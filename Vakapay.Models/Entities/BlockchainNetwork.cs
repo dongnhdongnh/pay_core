@@ -1,6 +1,6 @@
 namespace Vakapay.Models.Entities
 {
-    public class BlokchainNetwork
+    public class BlockchainNetwork
     {
         public string Id { get; set; }
         public string Name { get; set; }

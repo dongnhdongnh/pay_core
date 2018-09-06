@@ -4,4 +4,9 @@
         <TargetFramework>netcoreapp2.1</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Vakapay.EthereumBussiness\Vakapay.EthereumBussiness.csproj" />
+      <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+    </ItemGroup>
+
 </Project>
