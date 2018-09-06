@@ -7,17 +7,17 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class UserRepository :MysqlBaseConnection<UserRepository>, IUserRepository
+    public class EthereumAddressRepository : MysqlBaseConnection<EthereumAddressRepository>, IEthereumAddressRepository
     {
-        public UserRepository(string connectionString) : base(connectionString)
+        public EthereumAddressRepository(string connectionString) : base(connectionString)
         {
         }
 
-        public UserRepository(IDbConnection dbConnection) : base(dbConnection)
+        public EthereumAddressRepository(IDbConnection dbConnection) : base(dbConnection)
         {
         }
 
-        public ReturnObject Update(User objectUpdate)
+        public ReturnObject Update(EthereumAddress objectUpdate)
         {
             throw new System.NotImplementedException();
         }
@@ -27,17 +27,17 @@ namespace Vakapay.Repositories.Mysql
             throw new System.NotImplementedException();
         }
 
-        public ReturnObject Insert(User objectInsert)
+        public ReturnObject Insert(EthereumAddress objectInsert)
         {
             throw new System.NotImplementedException();
         }
 
-        public User FindById(string Id)
+        public EthereumAddress FindById(string Id)
         {
-            return new User();
+            throw new System.NotImplementedException();
         }
 
-        public List<User> FindBySql(string sqlString)
+        public List<EthereumAddress> FindBySql(string sqlString)
         {
             throw new System.NotImplementedException();
         }

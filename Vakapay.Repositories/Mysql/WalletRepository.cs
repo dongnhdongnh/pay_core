@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Security;
+using Dapper;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -29,7 +32,22 @@ namespace Vakapay.Repositories.Mysql
 
         public ReturnObject Insert(Wallet objectInsert)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if(Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                var result = Connection.InsertTask<string, Wallet>(objectInsert);
+                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+                };
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public Wallet FindById(string Id)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -11,9 +12,14 @@ namespace Vakapay.WalletBussiness
     {
         private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
 
-        public WalletBussiness(IVakapayRepositoryFactory _vakapayRepositoryFactory)
+        private readonly IDbConnection ConnectionDb;
+
+        public WalletBussiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) 
         {
             vakapayRepositoryFactory = _vakapayRepositoryFactory;
+            ConnectionDb = isNewConnection
+                ? vakapayRepositoryFactory.GetDbConnection()
+                : vakapayRepositoryFactory.GetOldConnection();
         }
         
         /// <summary>
@@ -41,26 +47,26 @@ namespace Vakapay.WalletBussiness
             //commit transaction
             try
             {
-                var dbConnection = vakapayRepositoryFactory.GetDbConnection();
-                if(dbConnection.State != ConnectionState.Open)
-                    dbConnection.Open();
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(dbConnection);
+                
+                if(ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var userCheck = userRepository.FindById(user.Id);
                 if(userCheck == null)
                     return new ReturnObject
                     {
-                        Status = "Error",
+                        Status = Status.StatusError,
                         Message = "User Not Found"
                     };
-                var ethereum = new EthereumBussiness.EthereumBussiness(vakapayRepositoryFactory);
-                var resultMakeaddress = ethereum.CreateNewAddAddress("random_password");
+                /*//var ethereum = new EthereumBussiness.EthereumBussiness(vakapayRepositoryFactory);
+                /*var resultMakeaddress = ethereum.CreateNewAddAddress();
                 if (resultMakeaddress.Status == Status.StatusError)
-                    return resultMakeaddress;
-                var address = resultMakeaddress.Data;
+                    return resultMakeaddress;#1#
+                var address = resultMakeaddress.Data;*/
                 var wallet = new Wallet
                 {
-                    Id = "",
-                    Address = address,
+                    Id = CommonHelper.GenerateUuid(),
+                    Address = null,
                     Balance = 0,
                     Version = 0,
                     CreatedAt = 0,
@@ -70,7 +76,7 @@ namespace Vakapay.WalletBussiness
                     
                 };
 
-                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(dbConnection);
+                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
 
                 var resultMakeWallet = walletRepo.Insert(wallet);
                 return resultMakeWallet;
@@ -78,11 +84,8 @@ namespace Vakapay.WalletBussiness
             }
             catch(Exception e)
             {
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = e.Message
-                };
+                throw e;
+
             }
 
             
@@ -104,6 +107,27 @@ namespace Vakapay.WalletBussiness
         public List<T> FindTransactionWallet<T>(User user, string networkName, int limit, int page, string orderBy)
         {
             return new List<T>();
+        }
+        /// <summary>
+        /// This function will make withdraw from wallet
+        /// </summary>
+        /// <param name="wallet"></param>
+        /// <param name="toAddress"></param>
+        /// <param name="amount"></param>
+        /// <returns></returns>
+        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount)
+        {
+            /*
+             * 1. Validate User status
+             * 2. Validate Network status
+             * 3. Validate amount
+             * 4. Update Wallet Balance
+             * 5. Make new transaction withdraw pending
+             *
+             *
+             * 
+             */
+            return null;
         }
     }
 }

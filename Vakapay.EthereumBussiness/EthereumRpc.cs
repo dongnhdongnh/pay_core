@@ -2,6 +2,9 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.EthereumBussiness
 {
+    /// <summary>
+    /// This class is communicate with ethereum network throught rpc api
+    /// </summary>
     public class EthereumRpc
     {
         public string EndPointUrl { get; set; }
@@ -38,6 +41,11 @@ namespace Vakapay.EthereumBussiness
         }
 
         public ReturnObject FindBlockByHash(string hash)
+        {
+            return null;
+        }
+
+        public ReturnObject FindBlockByNumber(string number)
         {
             return null;
         }

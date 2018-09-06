@@ -7,6 +7,8 @@ namespace Vakapay.Repositories.Mysql
     public class VakapayRepositoryMysqlPersistenceFactory : IVakapayRepositoryFactory
     {
         public RepositoryConfiguration repositoryConfiguration { get;}
+        
+        public IDbConnection Connection { get; set; }
 
         public VakapayRepositoryMysqlPersistenceFactory(RepositoryConfiguration _repositoryConfiguration)
         {
@@ -19,7 +21,13 @@ namespace Vakapay.Repositories.Mysql
 
         public IDbConnection GetDbConnection()
         {
-            return new MySqlConnection(repositoryConfiguration.ConnectionString);
+            Connection =  new MySqlConnection(repositoryConfiguration.ConnectionString);
+            return Connection;
+        }
+
+        public IDbConnection GetOldConnection()
+        {
+            return Connection;
         }
 
         public IWalletRepository GetWalletRepository(IDbConnection dbConnection)
@@ -30,6 +38,11 @@ namespace Vakapay.Repositories.Mysql
         public IUserRepository GetUserRepository(IDbConnection dbConnection)
         {
             return new UserRepository(dbConnection);
+        }
+
+        public IEthereumAddressRepository GetEthereumAddressRepository(IDbConnection dbConnection)
+        {
+            return new EthereumAddressRepository(dbConnection);
         }
     }
 }

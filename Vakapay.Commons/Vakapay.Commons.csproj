@@ -5,8 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Vakapay.Commons\Vakapay.Commons.csproj" />
-      <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+      <PackageReference Include="Newtonsoft.Json.Net20.dll">
+        <Version>3.5.0</Version>
+      </PackageReference>
     </ItemGroup>
 
 </Project>
