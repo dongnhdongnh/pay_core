@@ -24,7 +24,7 @@ namespace Vakapay.Repositories.Mysql
 
         public IWalletRepository GetWalletRepository(IDbConnection dbConnection)
         {
-            throw new System.NotImplementedException();
+            return new WalletRepository(dbConnection);
         }
 
         public IUserRepository GetUserRepository(IDbConnection dbConnection)
