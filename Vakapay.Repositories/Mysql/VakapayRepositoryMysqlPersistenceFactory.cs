@@ -29,7 +29,7 @@ namespace Vakapay.Repositories.Mysql
 
         public IUserRepository GetUserRepository(IDbConnection dbConnection)
         {
-            throw new System.NotImplementedException();
+            return new UserRepository(dbConnection);
         }
     }
 }
