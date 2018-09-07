@@ -8,7 +8,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
       <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
-      <ProjectReference Include="..\Vakapay.WalletBussiness\Vakapay.WalletBussiness.csproj" />
+      <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
     </ItemGroup>
 
 </Project>

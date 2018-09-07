@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vakapay.WalletBussiness
+namespace Vakapay.BitcoinBusiness
 {
     public class Class1
     {

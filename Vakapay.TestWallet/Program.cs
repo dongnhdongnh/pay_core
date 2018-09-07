@@ -20,7 +20,7 @@ namespace Vakapay.TestWallet
                 };
 
                 var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-                var WalletBussiness = new WalletBussiness.WalletBussiness(PersistenceFactory);
+                var WalletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
 
                 var user = new User
                 {
@@ -35,7 +35,7 @@ namespace Vakapay.TestWallet
                     Id = CommonHelper.GenerateUuid()
                 };
             
-                var result = WalletBussiness.CreateNewWallet(user, blockChainNetwork);
+                var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
             
                 Console.WriteLine(JsonHelper.SerializeObject(result).ToString());
             }

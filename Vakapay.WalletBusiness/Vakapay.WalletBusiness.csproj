@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Vakapay.EthereumBussiness\Vakapay.EthereumBussiness.csproj" />
+      <ProjectReference Include="..\Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj" />
       <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
     </ItemGroup>
 

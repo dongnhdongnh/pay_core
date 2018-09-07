@@ -1,4 +1,4 @@
-namespace Vakapay.BitcoinBussiness
+namespace Vakapay.BitcoinBusiness
 {
     public class BitcoinRpc
     {

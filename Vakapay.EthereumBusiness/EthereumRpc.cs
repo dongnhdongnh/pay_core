@@ -1,6 +1,6 @@
 using Vakapay.Models.Domains;
 
-namespace Vakapay.EthereumBussiness
+namespace Vakapay.EthereumBusiness
 {
     /// <summary>
     /// This class is communicate with ethereum network throught rpc api

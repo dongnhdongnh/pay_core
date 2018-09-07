@@ -5,15 +5,15 @@ using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 
-namespace Vakapay.EthereumBussiness
+namespace Vakapay.EthereumBusiness
 {
-    public class EthereumBussiness
+    public class EthereumBusiness
     {
         private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
         private EthereumRpc ethereumRpc { get; set; }
         private  IDbConnection DbConnection { get; set; }
 
-        public EthereumBussiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
+        public EthereumBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
         {
             vakapayRepositoryFactory = _vakapayRepositoryFactory;
             ethereumRpc = new EthereumRpc("http://endpoint");
