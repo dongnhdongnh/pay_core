@@ -6,15 +6,15 @@ using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 
-namespace Vakapay.WalletBussiness
+namespace Vakapay.WalletBusiness
 {
-    public class WalletBussiness
+    public class WalletBusiness
     {
         private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
 
         private readonly IDbConnection ConnectionDb;
 
-        public WalletBussiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) 
+        public WalletBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) 
         {
             vakapayRepositoryFactory = _vakapayRepositoryFactory;
             ConnectionDb = isNewConnection
@@ -58,7 +58,7 @@ namespace Vakapay.WalletBussiness
                         Status = Status.StatusError,
                         Message = "User Not Found"
                     };
-                /*//var ethereum = new EthereumBussiness.EthereumBussiness(vakapayRepositoryFactory);
+                /*//var ethereum = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory);
                 /*var resultMakeaddress = ethereum.CreateNewAddAddress();
                 if (resultMakeaddress.Status == Status.StatusError)
                     return resultMakeaddress;#1#

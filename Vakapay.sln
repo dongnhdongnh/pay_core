@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ApiService", "Vakapay.ApiService\Vakapay.ApiService.csproj", "{0F8CFA16-3691-40AE-B889-76CF23B10D3A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedProject", "SharedProject", "{5CBC2126-CB82-4456-9714-A7E505F9D44D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedProjects", "SharedProjects", "{5CBC2126-CB82-4456-9714-A7E505F9D44D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuissnessProject", "BuissnessProject", "{3AD83376-344D-4C86-A1C9-F1324F4C0541}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BusinessProjects", "BusinessProjects", "{3AD83376-344D-4C86-A1C9-F1324F4C0541}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceProject", "ServiceProject", "{4E6A4058-F824-4EA9-B00B-F3F801881F0E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceProjects", "ServiceProjects", "{4E6A4058-F824-4EA9-B00B-F3F801881F0E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.Models", "Vakapay.Models\Vakapay.Models.csproj", "{FCD19A58-A3E0-45E6-BA5D-6284238C9D95}"
 EndProject
@@ -29,15 +29,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.SendEmail", "Vakapa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.Securities", "Vakapay.Securities\Vakapay.Securities.csproj", "{06084871-1B86-4494-965C-023FC16AC9A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.BitcoinBussiness", "Vakapay.BitcoinBussiness\Vakapay.BitcoinBussiness.csproj", "{DF78D89D-7856-4680-8437-97590F885A30}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.BitcoinBusiness", "Vakapay.BitcoinBusiness\Vakapay.BitcoinBusiness.csproj", "{DF78D89D-7856-4680-8437-97590F885A30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.EthereumBussiness", "Vakapay.EthereumBussiness\Vakapay.EthereumBussiness.csproj", "{2149C669-25B0-41C3-9861-CAC456698F78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.EthereumBusiness", "Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj", "{2149C669-25B0-41C3-9861-CAC456698F78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.VakacoinBussiness", "Vakapay.VakacoinBussiness\Vakapay.VakacoinBussiness.csproj", "{73CF38DC-DB71-461D-BF64-B698D2EDB291}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.VakacoinBusiness", "Vakapay.VakacoinBusiness\Vakapay.VakacoinBusiness.csproj", "{73CF38DC-DB71-461D-BF64-B698D2EDB291}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.UserBussiness", "Vakapay.UserBussiness\Vakapay.UserBussiness.csproj", "{4D541A7F-83B0-47DC-8F6F-865889A72233}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.UserBusiness", "Vakapay.UserBusiness\Vakapay.UserBusiness.csproj", "{4D541A7F-83B0-47DC-8F6F-865889A72233}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.WalletBussiness", "Vakapay.WalletBussiness\Vakapay.WalletBussiness.csproj", "{94CD37D8-6A7E-4027-9F6C-A26C87473C06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.WalletBusiness", "Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj", "{94CD37D8-6A7E-4027-9F6C-A26C87473C06}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientApp", "ClientApp", "{7056D07E-D790-4698-AA65-CA0F3A4FD02C}"
 EndProject
