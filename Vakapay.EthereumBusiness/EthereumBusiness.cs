@@ -7,19 +7,15 @@ using Vakapay.Models.Repositories;
 
 namespace Vakapay.EthereumBusiness
 {
-    public class EthereumBusiness
+    using BlockchainBusiness;
+    public class EthereumBusiness : BlockchainBusiness
     {
-        private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
         private EthereumRpc ethereumRpc { get; set; }
-        private  IDbConnection DbConnection { get; set; }
 
-        public EthereumBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
+        public EthereumBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) : 
+            base(_vakapayRepositoryFactory, isNewConnection)
         {
-            vakapayRepositoryFactory = _vakapayRepositoryFactory;
             ethereumRpc = new EthereumRpc("http://endpoint");
-            DbConnection = isNewConnection
-                ? vakapayRepositoryFactory.GetDbConnection()
-                : vakapayRepositoryFactory.GetOldConnection();
         }
         public ReturnObject SendTransaction(EthereumWithdrawTransaction blockchainTransaction)
         {

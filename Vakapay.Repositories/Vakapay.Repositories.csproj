@@ -17,4 +17,16 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Mysql\NewDirectory1\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Mysql\NewDirectory1\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Mysql\NewDirectory1\**" />
+    </ItemGroup>
+
 </Project>
