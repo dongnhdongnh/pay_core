@@ -44,5 +44,13 @@ namespace Vakapay.Commons.Helpers
             return new string(Enumerable.Repeat(chars, length)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+        
+        public static string RandomAccountNameVakacoin(int length = 12)
+        {
+            Random random = new Random();
+            const string chars = "abcdefghijklmnopqrstuvwxyz12345";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
     }
 }
