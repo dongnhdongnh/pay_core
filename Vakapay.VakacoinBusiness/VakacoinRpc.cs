@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
+using Cryptography.ECDSA;
+
 
 namespace Vakapay.VakacoinBusiness
 {
@@ -42,13 +44,19 @@ namespace Vakapay.VakacoinBusiness
         {
             var values = new Dictionary<string, string>
             {
-                { "account_name", "vaka" },
+                { "account_name", accountName },
             };
 
             var result = HttpClientHelper.PostRequest(GetAccountPostUrl(), values);
             var jResult= JObject.Parse(result);
             var exist = jResult["error"] == null;
             return exist;
+        }
+
+        public VakaKeyPair CreateKey()
+        {
+             byte[] keybytes = Secp256K1Manager.GenerateRandomKey();
+            return new VakaKeyPair();
         }
     }
 }
