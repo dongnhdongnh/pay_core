@@ -1,3 +1,5 @@
+using System;
+
 namespace Vakapay.Commons.Helpers
 {
     public class JsonHelper
@@ -7,7 +9,8 @@ namespace Vakapay.Commons.Helpers
             return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
         }
 
-        public static string SerializeObject<T>(T obj)
+       // public static string SerializeObject(Object obj)
+        public static string SerializeObject(Object obj)
         {
             return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
         }
