@@ -31,6 +31,8 @@ namespace Vakapay.VakacoinBusiness
                     accountName = CommonHelper.RandomAccountNameVakacoin();
                 } while ( VakacoinRpc.CheckAccountExist(accountName) == true );
 
+                VakaKeyPair key = VakacoinRpc.CreateKey();
+                
                 return new ReturnObject { };
             }
             catch (Exception e)
@@ -45,5 +47,11 @@ namespace Vakapay.VakacoinBusiness
             
         }
         
+    }
+
+    public class VakaKeyPair
+    {
+        public string PrivateKey { get; set; }
+        public string PublicKey { get; set; }
     }
 }
