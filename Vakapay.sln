@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ApiService", "Vakapay.ApiService\Vakapay.ApiService.csproj", "{0F8CFA16-3691-40AE-B889-76CF23B10D3A}"
@@ -50,6 +50,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.BlockchainBusiness", "Vakapay.BlockchainBusiness\Vakapay.BlockchainBusiness.csproj", "{C4A74298-85C5-4323-89B1-C4F68AE7595C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.VakacoinBusiness.Test", "Vakapay.UnitTest\Vakapay.VakacoinBusiness.Test\Vakapay.VakacoinBusiness.Test.csproj", "{746C5A9D-0C25-413B-B88C-7077A2E29186}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestBitcoin", "Vakapay.TestBitcoin\Vakapay.TestBitcoin.csproj", "{AE3BB503-61F4-4BD4-BD39-D742C110250D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -137,6 +139,10 @@ Global
 		{746C5A9D-0C25-413B-B88C-7077A2E29186}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{746C5A9D-0C25-413B-B88C-7077A2E29186}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{746C5A9D-0C25-413B-B88C-7077A2E29186}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE3BB503-61F4-4BD4-BD39-D742C110250D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE3BB503-61F4-4BD4-BD39-D742C110250D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE3BB503-61F4-4BD4-BD39-D742C110250D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE3BB503-61F4-4BD4-BD39-D742C110250D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FCD19A58-A3E0-45E6-BA5D-6284238C9D95} = {5CBC2126-CB82-4456-9714-A7E505F9D44D}
@@ -158,5 +164,6 @@ Global
 		{2D719050-9162-407D-81D1-A8D8318CD935} = {5CBC2126-CB82-4456-9714-A7E505F9D44D}
 		{C4A74298-85C5-4323-89B1-C4F68AE7595C} = {3AD83376-344D-4C86-A1C9-F1324F4C0541}
 		{746C5A9D-0C25-413B-B88C-7077A2E29186} = {6FFCE6C6-04DD-4035-8C54-41EB236E3CBA}
+		{AE3BB503-61F4-4BD4-BD39-D742C110250D} = {6FFCE6C6-04DD-4035-8C54-41EB236E3CBA}
 	EndGlobalSection
 EndGlobal

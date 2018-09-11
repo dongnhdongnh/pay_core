@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 
@@ -25,18 +26,39 @@ namespace Vakapay.BitcoinBusiness
         // </summary>
         // <param name="a_account"></param>
         // bitcoin ver 16 GetNewAddress(Account); ver 17 GetNewAddress(Label)
-        public String CreateNewAddAddress(string Account = "")
+        public ReturnObject CreateNewAddAddress(string Account = "")
         {
             try
             {    
                 var address = bitcoinRpc.GetNewAddress(Account);
-                return address;
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = address
+                };
             }
             catch (Exception e)
             {
-                return e.Message;
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
             }
             
+        }
+
+        public JArray GetlistWallets()
+        {
+            try
+            {
+                Console.WriteLine(1);
+                return bitcoinRpc.ListWallets();
+            }
+            catch (Exception e)
+            {
+                return new JArray {e.Message};
+            }
         }
         
         
