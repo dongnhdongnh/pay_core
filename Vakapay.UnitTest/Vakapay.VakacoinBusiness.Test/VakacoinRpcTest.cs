@@ -22,5 +22,13 @@ namespace Vakapay.VakacoinBusiness.Test
         {
             Assert.AreEqual(result, _rpc.CheckAccountExist(xyz));
         }
+        
+        [Test]
+        public void CreateKey()
+        {
+            _rpc.CreateKey();
+        }        
+        
+        
     }
 }
