@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -33,8 +34,12 @@ namespace Vakapay.BitcoinBusiness
         {
             try
             {
-                var address = bitcoinRpc.GetNewAddress(Account);
-                Console.WriteLine(address);
+                var results = bitcoinRpc.GetNewAddress(Account);
+                if(results.Status == Status.StatusError)
+                    return results;
+
+                var address = ConvertResult(results.Data);
+                
                 if (WalletId == "")
                 {
                     //khoi tao wallet
@@ -46,7 +51,7 @@ namespace Vakapay.BitcoinBusiness
                     WalletId = wallet.Id;
                 }
                
-
+                
                 //add database vakaxa
                 var bitcoinAddressRepo = vakapayRepositoryFactory.GetBitcoinAddressRepository(DbConnection);
                 var bcAddress = new BitcoinAddress
@@ -90,10 +95,15 @@ namespace Vakapay.BitcoinBusiness
         {
             try
             {
-                var idTransaction = bitcoinRpc.SendFrom(fromAccount, toAddress, amount, minconf, comment, commentTo);
-                var transactionInfo = bitcoinRpc.GetTransaction(idTransaction);
-                Console.WriteLine(transactionInfo);
+                var results = bitcoinRpc.SendFrom(fromAccount, toAddress, amount, minconf, comment, commentTo);
+                
+                if(results.Status == Status.StatusError)
+                    return results;
+              //  var transactionInfo = bitcoinRpc.GetTransaction(idTransaction);
+              //  Console.WriteLine(transactionInfo);
+                
                 //add database vakaxa
+                var idTransaction = ConvertResult(results.Data);
                 var bitcoinAddressRepo = vakapayRepositoryFactory.GetEthereumAddressRepository(DbConnection);
 
                 //
@@ -126,9 +136,13 @@ namespace Vakapay.BitcoinBusiness
             string commentTo = "")
         {
             try
-            {
-                var idTransaction = bitcoinRpc.SendToAddress(address, amount, comment, commentTo);
-
+            {   
+               
+                var results = bitcoinRpc.SendToAddress(address, amount, comment, commentTo);
+                if(results.Status == Status.StatusError)
+                    return results;
+                
+                var idTransaction = ConvertResult(results.Data);
                 //add database vakaxa
                 var bitcoinAddressRepo = vakapayRepositoryFactory.GetEthereumAddressRepository(DbConnection);
 
@@ -159,12 +173,14 @@ namespace Vakapay.BitcoinBusiness
         {
             try
             {
-                var balance = bitcoinRpc.GetBalance(account, minconf);
-
+                var results = bitcoinRpc.GetBalance(account, minconf);
+                if(results.Status == Status.StatusError)
+                    return results;
+                var balance = ConvertResult(results.Data);
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
-                    Data = balance.ToString()
+                    Data = balance
                 };
             }
             catch (Exception e)
@@ -176,18 +192,10 @@ namespace Vakapay.BitcoinBusiness
                 };
             }
         }
-        
-        public JArray GetlistWallets()
+
+        private String ConvertResult(String data)
         {
-            try
-            {
-                Console.WriteLine(1);
-                return bitcoinRpc.ListWallets();
-            }
-            catch (Exception e)
-            {
-                return new JArray {e.Message};
-            }
+            return JsonConvert.DeserializeObject<JObject>(data)["result"].ToString();
         }
     }
 }
