@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj" />
-    <ProjectReference Include="..\Vakapay.EthereumBussiness\Vakapay.EthereumBussiness.csproj" />
   </ItemGroup>
 
 </Project>

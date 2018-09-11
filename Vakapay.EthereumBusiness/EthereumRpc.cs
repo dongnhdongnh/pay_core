@@ -9,17 +9,17 @@ using Vakapay.EthereumBussiness;
 
 namespace Vakapay.EthereumBusiness
 {
-    /// <summary>
-    /// This class is communicate with ethereum network throught rpc api
-    /// </summary>
-    public class EthereumRpc
-    {
-        public string EndPointUrl { get; set; }
+	/// <summary>
+	/// This class is communicate with ethereum network throught rpc api
+	/// </summary>
+	public class EthereumRpc
+	{
+		public string EndPointUrl { get; set; }
 
-        public EthereumRpc(string endPointUrl)
-        {
-            EndPointUrl = endPointUrl;
-        }
+		public EthereumRpc(string endPointUrl)
+		{
+			EndPointUrl = endPointUrl;
+		}
 
 		/// <summary>
 		/// Send RPC to get JSON DAta
@@ -31,6 +31,7 @@ namespace Vakapay.EthereumBusiness
 		{
 			try
 			{
+				Console.WriteLine("=====================" + RpcName + "=======================");
 				// Set a default policy level for the "http:" and "https" schemes.
 				HttpRequestCachePolicy policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
 				HttpWebRequest.DefaultCachePolicy = policy;
@@ -63,7 +64,6 @@ namespace Vakapay.EthereumBusiness
 				Console.WriteLine("IsFromCache? {0}", httpResponse.IsFromCache);
 				using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
 				{
-					Console.WriteLine("im getter");
 					var result = streamReader.ReadToEnd();
 					//EthRPCJson.Getter _getter = new EthRPCJson.Getter(result);
 					Console.WriteLine(result);
@@ -79,7 +79,7 @@ namespace Vakapay.EthereumBusiness
 			catch (Exception e)
 			{
 
-				
+
 				return new ReturnObject
 				{
 					Status = Status.StatusError,
@@ -97,29 +97,36 @@ namespace Vakapay.EthereumBusiness
 		/// <param name="amount"></param>
 		/// <returns></returns>
 		public ReturnObject SendTransaction(string From, string ToAddress, decimal amount)
-        {
-            return null;
-        }
-        /// <summary>
-        /// This function will be create ethereum address with password
-        /// return Return Object with data property is address generated
-        /// </summary>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        public ReturnObject CreateAddress(string password)
-        {
-            return null;
-        }
+		{
 
-        public ReturnObject FindTransactionByHash(string hash)
-        {
-            return null;
-        }
+			String _transaction = String.Format("{\"from\": \"{0}\",\"to\": \"{1}\",\"value\": \"{2}\"}\")", From, ToAddress, amount);
+			return EthereumSendRPC(EthereumRPCList.RPCName.eth_sendTransaction, new Object[] { _transaction });
+		}
+		/// <summary>
+		/// This function will be create ethereum address with password
+		/// return Return Object with data property is address generated
+		/// </summary>
+		/// <param name="password"></param>
+		/// <returns></returns>
+		public ReturnObject CreateAddress(string password)
+		{
+			return EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
+		}
 
-        public ReturnObject FindBlockByHash(string hash)
-        {
-            return null;
-        }
+		public ReturnObject FindTransactionByBlockNumberAndIndex(int blockNumber, int transactionIndex)
+		{
+			return EthereumSendRPC(EthereumRPCList.RPCName.eth_getTransactionByBlockNumberAndIndex, new Object[] { blockNumber.IntToHex(), transactionIndex.IntToHex() });
+		}
+
+		public ReturnObject FindTransactionByHash(string hash)
+		{
+			return EthereumSendRPC(EthereumRPCList.RPCName.eth_getTransactionByHash, new Object[] { hash });
+		}
+
+		public ReturnObject FindBlockByHash(string hash)
+		{
+			return EthereumSendRPC(EthereumRPCList.RPCName.eth_getBlockByHash, new Object[] { hash, true });
+		}
 
 		public ReturnObject FindBlockByNumber(int number)
 		{
@@ -131,6 +138,7 @@ namespace Vakapay.EthereumBusiness
 		{
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_accounts);
 		}
+
 
 	}
 }

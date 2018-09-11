@@ -22,5 +22,12 @@ namespace Vakapay.ApiService.Controllers
 			var oputput = _etheRpc.GetAccounts();
 			return JsonHelper.SerializeObject(oputput);
 		}
+
+		[HttpGet("Test/{pass}")]
+		public ActionResult<string> Test(string pass)
+		{
+			var oputput = _etheRpc.CreateAddress(pass);
+			return JsonHelper.SerializeObject(oputput);
+		}
 	}
 }
