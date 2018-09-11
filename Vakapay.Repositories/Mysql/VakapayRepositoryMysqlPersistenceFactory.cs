@@ -44,5 +44,10 @@ namespace Vakapay.Repositories.Mysql
         {
             return new EthereumAddressRepository(dbConnection);
         }
+        
+        public IBitcoinAddressRepository GetBitcoinAddressRepository(IDbConnection dbConnection)
+        {
+            return new BitcoinAddressRepository(dbConnection);
+        }
     }
 }
