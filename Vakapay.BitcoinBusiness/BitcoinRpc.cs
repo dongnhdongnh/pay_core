@@ -250,5 +250,64 @@ namespace Vakapay.BitcoinBusiness
       {
         return InvokeMethod("validateaddress", a_address)["result"] as JObject;
       }
+      
+      // == Blockchain ==
+
+        /**
+         * The getbestblockhash RPC returns the header hash of the most recent block on the best block chain.
+         */
+        public String getBestBlockHash()
+        {
+            return InvokeMethod("getbestblockhash")["result"].ToString();
+        }
+
+        /**
+         * The getblock RPC gets a block with a particular header hash from the local block database either as a JSON object or as a serialized block.
+         */
+        public JObject GetBlock(string blockhash)
+        {
+            return InvokeMethod("validateaddress", blockhash)["result"] as JObject;
+        }
+
+        /**
+         * The getblockchaininfo RPC provides information about the current state of the block chain.
+         */
+        public JObject GetBlockChainInfo()
+        {
+            return InvokeMethod("getblockchaininfo")["result"] as JObject;
+        }
+
+        /**
+         * The getblockcount RPC returns the number of blocks in the local best block chain.
+         */
+        public int GetBlockCount()
+        {
+            return (int) InvokeMethod("getblockcount")["result"];
+        }
+
+        /**
+         * The getblockhash RPC returns the header hash of a block at the given height in the local best block chain.
+         */
+        public String GetBlockHash(int height)
+        {
+            return InvokeMethod("getblockhash", height)["result"].ToString();
+        }
+
+        /**
+         * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.
+         */
+        public JObject getBlockHeader(string hash)
+        {
+            return InvokeMethod("getblockheader", hash)["result"] as JObject;
+        }
+
+        /**
+         * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.(sequentially)
+         */
+        public JObject getBlockHeader(string hash, bool isSequentially)
+        {
+            return InvokeMethod("getblockheader", hash, isSequentially)["result"] as JObject;
+        }
+      
     }
 }
