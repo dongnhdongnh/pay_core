@@ -24,8 +24,8 @@ namespace Vakapay.TestBitcoin
                 var bitcoinRpc = new BitcoinBusiness(PersistenceFactory);
                 var address = bitcoinRpc.CreateNewAddAddress(null);
                 Console.WriteLine(JsonHelper.SerializeObject(address).ToString());
-                var list = bitcoinRpc.GetlistWallets();
-                Console.WriteLine(list);
+//                var list = bitcoinRpc.GetlistWallets();
+//                Console.WriteLine(list);
 
             }
             catch (Exception e)

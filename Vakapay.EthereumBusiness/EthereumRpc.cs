@@ -88,7 +88,25 @@ namespace Vakapay.EthereumBusiness
 			}
 
 		}
-
+		/// <summary>
+		/// Send Transaction with  Passphrase
+		/// </summary>
+		/// <param name="From"></param>
+		/// <param name="ToAddress"></param>
+		/// <param name="amount"></param>
+		/// <param name="passphrase"></param>
+		/// <returns></returns>
+		public ReturnObject SendTransactionWithPassphrase(string From, string ToAddress, decimal amount, string passphrase)
+		{
+			EthRPCJson.TransactionSender _sender = new EthRPCJson.TransactionSender()
+			{
+				from = From,
+				to = ToAddress,
+				value = ((int)amount).IntToHex()
+			};
+			//var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
+			return EthereumSendRPC(EthereumRPCList.RPCName.personal_sendTransaction, new Object[] { _sender, passphrase });
+		}
 		/// <summary>
 		/// This function send transaction
 		/// </summary>
@@ -98,9 +116,13 @@ namespace Vakapay.EthereumBusiness
 		/// <returns></returns>
 		public ReturnObject SendTransaction(string From, string ToAddress, decimal amount)
 		{
-
-			String _transaction = String.Format("{\"from\": \"{0}\",\"to\": \"{1}\",\"value\": \"{2}\"}\")", From, ToAddress, amount);
-			return EthereumSendRPC(EthereumRPCList.RPCName.eth_sendTransaction, new Object[] { _transaction });
+			EthRPCJson.TransactionSender _sender = new EthRPCJson.TransactionSender()
+			{
+				from = From,
+				to = ToAddress,
+				value = ((int)amount).IntToHex()
+			};
+			return EthereumSendRPC(EthereumRPCList.RPCName.eth_sendTransaction, new Object[] { _sender });
 		}
 		/// <summary>
 		/// This function will be create ethereum address with password

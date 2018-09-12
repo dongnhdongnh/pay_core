@@ -27,5 +27,14 @@ namespace Vakapay.VakacoinBusiness.Test
 			Assert.IsNotNull(output);
 		}
 
+		[Test]
+		public void SendTransaction()
+		{
+			var output = _etheRpc.SendTransactionWithPassphrase("0x12890d2cce102216644c59dae5baed380d84830c", "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517", 10, "password");
+			//var output = _etheRpc.SendTransaction("0x12890d2cce102216644c59dae5baed380d84830c", "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517", 10);
+			//Trace.Write(JsonHelper.SerializeObject(output));
+			//	Console.WriteLine(JsonHelper.SerializeObject(output));
+			Assert.IsNotNull(output);
+		}
 	}
 }
