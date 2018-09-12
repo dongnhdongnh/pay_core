@@ -27,6 +27,9 @@ namespace Vakapay.EthereumBusiness
 				if (_rpcResult.Status == Status.StatusError)
 					return _rpcResult;
 				var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
+				blockchainTransaction.Id = CommonHelper.GenerateUuid();
+				blockchainTransaction.CreatedAt = CommonHelper.GetUnixTimestamp().ToString();
+				blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
 				return ethereumwithdrawRepo.Insert(blockchainTransaction);
 
 			}
