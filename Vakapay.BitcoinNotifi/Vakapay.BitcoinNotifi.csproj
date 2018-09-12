@@ -7,6 +7,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Vakapay.BitcoinBusiness\Vakapay.BitcoinBusiness.csproj" />
+      <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
     </ItemGroup>
 
 </Project>
