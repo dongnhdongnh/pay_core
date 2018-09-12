@@ -58,7 +58,9 @@ namespace Vakapay.VakacoinBusiness
         public VakaKeyPair CreateKey()
         {
             byte[] keybytes = Secp256K1Manager.GenerateRandomKey();
-            string prv = KeyToString(keybytes, "sha256x2");
+            var version = 0x80;
+            
+            
             return new VakaKeyPair();
         }
         
