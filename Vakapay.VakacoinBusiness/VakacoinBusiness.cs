@@ -2,6 +2,7 @@ using System;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
+using Vakapay.Cryptography;
 
 namespace Vakapay.VakacoinBusiness
 {
@@ -21,7 +22,7 @@ namespace Vakapay.VakacoinBusiness
         /// save account name to database
         /// </summary>
         /// <returns></returns>
-        public ReturnObject CreateNewAddAddress(string walletId)
+        public ReturnObject CreateNewAccount()
         {
             try
             {
@@ -31,7 +32,7 @@ namespace Vakapay.VakacoinBusiness
                     accountName = CommonHelper.RandomAccountNameVakacoin();
                 } while ( VakacoinRpc.CheckAccountExist(accountName) == true );
 
-                VakaKeyPair key = VakacoinRpc.CreateKey();
+                KeyManager.KeyPair keyPair = KeyManager.GenerateKeyPair();
                 
                 return new ReturnObject { };
             }
@@ -42,16 +43,10 @@ namespace Vakapay.VakacoinBusiness
                     Status = Status.StatusError,
                     Message = e.Message
                 };
-                ;
             }
-            
         }
-        
-    }
 
-    public class VakaKeyPair
-    {
-        public string PrivateKey { get; set; }
-        public string PublicKey { get; set; }
+
+        
     }
 }

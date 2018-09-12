@@ -17,11 +17,31 @@ namespace Vakapay.EthereumBusiness
 		public EthereumBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) :
 			base(_vakapayRepositoryFactory, isNewConnection)
 		{
-			ethereumRpc = new EthereumRpc("http://endpoint");
+			ethereumRpc = new EthereumRpc("http://127.0.0.1:9900/");
 		}
 		public ReturnObject SendTransaction(EthereumWithdrawTransaction blockchainTransaction)
 		{
-			return null;
+			try
+			{
+				var _rpcResult = ethereumRpc.SendTransactionWithPassphrase(blockchainTransaction.FromAddress, blockchainTransaction.ToAddress, blockchainTransaction.Amount, "password");
+				if (_rpcResult.Status == Status.StatusError)
+					return _rpcResult;
+				var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
+				blockchainTransaction.Id = CommonHelper.GenerateUuid();
+				blockchainTransaction.CreatedAt = CommonHelper.GetUnixTimestamp().ToString();
+				blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+				return ethereumwithdrawRepo.Insert(blockchainTransaction);
+
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
 		}
 
 		/// <summary>
@@ -59,8 +79,6 @@ namespace Vakapay.EthereumBusiness
 				});
 
 				return ResultAddEthereumAddress;
-
-
 			}
 			catch (Exception e)
 			{
@@ -69,7 +87,7 @@ namespace Vakapay.EthereumBusiness
 					Status = Status.StatusError,
 					Message = e.Message
 				};
-				;
+
 			}
 
 		}

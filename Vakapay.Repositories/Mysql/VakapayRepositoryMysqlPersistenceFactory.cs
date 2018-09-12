@@ -1,4 +1,3 @@
-using System;
 using System.Data;
 using MySql.Data.MySqlClient;
 using Vakapay.Models.Repositories;
@@ -23,7 +22,6 @@ namespace Vakapay.Repositories.Mysql
 		public IDbConnection GetDbConnection()
 		{
 			Connection = new MySqlConnection(repositoryConfiguration.ConnectionString);
-			Console.WriteLine("CONNECTION NULL= " + Connection == null);
 			return Connection;
 		}
 
@@ -50,6 +48,16 @@ namespace Vakapay.Repositories.Mysql
 		public IBitcoinAddressRepository GetBitcoinAddressRepository(IDbConnection dbConnection)
 		{
 			return new BitcoinAddressRepository(dbConnection);
+		}
+
+		public IBitcoinRawTransactionRepository GeBitcoinRawTransactionRepository(IDbConnection dbConnection)
+		{
+			return new BitcoinRawTransactionRepository(dbConnection);
+		}
+
+		public IEthereumWithdrawnTransactionRepository GetEthereumWithdrawnTransactionRepository(IDbConnection dbConnection)
+		{
+			return new EthereumWithdrawnTransactionRepository(dbConnection);
 		}
 	}
 }
