@@ -347,7 +347,7 @@ namespace Vakapay.BitcoinBusiness
          */
         public ReturnObject GetBlock(string blockhash)
         {
-            return InvokeMethod("validateaddress", blockhash);
+            return InvokeMethod("getblock", blockhash);
         }
 
         /**

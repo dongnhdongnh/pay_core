@@ -6,5 +6,6 @@ namespace Vakapay.Models.Domains
         public static string StatusError = "Error";
         public static string StatusCompleted = "Completed";
         public static string StatusSuccess = "Success";
+        public static string StatusPending = "Pending";
     }
 }
