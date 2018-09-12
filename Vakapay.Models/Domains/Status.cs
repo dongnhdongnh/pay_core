@@ -2,9 +2,9 @@ namespace Vakapay.Models.Domains
 {
     public class Status
     {
-        public static string StatusActive = "Active";
-        public static string StatusError = "Error";
-        public static string StatusCompleted = "Completed";
-        public static string StatusSuccess = "Success";
+        public const string StatusActive = "Active";
+        public const string StatusError = "Error";
+        public const string StatusCompleted = "Completed";
+        public const string StatusSuccess = "Success";
     }
 }
