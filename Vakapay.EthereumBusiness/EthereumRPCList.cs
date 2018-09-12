@@ -15,6 +15,7 @@ namespace Vakapay.EthereumBussiness
 				if (_datas == null)
 				{
 					_datas = new Dictionary<RPCName, EthRPCJson.Sender>();
+					_datas[RPCName.eth_blockNumber] = new EthRPCJson.Sender("1", "eth_blockNumber");
 					_datas[RPCName.eth_accounts] = new EthRPCJson.Sender("1", "eth_accounts");
 					_datas[RPCName.eth_getBlockByNumber] = new EthRPCJson.Sender("1", "eth_getBlockByNumber");
 					_datas[RPCName.eth_getBlockByHash] = new EthRPCJson.Sender("1", "eth_getBlockByHash");
@@ -30,6 +31,7 @@ namespace Vakapay.EthereumBussiness
 		public enum RPCName
 		{
 			eth_accounts,
+			eth_blockNumber,
 			eth_getBlockByNumber,
 			eth_getBlockByHash,
 			personal_newAccount,

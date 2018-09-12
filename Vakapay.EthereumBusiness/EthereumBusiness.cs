@@ -8,6 +8,7 @@ using Vakapay.Models.Repositories;
 namespace Vakapay.EthereumBusiness
 {
 	using BlockchainBusiness;
+	using System.Collections.Generic;
 	using Vakapay.Models.Entities.ETH;
 
 	public class EthereumBusiness : BlockchainBusiness
@@ -93,6 +94,31 @@ namespace Vakapay.EthereumBusiness
 
 			}
 
+		}
+
+		public void ScanBlock()
+		{
+			int blockNumber = 0;
+			var _result = ethereumRpc.GetBlockNumber();
+			if (_result.Status == Status.StatusError)
+				return;
+			EthRPCJson.Getter _getter = new EthRPCJson.Getter(_result.Data);
+			if (!_getter.result.ToString().HexToInt(out blockNumber))
+				return;
+			Console.WriteLine("block number " + blockNumber);
+			for (int i = blockNumber - 2; i <= blockNumber; i++)
+			{
+				_result = ethereumRpc.FindBlockByNumber(i);
+				if (_result.Status == Status.StatusError)
+					return;
+				_getter = new EthRPCJson.Getter(_result.Data);
+				Console.WriteLine(JsonHelper.SerializeObject(_getter.result));
+			}
+
+			String _query = String.Format("SELECT * FROM vakapay.ethereumwithdrawtransaction Where Status='{0}'", Status.StatusPending);
+			var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
+			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(_query);
+			Console.WriteLine(_pending.Count);
 		}
 	}
 }

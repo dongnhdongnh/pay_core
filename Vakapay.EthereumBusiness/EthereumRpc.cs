@@ -160,7 +160,10 @@ namespace Vakapay.EthereumBusiness
 		{
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_accounts);
 		}
-
+		public ReturnObject GetBlockNumber()
+		{
+			return EthereumSendRPC(EthereumRPCList.RPCName.eth_blockNumber);
+		}
 
 	}
 }

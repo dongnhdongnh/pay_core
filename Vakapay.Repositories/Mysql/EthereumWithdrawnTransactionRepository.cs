@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -32,7 +33,18 @@ namespace Vakapay.Repositories.Mysql
 
 		public List<EthereumWithdrawTransaction> FindBySql(string sqlString)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList();
+
+				return result;
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
 		}
 
 		public ReturnObject Insert(EthereumWithdrawTransaction objectInsert)
@@ -51,7 +63,11 @@ namespace Vakapay.Repositories.Mysql
 			}
 			catch (Exception e)
 			{
-				throw e;
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
 			}
 		}
 
