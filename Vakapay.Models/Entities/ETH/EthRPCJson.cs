@@ -45,5 +45,12 @@ namespace Vakapay.Models.Entities.ETH
 			public string jsonrpc;
 			public Object result;
 		}
+
+		public class TransactionSender
+		{
+			public string from;
+			public string to;
+			public string value;
+		}
 	}
 }

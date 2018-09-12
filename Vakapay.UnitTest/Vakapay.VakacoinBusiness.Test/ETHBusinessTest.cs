@@ -30,5 +30,7 @@ namespace Vakapay.VakacoinBusiness.Test
 			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}
+
+
 	}
 }

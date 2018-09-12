@@ -53,9 +53,12 @@ namespace Vakapay.Commons.Helpers
 				.Select(s => s[random.Next(s.Length)]).ToArray());
 		}
 
-		public static string IntToHex(this int input)
+		public static string IntToHex(this int input, string extra = null)
 		{
-			return "0x" + input.ToString("X");
+			if (extra == null)
+				return "0x" + input.ToString("X");
+			else
+				return extra + input.ToString("X");
 		}
 
 		public static bool HexToInt(this string hex, out int result)
