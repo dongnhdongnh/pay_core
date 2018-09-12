@@ -53,8 +53,9 @@ namespace Vakapay.BitcoinBusiness
                         joe.Add(new JProperty("params", props));
                     }
                 }
-
+              
                 string s = JsonConvert.SerializeObject(joe);
+                
                 // serialize json for the request
                 byte[] byteArray = Encoding.UTF8.GetBytes(s);
                 webRequest.ContentLength = byteArray.Length;
@@ -81,9 +82,9 @@ namespace Vakapay.BitcoinBusiness
                             {
                                 var result = sr.ReadToEnd();
 
-
                                 var results = JsonConvert.DeserializeObject<JObject>(result);
-                                Console.WriteLine(results.SelectToken("error"));
+
+
                                 if (string.IsNullOrEmpty(results["error"].ToString()))
                                 {
                                     return new ReturnObject
@@ -100,7 +101,6 @@ namespace Vakapay.BitcoinBusiness
                                         Message = results["error"].ToString(),
                                     };
                                 }
-
                             }
                         }
                     }
@@ -460,6 +460,28 @@ namespace Vakapay.BitcoinBusiness
                     a_amount,
                     a_minconf,
                     a_comment
+                );
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+        
+        /**
+         * amounts are double-precision floating point numbers
+         */
+        public ReturnObject Sendmany(string fromAccount, JObject mutiAddress, int minconf = 1, string comment = "")
+        {
+            try
+            {
+                return InvokeMethod(
+                    "sendmany",
+                    fromAccount,
+                    mutiAddress,
+                    minconf,
+                    comment
+                  
                 );
             }
             catch (Exception e)

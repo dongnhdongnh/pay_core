@@ -82,6 +82,88 @@ namespace Vakapay.BitcoinBusiness
             return null;
         }
 
+
+        /// <summary>
+        /// amounts are double-precision floating point numbers. Returns the transaction ID if successful.
+        /// </summary>
+        /// <param name="fromAccount"></param>
+        /// <param name="mutiAddress"></param>
+        /// <param name="minconf"></param>
+        /// <param name="comment"></param>
+        public ReturnObject Sendmany(string fromAccount, JObject mutiAddress, int minconf = 1, string comment = "")
+        {
+            try
+            {
+                var results = bitcoinRpc.Sendmany(fromAccount, mutiAddress, minconf, comment);
+
+                if (results.Status == Status.StatusError)
+                    return results;
+
+                var idTransaction = results.Data;
+
+                //get transaction
+                var transaction = bitcoinRpc.GetTransaction(idTransaction);
+                if (transaction.Status == Status.StatusError)
+                    return transaction;
+                var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
+                
+                // get block
+                var blockInfo = new JObject();
+                if (!string.IsNullOrEmpty((string) transactionInfo["blockhash"]))
+                {
+                    var block = bitcoinRpc.GetBlock((string) transactionInfo["blockhash"]);
+                    if (block.Status == Status.StatusError)
+                        return block;
+                    blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data);
+                }
+                
+                
+                var bitcoinRawTransactionRepo =
+                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                var details = transactionInfo["details"];
+                        
+                var data = new JObject();
+                foreach (var detail in details)
+                {
+                    var rawTransaction = new BitcoinWithdrawTransaction
+                    {
+                        Id = CommonHelper.GenerateUuid(),
+                        Hash = idTransaction,
+                        BlockNumber = (string) blockInfo["height"],
+                        NetworkName = "Bitcoin",
+                        Amount = (decimal) detail["amount"],
+                        FromAddress = fromAccount,
+                        ToAddress = (string) detail["address"],
+                        Fee = (decimal) detail["fee"],
+                        Status = Status.StatusPending,
+                        CreatedAt = CommonHelper.GetUnixTimestamp().ToString(),
+                        UpdatedAt = CommonHelper.GetUnixTimestamp().ToString()
+                    };
+                    
+                   
+                    var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Insert(rawTransaction);
+                    
+                    data.Add(ResultAddBitcoinRawTransactionAddress);
+                    
+                  
+                }
+
+                return new ReturnObject
+                {
+                    Status = Status.StatusCompleted,
+                    Data = (string) data
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
         /// <summary>
         /// Amount is a real and is rounded to the nearest 0.01. Returns the transaction ID if successful.
         /// </summary>
@@ -106,13 +188,13 @@ namespace Vakapay.BitcoinBusiness
                     return results;
 
                 var idTransaction = results.Data;
-                
+
                 //get transaction
                 var transaction = bitcoinRpc.GetTransaction(idTransaction);
                 if (transaction.Status == Status.StatusError)
                     return transaction;
                 var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
-                
+
 
                 //block
                 var blockInfo = new JObject();
@@ -121,7 +203,7 @@ namespace Vakapay.BitcoinBusiness
                     var block = bitcoinRpc.GetBlock((string) transactionInfo["blockhash"]);
                     if (block.Status == Status.StatusError)
                         return block;
-                    blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data); 
+                    blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data);
                 }
 
 
