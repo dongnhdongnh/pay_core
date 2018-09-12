@@ -241,5 +241,22 @@ namespace Vakapay.BitcoinBusiness
         {
             return JsonConvert.DeserializeObject<JObject>(data)["result"].ToString();
         }
+
+        public ReturnObject GetTransaction(string txid)
+        {
+            try
+            {
+                var results = bitcoinRpc.GetTransaction(txid);
+                return results;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
     }
 }
