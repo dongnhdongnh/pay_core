@@ -23,13 +23,13 @@ namespace Vakapay.TestWallet
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = "server=127.0.0.1;userid=root;password=Concuacang123!;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                    ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
                 };
 
                 var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-                const bool testWalletBusiness = false;
-                const bool testVakacoinBusiness = true;
+                const bool testWalletBusiness = true;
+                const bool testVakacoinBusiness = false;
 
                 if (testWalletBusiness) // testWalletBusiness
                 {

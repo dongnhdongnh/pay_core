@@ -1,53 +1,55 @@
+using System;
 using System.Data;
 using MySql.Data.MySqlClient;
 using Vakapay.Models.Repositories;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class VakapayRepositoryMysqlPersistenceFactory : IVakapayRepositoryFactory
-    {
-        public RepositoryConfiguration repositoryConfiguration { get;}
-        
-        public IDbConnection Connection { get; set; }
+	public class VakapayRepositoryMysqlPersistenceFactory : IVakapayRepositoryFactory
+	{
+		public RepositoryConfiguration repositoryConfiguration { get; }
 
-        public VakapayRepositoryMysqlPersistenceFactory(RepositoryConfiguration _repositoryConfiguration)
-        {
-            repositoryConfiguration = _repositoryConfiguration;
-        }
-        public IApiKeyRepository getApiKeyRepository(IDbConnection connection)
-        {
-            return new ApiKeyRepository(connection);
-        }
+		public IDbConnection Connection { get; set; }
 
-        public IDbConnection GetDbConnection()
-        {
-            Connection =  new MySqlConnection(repositoryConfiguration.ConnectionString);
-            return Connection;
-        }
+		public VakapayRepositoryMysqlPersistenceFactory(RepositoryConfiguration _repositoryConfiguration)
+		{
+			repositoryConfiguration = _repositoryConfiguration;
+		}
+		public IApiKeyRepository getApiKeyRepository(IDbConnection connection)
+		{
+			return new ApiKeyRepository(connection);
+		}
 
-        public IDbConnection GetOldConnection()
-        {
-            return Connection;
-        }
+		public IDbConnection GetDbConnection()
+		{
+			Connection = new MySqlConnection(repositoryConfiguration.ConnectionString);
+			Console.WriteLine("CONNECTION NULL= " + Connection == null);
+			return Connection;
+		}
 
-        public IWalletRepository GetWalletRepository(IDbConnection dbConnection)
-        {
-            return new WalletRepository(dbConnection);
-        }
+		public IDbConnection GetOldConnection()
+		{
+			return Connection;
+		}
 
-        public IUserRepository GetUserRepository(IDbConnection dbConnection)
-        {
-            return new UserRepository(dbConnection);
-        }
+		public IWalletRepository GetWalletRepository(IDbConnection dbConnection)
+		{
+			return new WalletRepository(dbConnection);
+		}
 
-        public IEthereumAddressRepository GetEthereumAddressRepository(IDbConnection dbConnection)
-        {
-            return new EthereumAddressRepository(dbConnection);
-        }
-        
-        public IBitcoinAddressRepository GetBitcoinAddressRepository(IDbConnection dbConnection)
-        {
-            return new BitcoinAddressRepository(dbConnection);
-        }
-    }
+		public IUserRepository GetUserRepository(IDbConnection dbConnection)
+		{
+			return new UserRepository(dbConnection);
+		}
+
+		public IEthereumAddressRepository GetEthereumAddressRepository(IDbConnection dbConnection)
+		{
+			return new EthereumAddressRepository(dbConnection);
+		}
+
+		public IBitcoinAddressRepository GetBitcoinAddressRepository(IDbConnection dbConnection)
+		{
+			return new BitcoinAddressRepository(dbConnection);
+		}
+	}
 }

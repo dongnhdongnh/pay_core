@@ -29,21 +29,21 @@ namespace Vakapay.Models.Entities.ETH
 			}
 		}
 
-		//public class Getter
-		//{
-		//	public Getter(string input)
-		//	{
-		//		Console.WriteLine("==getter " + input);
-		//		if (input == null)
-		//			return;
-		//		Getter thing = JsonHelper.DeserializeObject<Getter>(input);
-		//		this.id = thing.id;
-		//		this.jsonrpc = thing.jsonrpc;
-		//		this.result = thing.result;
-		//	}
-		//	public string id;
-		//	public string jsonrpc;
-		//	public string result;
-		//}
+		public class Getter
+		{
+			public Getter(string input)
+			{
+				Console.WriteLine("==getter " + input);
+				if (input == null)
+					return;
+				Getter thing = JsonHelper.DeserializeObject<Getter>(input);
+				this.id = thing.id;
+				this.jsonrpc = thing.jsonrpc;
+				this.result = thing.result;
+			}
+			public string id;
+			public string jsonrpc;
+			public Object result;
+		}
 	}
 }
