@@ -1,8 +1,6 @@
 using System;
-using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
-using Vakapay.Cryptography;
 
 namespace Vakapay.VakacoinBusiness
 {
@@ -26,13 +24,7 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-                string accountName = "";
-                do
-                {
-                    accountName = CommonHelper.RandomAccountNameVakacoin();
-                } while ( VakacoinRpc.CheckAccountExist(accountName) == true );
 
-                KeyManager.KeyPair keyPair = KeyManager.GenerateKeyPair();
                 
                 return new ReturnObject { };
             }
