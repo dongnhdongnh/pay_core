@@ -54,5 +54,10 @@ namespace Vakapay.Repositories.Mysql
         {
             return new BitcoinRawTransactionRepository(dbConnection);
         }
-    }
+
+		public IEthereumWithdrawnTransactionRepository GetEthereumWithdrawnTransactionRepository(IDbConnection dbConnection)
+		{
+			throw new System.NotImplementedException();
+		}
+	}
 }

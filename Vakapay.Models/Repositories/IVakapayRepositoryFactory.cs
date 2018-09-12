@@ -2,15 +2,16 @@ using System.Data;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IVakapayRepositoryFactory
-    {
-        IApiKeyRepository getApiKeyRepository(IDbConnection dbConnection);
-        IDbConnection GetDbConnection();
-        IDbConnection GetOldConnection();
-        IWalletRepository GetWalletRepository(IDbConnection dbConnection);
-        IUserRepository GetUserRepository(IDbConnection dbConnection);
-        IEthereumAddressRepository GetEthereumAddressRepository(IDbConnection dbConnection);
-        IBitcoinAddressRepository GetBitcoinAddressRepository(IDbConnection dbConnection);
-        IBitcoinRawTransactionRepository GeBitcoinRawTransactionRepository(IDbConnection dbConnection);
-    }
+	public interface IVakapayRepositoryFactory
+	{
+		IApiKeyRepository getApiKeyRepository(IDbConnection dbConnection);
+		IDbConnection GetDbConnection();
+		IDbConnection GetOldConnection();
+		IWalletRepository GetWalletRepository(IDbConnection dbConnection);
+		IUserRepository GetUserRepository(IDbConnection dbConnection);
+		IEthereumAddressRepository GetEthereumAddressRepository(IDbConnection dbConnection);
+		IEthereumWithdrawnTransactionRepository GetEthereumWithdrawnTransactionRepository(IDbConnection dbConnection);
+		IBitcoinAddressRepository GetBitcoinAddressRepository(IDbConnection dbConnection);
+		IBitcoinRawTransactionRepository GeBitcoinRawTransactionRepository(IDbConnection dbConnection);
+	}
 }
