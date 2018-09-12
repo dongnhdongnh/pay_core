@@ -59,5 +59,10 @@ namespace Vakapay.Repositories.Mysql
 		{
 			return new EthereumWithdrawnTransactionRepository(dbConnection);
 		}
+
+		public IVakacoinTransactionHistoryRepository GetVakacoinTransactionHistoryRepository(IDbConnection dbConnection)
+		{
+			return new VakacoinTransactionHistoryRepository(dbConnection);
+		}
 	}
 }
