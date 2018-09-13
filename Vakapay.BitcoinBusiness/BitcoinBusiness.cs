@@ -133,6 +133,7 @@ namespace Vakapay.BitcoinBusiness
                         Id = CommonHelper.GenerateUuid(),
                         Hash = idTransaction,
                         BlockNumber = (string) blockInfo["height"],
+                        BlockHash = (string) transactionInfo["blockhash"],
                         NetworkName = "Bitcoin",
                         Amount = (decimal) detail["amount"],
                         FromAddress = fromAccount,
@@ -218,6 +219,7 @@ namespace Vakapay.BitcoinBusiness
                     Id = CommonHelper.GenerateUuid(),
                     Hash = idTransaction,
                     BlockNumber = (string) blockInfo["height"],
+                    BlockHash = (string) transactionInfo["blockhash"],
                     NetworkName = "Bitcoin",
                     Amount = (decimal) amount,
                     FromAddress = fromAccount,
@@ -232,11 +234,6 @@ namespace Vakapay.BitcoinBusiness
                 //
                 return ResultAddBitcoinRawTransactionAddress;
                 //deposit
-//                return new ReturnObject
-//                {
-//                    Status = Status.StatusSuccess,
-//                    Data = idTransaction
-//                };
             }
             catch (Exception e)
             {

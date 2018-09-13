@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
+using Dapper;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -37,7 +39,25 @@ namespace Vakapay.Repositories.Mysql
 
         public ReturnObject Insert(BitcoinWithdrawTransaction objectInsert)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                
+                
+                var result = Connection.InsertTask<string, BitcoinWithdrawTransaction>(objectInsert);
+                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
+                    Data = result
+                };
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         BitcoinWithdrawTransaction IRepositoryBase<BitcoinWithdrawTransaction>.FindById(string Id)

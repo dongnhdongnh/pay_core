@@ -35,6 +35,8 @@ namespace Vakapay.Repositories.Mysql
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
+                
+                
                 var result = Connection.InsertTask<string, BitcoinAddress>(objectInsert);
                 var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
                 return new ReturnObject
