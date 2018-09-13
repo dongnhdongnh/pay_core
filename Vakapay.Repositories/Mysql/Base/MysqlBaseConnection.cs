@@ -4,7 +4,7 @@ using MySql.Data.MySqlClient;
 
 namespace Vakapay.Repositories.Mysql.Base
 {
-    public class MysqlBaseConnection<T> : IDisposable
+    public class MysqlBaseConnection : IDisposable
     {
         public MySqlConnection Connection { get; }
 

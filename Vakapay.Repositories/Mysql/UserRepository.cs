@@ -7,7 +7,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class UserRepository :MysqlBaseConnection<UserRepository>, IUserRepository
+    public class UserRepository :MysqlBaseConnection, IUserRepository
     {
         public UserRepository(string connectionString) : base(connectionString)
         {

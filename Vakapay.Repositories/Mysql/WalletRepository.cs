@@ -10,7 +10,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class WalletRepository : MysqlBaseConnection<WalletRepository> ,IWalletRepository
+    public class WalletRepository : MysqlBaseConnection ,IWalletRepository
     {
         public WalletRepository(string connectionString) : base(connectionString)
         {
