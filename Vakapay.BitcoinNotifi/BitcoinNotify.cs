@@ -63,8 +63,10 @@ namespace Vakapay.BitcoinNotifi
         {
             try
             {
-                List<BitcoinDepositTransaction> listBtcDepositTransactions =
-                    btcDepositTransactionRepository.FindBySql("");
+                List<BitcoinDepositTransaction> listBtcDepositTransactions = btcDepositTransactionRepository.FindBySql(
+                    "SELECT * FROM bitcoindeposittransaction WHERE Hash = '" +
+                    transactionId + "' and ToAddress = '" + address + "'");
+                logger.Debug("GetDepositTransaction from DB: " + listBtcDepositTransactions.Count);
                 if (listBtcDepositTransactions.Count > 0)
                 {
                     return listBtcDepositTransactions.ElementAt(0);
@@ -129,6 +131,7 @@ namespace Vakapay.BitcoinNotifi
                     if (currentBtcDepositTransaction != null)
                     {
                         currentBtcDepositTransaction.BlockHash = transactionModel.Blockhash;
+                        currentBtcDepositTransaction.Amount = transactionModel.Amount;
                         currentBtcDepositTransaction.Status = Status.StatusCompleted;
                         currentBtcDepositTransaction.UpdatedAt = currentTime;
                         btcDepositTransactionRepository.Update(currentBtcDepositTransaction);
@@ -169,7 +172,8 @@ namespace Vakapay.BitcoinNotifi
                     CreatedAt = currentTime,
                     UpdatedAt = currentTime
                 };
-                logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " + btcDepositTransaction);
+                logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
+                             btcDepositTransaction.ToJson());
                 btcDepositTransactionRepository.Insert(btcDepositTransaction);
             }
             catch (Exception e)
@@ -184,7 +188,10 @@ namespace Vakapay.BitcoinNotifi
             try
             {
                 List<BitcoinWithdrawTransaction> listBtcRawTransactions =
-                    bitcoinRawTransactionRepository.FindBySql("");
+                    bitcoinRawTransactionRepository.FindBySql(
+                        "SELECT * FROM bitcoinwithdrawtransaction WHERE Hash = '" +
+                        transactionId + "' and ToAddress = '" + address + "'");
+                logger.Debug("GetBtcWithdrawTransaction from DB: " + listBtcRawTransactions.Count);
                 if (listBtcRawTransactions.Count > 0)
                 {
                     return listBtcRawTransactions.ElementAt(0);
@@ -206,17 +213,12 @@ namespace Vakapay.BitcoinNotifi
             try
             {
                 logger.Debug("HandleNotifyDataSend start");
-                logger.Debug("HandleNotifyDataSend =>> btcBussines: " + btcBussines);
-                logger.Debug("HandleNotifyDataSend =>> btcBussines.VakapayRepositoryFactory: " +
-                             btcBussines.factory);
-                logger.Debug("HandleNotifyDataSend =>> btcBussines.DBConnection: " + btcBussines.dbconnect);
-
                 IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBussines
                     .factory.GeBitcoinRawTransactionRepository(btcBussines.dbconnect);
 
                 BitcoinWithdrawTransaction currentBtcWithdrawTransaction =
-                    GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
-                        transactionModel.Txid);
+                    GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, "mwfHq6NigeDDV7MrBHdyZhQdUWeYqPCFLV",
+                        "beb4bd560b68cc5c28e772322d8f2caee67bf76364c62dc62a724f46154e9b6b");
                 logger.Debug("HandleNotifyDataSend =>> btcWithdrawTransaction: " + currentBtcWithdrawTransaction);
                 if (currentBtcWithdrawTransaction == null)
                 {
