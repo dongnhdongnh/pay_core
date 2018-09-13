@@ -37,6 +37,7 @@ namespace Vakapay.Commons.Helpers
 		{
 			return Guid.TryParse(guidString, out var _);
 		}
+		
 		public static string RandomString(int length)
 		{
 			Random random = new Random();
