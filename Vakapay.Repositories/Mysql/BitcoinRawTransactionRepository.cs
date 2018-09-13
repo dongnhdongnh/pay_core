@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Dapper;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -68,7 +69,19 @@ namespace Vakapay.Repositories.Mysql
 
         public List<BitcoinWithdrawTransaction> FindBySql(string sqlString)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+               
+                var result = Connection.Query<BitcoinWithdrawTransaction>(sqlString);
+                
+                return  result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }
