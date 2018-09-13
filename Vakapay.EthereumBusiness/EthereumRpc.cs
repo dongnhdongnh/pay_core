@@ -98,7 +98,7 @@ namespace Vakapay.EthereumBusiness
 		/// <returns></returns>
 		public ReturnObject SendTransactionWithPassphrase(string From, string ToAddress, decimal amount, string passphrase)
 		{
-			EthRPCJson.TransactionSender _sender = new EthRPCJson.TransactionSender()
+			EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
 			{
 				from = From,
 				to = ToAddress,
@@ -116,7 +116,7 @@ namespace Vakapay.EthereumBusiness
 		/// <returns></returns>
 		public ReturnObject SendTransaction(string From, string ToAddress, decimal amount)
 		{
-			EthRPCJson.TransactionSender _sender = new EthRPCJson.TransactionSender()
+			EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
 			{
 				from = From,
 				to = ToAddress,

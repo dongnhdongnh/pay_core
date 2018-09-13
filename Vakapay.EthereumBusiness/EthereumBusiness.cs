@@ -96,29 +96,52 @@ namespace Vakapay.EthereumBusiness
 
 		}
 
-		public void ScanBlock()
+		public int ScanBlock()
 		{
-			int blockNumber = 0;
-			var _result = ethereumRpc.GetBlockNumber();
-			if (_result.Status == Status.StatusError)
-				return;
-			EthRPCJson.Getter _getter = new EthRPCJson.Getter(_result.Data);
-			if (!_getter.result.ToString().HexToInt(out blockNumber))
-				return;
-			Console.WriteLine("block number " + blockNumber);
-			for (int i = blockNumber - 2; i <= blockNumber; i++)
-			{
-				_result = ethereumRpc.FindBlockByNumber(i);
-				if (_result.Status == Status.StatusError)
-					return;
-				_getter = new EthRPCJson.Getter(_result.Data);
-				Console.WriteLine(JsonHelper.SerializeObject(_getter.result));
-			}
+
 
 			String _query = String.Format("SELECT * FROM vakapay.ethereumwithdrawtransaction Where Status='{0}'", Status.StatusPending);
 			var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
 			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(_query);
-			Console.WriteLine(_pending.Count);
+			if (_pending.Count <= 0)
+			{
+				Console.WriteLine("No pending");
+				return 0;
+			}
+
+
+			int blockNumber = 0;
+			var _result = ethereumRpc.GetBlockNumber();
+			if (_result.Status == Status.StatusError)
+				return 0;
+			EthRPCJson.Getter _getter = new EthRPCJson.Getter(_result.Data);
+			if (!_getter.result.ToString().HexToInt(out blockNumber))
+				return 0;
+			Console.WriteLine("block number " + blockNumber);
+
+
+
+			List<EthRPCJson.BlockInfor> blocks = new List<EthRPCJson.BlockInfor>();
+			for (int i = blockNumber - 1000; i <= blockNumber; i++)
+			{
+				if (i < 0) continue;
+				_result = ethereumRpc.FindBlockByNumber(i);
+				if (_result.Status == Status.StatusError)
+					return 0;
+				if (_result.Data == null)
+					continue;
+				_getter = new EthRPCJson.Getter(_result.Data);
+				EthRPCJson.BlockInfor _block = JsonHelper.DeserializeObject<EthRPCJson.BlockInfor>(_getter.result.ToString());
+				if (_block.transactions.Length > 0)
+				{
+					blocks.Add(_block);
+				}
+				//	Console.WriteLine(JsonHelper.SerializeObject(_getter.result));
+			}
+
+			Console.WriteLine(blocks.Count);
+			return blocks.Count;
+
 		}
 	}
 }

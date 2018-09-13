@@ -46,11 +46,25 @@ namespace Vakapay.Models.Entities.ETH
 			public Object result;
 		}
 
-		public class TransactionSender
+		public class TransactionInfor
 		{
 			public string from;
 			public string to;
 			public string value;
+			public String blockHash;
+			public String blockNumber;
+			public String transactionIndex;
 		}
+
+		public class BlockInfor
+		{
+			public string number;
+			public string hash;
+			public TransactionInfor[] transactions;
+			public String transactionsRoot;
+			public string totalDifficulty;
+		}
+
+
 	}
 }
