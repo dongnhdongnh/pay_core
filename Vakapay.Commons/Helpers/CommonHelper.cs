@@ -63,8 +63,8 @@ namespace Vakapay.Commons.Helpers
 
 		public static bool HexToInt(this string hex, out int result)
 		{
-
-			return int.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out result);
+			char[] _trim_hex = new char[] { '0', 'x' };
+			return int.TryParse(hex.TrimStart(_trim_hex), System.Globalization.NumberStyles.HexNumber, null, out result);
 
 		}
 	}

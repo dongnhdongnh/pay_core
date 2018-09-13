@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using VakacoinCore.Response.API;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.VakacoinBusiness.Test
@@ -37,7 +38,14 @@ namespace Vakapay.VakacoinBusiness.Test
         {
             Assert.AreEqual( status, _rpc.SendTransaction(from, to, amount, 
                 memo, privatekey).Status);
-        }        
+        }
+
+        [Test]
+        public void CreateRandomAccountTest()
+        {
+            Account oAccount;
+            _rpc.CreateRandomAccount(out oAccount);
+        }
         
         
     }

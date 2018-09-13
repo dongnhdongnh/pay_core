@@ -5,6 +5,8 @@ using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
 using VakacoinCore;
 using VakacoinCore.ActionArgs;
+using VakacoinCore.Response;
+using VakacoinCore.Response.API;
 using VakacoinCore.Utilities;
 using Action=VakacoinCore.Params.Action;
 
@@ -58,6 +60,44 @@ namespace Vakapay.VakacoinBusiness
             var jResult= JObject.Parse(result);
             var exist = jResult["error"] == null;
             return exist;
+        }
+
+        public ReturnObject CreateRandomAccount(out Account account)
+        {
+            account = null;
+            try
+            {
+                var accountName = "";
+                do
+                {
+                    accountName = CommonHelper.RandomAccountNameVakacoin();
+                } while (CheckAccountExist(accountName) == true);
+
+                var keyPair = KeyManager.GenerateKeyPair();
+
+                var args = new NewAccountxArgs() {name = accountName}; 
+                
+                var action = GetActionObject("", "newaccountx", "", "vaka", args);
+
+                List<string> privateKeysInWIF = new List<string> { }; // blank
+                
+                //push transaction
+                var transactionResult = ChainApiObj.PushTransaction(new [] { action }, privateKeysInWIF);
+                
+                return new ReturnObject
+                {
+                    Status = Status.StatusActive,
+                    Data = accountName
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
         }
         
         public ReturnObject SendTransaction(string from, string to, string amount, string memo, string privateKey)
