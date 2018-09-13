@@ -15,13 +15,15 @@ namespace Vakapay.BitcoinBusiness
     public class BitcoinBusiness : BlockchainBusiness
     {
         private BitcoinRpc bitcoinRpc { get; set; }
-        public IVakapayRepositoryFactory VakapayRepositoryFactory { get; set; }
-        public IDbConnection DBConnection { get; set; }
+        public IVakapayRepositoryFactory factory { get; set; }
+        public IDbConnection dbconnect { get; set; }
 
 
         public BitcoinBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) :
             base(_vakapayRepositoryFactory, isNewConnection)
         {
+            factory = _vakapayRepositoryFactory;
+            dbconnect = DbConnection;
             bitcoinRpc = new BitcoinRpc("http://127.0.0.1:18443");
             bitcoinRpc.Credentials = new NetworkCredential("bitcoinrpc", "wqfgewgewi");
         }
@@ -37,7 +39,7 @@ namespace Vakapay.BitcoinBusiness
         {
             try
             {
-                var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection);
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(DbConnection);
 
                 var walletCheck = walletRepository.FindById(WalletId);
 
@@ -55,7 +57,7 @@ namespace Vakapay.BitcoinBusiness
                 var address = results.Data;
 
                 //add database vakaxa
-                var bitcoinAddressRepo = VakapayRepositoryFactory.GetBitcoinAddressRepository(DbConnection);
+                var bitcoinAddressRepo = vakapayRepositoryFactory.GetBitcoinAddressRepository(DbConnection);
                 var time = (int) CommonHelper.GetUnixTimestamp();
                 var bcAddress = new BitcoinAddress
                 {
@@ -124,7 +126,7 @@ namespace Vakapay.BitcoinBusiness
 
 
                 var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
                 var details = transactionInfo["details"];
 
                 var data = new JObject();
@@ -214,7 +216,7 @@ namespace Vakapay.BitcoinBusiness
 
                 //add database vakaxa
                 var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
 
                 var time = CommonHelper.GetUnixTimestamp().ToString();
                 var rawTransaction = new BitcoinWithdrawTransaction
@@ -339,7 +341,7 @@ namespace Vakapay.BitcoinBusiness
 //                var idTransaction = results.Data;
 //                //add database vakaxa
 //                var bitcoinRawTransactionRepo =
-//                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+//                    vakapayRepositoryvakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
 //
 //                //
 //                return new ReturnObject

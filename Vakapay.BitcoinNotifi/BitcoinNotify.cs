@@ -88,10 +88,10 @@ namespace Vakapay.BitcoinNotifi
             try
             {
                 logger.Debug("HandleNotifiDataReceiver start");
-                
+
                 var btcDepositTransactionRepository = btcBussines
-                    .VakapayRepositoryFactory.GetBitcoinDepositTransactioRepository(btcBussines.DBConnection);
-                
+                    .factory.GetBitcoinDepositTransactioRepository(btcBussines.dbconnect);
+
                 logger.Debug("HandleNotifiDataReceiver start1");
                 var currentBtcDepositTransaction = GetDepositTransaction(btcDepositTransactionRepository,
                     transactionModelDetail.Address, transactionModel.Txid);
@@ -117,7 +117,7 @@ namespace Vakapay.BitcoinNotifi
                 {
                     logger.Debug("HandleNotifiDataReceiver with confirm > 0");
                     IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBussines
-                        .VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(btcBussines.DBConnection);
+                        .factory.GeBitcoinRawTransactionRepository(btcBussines.dbconnect);
                     BitcoinWithdrawTransaction currentBtcWithdrawTransaction =
                         GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
                             transactionModel.Txid);
@@ -125,7 +125,7 @@ namespace Vakapay.BitcoinNotifi
                     {
                         bitcoinRawTransactionRepository.Update(currentBtcWithdrawTransaction);
                     }
-                    
+
                     if (currentBtcDepositTransaction != null)
                     {
                         currentBtcDepositTransaction.BlockHash = transactionModel.Blockhash;
@@ -206,8 +206,14 @@ namespace Vakapay.BitcoinNotifi
             try
             {
                 logger.Debug("HandleNotifyDataSend start");
+                logger.Debug("HandleNotifyDataSend =>> btcBussines: " + btcBussines);
+                logger.Debug("HandleNotifyDataSend =>> btcBussines.VakapayRepositoryFactory: " +
+                             btcBussines.factory);
+                logger.Debug("HandleNotifyDataSend =>> btcBussines.DBConnection: " + btcBussines.dbconnect);
+
                 IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBussines
-                    .VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(btcBussines.DBConnection);
+                    .factory.GeBitcoinRawTransactionRepository(btcBussines.dbconnect);
+
                 BitcoinWithdrawTransaction currentBtcWithdrawTransaction =
                     GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
                         transactionModel.Txid);
@@ -230,7 +236,8 @@ namespace Vakapay.BitcoinNotifi
                         CreatedAt = currentTime,
                         UpdatedAt = currentTime
                     };
-                    logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " + newBtcWithdrawTransaction);
+                    logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
+                                 newBtcWithdrawTransaction);
                     bitcoinRawTransactionRepository.Insert(newBtcWithdrawTransaction);
                 }
             }
