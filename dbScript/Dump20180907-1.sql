@@ -41,6 +41,81 @@ CREATE TABLE `wallet` (
 -- Dumping data for table `wallet`
 --
 
+--
+-- Table structure for table `ethereumwithdrawtransaction`
+--
+
+CREATE TABLE `ethereumwithdrawtransaction` (
+  `Id` varchar(200) NOT NULL,
+  `Hash` varchar(200) DEFAULT NULL,
+  `BlockNumber` varchar(200) DEFAULT NULL,
+  `NetworkName` varchar(200) DEFAULT NULL,
+  `Amount` decimal(20,0) NOT NULL,
+  `FromAddress` varchar(200) NOT NULL,
+  `ToAddress` varchar(200) NOT NULL,
+  `Fee` varchar(200) NOT NULL,
+  `Status` varchar(200) DEFAULT NULL,
+  `CreatedAt` int(11) NOT NULL,
+  `UpdatedAt` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `ethereumwithdrawtransaction`
+--
+
+--
+-- Table structure for table `ethereumaddress`
+--
+
+CREATE TABLE `ethereumaddress` (
+  `Id` varchar(200) NOT NULL,
+  `Status` varchar(200) NOT NULL,
+  `Address` varchar(45) NOT NULL,
+  `CreatedAt` int(11) NOT NULL,
+  `Password` varchar(200) NOT NULL,
+  `UpdatedAt` int(11) NOT NULL,
+  `WalletId` varchar(200) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `ethereumaddress`
+--
+
+
+--
+-- Table structure for table `bitcoinddress`a
+--
+CREATE TABLE `bitcoinaddress` (
+  `Id` varchar(200) NOT NULL,
+  `Status` varchar(45) DEFAULT NULL,
+  `Address` varchar(45) DEFAULT NULL,
+  `CreatedAt` int(11) DEFAULT NULL,
+  `UpdatedAt` int(11) DEFAULT NULL,
+  `WalletId` varchar(200) DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- Table structure for table `bitcoinwithdrawtransaction`
+--
+
+CREATE TABLE `bitcoinwithdrawtransaction` (
+  `Id` varchar(200) NOT NULL,
+  `Hash` varchar(200) DEFAULT NULL,
+  `BlockNumber` varchar(200) DEFAULT NULL,
+  `BlockHash` varchar(200) DEFAULT NULL,
+  `NetworkName` varchar(200) DEFAULT NULL,
+  `Amount` decimal(20,0) NOT NULL,
+  `FromAddress` varchar(200) NOT NULL,
+  `ToAddress` varchar(200) NOT NULL,
+  `Fee` varchar(200) NOT NULL,
+  `Status` varchar(200) DEFAULT NULL,
+  `CreatedAt` int(11) NOT NULL,
+  `UpdatedAt` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
 LOCK TABLES `wallet` WRITE;
 /*!40000 ALTER TABLE `wallet` DISABLE KEYS */;
 INSERT INTO `wallet` VALUES ('b342e41e-f96b-4da6-ae74-8e7a0e4a60ce','9e69c659-c274-4543-ac82-002c16fe6fae',0.00000000,'Ethereum',NULL,0,0,0);

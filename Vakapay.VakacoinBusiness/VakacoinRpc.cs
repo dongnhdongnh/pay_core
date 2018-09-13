@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
-using Cryptography.ECDSA;
+using VakacoinCore;
+using VakacoinCore.ActionArgs;
+using VakacoinCore.Response;
+using VakacoinCore.Response.API;
+using VakacoinCore.Utilities;
+using Action=VakacoinCore.Params.Action;
 
 
 namespace Vakapay.VakacoinBusiness
@@ -13,34 +16,38 @@ namespace Vakapay.VakacoinBusiness
     public class VakacoinRpc
     {
         private string EndPointUrl { get; set; }
-        private string VakacoinVersion { get; } = "v1";
-        
+        private ChainAPI ChainApiObj { get; }
+        private const string CoreSymbol = "VAKA";
+        private const string SystemTokenContract = "vaka.token";
+        private const string ActivePermission = "active";
+        private const string TransferAction = "transfer";
+
         public VakacoinRpc(string endPointUrl)
         {
-            if (endPointUrl[endPointUrl.Length - 1] != '/')
-            {
-                endPointUrl += "/";
-            }
-
-            endPointUrl += VakacoinVersion;
-            
-            EndPointUrl = endPointUrl; // return end://point.url/v1
+            ChainApiObj = new ChainAPI(endPointUrl);
+            EndPointUrl = endPointUrl;
         }
 
         private string GetAccountPostUrl()
         {
-            return EndPointUrl + "/chain/get_account";
+            return EndPointUrl + "/v1/chain/get_account";
         }
 
         private string GetInfoPostUrl()
         {
-            return EndPointUrl + "/chain/get_info";
+            return EndPointUrl + "/v1/chain/get_info";
         }
 
         public ReturnObject CreateAddress(string password)
         {
             return null;
         }
+
+        private Action GetActionObject(string accountName, string actionName, string permission, string code, object args)
+        {
+            return new ActionUtility(EndPointUrl).GetActionObject(accountName, actionName, permission, code, args);
+        }
+
 
         public bool CheckAccountExist(string accountName)
         {
@@ -55,76 +62,70 @@ namespace Vakapay.VakacoinBusiness
             return exist;
         }
 
-        public VakaKeyPair CreateKey()
+        public ReturnObject CreateRandomAccount(out Account account)
         {
-            byte[] keybytes = Secp256K1Manager.GenerateRandomKey();
-            string prv = KeyToString(keybytes, "sha256x2");
-            return new VakaKeyPair();
+            account = null;
+            try
+            {
+                var accountName = "";
+                do
+                {
+                    accountName = CommonHelper.RandomAccountNameVakacoin();
+                } while (CheckAccountExist(accountName) == true);
+
+                var keyPair = KeyManager.GenerateKeyPair();
+
+                var args = new NewAccountxArgs() {name = accountName}; 
+                
+                var action = GetActionObject("", "newaccountx", "", "vaka", args);
+
+                List<string> privateKeysInWIF = new List<string> { }; // blank
+                
+                //push transaction
+                var transactionResult = ChainApiObj.PushTransaction(new [] { action }, privateKeysInWIF);
+                
+                return new ReturnObject
+                {
+                    Status = Status.StatusActive,
+                    Data = accountName
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
         }
         
-        public static string KeyToString(byte[] key, string keyType, string prefix = null)
+        public ReturnObject SendTransaction(string from, string to, string amount, string memo, string privateKey)
         {
-            byte[] digest = null;
+            try
+            {
+                //var sAmount = string.Format("{0:0.0000}", amount) + " " + CoreSymbol;
+                
+                var args = new TransferArgs() {from = from, to = to, quantity = amount, memo = memo};
+                
+                //prepare action object
+                var action = GetActionObject(from, TransferAction, ActivePermission, SystemTokenContract, args);
 
-            if (keyType == "sha256x2")
-            {
-                digest = Sha256Manager.GetHash(Sha256Manager.GetHash(Combine(new List<byte[]>() {
-                    new byte[] { 128 },
-                    key
-                })));
+                List<string> privateKeysInWIF = new List<string> { privateKey };
+                
+                //push transaction
+                var transactionResult = ChainApiObj.PushTransaction(new [] { action }, privateKeysInWIF);
+                
+                return new ReturnObject(){Status = Status.StatusSuccess, Data = transactionResult.transaction_id};
             }
-            else if (!string.IsNullOrWhiteSpace(keyType))
+            catch (Exception e)
             {
-                digest = Ripemd160Manager.GetHash(Combine(new List<byte[]>() {
-                    key,
-                    Encoding.UTF8.GetBytes(keyType)
-                }));
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
             }
-            else
-            {
-                digest = Ripemd160Manager.GetHash(key);
-            }
-
-            return prefix + Base58.Encode(Combine(new List<byte[]>() {
-                key,
-                digest.Take(4).ToArray()
-            }));
         }
-        
-        public static byte[] Combine(IEnumerable<byte[]> arrays)
-        {
-            byte[] ret = new byte[arrays.Sum(x => x != null ? x.Length : 0)];
-            int offset = 0;
-            foreach (byte[] data in arrays)
-            {
-                if (data == null) continue;
-
-                Buffer.BlockCopy(data, 0, ret, offset, data.Length);
-                offset += data.Length;
-            }
-            return ret;
-        }
-
-        public void MainTest()
-        {
-            
-        }
-     
-//        private static object ReadPrivateKey(byte[] data, ref Int32 readIndex)
-//        {
-//            var type = (byte)ReadByte(data, ref readIndex);
-//            var keyBytes = data.Skip(readIndex).Take(CryptoHelper.PRIV_KEY_DATA_SIZE).ToArray();
-//
-//            readIndex += CryptoHelper.PRIV_KEY_DATA_SIZE;
-//
-//            if (type == (int)KeyType.r1)
-//            {
-//                return CryptoHelper.PrivKeyBytesToString(keyBytes, "R1", "PVT_R1_");
-//            }
-//            else
-//            {
-//                throw new Exception("private key type not supported.");
-//            }
-//        }
     }
 }

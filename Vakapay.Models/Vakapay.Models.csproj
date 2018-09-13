@@ -1,9 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Vakapay.Commons\Class1.cs" />
     <Compile Remove="Vakapay.Reposities\Class1.cs" />
@@ -15,7 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Domains\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vakapay.Commons\Vakapay.Commons.csproj" />

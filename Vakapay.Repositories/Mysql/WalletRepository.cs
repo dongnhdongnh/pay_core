@@ -34,7 +34,7 @@ namespace Vakapay.Repositories.Mysql
         {
             try
             {
-                if(Connection.State != ConnectionState.Open)
+                if (Connection.State != ConnectionState.Open)
                     Connection.Open();
                 var result = Connection.InsertTask<string, Wallet>(objectInsert);
                 var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
@@ -52,7 +52,22 @@ namespace Vakapay.Repositories.Mysql
 
         public Wallet FindById(string Id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                string sQuery = "SELECT * FROM wallet WHERE Id = @ID";
+
+                var result = Connection.QuerySingleOrDefault<Wallet>(sQuery, new {ID = Id});
+
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public List<Wallet> FindBySql(string sqlString)

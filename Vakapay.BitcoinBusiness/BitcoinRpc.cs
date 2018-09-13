@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.Models.Domains;
 
 namespace Vakapay.BitcoinBusiness
 {
@@ -24,191 +25,425 @@ namespace Vakapay.BitcoinBusiness
 
         public ICredentials Credentials;
 
-        public JObject InvokeMethod(string a_sMethod, params object[] a_params)
+        public ReturnObject InvokeMethod(string a_sMethod, params object[] a_params)
         {
-            HttpWebRequest webRequest = (HttpWebRequest) WebRequest.Create(Url);
-
-            webRequest.Credentials = Credentials;
-            webRequest.ContentType = "application/json-rpc";
-            webRequest.Method = "POST";
-
-            JObject joe = new JObject();
-            joe["jsonrpc"] = "1.0";
-            joe["id"] = "1";
-            joe["method"] = a_sMethod;
-
-            if (a_params != null)
-            {
-                if (a_params.Length > 0)
-                {
-                    JArray props = new JArray();
-                    foreach (var p in a_params)
-                    {
-                        props.Add(p);
-                    }
-
-                    joe.Add(new JProperty("params", props));
-                }
-            }
-
-            string s = JsonConvert.SerializeObject(joe);
-            // serialize json for the request
-            byte[] byteArray = Encoding.UTF8.GetBytes(s);
-            webRequest.ContentLength = byteArray.Length;
-
             try
             {
-                using (Stream dataStream = webRequest.GetRequestStream())
-                {
-                    dataStream.Write(byteArray, 0, byteArray.Length);
-                }
-            }
-            catch (Exception e)
-            {
-                return (JObject) e.Message;
-            }
+                HttpWebRequest webRequest = (HttpWebRequest) WebRequest.Create(Url);
 
-            try
-            {
-                using (WebResponse webResponse = webRequest.GetResponse())
+                webRequest.Credentials = Credentials;
+                webRequest.ContentType = "application/json-rpc";
+                webRequest.Method = "POST";
+
+                JObject joe = new JObject();
+                joe["jsonrpc"] = "1.0";
+                joe["id"] = "1";
+                joe["method"] = a_sMethod;
+
+                if (a_params != null)
                 {
-                    using (Stream str = webResponse.GetResponseStream())
+                    if (a_params.Length > 0)
                     {
-                        using (StreamReader sr = new StreamReader(str))
+                        JArray props = new JArray();
+                        foreach (var p in a_params)
                         {
-                            return JsonConvert.DeserializeObject<JObject>(sr.ReadToEnd());
+                            props.Add(p);
+                        }
+
+                        joe.Add(new JProperty("params", props));
+                    }
+                }
+              
+                string s = JsonConvert.SerializeObject(joe);
+                
+                // serialize json for the request
+                byte[] byteArray = Encoding.UTF8.GetBytes(s);
+                webRequest.ContentLength = byteArray.Length;
+
+                try
+                {
+                    using (Stream dataStream = webRequest.GetRequestStream())
+                    {
+                        dataStream.Write(byteArray, 0, byteArray.Length);
+                    }
+                }
+                catch (Exception e)
+                {
+                    return returnError(e);
+                }
+
+                try
+                {
+                    using (WebResponse webResponse = webRequest.GetResponse())
+                    {
+                        using (Stream str = webResponse.GetResponseStream())
+                        {
+                            using (StreamReader sr = new StreamReader(str))
+                            {
+                                var result = sr.ReadToEnd();
+
+                                var results = JsonConvert.DeserializeObject<JObject>(result);
+
+
+                                if (string.IsNullOrEmpty(results["error"].ToString()))
+                                {
+                                    return new ReturnObject
+                                    {
+                                        Status = Status.StatusCompleted,
+                                        Data = results["result"].ToString(),
+                                    };
+                                }
+                                else
+                                {
+                                    return new ReturnObject
+                                    {
+                                        Status = Status.StatusError,
+                                        Message = results["error"].ToString(),
+                                    };
+                                }
+                            }
                         }
                     }
                 }
+                catch (Exception e)
+                {
+                    return returnError(e);
+                }
             }
             catch (Exception e)
             {
-                return (JObject) e.Message;
+                return returnError(e);
             }
         }
 
         public void BackupWallet(string a_destination)
         {
-            InvokeMethod("backupwallet", a_destination);
-        }
-
-        public string GetAccount(string a_address)
-        {
-            return InvokeMethod("getaccount", a_address)["result"].ToString();
-        }
-
-        public string GetAccountAddress(string a_account)
-        {
-            return InvokeMethod("getaccountaddress", a_account)["result"].ToString();
-        }
-
-        public IEnumerable<string> GetAddressesByAccount(string a_account)
-        {
-            return from o in InvokeMethod("getaddressesbyaccount", a_account)["result"]
-                select o.ToString();
-        }
-
-        public float GetBalance(string a_account = null, int a_minconf = 1)
-        {
-            if (a_account == null)
+            try
             {
-                return (float) InvokeMethod("getbalance")["result"];
+                InvokeMethod("backupwallet", a_destination);
             }
-
-            return (float) InvokeMethod("getbalance", a_account, a_minconf)["result"];
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
-        public string GetBlockByCount(int a_height)
+        /**
+         * Returns the account associated with the given address.
+         */
+        public ReturnObject GetAccount(string a_address)
         {
-            return InvokeMethod("getblockbycount", a_height)["result"].ToString();
+            try
+            {
+                return InvokeMethod("getaccount", a_address);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public int GetBlockNumber()
+        /**
+         * Returns the current bitcoin address for receiving payments to this account. If <account> does not exist, it will be created along with an associated new address that will be returned.
+         */
+        public ReturnObject GetAccountAddress(string a_account)
         {
-            return (int) InvokeMethod("getblocknumber")["result"];
+            try
+            {
+                return InvokeMethod("getaccountaddress", a_account);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public int GetConnectionCount()
+//        public IEnumerable<string> GetAddressesByAccount(string a_account)
+//        {
+//            return from o in InvokeMethod("getaddressesbyaccount", a_account)["result"]
+//                select o.ToString();
+//        }
+
+        /**
+         * If [account] is not specified, returns the server's total available balance.
+           If [account] is specified, returns the balance in the account.
+         */
+        public ReturnObject GetBalance(string a_account = null, int a_minconf = 1)
         {
-            return (int) InvokeMethod("getconnectioncount")["result"];
+            try
+            {
+                if (a_account == null)
+                {
+                    return InvokeMethod("getbalance");
+                }
+
+                return InvokeMethod("getbalance", a_account, a_minconf);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public float GetDifficulty()
+        public ReturnObject GetBlockByCount(int a_height)
         {
-            return (float) InvokeMethod("getdifficulty")["result"];
+            try
+            {
+                return InvokeMethod("getblockbycount", a_height);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public bool GetGenerate()
+        public ReturnObject GetBlockNumber()
         {
-            return (bool) InvokeMethod("getgenerate")["result"];
+            try
+            {
+                return InvokeMethod("getblocknumber");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public float GetHashesPerSec()
+        public ReturnObject GetConnectionCount()
         {
-            return (float) InvokeMethod("gethashespersec")["result"];
+            try
+            {
+                return InvokeMethod("getconnectioncount");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JObject GetInfo()
+        public ReturnObject GetDifficulty()
         {
-            return InvokeMethod("getinfo")["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getdifficulty");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public string GetNewAddress(string a_account = "")
+        public ReturnObject GetGenerate()
         {
-            return InvokeMethod("getnewaddress", a_account)["result"].ToString();
+            try
+            {
+                return InvokeMethod("getgenerate");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public float GetReceivedByAccount(string a_account, int a_minconf = 1)
+        public ReturnObject GetHashesPerSec()
         {
-            return (float) InvokeMethod("getreceivedbyaccount", a_account, a_minconf)["result"];
+            try
+            {
+                return InvokeMethod("gethashespersec");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public float GetReceivedByAddress(string a_address, int a_minconf = 1)
+        public ReturnObject GetInfo()
         {
-            return (float) InvokeMethod("getreceivedbyaddress", a_address, a_minconf)["result"];
+            try
+            {
+                return InvokeMethod("getinfo");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JObject GetTransaction(string a_txid)
+        /**
+         * Returns a new bitcoin address for receiving payments. If [account] is specified payments received with the address will be credited to [account].
+         */
+        public ReturnObject GetNewAddress(string a_account = "")
         {
-            return InvokeMethod("gettransaction", a_txid)["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getnewaddress", a_account);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JObject GetWork()
+        /**
+         * Returns the total amount received by addresses with [account] in transactions with at least [minconf] confirmations. If [account] not provided return will include all transactions to all accounts.
+         */
+        public ReturnObject GetReceivedByAccount(string a_account, int a_minconf = 1)
         {
-            return InvokeMethod("getwork")["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getreceivedbyaccount", a_account, a_minconf);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public bool GetWork(string a_data)
+        /**
+         * Returns the amount received by <bitcoinaddress> in transactions with at least [minconf] confirmations. It correctly handles the case where someone has sent to the address in multiple transactions. Keep in mind that addresses are only ever used for receiving transactions. Works only for addresses in the local wallet, external addresses will always show 0
+         */
+        public ReturnObject GetReceivedByAddress(string a_address, int a_minconf = 1)
         {
-            return (bool) InvokeMethod("getwork", a_data)["result"];
+            try
+            {
+                return InvokeMethod("getreceivedbyaddress", a_address, a_minconf);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public string Help(string a_command = "")
+        /**
+         * Returns an object about the given transaction containing:
+            "amount" : total amount of the transaction
+            "confirmations" : number of confirmations of the transaction
+            "txid" : the transaction ID
+            "time" : time associated with the transaction[1].
+            "details" - An array of objects containing:
+            "account"
+            "address"
+            "category"
+            "amount"
+            "fee"
+         */
+        public ReturnObject GetTransaction(string a_txid)
         {
-            return InvokeMethod("help", a_command)["result"].ToString();
+            try
+            {
+                return InvokeMethod("gettransaction", a_txid);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JObject ListAccounts(int a_minconf = 1)
+        /**
+         * If [data] is not specified, returns formatted hash data to work on:
+            "midstate" : precomputed hash state after hashing the first half of the data
+            "data" : block data
+            "hash1" : formatted hash buffer for second hash
+            "target" : little endian hash target
+           If [data] is specified, tries to solve the block and returns true if it was successful.
+         */
+        public ReturnObject GetWork(string a_data = "")
         {
-            return InvokeMethod("listaccounts", a_minconf)["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getwork", a_data);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JArray ListReceivedByAccount(int a_minconf = 1, bool a_includeEmpty = false)
+        public ReturnObject Help(string a_command = "")
         {
-            return InvokeMethod("listreceivedbyaccount", a_minconf, a_includeEmpty)["result"] as JArray;
+            try
+            {
+                return InvokeMethod("help", a_command);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JArray ListReceivedByAddress(int a_minconf = 1, bool a_includeEmpty = false)
+        /**
+         * Returns Object that has account names as keys, account balances as values.
+         */
+        public ReturnObject ListAccounts(int a_minconf = 1)
         {
-            return InvokeMethod("listreceivedbyaddress", a_minconf, a_includeEmpty)["result"] as JArray;
+            try
+            {
+                return InvokeMethod("listaccounts", a_minconf);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JArray ListTransactions(string a_account, int a_count = 10)
+        /**
+        * Returns an array of objects containing:
+            "account" : the account of the receiving addresses
+            "amount" : total amount received by addresses with this account
+            "confirmations" : number of confirmations of the most recent transaction included
+        */
+        public ReturnObject ListReceivedByAccount(int a_minconf = 1, bool a_includeEmpty = false)
         {
-            return InvokeMethod("listtransactions", a_account, a_count)["result"] as JArray;
+            try
+            {
+                return InvokeMethod("listreceivedbyaccount", a_minconf, a_includeEmpty);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public bool Move(
+        /**
+         * Returns an array of objects containing:
+            "address" : receiving address
+            "account" : the account of the receiving address
+            "amount" : total amount received by the address
+            "confirmations" : number of confirmations of the most recent transaction included
+           To get a list of accounts on the system, execute bitcoind listreceivedbyaddress 0 true
+         */
+        public ReturnObject ListReceivedByAddress(int a_minconf = 1, bool a_includeEmpty = false)
+        {
+            try
+            {
+                return InvokeMethod("listreceivedbyaddress", a_minconf, a_includeEmpty);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        /**
+         * Returns up to [count] most recent transactions skipping the first [from] transactions for account [account]. If [account] not provided it'll return recent transactions from all accounts.
+         */
+        public ReturnObject ListTransactions(string a_account, int a_count = 10)
+        {
+            try
+            {
+                return InvokeMethod("listtransactions", a_account, a_count);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        /**
+         * Move from one account in your wallet to another
+         */
+        public ReturnObject Move(
             string a_fromAccount,
             string a_toAccount,
             float a_amount,
@@ -216,57 +451,143 @@ namespace Vakapay.BitcoinBusiness
             string a_comment = ""
         )
         {
-            return (bool) InvokeMethod(
-                "move",
-                a_fromAccount,
-                a_toAccount,
-                a_amount,
-                a_minconf,
-                a_comment
-            )["result"];
+            try
+            {
+                return InvokeMethod(
+                    "move",
+                    a_fromAccount,
+                    a_toAccount,
+                    a_amount,
+                    a_minconf,
+                    a_comment
+                );
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+        
+        /**
+         * amounts are double-precision floating point numbers
+         */
+        public ReturnObject Sendmany(string fromAccount, JObject mutiAddress, int minconf = 1, string comment = "")
+        {
+            try
+            {
+                return InvokeMethod(
+                    "sendmany",
+                    fromAccount,
+                    mutiAddress,
+                    minconf,
+                    comment
+                  
+                );
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public string SendFrom(string a_fromAccount,
+        /**
+         *  <amount> is a real and is rounded to 8 decimal places. Will send the given amount to the given address, ensuring the account has a valid balance using [minconf] confirmations. Returns the transaction ID if successful (not in JSON object).
+         */
+        public ReturnObject SendFrom(string a_fromAccount,
             string a_toAddress,
             double a_amount,
             int a_minconf = 1,
             string a_comment = "",
             string a_commentTo = "")
         {
-            return InvokeMethod(
-                "sendfrom",
-                a_fromAccount,
-                a_toAddress,
-                a_amount,
-                a_minconf,
-                a_comment,
-                a_commentTo
-            )["result"].ToString();
+            try
+            {
+                return InvokeMethod(
+                    "sendfrom",
+                    a_fromAccount,
+                    a_toAddress,
+                    a_amount,
+                    a_minconf,
+                    a_comment,
+                    a_commentTo
+                );
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public string SendToAddress(string a_address, double a_amount, string a_comment, string a_commentTo)
+        /**
+         *  <amount> is a real and is rounded to 8 decimal places. Returns the transaction ID <txid> if successful.
+         */
+        public ReturnObject SendToAddress(string a_address, double a_amount, string a_comment, string a_commentTo)
         {
-            return InvokeMethod("sendtoaddress", a_address, a_amount, a_comment, a_commentTo)["result"].ToString();
+            try
+            {
+                return InvokeMethod("sendtoaddress", a_address, a_amount, a_comment, a_commentTo);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
+        /**
+         *  Sets the account associated with the given address. Assigning address that is already assigned to the same account will create a new address associated with that account.
+         */
         public void SetAccount(string a_address, string a_account)
         {
-            InvokeMethod("setaccount", a_address, a_account);
+            try
+            {
+                InvokeMethod("setaccount", a_address, a_account);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
+        /**
+         *  <generate> is true or false to turn generation on or off. Generation is limited to [genproclimit] processors, -1 is unlimited.
+         */
         public void SetGenerate(bool a_generate, int a_genproclimit = 1)
         {
-            InvokeMethod("setgenerate", a_generate, a_genproclimit);
+            try
+            {
+                InvokeMethod("setgenerate", a_generate, a_genproclimit);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public void Stop()
         {
-            InvokeMethod("stop");
+            try
+            {
+                InvokeMethod("stop");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
-        public JObject ValidateAddress(string a_address)
+        public ReturnObject ValidateAddress(string a_address)
         {
-            return InvokeMethod("validateaddress", a_address)["result"] as JObject;
+            try
+            {
+                return InvokeMethod("validateaddress", a_address);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         // == Blockchain ==
@@ -274,62 +595,127 @@ namespace Vakapay.BitcoinBusiness
         /**
          * The getbestblockhash RPC returns the header hash of the most recent block on the best block chain.
          */
-        public String getBestBlockHash()
+        public ReturnObject getBestBlockHash()
         {
-            return InvokeMethod("getbestblockhash")["result"].ToString();
+            try
+            {
+                return InvokeMethod("getbestblockhash");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         /**
          * The getblock RPC gets a block with a particular header hash from the local block database either as a JSON object or as a serialized block.
          */
-        public JObject GetBlock(string blockhash)
+        public ReturnObject GetBlock(string blockhash)
         {
-            return InvokeMethod("validateaddress", blockhash)["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getblock", blockhash);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         /**
          * The getblockchaininfo RPC provides information about the current state of the block chain.
          */
-        public JObject GetBlockChainInfo()
+        public ReturnObject GetBlockChainInfo()
         {
-            return InvokeMethod("getblockchaininfo")["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getblockchaininfo");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         /**
          * The getblockcount RPC returns the number of blocks in the local best block chain.
          */
-        public int GetBlockCount()
+        public ReturnObject GetBlockCount()
         {
-            return (int) InvokeMethod("getblockcount")["result"];
+            try
+            {
+                return InvokeMethod("getblockcount");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         /**
          * The getblockhash RPC returns the header hash of a block at the given height in the local best block chain.
          */
-        public String GetBlockHash(int height)
+        public ReturnObject GetBlockHash(int height)
         {
-            return InvokeMethod("getblockhash", height)["result"].ToString();
+            try
+            {
+                return InvokeMethod("getblockhash", height);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         /**
          * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.
          */
-        public JObject getBlockHeader(string hash)
+        public ReturnObject getBlockHeader(string hash)
         {
-            return InvokeMethod("getblockheader", hash)["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getblockheader", hash);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         /**
          * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.(sequentially)
          */
-        public JObject getBlockHeader(string hash, bool isSequentially)
+        public ReturnObject getBlockHeader(string hash, bool isSequentially)
         {
-            return InvokeMethod("getblockheader", hash, isSequentially)["result"] as JObject;
+            try
+            {
+                return InvokeMethod("getblockheader", hash, isSequentially);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
-        public JArray ListWallets()
+        public ReturnObject ListWallets()
         {
-            return InvokeMethod("listwallets")["result"] as JArray;
+            try
+            {
+                return InvokeMethod("listwallets");
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        private ReturnObject returnError(Exception e)
+        {
+            return new ReturnObject
+            {
+                Status = Status.StatusError,
+                Message = e.Message
+            };
         }
     }
 }

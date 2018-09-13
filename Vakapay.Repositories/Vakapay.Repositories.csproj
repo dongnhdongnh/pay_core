@@ -1,20 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Dapper">
-        <Version>1.50.5</Version>
-      </PackageReference>
-      <PackageReference Include="MySql.Data">
-        <Version>8.0.12</Version>
-      </PackageReference>
-    </ItemGroup>
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Dapper">
+      <Version>1.50.5</Version>
+    </PackageReference>
+    <PackageReference Include="MySql.Data">
+      <Version>8.0.12</Version>
+    </PackageReference>
+    <PackageReference Include="NLog">
+      <Version>4.5.9</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c">
+      <HintPath>..\..\..\..\..\..\..\..\home\tienchelsea92\.nuget\packages\nlog\4.5.9\lib\netstandard2.0\NLog.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
