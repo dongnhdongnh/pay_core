@@ -60,27 +60,13 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        BitcoinWithdrawTransaction IRepositoryBase<BitcoinWithdrawTransaction>.FindById(string Id)
+
+        public BitcoinWithdrawTransaction FindById(string Id)
         {
             throw new System.NotImplementedException();
         }
 
-        List<BitcoinWithdrawTransaction> IRepositoryBase<BitcoinWithdrawTransaction>.FindBySql(string sqlString)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public ReturnObject Insert(BitcoinRawTransactionRepository objectInsert)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public BitcoinRawTransactionRepository FindById(string Id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public List<BitcoinRawTransactionRepository> FindBySql(string sqlString)
+        public List<BitcoinWithdrawTransaction> FindBySql(string sqlString)
         {
             throw new System.NotImplementedException();
         }

@@ -182,7 +182,7 @@ namespace Vakapay.BitcoinBusiness
         /// <param name="commentTo"></param>
         public ReturnObject SendFrom(string fromAccount,
             string toAddress,
-            float amount,
+            double amount,
             int minconf = 1,
             string comment = "",
             string commentTo = "")
