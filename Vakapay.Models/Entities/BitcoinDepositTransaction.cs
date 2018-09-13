@@ -8,6 +8,7 @@ namespace Vakapay.Models.Entities
         public string Id { get ; set ; }
         public string Hash { get ; set ; }
         public string BlockNumber { get ; set ; }
+        public string BlockHash { get; set; }
         public string NetworkName { get ; set ; }
         public decimal Amount { get ; set ; }
         public string FromAddress { get ; set ; }

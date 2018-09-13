@@ -10,4 +10,13 @@
       <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="NLog">
+        <Version>4.5.9</Version>
+      </PackageReference>
+      <PackageReference Include="NLog.Config">
+        <Version>4.5.9</Version>
+      </PackageReference>
+    </ItemGroup>
+
 </Project>

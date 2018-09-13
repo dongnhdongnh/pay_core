@@ -64,5 +64,9 @@ namespace Vakapay.Repositories.Mysql
 		{
 			return new VakacoinTransactionHistoryRepository(dbConnection);
 		}
+		public IBitcoinDepositTransactioRepository GetBitcoinDepositTransactioRepository(IDbConnection dbConnection)
+		{
+			return new BitcoinDepositTransactioRepository(dbConnection);
+		}
 	}
 }

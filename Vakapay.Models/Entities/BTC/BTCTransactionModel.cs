@@ -26,12 +26,12 @@ namespace Vakapay.Models.Entities.BTC
 
         [JsonProperty("bip125-replaceable")] public string Bip125Replaceable { get; set; }
 
-        [JsonProperty("details")] public Detail[] Details { get; set; }
+        [JsonProperty("details")] public BTCTransactionDetailModel[] BtcTransactionDetailsModel { get; set; }
 
         [JsonProperty("hex")] public string Hex { get; set; }
     }
 
-    public partial class Detail
+    public partial class BTCTransactionDetailModel
     {
         [JsonProperty("account")] public string Account { get; set; }
 
