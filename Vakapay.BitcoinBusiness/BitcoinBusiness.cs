@@ -219,7 +219,7 @@ namespace Vakapay.BitcoinBusiness
                         FromAddress = "",
                         ToAddress = (string) detail["address"],
                         Fee = (decimal) detail["fee"] * -1,
-                        Status = Status.StatusPending,
+                        Status = Status.StatusCompleted,
                         CreatedAt = time,
                         UpdatedAt = time
                     };
