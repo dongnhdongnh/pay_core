@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
@@ -7,6 +9,12 @@ using Vakapay.Cryptography;
 using VakaSharp;
 using VakaSharp.Api.v1;
 using Action=VakaSharp.Api.v1.Action;
+using VakacoinCore;
+using VakacoinCore.ActionArgs;
+using VakacoinCore.Response.API;
+using VakacoinCore.Utilities;
+using Action=VakacoinCore.Params.Action;
+
 
 namespace Vakapay.VakacoinBusiness
 {
@@ -182,6 +190,36 @@ namespace Vakapay.VakacoinBusiness
                     Status = Status.StatusError,
                     Message = e.Message
                 };
+            }
+        }
+
+        public string GetHeadBlockNumber()
+        {
+            var info = ChainApiObj.GetInfo();
+            return info.head_block_num.ToString();
+        }
+
+        public ArrayList GetAllTransactionsInBlock(string blockNumber)
+        {
+            try
+            {
+                var block = ChainApiObj.GetBlock(blockNumber);
+                List<Transaction> transactions = block.transactions;
+                ArrayList jsonTrxs = new ArrayList();
+                foreach (var transaction in transactions)
+                {
+                    if (JsonHelper.IsValidJson(transaction.trx.ToString())) //true if transaction.trx is json format
+                    {
+                        var json = transaction.trx;
+                        jsonTrxs.Add(json);
+                    }
+                }
+                return jsonTrxs;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }

@@ -28,4 +28,34 @@ public class JsonHelper
 
 namespace Vakapay.Commons.Helpers
 {
+       // public static string SerializeObject(Object obj)
+        public static string SerializeObject(Object obj)
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+        }
+
+        public static bool IsValidJson(string strInput)
+        {
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+                (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
+            {
+                try
+                {
+                    var obj = JToken.Parse(strInput);
+                    return true;
+                }
+                catch (Exception ex) //some other exception
+                {
+                    Console.WriteLine(ex.ToString());
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+    }
 }

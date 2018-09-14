@@ -43,7 +43,7 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public ReturnObject CreateTransactionHistory(string from, string to, decimal amount, DateTime transactionTime, string status)
+        public ReturnObject CreateTransactionHistory(string from, string to, decimal amount, string transactionTime, string status)
         {
             try
             {

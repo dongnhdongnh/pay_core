@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
+using Vakapay.VakacoinBusiness;
 
 namespace Vakapay.TestWallet
 {
-    using VakacoinBusiness;
     class Program
     {
         
@@ -18,35 +20,52 @@ namespace Vakapay.TestWallet
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                    ConnectionString = "server=localhost;userid=root;password=Abcd@1234;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
                 };
 
                 var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
+                var vakacoinBusiness = new VakacoinBusiness.VakacoinBusiness(PersistenceFactory);
+                
+                VakacoinRpc rpc = new VakacoinRpc("http://api.eosnewyork.io");
+
+//                foreach (var VARIABLE in rpc.GetAllTransactionsInBlock("16302351"))
+//                {
+//                    Console.WriteLine(VARIABLE.ToString());
+//                }
+//                var result = vakacoinBusiness.CreateTransactionHistory();
+                
+                
 
                 var WalletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
 
-                var user = new User
+                var walletLst = WalletBusiness.GetAllWallet();
+
+                foreach (var VARIABLE in walletLst)
                 {
-                    Id = CommonHelper.GenerateUuid(),
+                    Console.WriteLine(JsonHelper.SerializeObject(VARIABLE));
+                }
+                
+//                var user = new User
+//                {
+//                    Id = CommonHelper.GenerateUuid(),
+//                };
+//                var blockChainNetwork = new BlockchainNetwork
+//                {
+//                    Name = "Ethereum",
+//                    Status = Status.StatusActive,
+//                    Sysbol = "ETH",
+//                    Id = CommonHelper.GenerateUuid()
+//                };
+//
+//                var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
 
-                };
-                var blockChainNetwork = new BlockchainNetwork
-                {
-                    Name = "Ethereum",
-                    Status = Status.StatusActive,
-                    Sysbol = "ETH",
-                    Id = CommonHelper.GenerateUuid()
-                };
-
-                var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
-
-                Console.WriteLine(JsonHelper.SerializeObject(result).ToString());
+//                Console.WriteLine(JsonHelper.SerializeObject(walletLst));
  
             }
             catch (Exception e)
             {
-                throw e;
+                Console.WriteLine(e);
             }
             
         }

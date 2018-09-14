@@ -129,5 +129,32 @@ namespace Vakapay.WalletBusiness
              */
             return null;
         }
+
+        public ReturnObject UpdateBalance(string toAddress, string addedBlance)
+        {
+            return new ReturnObject
+            {
+                Status = "Success",
+                Message = ""
+            };
+        }
+
+        public List<Wallet> GetAllWallet()
+        {
+            try
+            {
+                if(ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                
+                var result = walletRepository.FindBySql("");
+                return result;
+            }
+            catch(Exception e)
+            {
+                throw e;
+
+            }
+        }
     }
 }
