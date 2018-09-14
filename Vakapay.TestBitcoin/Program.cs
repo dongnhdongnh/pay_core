@@ -1,6 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -49,8 +50,16 @@ namespace Vakapay.TestBitcoin
                 //sendtoaddress
                 var bitcoinraw = new BitcoinWithdrawTransaction
                 {
+                    Id = CommonHelper.GenerateUuid(),
+                    Hash = "",
+                    BlockNumber = "",
+                    BlockHash = "",
+                    NetworkName = "Bitcoin",
+                    Amount = 1,
+                    FromAddress = "",
                     ToAddress = "n1noYY4HBM38MxHN7cxir1fxtq2XjAprWi",
-                    Amount = 2
+                    Fee = 0,
+                    Status = Status.StatusPending,
                 };
                 var send1 = bitcoinRpc.SendTransaction(bitcoinraw);
                 Console.WriteLine(JsonHelper.SerializeObject(send1).ToString());
