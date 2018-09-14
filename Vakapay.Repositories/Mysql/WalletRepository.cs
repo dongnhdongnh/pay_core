@@ -71,16 +71,16 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
+    
+        
         public List<Wallet> FindBySql(string sqlString)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-               
-
-                var result = Connection.Query<Wallet>(sqlString);
                 
+                var result = Connection.Query<Wallet>(sqlString);
                 
                 return  result.ToList();
             }
@@ -92,7 +92,25 @@ namespace Vakapay.Repositories.Mysql
 
         public ReturnObject UpdateBalanceWallet(decimal amount, string Id, int version)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                string sQuery = "UPDATE wallet SET Balance = Balance + @AMOUNT WHERE Id = @ID AND Version = @VERSION";
+                
+                var result = Connection.Query(sQuery, new {ID = Id, VERSION = version, AMOUNT = amount});
+                
+                var status = !String.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+                };
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }
