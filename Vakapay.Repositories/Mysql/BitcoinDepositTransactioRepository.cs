@@ -58,7 +58,23 @@ namespace Vakapay.Repositories.Mysql
 
         public ReturnObject Delete(string Id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var result = Connection.Delete(new BitcoinDepositTransaction {Id = Id});
+                var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
+                };
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public ReturnObject Insert(BitcoinDepositTransaction objectInsert)
@@ -91,9 +107,24 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        BitcoinDepositTransaction IRepositoryBase<BitcoinDepositTransaction>.FindById(string Id)
+        public BitcoinDepositTransaction FindById(string Id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                string sQuery = "SELECT * FROM bitcoindeposittransaction WHERE Id = @ID";
+
+                var result = Connection.QuerySingleOrDefault<BitcoinDepositTransaction>(sQuery, new {ID = Id});
+
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public List<BitcoinDepositTransaction> FindBySql(string sqlString)

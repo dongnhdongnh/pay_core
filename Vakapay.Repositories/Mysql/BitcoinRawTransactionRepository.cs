@@ -27,11 +27,6 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        public ReturnObject Update(BitcoinRawTransactionRepository objectUpdate)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public ReturnObject Update(BitcoinWithdrawTransaction objectUpdate)
         {
             try
@@ -63,7 +58,23 @@ namespace Vakapay.Repositories.Mysql
 
         public ReturnObject Delete(string Id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var result = Connection.Delete(new BitcoinWithdrawTransaction {Id = Id});
+                var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
+                };
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public ReturnObject Insert(BitcoinWithdrawTransaction objectInsert)
@@ -92,7 +103,22 @@ namespace Vakapay.Repositories.Mysql
 
         public BitcoinWithdrawTransaction FindById(string Id)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                string sQuery = "SELECT * FROM bitcoinwithdrawtransaction WHERE Id = @ID";
+
+                var result = Connection.QuerySingleOrDefault<BitcoinWithdrawTransaction>(sQuery, new {ID = Id});
+
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public List<BitcoinWithdrawTransaction> FindBySql(string sqlString)

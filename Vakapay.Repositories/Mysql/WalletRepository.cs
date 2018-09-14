@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Security;
 using Dapper;
 using Vakapay.Models.Domains;
@@ -70,14 +71,46 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
+    
+        
         public List<Wallet> FindBySql(string sqlString)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                
+                var result = Connection.Query<Wallet>(sqlString);
+                
+                return  result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public ReturnObject UpdateBalanceWallet(decimal amount, string Id, int version)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                string sQuery = "UPDATE wallet SET Balance = Balance + @AMOUNT WHERE Id = @ID AND Version = @VERSION";
+                
+                var result = Connection.Query(sQuery, new {ID = Id, VERSION = version, AMOUNT = amount});
+                
+                var status = !String.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+                };
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
     }
 }

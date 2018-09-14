@@ -234,7 +234,7 @@ namespace Vakapay.BitcoinNotifi
                         FromAddress = transactionModelDetail.Account,
                         ToAddress = transactionModelDetail.Address,
                         Fee = 0,
-                        Status = Status.StatusPending,
+                        Status = Status.StatusCompleted,
                         CreatedAt = currentTime,
                         UpdatedAt = currentTime
                     };

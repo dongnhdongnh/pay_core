@@ -70,6 +70,7 @@ namespace Vakapay.VakacoinBusiness.Test
 			Assert.IsTrue(block > 0);
 		}
 
+	
 
 	}
 }

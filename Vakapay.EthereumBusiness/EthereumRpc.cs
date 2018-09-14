@@ -31,7 +31,7 @@ namespace Vakapay.EthereumBusiness
 		{
 			try
 			{
-				Console.WriteLine("=====================" + RpcName + "=======================");
+				//Console.WriteLine("=====================" + RpcName + "=======================");
 				// Set a default policy level for the "http:" and "https" schemes.
 				HttpRequestCachePolicy policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
 				HttpWebRequest.DefaultCachePolicy = policy;
@@ -54,19 +54,19 @@ namespace Vakapay.EthereumBusiness
 				using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
 				{
 					string json = _sender.GetJSon();
-					Console.WriteLine(json);
+					//Console.WriteLine(json);
 					streamWriter.Write(json);
 					streamWriter.Flush();
 					streamWriter.Close();
 				}
 				//Console.WriteLine("FROM CACHE:" + httpWebRequest.GetResponse().IsFromCache);
 				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-				Console.WriteLine("IsFromCache? {0}", httpResponse.IsFromCache);
+				//Console.WriteLine("IsFromCache? {0}", httpResponse.IsFromCache);
 				using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
 				{
 					var result = streamReader.ReadToEnd();
 					//EthRPCJson.Getter _getter = new EthRPCJson.Getter(result);
-					Console.WriteLine(result);
+					//Console.WriteLine(result);
 					//Console.WriteLine("FROM CACHE:" + httpWebRequest.GetResponse().IsFromCache);
 					return new ReturnObject
 					{
