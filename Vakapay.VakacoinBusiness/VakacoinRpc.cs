@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
@@ -18,6 +19,7 @@ namespace Vakapay.VakacoinBusiness
         private const string SystemTokenContract = "vaka.token";
         private const string ActivePermission = "active";
         private const string TransferAction = "transfer";
+        private VakaApi defaultApi;
 
         public VakacoinRpc(string endPointUrl, string chainId = null)
         {
@@ -29,7 +31,7 @@ namespace Vakapay.VakacoinBusiness
                 {
                     HttpEndpoint = EndPointUrl,
                 };
-                var defaultApi = new VakaApi(vakaConfig);
+                defaultApi = new VakaApi(vakaConfig);
 
                 var getInfoResult = defaultApi.GetInfo().Result;
                 chainId = getInfoResult.ChainId;
@@ -182,6 +184,36 @@ namespace Vakapay.VakacoinBusiness
                     Status = Status.StatusError,
                     Message = e.Message
                 };
+            }
+        }
+
+        public string GetHeadBlockNumber()
+        {
+            var info = defaultApi.GetInfo().Result;
+            return info.HeadBlockNum.ToString();
+        }
+
+        public ArrayList GetAllTransactionsInBlock(string blockNumber)
+        {
+            try
+            {
+                var block = defaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber}).Result;
+                List<TransactionReceipt> transactions = block.Transactions;
+                ArrayList jsonTrxs = new ArrayList();
+                foreach (var transaction in transactions)
+                {
+                    if (JsonHelper.IsValidJson(transaction.Trx.ToString())) //true if transaction.trx is json format
+                    {
+                        var json = transaction.Trx;
+                        jsonTrxs.Add(json);
+                    }
+                }
+                return jsonTrxs;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }

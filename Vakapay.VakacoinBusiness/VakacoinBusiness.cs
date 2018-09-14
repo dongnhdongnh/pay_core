@@ -43,7 +43,7 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public ReturnObject CreateTransactionHistory(string from, string to, decimal amount, DateTime transactionTime, int status)
+        public ReturnObject CreateTransactionHistory(string from, string to, decimal amount, string transactionTime, string status)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace Vakapay.VakacoinBusiness
                     To = to,
                     Amount = amount,
                     TransactionTime = transactionTime,
-                    CreatedTime =  DateTime.UtcNow.Date,
+                    CreatedTime =  DateTime.UtcNow,
                     status = status
                 };
                 var vakacoinRepo = VakapayRepositoryFactory.GetVakacoinTransactionHistoryRepository(DbConnection);

@@ -71,17 +71,13 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-    
-        
         public List<Wallet> FindBySql(string sqlString)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-                
-                var result = Connection.Query<Wallet>(sqlString);
-                
+                var result = Connection.Query<Wallet>(sqlString);                
                 return  result.ToList();
             }
             catch (Exception e)

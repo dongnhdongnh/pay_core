@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 public class JsonHelper
 {
@@ -22,10 +23,29 @@ public class JsonHelper
         DateParseHandling = DateParseHandling.None,
         Converters = {
             new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-        },
+        }
     };
-}
+    public static bool IsValidJson(string strInput)
+    {
+        strInput = strInput.Trim();
+        if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+            (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
+        {
+            try
+            {
+                var obj = JToken.Parse(strInput);
+                return true;
+            }
+            catch (Exception ex) //some other exception
+            {
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
 
-namespace Vakapay.Commons.Helpers
-{
+    }
 }

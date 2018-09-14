@@ -10,8 +10,8 @@ namespace Vakapay.Models.Entities
         public string From { get; set; }
         public string To { get; set; }
         public Decimal Amount { get; set; }
-        public DateTime TransactionTime { get; set; }
+        public string TransactionTime { get; set; }
         public DateTime CreatedTime { get; set; }
-        public int status { get; set; }
+        public string status { get; set; }
     }
 }
