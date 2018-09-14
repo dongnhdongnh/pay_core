@@ -13,27 +13,27 @@ namespace Vakapay.VakacoinBusiness
 {
     public class VakacoinRpc
     {
-        private string EndPointUrl { get; set; }
-        private string ChainID { get; set; }
+        private string EndPointUrl { get; }
+        private string ChainID { get; }
         private const string CoreSymbol = "VAKA";
         private const string SystemTokenContract = "vaka.token";
         private const string ActivePermission = "active";
         private const string TransferAction = "transfer";
-        private VakaApi defaultApi;
+        private VakaApi DefaultApi { get; }
 
         public VakacoinRpc(string endPointUrl, string chainId = null)
         {
             EndPointUrl = endPointUrl;
-          
+
+            var vakaConfig = new VakaConfigurator()
+            {
+                HttpEndpoint = EndPointUrl,
+            };
+            DefaultApi = new VakaApi(vakaConfig);
+            
             if (string.IsNullOrEmpty(chainId))
             {
-                var vakaConfig = new VakaConfigurator()
-                {
-                    HttpEndpoint = EndPointUrl,
-                };
-                defaultApi = new VakaApi(vakaConfig);
-
-                var getInfoResult = defaultApi.GetInfo().Result;
+                var getInfoResult = DefaultApi.GetInfo().Result;
                 chainId = getInfoResult.ChainId;
             }
             
@@ -78,6 +78,22 @@ namespace Vakapay.VakacoinBusiness
                     accountName = CommonHelper.RandomAccountNameVakacoin();
                 } while (CheckAccountExist(accountName) == true);
 
+                return CreateAccount(accountName);
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
+        public ReturnObject CreateAccount(string accountName)
+        {
+            try
+            {
                 var keyPair = KeyManager.GenerateKeyPair();
 
                 // start CreateTransaction
@@ -85,42 +101,47 @@ namespace Vakapay.VakacoinBusiness
                 {
                     HttpEndpoint = EndPointUrl,
                 };
-                
+
                 var vaka = new Vaka(vakaConfig);
 
-                var result = vaka.CreateTransaction( new Transaction()
+                var result = vaka.CreateTransaction(new Transaction()
                 {
                     Actions = new List<Action>()
                     {
                         new Action()
                         {
                             Account = "vaka",
-                            Authorization = new List<PermissionLevel>(){},
+                            Authorization = new List<PermissionLevel>() { },
                             Name = "newaccountx",
-                            Data = new {
+                            Data = new
+                            {
                                 name = accountName,
-                                owner = new {
+                                owner = new
+                                {
                                     threshold = 1,
-                                    keys = new List<object>() {
-                                        new { key = keyPair.PublicKey, weight = 1}
+                                    keys = new List<object>()
+                                    {
+                                        new {key = keyPair.PublicKey, weight = 1}
                                     },
-                                    accounts =  new List<object>(),
-                                    waits =  new List<object>()
+                                    accounts = new List<object>(),
+                                    waits = new List<object>()
                                 },
-                                active = new {
+                                active = new
+                                {
                                     threshold = 1,
-                                    keys = new List<object>() {
-                                        new { key = keyPair.PublicKey, weight = 1}
+                                    keys = new List<object>()
+                                    {
+                                        new {key = keyPair.PublicKey, weight = 1}
                                     },
-                                    accounts =  new List<object>(),
-                                    waits =  new List<object>()
+                                    accounts = new List<object>(),
+                                    waits = new List<object>()
                                 }
                             }
                         }
                     }
                 }).Result;
 
-                
+
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
@@ -186,10 +207,36 @@ namespace Vakapay.VakacoinBusiness
                 };
             }
         }
+        
+        public ReturnObject GetCurrencyBalance(string username)
+        {
+            try
+            {
+                var result = DefaultApi.GetCurrencyBalance(new GetCurrencyBalanceRequest()
+                {
+                    Code = SystemTokenContract,
+                    Account = username,
+                    Symbol = "VAKA"
+                }).Result;
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = result.Assets[0]
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
 
         public string GetHeadBlockNumber()
         {
-            var info = defaultApi.GetInfo().Result;
+            var info = DefaultApi.GetInfo().Result;
             return info.HeadBlockNum.ToString();
         }
 
@@ -197,7 +244,7 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-                var block = defaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber}).Result;
+                var block = DefaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber}).Result;
                 List<TransactionReceipt> transactions = block.Transactions;
                 ArrayList jsonTrxs = new ArrayList();
                 foreach (var transaction in transactions)

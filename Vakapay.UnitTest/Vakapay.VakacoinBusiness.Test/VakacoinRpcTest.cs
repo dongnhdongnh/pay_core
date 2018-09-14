@@ -39,12 +39,34 @@ namespace Vakapay.VakacoinBusiness.Test
                 memo, privatekey).Status);
         }
 
-        [Test]
-        public void CreateRandomAccountTest()
+        [TestCase( Status.StatusError , "useraaaaaaaa")]
+        [TestCase( Status.StatusError , "useraaaaaaa9")]
+        [TestCase( Status.StatusError , "userx")]
+        public void CreateAccount(string status, string username)
         {
-            _rpc.CreateRandomAccount();
+            Assert.AreEqual( status, _rpc.CreateAccount(username).Status);
+        }
+
+        [Test]
+        public void CreateRandomAccount()
+        {
+            Assert.AreEqual( Status.StatusSuccess, _rpc.CreateRandomAccount().Status);
         }
         
+        [TestCase( Status.StatusSuccess , "producer111a", "10.0000 VAKA", true)]
+        [TestCase( Status.StatusSuccess , "producer111a", "1.0000 VAKA", false)]
+        [TestCase( Status.StatusError , "vaka.n.exist", "10.0000 VAKA", false)]
+        public void GetCurrencyBalance(string status, string username, string amount, bool equal)
+        {
+            if (status == Status.StatusSuccess)
+            {
+                Assert.AreEqual(equal, amount == _rpc.GetCurrencyBalance(username).Data);
+            }
+            else
+            {
+                Assert.AreEqual( status, _rpc.GetCurrencyBalance(username).Status);
+            }
+        }
         
     }
 }
