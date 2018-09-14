@@ -3,7 +3,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-	public interface IEthereumWithdrawnTransactionRepository : IRepositoryBase<EthereumWithdrawTransaction>
+	public interface IEthereumWithdrawTransactionRepository : IRepositoryBase<EthereumWithdrawTransaction>
 	{
 	}
 }

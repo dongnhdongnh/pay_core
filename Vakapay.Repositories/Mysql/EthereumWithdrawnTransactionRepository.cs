@@ -11,7 +11,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawnTransactionRepository
+	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
 	{
 		public EthereumWithdrawnTransactionRepository(string connectionString) : base(connectionString)
 		{
@@ -73,7 +73,26 @@ namespace Vakapay.Repositories.Mysql
 
 		public ReturnObject Update(EthereumWithdrawTransaction objectUpdate)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.Update<EthereumWithdrawTransaction>(objectUpdate);
+				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+				return new ReturnObject
+				{
+					Status = status,
+					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
+				};
+			}
+			catch (Exception e)
+			{
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
 		}
 	}
 }

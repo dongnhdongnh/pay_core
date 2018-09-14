@@ -9,6 +9,7 @@ namespace Vakapay.EthereumBusiness
 {
 	using BlockchainBusiness;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Vakapay.Models.Entities.ETH;
 
 	public class EthereumBusiness : BlockchainBusiness
@@ -28,7 +29,7 @@ namespace Vakapay.EthereumBusiness
 				if (_rpcResult.Status == Status.StatusError)
 					return _rpcResult;
 				EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
-				var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
+				var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
 				blockchainTransaction.Id = CommonHelper.GenerateUuid();
 				blockchainTransaction.Hash = (String)_getter.result;
 				blockchainTransaction.Status = Status.StatusPending;
@@ -98,10 +99,13 @@ namespace Vakapay.EthereumBusiness
 
 		public int ScanBlock()
 		{
-
+			int LastBlock = -1;
+			int.TryParse(CacheHelper.GetCacheString(CacheHelper.CacheKey.KEY_ETH_LASTSCANBLOCK), out LastBlock);
+			if (LastBlock < 0)
+				LastBlock = 0;
 
 			String _query = String.Format("SELECT * FROM vakapay.ethereumwithdrawtransaction Where Status='{0}'", Status.StatusPending);
-			var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
+			var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
 			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(_query);
 			if (_pending.Count <= 0)
 			{
@@ -122,7 +126,8 @@ namespace Vakapay.EthereumBusiness
 
 
 			List<EthRPCJson.BlockInfor> blocks = new List<EthRPCJson.BlockInfor>();
-			for (int i = blockNumber - 1000; i <= blockNumber; i++)
+			Console.WriteLine("SCAN FROM " + LastBlock + "___" + blockNumber);
+			for (int i = LastBlock; i <= blockNumber; i++)
 			{
 				if (i < 0) continue;
 				_result = ethereumRpc.FindBlockByNumber(i);
@@ -138,6 +143,37 @@ namespace Vakapay.EthereumBusiness
 				}
 				//	Console.WriteLine(JsonHelper.SerializeObject(_getter.result));
 			}
+			CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_ETH_LASTSCANBLOCK, blockNumber.ToString());
+			if (blocks.Count <= 0)
+			{
+				Console.WriteLine("NO BLOCK");
+				return 0;
+			}
+			//check pending and update:
+			var ethereumWithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+			foreach (EthRPCJson.BlockInfor _block in blocks)
+			{
+				if (_pending.Count <= 0)
+				{
+					//SCAN DONE:
+					return 0;
+				}
+				for (int i = _pending.Count - 1; i >= 0; i--)
+				{
+					EthereumWithdrawTransaction _currentPending = _pending[i];
+					EthRPCJson.TransactionInfor _trans = _block.transactions.Single(x => x.blockHash == _currentPending.Hash);
+					if (_trans != null)
+					{
+						_currentPending.BlockNumber = _trans.blockNumber;
+						_currentPending.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+						_currentPending.Status = Status.StatusCompleted;
+						ethereumWithdrawRepo.Update(_currentPending);
+						_pending.RemoveAt(i);
+					}
+
+				}
+			}
+
 
 			Console.WriteLine(blocks.Count);
 			return blocks.Count;
