@@ -10,6 +10,7 @@ namespace Vakapay.EthereumBusiness
 	using BlockchainBusiness;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Threading;
 	using Vakapay.Models.Entities.ETH;
 
 	public class EthereumBusiness : BlockchainBusiness
@@ -97,12 +98,53 @@ namespace Vakapay.EthereumBusiness
 
 		}
 
+		bool isScanning = false;
+		public void AutoScanBlock()
+		{
+			Thread scanThread = new Thread(DoAutoScanBlock);
+			scanThread.Start();
+
+
+		}
+		void DoAutoScanBlock()
+		{
+			while (true)
+
+			{
+
+				Console.WriteLine("is scan=" + isScanning);
+				if (!isScanning)
+					ScanBlock();
+				Thread.Sleep(5000);
+
+			}
+		}
+
 		public int ScanBlock()
 		{
+			Console.WriteLine("START NEW SCAN");
+			isScanning = true;
+			long _time = CommonHelper.GetUnixTimestamp();
 			int LastBlock = -1;
 			int.TryParse(CacheHelper.GetCacheString(CacheHelper.CacheKey.KEY_ETH_LASTSCANBLOCK), out LastBlock);
 			if (LastBlock < 0)
 				LastBlock = 0;
+
+			int blockNumber = 0;
+			var _result = ethereumRpc.GetBlockNumber();
+			if (_result.Status == Status.StatusError)
+			{
+				isScanning = false;
+				return 0;
+			}
+			EthRPCJson.Getter _getter = new EthRPCJson.Getter(_result.Data);
+			if (!_getter.result.ToString().HexToInt(out blockNumber))
+			{
+				isScanning = false;
+				return 0;
+			}
+			Console.WriteLine("block number " + blockNumber);
+
 
 			String _query = String.Format("SELECT * FROM vakapay.ethereumwithdrawtransaction Where Status='{0}'", Status.StatusPending);
 			var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
@@ -110,18 +152,12 @@ namespace Vakapay.EthereumBusiness
 			if (_pending.Count <= 0)
 			{
 				Console.WriteLine("No pending");
+				isScanning = false;
 				return 0;
 			}
 
 
-			int blockNumber = 0;
-			var _result = ethereumRpc.GetBlockNumber();
-			if (_result.Status == Status.StatusError)
-				return 0;
-			EthRPCJson.Getter _getter = new EthRPCJson.Getter(_result.Data);
-			if (!_getter.result.ToString().HexToInt(out blockNumber))
-				return 0;
-			Console.WriteLine("block number " + blockNumber);
+
 
 
 
@@ -132,7 +168,10 @@ namespace Vakapay.EthereumBusiness
 				if (i < 0) continue;
 				_result = ethereumRpc.FindBlockByNumber(i);
 				if (_result.Status == Status.StatusError)
+				{
+					isScanning = false;
 					return 0;
+				}
 				if (_result.Data == null)
 					continue;
 				_getter = new EthRPCJson.Getter(_result.Data);
@@ -147,6 +186,7 @@ namespace Vakapay.EthereumBusiness
 			if (blocks.Count <= 0)
 			{
 				Console.WriteLine("NO BLOCK");
+				isScanning = false;
 				return 0;
 			}
 			//check pending and update:
@@ -156,14 +196,16 @@ namespace Vakapay.EthereumBusiness
 				if (_pending.Count <= 0)
 				{
 					//SCAN DONE:
+					isScanning = false;
 					return 0;
 				}
 				for (int i = _pending.Count - 1; i >= 0; i--)
 				{
 					EthereumWithdrawTransaction _currentPending = _pending[i];
-					EthRPCJson.TransactionInfor _trans = _block.transactions.Single(x => x.blockHash == _currentPending.Hash);
+					EthRPCJson.TransactionInfor _trans = _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
 					if (_trans != null)
 					{
+						Console.WriteLine("HELLO " + _currentPending.Hash);
 						_currentPending.BlockNumber = _trans.blockNumber;
 						_currentPending.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
 						_currentPending.Status = Status.StatusCompleted;
@@ -174,8 +216,9 @@ namespace Vakapay.EthereumBusiness
 				}
 			}
 
-
-			Console.WriteLine(blocks.Count);
+			_time = CommonHelper.GetUnixTimestamp() - _time;
+			Console.WriteLine(blocks.Count + ",Time=" + _time);
+			isScanning = false;
 			return blocks.Count;
 
 		}
