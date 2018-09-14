@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
+using Newtonsoft.Json.Linq;
 using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -114,6 +115,33 @@ namespace Vakapay.Repositories.Mysql
 
 
                 return result;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public List<BitcoinWithdrawTransaction> FindWhere(BitcoinWithdrawTransaction rawtransaction)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+
+                string sQuery = "SELECT * FROM bitcoinwithdrawtransaction WHERE 1 = 1";
+
+
+                if (!string.IsNullOrEmpty(rawtransaction.Hash))
+                    sQuery += " AND Hash" + "='" + rawtransaction.Hash + "'";
+
+                if (!string.IsNullOrEmpty(rawtransaction.ToAddress))
+                    sQuery += " AND ToAddress" + "='" + rawtransaction.ToAddress + "'";
+
+
+                var result = Connection.Query<BitcoinWithdrawTransaction>(sQuery);
+                return result.ToList();
             }
             catch (Exception e)
             {

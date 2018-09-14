@@ -63,9 +63,12 @@ namespace Vakapay.BitcoinNotifi
         {
             try
             {
-                List<BitcoinDepositTransaction> listBtcDepositTransactions = btcDepositTransactionRepository.FindBySql(
-                    "SELECT * FROM bitcoindeposittransaction WHERE Hash = '" +
-                    transactionId + "' and ToAddress = '" + address + "'");
+                List<BitcoinDepositTransaction> listBtcDepositTransactions = btcDepositTransactionRepository.FindWhere(
+                    new BitcoinDepositTransaction()
+                    {
+                        Hash = transactionId,
+                        ToAddress = address
+                    });
                 logger.Debug("GetDepositTransaction from DB: " + listBtcDepositTransactions.Count);
                 if (listBtcDepositTransactions.Count > 0)
                 {
@@ -188,9 +191,11 @@ namespace Vakapay.BitcoinNotifi
             try
             {
                 List<BitcoinWithdrawTransaction> listBtcRawTransactions =
-                    bitcoinRawTransactionRepository.FindBySql(
-                        "SELECT * FROM bitcoinwithdrawtransaction WHERE Hash = '" +
-                        transactionId + "' and ToAddress = '" + address + "'");
+                    bitcoinRawTransactionRepository.FindWhere(new BitcoinWithdrawTransaction
+                    {
+                        Hash = transactionId,
+                        ToAddress = address
+                    });
                 logger.Debug("GetBtcWithdrawTransaction from DB: " + listBtcRawTransactions.Count);
                 if (listBtcRawTransactions.Count > 0)
                 {

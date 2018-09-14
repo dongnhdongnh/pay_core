@@ -106,7 +106,34 @@ namespace Vakapay.Repositories.Mysql
                 };
             }
         }
+        
+        public List<BitcoinDepositTransaction> FindWhere(BitcoinDepositTransaction rawtransaction)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
 
+
+                string sQuery = "SELECT * FROM bitcoindeposittransaction WHERE 1 = 1";
+
+
+                if (!string.IsNullOrEmpty(rawtransaction.Hash))
+                    sQuery += " AND Hash" + "='" + rawtransaction.Hash + "'";
+
+                if (!string.IsNullOrEmpty(rawtransaction.ToAddress))
+                    sQuery += " AND ToAddress" + "='" + rawtransaction.ToAddress + "'";
+
+
+                var result = Connection.Query<BitcoinDepositTransaction>(sQuery);
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        
         public BitcoinDepositTransaction FindById(string Id)
         {
             try
