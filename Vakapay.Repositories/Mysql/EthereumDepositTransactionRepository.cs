@@ -11,19 +11,13 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
+	public class EthereumDepositTransactionRepository : MysqlBaseConnection, IEthereumDepositTransactionRepository
 	{
-
-		public string Query_Search(string SearchName, string SearchData)
-		{
-			return String.Format("SELECT * FROM vakapay.ethereumwithdrawtransaction Where {0}='{1}'", SearchName, SearchData);
-		}
-
-		public EthereumWithdrawnTransactionRepository(string connectionString) : base(connectionString)
+		public EthereumDepositTransactionRepository(string connectionString) : base(connectionString)
 		{
 		}
 
-		public EthereumWithdrawnTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
+		public EthereumDepositTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
 		{
 		}
 
@@ -32,18 +26,18 @@ namespace Vakapay.Repositories.Mysql
 			throw new NotImplementedException();
 		}
 
-		public EthereumWithdrawTransaction FindById(string Id)
+		public EthereumDepositTransaction FindById(string Id)
 		{
 			throw new NotImplementedException();
 		}
 
-		public List<EthereumWithdrawTransaction> FindBySql(string sqlString)
+		public List<EthereumDepositTransaction> FindBySql(string sqlString)
 		{
 			try
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList();
+				var result = Connection.Query<EthereumDepositTransaction>(sqlString).ToList();
 
 				return result;
 			}
@@ -53,13 +47,13 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public ReturnObject Insert(EthereumWithdrawTransaction objectInsert)
+		public ReturnObject Insert(EthereumDepositTransaction objectInsert)
 		{
 			try
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				var result = Connection.InsertTask<string, EthereumWithdrawTransaction>(objectInsert);
+				var result = Connection.InsertTask<string, EthereumDepositTransaction>(objectInsert);
 				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
 				return new ReturnObject
 				{
@@ -77,13 +71,13 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public ReturnObject Update(EthereumWithdrawTransaction objectUpdate)
+		public ReturnObject Update(EthereumDepositTransaction objectUpdate)
 		{
 			try
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				var result = Connection.Update<EthereumWithdrawTransaction>(objectUpdate);
+				var result = Connection.Update<EthereumDepositTransaction>(objectUpdate);
 				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
 				return new ReturnObject
 				{

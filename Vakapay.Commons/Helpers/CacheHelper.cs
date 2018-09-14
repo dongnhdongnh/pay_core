@@ -40,8 +40,10 @@ namespace Vakapay.Commons.Helpers
 		}
 		public static String GetCacheString(String key)
 		{
+
 			return CacheDatabase.StringGet(key);
 		}
+
 
 		public class CacheKey
 		{
