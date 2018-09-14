@@ -6,15 +6,15 @@ namespace Vakapay.BlockchainBusiness
 {
     public abstract class BlockchainBusiness
     {
-        protected readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
+        protected readonly IVakapayRepositoryFactory VakapayRepositoryFactory;
         protected  IDbConnection DbConnection { get; set; }
         
         public BlockchainBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
         {
-            vakapayRepositoryFactory = _vakapayRepositoryFactory;
+            VakapayRepositoryFactory = _vakapayRepositoryFactory;
             DbConnection = isNewConnection
-                ? vakapayRepositoryFactory.GetDbConnection()
-                : vakapayRepositoryFactory.GetOldConnection();
+                ? VakapayRepositoryFactory.GetDbConnection()
+                : VakapayRepositoryFactory.GetOldConnection();
         }
         
         public ReturnObject SendTransaction(IBlockchainTransaction blockchainTransaction)

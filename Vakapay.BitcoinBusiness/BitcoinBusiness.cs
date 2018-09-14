@@ -39,7 +39,7 @@ namespace Vakapay.BitcoinBusiness
         {
             try
             {
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(DbConnection);
+                var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection);
 
                 var walletCheck = walletRepository.FindById(WalletId);
 
@@ -57,7 +57,7 @@ namespace Vakapay.BitcoinBusiness
                 var address = results.Data;
 
                 //add database vakaxa
-                var bitcoinAddressRepo = vakapayRepositoryFactory.GetBitcoinAddressRepository(DbConnection);
+                var bitcoinAddressRepo = VakapayRepositoryFactory.GetBitcoinAddressRepository(DbConnection);
                 var time = (int) CommonHelper.GetUnixTimestamp();
                 var bcAddress = new BitcoinAddress
                 {
@@ -126,7 +126,7 @@ namespace Vakapay.BitcoinBusiness
 
 
                 var bitcoinRawTransactionRepo =
-                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
                 var details = transactionInfo["details"];
 
                 var data = new JObject();
@@ -216,7 +216,7 @@ namespace Vakapay.BitcoinBusiness
 
                 //add database vakaxa
                 var bitcoinRawTransactionRepo =
-                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
 
                 var time = CommonHelper.GetUnixTimestamp().ToString();
                 var rawTransaction = new BitcoinWithdrawTransaction

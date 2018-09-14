@@ -15,11 +15,17 @@ namespace Vakapay.EthereumBusiness
 	{
 		private EthereumRpc ethereumRpc { get; set; }
 
-		public EthereumBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) :
+		public EthereumBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true, string ethereumEndpoint = "") :
 			base(_vakapayRepositoryFactory, isNewConnection)
 		{
-			ethereumRpc = new EthereumRpc("http://127.0.0.1:9900/");
+			ethereumRpc = new EthereumRpc(ethereumEndpoint);
 		}
+		/// <summary>
+		/// This function will read from ethereum transaction database, send ethereum, and save transaction status, send email, send sms
+		/// algorith should be apply optimistic lock for save
+		/// </summary>
+		/// <param name="blockchainTransaction"></param>
+		/// <returns></returns>
 		public ReturnObject SendTransaction(EthereumWithdrawTransaction blockchainTransaction)
 		{
 			try
@@ -28,7 +34,7 @@ namespace Vakapay.EthereumBusiness
 				if (_rpcResult.Status == Status.StatusError)
 					return _rpcResult;
 				EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
-				var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
+				var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
 				blockchainTransaction.Id = CommonHelper.GenerateUuid();
 				blockchainTransaction.Hash = (String)_getter.result;
 				blockchainTransaction.Status = Status.StatusPending;
@@ -65,7 +71,7 @@ namespace Vakapay.EthereumBusiness
 
 				EthRPCJson.Getter _getter = new EthRPCJson.Getter(ResultMakeAddress.Data);
 
-				var ethereumAddressRepo = vakapayRepositoryFactory.GetEthereumAddressRepository(DbConnection);
+				var ethereumAddressRepo = VakapayRepositoryFactory.GetEthereumAddressRepository(DbConnection);
 
 				//TODO Encrypt Password Before save
 				var ResultAddEthereumAddress = ethereumAddressRepo.Insert(new EthereumAddress
@@ -101,7 +107,7 @@ namespace Vakapay.EthereumBusiness
 
 
 			String _query = String.Format("SELECT * FROM vakapay.ethereumwithdrawtransaction Where Status='{0}'", Status.StatusPending);
-			var ethereumwithdrawRepo = vakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
+			var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawnTransactionRepository(DbConnection);
 			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(_query);
 			if (_pending.Count <= 0)
 			{

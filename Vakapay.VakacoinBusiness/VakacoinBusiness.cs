@@ -59,7 +59,7 @@ namespace Vakapay.VakacoinBusiness
                     CreatedTime =  DateTime.UtcNow.Date,
                     status = status
                 };
-                var vakacoinRepo = vakapayRepositoryFactory.GetVakacoinTransactionHistoryRepository(DbConnection);
+                var vakacoinRepo = VakapayRepositoryFactory.GetVakacoinTransactionHistoryRepository(DbConnection);
 
                 var result = vakacoinRepo.Insert(transaction);
                 return result;
