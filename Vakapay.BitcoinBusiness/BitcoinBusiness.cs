@@ -131,6 +131,8 @@ namespace Vakapay.BitcoinBusiness
                 blockchainTransaction.Status = Status.StatusCompleted;
                 blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
                 blockchainTransaction.Hash = idTransaction;
+                blockchainTransaction.BlockHash = (string) transactionInfo["blockhash"];
+                blockchainTransaction.BlockNumber = (string) blockInfo["height"];
 
 
                 var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Update(blockchainTransaction);
