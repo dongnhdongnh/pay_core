@@ -302,7 +302,7 @@ namespace Vakapay.BitcoinBusiness
                     FromAddress = "",
                     ToAddress = toAddress,
                     Fee = (decimal) transactionInfo["fee"] * -1,
-                    Status = Status.StatusPending,
+                    Status = Status.StatusCompleted,
                     CreatedAt = time,
                     UpdatedAt = time
                 };
