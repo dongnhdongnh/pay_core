@@ -27,6 +27,8 @@ namespace Vakapay.TestBitcoin
 
                 var bitcoinRpc = new BitcoinBusiness(PersistenceFactory);
                 //  bitcoinRpc.test("a");
+                //bitcoinRpc.test("18382a96c79dc20a8b345c4e88708661a887cdfad22f27770638483805359d14");
+
                 //address
                 var address = bitcoinRpc.CreateNewAddAddress("815f09b4-e329-498d-bd0c-c389d0f6fb32");
                 Console.WriteLine(JsonHelper.SerializeObject(address).ToString());
@@ -37,14 +39,14 @@ namespace Vakapay.TestBitcoin
                 mutil.Add("2Mv5zhXas6Erc5bVRoSPXYGvqqoybyrghSS", 1);
                 mutil.Add("2MskqLDPuAQ4bjmYhWWDNFegys3LCcQDcp9", 2);
 
-                var send = bitcoinRpc.Sendmany("Tien", mutil);
+                var send = bitcoinRpc.Sendmany("", mutil);
                 Console.WriteLine(JsonHelper.SerializeObject(send));
 
 //                var tran = bitcoinRpc.TransactionByTxidBlockchain(
 //                    "7ae65806e278251462fae15117fc3193de74918b9e0aedc0b4166a475b3af683");
 
                 //sendfrom 
-                var sendfrom = bitcoinRpc.SendFrom("Tien", "n1noYY4HBM38MxHN7cxir1fxtq2XjAprWi", 1);
+                var sendfrom = bitcoinRpc.SendFrom("", "n1noYY4HBM38MxHN7cxir1fxtq2XjAprWi", 1);
                 Console.WriteLine(JsonHelper.SerializeObject(sendfrom));
 
                 //sendtoaddress
@@ -59,8 +61,14 @@ namespace Vakapay.TestBitcoin
                     FromAddress = "",
                     ToAddress = "n1noYY4HBM38MxHN7cxir1fxtq2XjAprWi",
                     Fee = 0,
+                    CreatedAt = CommonHelper.GetUnixTimestamp().ToString(),
+                    UpdatedAt = CommonHelper.GetUnixTimestamp().ToString(),
                     Status = Status.StatusPending,
                 };
+
+                var bitcoinRawTransactionRepo =
+                    bitcoinRpc.factory.GeBitcoinRawTransactionRepository(bitcoinRpc.dbconnect);
+                bitcoinRawTransactionRepo.Insert(bitcoinraw);
                 var send1 = bitcoinRpc.SendTransaction(bitcoinraw);
                 Console.WriteLine(JsonHelper.SerializeObject(send1).ToString());
 

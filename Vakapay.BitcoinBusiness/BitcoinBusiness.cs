@@ -88,6 +88,18 @@ namespace Vakapay.BitcoinBusiness
         {
             try
             {
+                //check withraw database
+                var bitcoinRawTransactionRepo =
+                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+
+                var raw = bitcoinRawTransactionRepo.FindById(blockchainTransaction.Id);
+                if (raw == null)
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "WithRawtransaction Not Found"
+                    };
+
                 var results = bitcoinRpc.SendToAddress(blockchainTransaction.ToAddress, blockchainTransaction.Amount);
 
                 if (results.Status == Status.StatusError)
@@ -114,34 +126,14 @@ namespace Vakapay.BitcoinBusiness
 
 
                 //add database vakaxa
-                var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
 
-                var time = CommonHelper.GetUnixTimestamp().ToString();
-                
-                
+
                 blockchainTransaction.Status = Status.StatusCompleted;
-                blockchainTransaction.CreatedAt = Status.StatusCompleted;
-                blockchainTransaction.UpdatedAt = Status.StatusCompleted;
+                blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
                 blockchainTransaction.Hash = idTransaction;
-                
-//                var rawTransaction = new BitcoinWithdrawTransaction
-//                {
-//                    Id = CommonHelper.GenerateUuid(),
-//                    Hash = idTransaction,
-//                    BlockNumber = (string) blockInfo["height"],
-//                    BlockHash = (string) transactionInfo["blockhash"],
-//                    NetworkName = "Bitcoin",
-//                    Amount = blockchainTransaction.Amount,
-//                    FromAddress = "",
-//                    ToAddress = blockchainTransaction.ToAddress,
-//                    Fee = (decimal) transactionInfo["fee"] * -1,
-//                    Status = Status.StatusPending,
-//                    CreatedAt = time,
-//                    UpdatedAt = time
-//                };
 
-                var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Insert(blockchainTransaction);
+
+                var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Update(blockchainTransaction);
 
 //                //update balance wallet
 //                decimal balanceChange = (decimal) transactionInfo["amount"] + (decimal) transactionInfo["fee"];
