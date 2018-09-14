@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using VakacoinCore.Response.API;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.VakacoinBusiness.Test
@@ -43,8 +42,7 @@ namespace Vakapay.VakacoinBusiness.Test
         [Test]
         public void CreateRandomAccountTest()
         {
-            Account oAccount;
-            _rpc.CreateRandomAccount(out oAccount);
+            _rpc.CreateRandomAccount();
         }
         
         
