@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
 using Vakapay.Cryptography;
 using VakaSharp;
 using VakaSharp.Api.v1;
-using VakaSharp.Helpers;
-using VakaSharp.Providers;
 using Action=VakaSharp.Api.v1.Action;
 
 namespace Vakapay.VakacoinBusiness
@@ -80,42 +77,53 @@ namespace Vakapay.VakacoinBusiness
                 } while (CheckAccountExist(accountName) == true);
 
                 var keyPair = KeyManager.GenerateKeyPair();
-                
-                //test TODO remove
-                accountName = "liemlonglan2";
 
-//                var args = new NewAccountxArgs()
-//                {
-//                    name = accountName,
-//                    owner = new {
-//                        threshold = 1,
-//                        keys = new List<object>() {
-//                            new { key = "EOS8Q8CJqwnSsV4A6HDBEqmQCqpQcBnhGME1RUvydDRnswNngpqfr", weight = 1}
-//                        },
-//                        accounts =  new List<object>(),
-//                        waits =  new List<object>()
-//                    },
-//                    active = new {
-//                        threshold = 1,
-//                        keys = new List<object>() {
-//                            new { key = "EOS8Q8CJqwnSsV4A6HDBEqmQCqpQcBnhGME1RUvydDRnswNngpqfr", weight = 1}
-//                        },
-//                        accounts =  new List<object>(),
-//                        waits =  new List<object>()
-//                    }
-//                }; 
-//                
-//                var action = GetActionObject("", "newaccountx", "", "vaka", args);
-//
-//                List<string> privateKeysInWIF = new List<string> { }; // blank
-//                
-//                //push transaction
-//                var transactionResult = ChainApiObj.PushTransaction(new [] { action }, privateKeysInWIF);
+                // start CreateTransaction
+                var vakaConfig = new VakaConfigurator()
+                {
+                    HttpEndpoint = EndPointUrl,
+                };
+                
+                var vaka = new Vaka(vakaConfig);
+
+                var result = vaka.CreateTransaction( new Transaction()
+                {
+                    Actions = new List<Action>()
+                    {
+                        new Action()
+                        {
+                            Account = "vaka",
+                            Authorization = new List<PermissionLevel>(){},
+                            Name = "newaccountx",
+                            Data = new {
+                                name = accountName,
+                                owner = new {
+                                    threshold = 1,
+                                    keys = new List<object>() {
+                                        new { key = keyPair.PublicKey, weight = 1}
+                                    },
+                                    accounts =  new List<object>(),
+                                    waits =  new List<object>()
+                                },
+                                active = new {
+                                    threshold = 1,
+                                    keys = new List<object>() {
+                                        new { key = keyPair.PublicKey, weight = 1}
+                                    },
+                                    accounts =  new List<object>(),
+                                    waits =  new List<object>()
+                                }
+                            }
+                        }
+                    }
+                }).Result;
+
                 
                 return new ReturnObject
                 {
-                    Status = Status.StatusActive,
-                    Data = accountName
+                    Status = Status.StatusSuccess,
+                    Data = accountName,
+                    Message = keyPair.PrivateKey
                 };
             }
             catch (Exception e)
@@ -136,28 +144,12 @@ namespace Vakapay.VakacoinBusiness
                 {
                     SignProvider = new DefaultSignProvider(sPrivateKey),
                     HttpEndpoint = EndPointUrl,
-                    ChainId = ChainID
                 };
-                var defaultApi = new VakaApi(vakaConfig);
+                
+                var vaka = new Vaka(vakaConfig);
 
-                var getInfoResult = defaultApi.GetInfo().Result;
-                var getBlockResult = defaultApi.GetBlock(new GetBlockRequest()
+                var result = vaka.CreateTransaction( new Transaction()
                 {
-                    BlockNumOrId = getInfoResult.LastIrreversibleBlockNum.Value.ToString()
-                }).Result;
-
-                var trx = new Transaction()
-                {
-                    //trx headers
-                    Expiration = getInfoResult.HeadBlockTime.Value.AddSeconds(60), //expire Seconds
-                    RefBlockNum = (UInt16) (getInfoResult.LastIrreversibleBlockNum.Value & 0xFFFF),
-                    RefBlockPrefix = getBlockResult.RefBlockPrefix,
-                    // trx info
-                    MaxNetUsageWords = 0,
-                    MaxCpuUsageMs = 0,
-                    DelaySec = 0,
-                    ContextFreeActions = new List<Action>(),
-                    TransactionExtensions = new List<Extension>(),
                     Actions = new List<Action>()
                     {
                         new Action()
@@ -165,7 +157,7 @@ namespace Vakapay.VakacoinBusiness
                             Account = SystemTokenContract,
                             Authorization = new List<PermissionLevel>()
                             {
-                                new PermissionLevel() {Actor = sFrom, Permission = "active"}
+                                new PermissionLevel() {Actor = sFrom, Permission = ActivePermission}
                             },
                             Name = TransferAction,
                             Data = new
@@ -175,26 +167,12 @@ namespace Vakapay.VakacoinBusiness
                             }
                         }
                     }
-                };
-
-                var publicKey = KeyManager.GetVakaPublicKey(sPrivateKey);
-                var abiSerializer = new AbiSerializationProvider(defaultApi);
-                var packedTrx = abiSerializer.SerializePackedTransaction(trx).Result;
-                var requiredKeys = new List<string>() {publicKey};
-                var signatures = vakaConfig.SignProvider.Sign(defaultApi.Config.ChainId, requiredKeys, packedTrx)
-                    .Result;
-
-                var response = defaultApi.PushTransaction(new PushTransactionRequest()
-                {
-                    Signatures = signatures.ToArray(),
-                    Compression = 0,
-                    PackedContextFreeData = "",
-                    PackedTrx = SerializationHelper.ByteArrayToHexString(packedTrx)
                 }).Result;
 
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
+                    Data = result
                 };
             }
             catch (Exception e)

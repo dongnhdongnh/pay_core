@@ -239,3 +239,6 @@ _Pvt_Extensions
 .vscode/
 
 .DS_Store
+
+# json
+Vakaxa.ApiServer/ClientApp/package-lock.json
