@@ -25,12 +25,7 @@ namespace Vakapay.Repositories.Mysql
 
         public BitcoinRawTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
         {
-        }
-
-        public ReturnObject Update(BitcoinRawTransactionRepository objectUpdate)
-        {
-            throw new System.NotImplementedException();
-        }
+        }       
 
         public ReturnObject Update(BitcoinWithdrawTransaction objectUpdate)
         {

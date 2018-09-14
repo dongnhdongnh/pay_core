@@ -83,10 +83,70 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-
+        
         public ReturnObject SendTransaction(BitcoinWithdrawTransaction blockchainTransaction)
         {
-            return null;
+            try
+            {
+                var results = bitcoinRpc.SendToAddress(blockchainTransaction.ToAddress, blockchainTransaction.Amount);
+
+                if (results.Status == Status.StatusError)
+                    return results;
+
+                var idTransaction = results.Data;
+
+                //get transaction
+                var transaction = bitcoinRpc.GetTransaction(idTransaction);
+                if (transaction.Status == Status.StatusError)
+                    return transaction;
+                var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
+
+
+                //block
+                var blockInfo = new JObject();
+                if (!string.IsNullOrEmpty((string) transactionInfo["blockhash"]))
+                {
+                    var block = bitcoinRpc.GetBlock((string) transactionInfo["blockhash"]);
+                    if (block.Status == Status.StatusError)
+                        return block;
+                    blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data);
+                }
+
+
+                //add database vakaxa
+                var bitcoinRawTransactionRepo =
+                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+
+                var time = CommonHelper.GetUnixTimestamp().ToString();
+                var rawTransaction = new BitcoinWithdrawTransaction
+                {
+                    Id = CommonHelper.GenerateUuid(),
+                    Hash = idTransaction,
+                    BlockNumber = (string) blockInfo["height"],
+                    BlockHash = (string) transactionInfo["blockhash"],
+                    NetworkName = "Bitcoin",
+                    Amount = (decimal) blockchainTransaction.Amount,
+                    FromAddress = "",
+                    ToAddress = blockchainTransaction.ToAddress,
+                    Fee = (decimal) transactionInfo["fee"],
+                    Status = Status.StatusPending,
+                    CreatedAt = time,
+                    UpdatedAt = time
+                };
+
+                var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Insert(rawTransaction);
+                //
+                return ResultAddBitcoinRawTransactionAddress;
+                //deposit
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
         }
 
 
@@ -141,7 +201,7 @@ namespace Vakapay.BitcoinBusiness
                         BlockHash = (string) transactionInfo["blockhash"],
                         NetworkName = "Bitcoin",
                         Amount = (decimal) detail["amount"],
-                        FromAddress = fromAccount,
+                        FromAddress = "",
                         ToAddress = (string) detail["address"],
                         Fee = (decimal) detail["fee"],
                         Status = Status.StatusPending,
@@ -227,7 +287,7 @@ namespace Vakapay.BitcoinBusiness
                     BlockHash = (string) transactionInfo["blockhash"],
                     NetworkName = "Bitcoin",
                     Amount = (decimal) amount,
-                    FromAddress = fromAccount,
+                    FromAddress = "",
                     ToAddress = toAddress,
                     Fee = (decimal) transactionInfo["fee"],
                     Status = Status.StatusPending,
@@ -312,12 +372,16 @@ namespace Vakapay.BitcoinBusiness
         /// <param name="Id"></param>
         public void test(String Id)
         {
-            var transaction = bitcoinRpc.GetTransaction(Id);
-            var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
-            //Console.WriteLine(transaction);
-            //Console.WriteLine(transaction.Data);
-            var block = bitcoinRpc.GetBlock((string) transactionInfo["blockhash"]);
-            var blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data)["result"];
+            //add database vakaxa
+            var bitcoinRawTransactionRepo =
+                vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+            var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.FindBySql("SELECT * FROM bitcoinwithdrawtransaction");
+//            var transaction = bitcoinRpc.GetTransaction(Id);
+//            var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
+//            //Console.WriteLine(transaction);
+//            //Console.WriteLine(transaction.Data);
+//            var block = bitcoinRpc.GetBlock((string) transactionInfo["blockhash"]);
+//            var blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data)["result"];
         }
 
         /// <summary>

@@ -521,7 +521,7 @@ namespace Vakapay.BitcoinBusiness
         /**
          *  <amount> is a real and is rounded to 8 decimal places. Returns the transaction ID <txid> if successful.
          */
-        public ReturnObject SendToAddress(string a_address, double a_amount, string a_comment, string a_commentTo)
+        public ReturnObject SendToAddress(string a_address, decimal a_amount, string a_comment = "", string a_commentTo = "")
         {
             try
             {
