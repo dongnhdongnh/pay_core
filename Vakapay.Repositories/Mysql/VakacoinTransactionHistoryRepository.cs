@@ -9,7 +9,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class VakacoinTransactionHistoryRepository : MysqlBaseConnection<VakacoinTransactionHistoryRepository>, IVakacoinTransactionHistoryRepository
+    public class VakacoinTransactionHistoryRepository : MysqlBaseConnection, IVakacoinTransactionHistoryRepository
     {
         public VakacoinTransactionHistoryRepository(string connectionString) : base(connectionString)
         {

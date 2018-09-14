@@ -29,14 +29,8 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-                string accountName = "";
-                do
-                {
-                    accountName = CommonHelper.RandomAccountNameVakacoin();
-                } while (VakacoinRpc.CheckAccountExist(accountName) == true);
 
-                KeyManager.KeyPair keyPair = KeyManager.GenerateKeyPair();
-
+                
                 return new ReturnObject { };
             }
             catch (Exception e)

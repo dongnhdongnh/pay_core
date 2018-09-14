@@ -31,7 +31,7 @@ namespace Vakapay.EthereumBusiness
 		{
 			try
 			{
-				Console.WriteLine("=====================" + RpcName + "=======================");
+				//Console.WriteLine("=====================" + RpcName + "=======================");
 				// Set a default policy level for the "http:" and "https" schemes.
 				HttpRequestCachePolicy policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
 				HttpWebRequest.DefaultCachePolicy = policy;
@@ -54,19 +54,19 @@ namespace Vakapay.EthereumBusiness
 				using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
 				{
 					string json = _sender.GetJSon();
-					Console.WriteLine(json);
+					//Console.WriteLine(json);
 					streamWriter.Write(json);
 					streamWriter.Flush();
 					streamWriter.Close();
 				}
 				//Console.WriteLine("FROM CACHE:" + httpWebRequest.GetResponse().IsFromCache);
 				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-				Console.WriteLine("IsFromCache? {0}", httpResponse.IsFromCache);
+				//Console.WriteLine("IsFromCache? {0}", httpResponse.IsFromCache);
 				using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
 				{
 					var result = streamReader.ReadToEnd();
 					//EthRPCJson.Getter _getter = new EthRPCJson.Getter(result);
-					Console.WriteLine(result);
+					//Console.WriteLine(result);
 					//Console.WriteLine("FROM CACHE:" + httpWebRequest.GetResponse().IsFromCache);
 					return new ReturnObject
 					{
@@ -98,7 +98,7 @@ namespace Vakapay.EthereumBusiness
 		/// <returns></returns>
 		public ReturnObject SendTransactionWithPassphrase(string From, string ToAddress, decimal amount, string passphrase)
 		{
-			EthRPCJson.TransactionSender _sender = new EthRPCJson.TransactionSender()
+			EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
 			{
 				from = From,
 				to = ToAddress,
@@ -116,7 +116,7 @@ namespace Vakapay.EthereumBusiness
 		/// <returns></returns>
 		public ReturnObject SendTransaction(string From, string ToAddress, decimal amount)
 		{
-			EthRPCJson.TransactionSender _sender = new EthRPCJson.TransactionSender()
+			EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
 			{
 				from = From,
 				to = ToAddress,
@@ -160,7 +160,10 @@ namespace Vakapay.EthereumBusiness
 		{
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_accounts);
 		}
-
+		public ReturnObject GetBlockNumber()
+		{
+			return EthereumSendRPC(EthereumRPCList.RPCName.eth_blockNumber);
+		}
 
 	}
 }

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Vakapay.Models.Entities
-{
+{   
+    [Table("bitcoinaddress")]
     public class BitcoinAddress
     {
         public string Id { get; set; }

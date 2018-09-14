@@ -33,7 +33,7 @@ namespace Vakapay.Models.Entities.ETH
 		{
 			public Getter(string input)
 			{
-				Console.WriteLine("==getter " + input);
+				//	Console.WriteLine("==getter " + input);
 				if (input == null)
 					return;
 				Getter thing = JsonHelper.DeserializeObject<Getter>(input);
@@ -46,11 +46,30 @@ namespace Vakapay.Models.Entities.ETH
 			public Object result;
 		}
 
-		public class TransactionSender
+		public class TransactionInfor
 		{
 			public string from;
 			public string to;
 			public string value;
+			public string hash;
+			public string blockHash;
+			public string blockNumber;
+			public string transactionIndex;
+			public string gas;
+			public string gasPrice;
+			public string input;
+			public string nonce;
 		}
+
+		public class BlockInfor
+		{
+			public string number;
+			public string hash;
+			public TransactionInfor[] transactions;
+			public string transactionsRoot;
+			public string totalDifficulty;
+		}
+
+
 	}
 }

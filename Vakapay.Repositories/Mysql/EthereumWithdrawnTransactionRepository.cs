@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -10,7 +11,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection<EthereumWithdrawnTransactionRepository>, IEthereumWithdrawnTransactionRepository
+	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
 	{
 		public EthereumWithdrawnTransactionRepository(string connectionString) : base(connectionString)
 		{
@@ -32,7 +33,18 @@ namespace Vakapay.Repositories.Mysql
 
 		public List<EthereumWithdrawTransaction> FindBySql(string sqlString)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList();
+
+				return result;
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
 		}
 
 		public ReturnObject Insert(EthereumWithdrawTransaction objectInsert)
@@ -51,13 +63,36 @@ namespace Vakapay.Repositories.Mysql
 			}
 			catch (Exception e)
 			{
-				throw e;
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
 			}
 		}
 
 		public ReturnObject Update(EthereumWithdrawTransaction objectUpdate)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.Update<EthereumWithdrawTransaction>(objectUpdate);
+				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+				return new ReturnObject
+				{
+					Status = status,
+					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
+				};
+			}
+			catch (Exception e)
+			{
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
 		}
 	}
 }

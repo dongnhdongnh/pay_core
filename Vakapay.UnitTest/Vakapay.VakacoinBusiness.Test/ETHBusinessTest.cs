@@ -54,6 +54,23 @@ namespace Vakapay.VakacoinBusiness.Test
 			Assert.IsNotNull(outPut);
 		}
 
+		[Test]
+		public void TestScan()
+		{
+
+			var repositoryConfig = new RepositoryConfiguration
+			{
+				ConnectionString = ETHBusinessTest.ConnectionString
+			};
+
+			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
+			int block = _ethBus.ScanBlock();
+
+			Assert.IsTrue(block > 0);
+		}
+
+	
 
 	}
 }

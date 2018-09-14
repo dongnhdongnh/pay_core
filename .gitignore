@@ -235,4 +235,10 @@ _Pvt_Extensions
 # IDEA
 .idea/
 
+# Visual Studio Code
+.vscode/
+
 .DS_Store
+
+# json
+Vakaxa.ApiServer/ClientApp/package-lock.json

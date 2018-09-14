@@ -7,7 +7,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class ApiKeyRepository : MysqlBaseConnection<ApiKeyRepository>, IApiKeyRepository
+    public class ApiKeyRepository : MysqlBaseConnection, IApiKeyRepository
     {
         public ApiKeyRepository(string connectionString) : base(connectionString)
         {

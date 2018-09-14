@@ -9,11 +9,11 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumAddressRepository : MysqlBaseConnection<EthereumAddressRepository>, IEthereumAddressRepository
-	{
-		public EthereumAddressRepository(string connectionString) : base(connectionString)
-		{
-		}
+    public class EthereumAddressRepository : MysqlBaseConnection, IEthereumAddressRepository
+    {
+        public EthereumAddressRepository(string connectionString) : base(connectionString)
+        {
+        }
 
 		public EthereumAddressRepository(IDbConnection dbConnection) : base(dbConnection)
 		{

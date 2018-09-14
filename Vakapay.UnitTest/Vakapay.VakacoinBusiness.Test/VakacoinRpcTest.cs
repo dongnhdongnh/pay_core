@@ -37,7 +37,13 @@ namespace Vakapay.VakacoinBusiness.Test
         {
             Assert.AreEqual( status, _rpc.SendTransaction(from, to, amount, 
                 memo, privatekey).Status);
-        }        
+        }
+
+        [Test]
+        public void CreateRandomAccountTest()
+        {
+            _rpc.CreateRandomAccount();
+        }
         
         
     }
