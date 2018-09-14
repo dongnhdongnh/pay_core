@@ -147,7 +147,7 @@ namespace Vakapay.WalletBusiness
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
                 
-                var result = walletRepository.FindBySql("");
+                var result = walletRepository.FindBySql("SELECT * FROM wallet");
                 return result;
             }
             catch(Exception e)

@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
@@ -9,12 +8,6 @@ using Vakapay.Cryptography;
 using VakaSharp;
 using VakaSharp.Api.v1;
 using Action=VakaSharp.Api.v1.Action;
-using VakacoinCore;
-using VakacoinCore.ActionArgs;
-using VakacoinCore.Response.API;
-using VakacoinCore.Utilities;
-using Action=VakacoinCore.Params.Action;
-
 
 namespace Vakapay.VakacoinBusiness
 {
@@ -26,6 +19,7 @@ namespace Vakapay.VakacoinBusiness
         private const string SystemTokenContract = "vaka.token";
         private const string ActivePermission = "active";
         private const string TransferAction = "transfer";
+        private VakaApi defaultApi;
 
         public VakacoinRpc(string endPointUrl, string chainId = null)
         {
@@ -37,7 +31,7 @@ namespace Vakapay.VakacoinBusiness
                 {
                     HttpEndpoint = EndPointUrl,
                 };
-                var defaultApi = new VakaApi(vakaConfig);
+                defaultApi = new VakaApi(vakaConfig);
 
                 var getInfoResult = defaultApi.GetInfo().Result;
                 chainId = getInfoResult.ChainId;
@@ -195,22 +189,22 @@ namespace Vakapay.VakacoinBusiness
 
         public string GetHeadBlockNumber()
         {
-            var info = ChainApiObj.GetInfo();
-            return info.head_block_num.ToString();
+            var info = defaultApi.GetInfo().Result;
+            return info.HeadBlockNum.ToString();
         }
 
         public ArrayList GetAllTransactionsInBlock(string blockNumber)
         {
             try
             {
-                var block = ChainApiObj.GetBlock(blockNumber);
-                List<Transaction> transactions = block.transactions;
+                var block = defaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber}).Result;
+                List<TransactionReceipt> transactions = block.Transactions;
                 ArrayList jsonTrxs = new ArrayList();
                 foreach (var transaction in transactions)
                 {
-                    if (JsonHelper.IsValidJson(transaction.trx.ToString())) //true if transaction.trx is json format
+                    if (JsonHelper.IsValidJson(transaction.Trx.ToString())) //true if transaction.trx is json format
                     {
-                        var json = transaction.trx;
+                        var json = transaction.Trx;
                         jsonTrxs.Add(json);
                     }
                 }

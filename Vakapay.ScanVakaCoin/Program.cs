@@ -17,10 +17,6 @@ namespace Vakapay.ScanVakaCoin
     {
         static void Main(string[] args)
         {
-            IHazelcastInstance client = HazelcastClient.NewHazelcastClient();
-            var map = client.GetMap<string, Wallet>("wallets");
-            map.
-            
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("Configs.json");

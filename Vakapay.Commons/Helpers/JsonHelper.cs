@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 public class JsonHelper
 {
@@ -22,40 +23,29 @@ public class JsonHelper
         DateParseHandling = DateParseHandling.None,
         Converters = {
             new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
-        },
-    };
-}
-
-namespace Vakapay.Commons.Helpers
-{
-       // public static string SerializeObject(Object obj)
-        public static string SerializeObject(Object obj)
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
         }
-
-        public static bool IsValidJson(string strInput)
+    };
+    public static bool IsValidJson(string strInput)
+    {
+        strInput = strInput.Trim();
+        if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+            (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
         {
-            strInput = strInput.Trim();
-            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
-                (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
+            try
             {
-                try
-                {
-                    var obj = JToken.Parse(strInput);
-                    return true;
-                }
-                catch (Exception ex) //some other exception
-                {
-                    Console.WriteLine(ex.ToString());
-                    return false;
-                }
+                var obj = JToken.Parse(strInput);
+                return true;
             }
-            else
+            catch (Exception ex) //some other exception
             {
+                Console.WriteLine(ex.ToString());
                 return false;
             }
-
         }
+        else
+        {
+            return false;
+        }
+
     }
 }
