@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.IO;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +25,7 @@ namespace Vakapay.ScanVakaCoin
             pr.Init();
             pr.Processing();
             pr.RescanErrorBlock();
-//            pr.ReceivedProcess(pr.rpc.GetAllTransactionsInBlock("16512179"));
+//            pr.ReceivedProcess(pr.rpc.GetAllTransactionsInBlock("16535578"));
         }
 
         private void Init()
@@ -149,6 +149,10 @@ namespace Vakapay.ScanVakaCoin
                 if (actionName.ToString() != "transfer")
                         continue;
                 
+                //check data is valid json
+                if (!JsonHelper.IsValidJson(jsonTrx["actions"][0]["data"].ToString()))
+                    continue;
+                    
                 //check quantity and to_address in transaction
                 var quantity = jsonTrx["actions"][0]["data"]["quantity"];
                 var _to = jsonTrx["actions"][0]["data"]["to"];
