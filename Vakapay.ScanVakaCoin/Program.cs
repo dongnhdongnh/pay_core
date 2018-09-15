@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.IO;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +18,7 @@ namespace Vakapay.ScanVakaCoin
         private VakacoinRpc rpc;
         private int lastBlock;
         private ArrayList errorBlocks;
+        private System.Runtime.Caching.MemoryCache cache;
 
         static void Main(string[] args)
         {
@@ -51,7 +52,10 @@ namespace Vakapay.ScanVakaCoin
             lastBlock = 0;
             errorBlocks = new ArrayList();
             
-//            var cache = new System.Runtime.Caching.MemoryCache("ScanVakacoinCache");
+            cache = new System.Runtime.Caching.MemoryCache("ScanVakacoinCache");
+            if (cache["lastBlock"] != null)
+                lastBlock = (int) cache["lastBlock"];
+            
             
         }
 
@@ -79,6 +83,7 @@ namespace Vakapay.ScanVakaCoin
                 var transactions = rpc.GetAllTransactionsInBlock(headBlock.ToString());
                 ReceivedProcess(transactions);
                 lastBlock = headBlock;
+                cache.Set("lastBlock", lastBlock, DateTimeOffset.MaxValue);
             }
             catch (Exception e)
             {
@@ -99,6 +104,7 @@ namespace Vakapay.ScanVakaCoin
                     var transactions = rpc.GetAllTransactionsInBlock(processingBlock.ToString());
                     ReceivedProcess(transactions);
                     lastBlock = processingBlock;
+                    cache.Set("lastBlock", lastBlock, DateTimeOffset.MaxValue);
                 }
                 catch (Exception e)
                 {
