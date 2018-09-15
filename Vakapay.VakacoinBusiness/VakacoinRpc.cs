@@ -234,14 +234,16 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public string GetHeadBlockNumber()
+        public int GetHeadBlockNumber()
         {
             var info = DefaultApi.GetInfo().Result;
-            return info.HeadBlockNum.ToString();
+            return Int32.Parse(info.HeadBlockNum.ToString());
         }
 
+        //Return arraylist of Transaction in a block
         public ArrayList GetAllTransactionsInBlock(string blockNumber)
         {
+            Console.WriteLine("Scan block: "+blockNumber);
             try
             {
                 var block = DefaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber}).Result;
@@ -260,7 +262,7 @@ namespace Vakapay.VakacoinBusiness
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
+                return null;
             }
         }
     }

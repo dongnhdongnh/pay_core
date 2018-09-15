@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -130,8 +131,9 @@ namespace Vakapay.WalletBusiness
             return null;
         }
 
-        public ReturnObject UpdateBalance(string toAddress, string addedBlance)
+        public ReturnObject UpdateBalance(string toAddress, decimal addedBlance, string networkName)
         {
+            Console.WriteLine("update blance for "+ toAddress + ": "+addedBlance);
             return new ReturnObject
             {
                 Status = "Success",
@@ -152,8 +154,50 @@ namespace Vakapay.WalletBusiness
             }
             catch(Exception e)
             {
+                Console.WriteLine(e);
                 throw e;
+            }
+        }
+        
+        
+        public bool CheckExistedAddress(String addr)
+        {
+            try
+            {
+                var wallet = FindByAddress(addr);
+                if (wallet != null)
+                    return true;
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            } 
+        }
 
+        public Wallet FindByAddress(string addr)
+        {
+            try
+            {
+                if(ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var result = walletRepository.FindBySql($"SELECT * FROM wallet WHERE Address = '{addr}'");
+
+                if (result.Count > 0 && result.Any() )
+                {
+                    return result[0];
+                }               
+                return null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
             }
         }
     }
