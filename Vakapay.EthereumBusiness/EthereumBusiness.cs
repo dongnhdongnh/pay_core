@@ -22,7 +22,34 @@ namespace Vakapay.EthereumBusiness
         {
             ethereumRpc = new EthereumRpc(endPoint);
         }
+        public ReturnObject RunSendTransaction()
+        {
+            try
+            {
+                var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+                List<EthereumWithdrawTransaction> pendings = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search("Status", Status.StatusPending));
+                Console.WriteLine(pendings.Count);
+                if (pendings.Count <= 0) throw new Exception("NO PENING");
+                else
+                {
+                    foreach (EthereumWithdrawTransaction pending in pendings)
+                    {
+                        SendTransaction(pending);
+                    }
+                }
+                return new ReturnObject();
+            }
+            catch (Exception e)
+            {
 
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+
+        }
         public ReturnObject SendTransaction(EthereumWithdrawTransaction blockchainTransaction)
         {
             try
@@ -32,11 +59,15 @@ namespace Vakapay.EthereumBusiness
                     return _rpcResult;
                 EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
                 var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-
                 blockchainTransaction.Status = Status.StatusCompleted;
-
                 blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
-                return ethereumwithdrawRepo.Update(blockchainTransaction);
+                EthereumWithdrawTransaction blockchainTransactionWhere = new EthereumWithdrawTransaction()
+                {
+                    Id = blockchainTransaction.Id,
+                    Amount = blockchainTransaction.Amount,
+                    Fee = blockchainTransaction.Fee
+                };
+                return ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, blockchainTransactionWhere));
 
             }
             catch (Exception e)
@@ -50,20 +81,23 @@ namespace Vakapay.EthereumBusiness
             }
         }
 
-        public ReturnObject SendTransactionOld(EthereumWithdrawTransaction blockchainTransaction)
+        public ReturnObject FakePendingTransaction(EthereumWithdrawTransaction blockchainTransaction)
         {
             try
             {
-                var _rpcResult = ethereumRpc.SendTransactionWithPassphrase(blockchainTransaction.FromAddress, blockchainTransaction.ToAddress, blockchainTransaction.Amount, "password");
-                if (_rpcResult.Status == Status.StatusError)
-                    return _rpcResult;
-                EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
+
+
+                //var _rpcResult = ethereumRpc.SendTransactionWithPassphrase(blockchainTransaction.FromAddress, blockchainTransaction.ToAddress, blockchainTransaction.Amount, "password");
+                //if (_rpcResult.Status == Status.StatusError)
+                //    return _rpcResult;
+                // EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
                 var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
                 blockchainTransaction.Id = CommonHelper.GenerateUuid();
-                blockchainTransaction.Hash = (String)_getter.result;
+                // blockchainTransaction.Hash = (String)_getter.result;
                 blockchainTransaction.Status = Status.StatusPending;
                 blockchainTransaction.CreatedAt = CommonHelper.GetUnixTimestamp().ToString();
                 blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+
                 return ethereumwithdrawRepo.Insert(blockchainTransaction);
 
             }
