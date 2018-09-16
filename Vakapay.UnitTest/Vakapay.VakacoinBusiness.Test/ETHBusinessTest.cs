@@ -49,7 +49,7 @@ namespace Vakapay.VakacoinBusiness.Test
 				ToAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
 				Amount = 10
 			};
-			var outPut = _ethBus.SendTransaction(_trans);
+			var outPut = _ethBus.SendTransactionOld(_trans);
 			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}
