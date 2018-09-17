@@ -228,7 +228,7 @@ namespace Vakapay.BitcoinNotifi
                 if (currentBtcWithdrawTransaction == null)
                 {
                     logger.Debug("cretateNewBtcDepositTransaction ");
-                    var currentTime = CommonHelper.GetUnixTimestamp().ToString();
+                    var currentTime = CommonHelper.GetUnixTimestamp();
                     var newBtcWithdrawTransaction = new BitcoinWithdrawTransaction()
                     {
                         Id = CommonHelper.GenerateUuid(),
@@ -240,8 +240,8 @@ namespace Vakapay.BitcoinNotifi
                         ToAddress = transactionModelDetail.Address,
                         Fee = 0,
                         Status = Status.StatusCompleted,
-                        CreatedAt = currentTime,
-                        UpdatedAt = currentTime
+                        CreatedAt = (int)currentTime,
+                        UpdatedAt = (int)currentTime
                     };
                     logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
                                  newBtcWithdrawTransaction);

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.BlockchainBusiness
@@ -9,6 +10,8 @@ namespace Vakapay.BlockchainBusiness
         ReturnObject SendMultiTransaction(string From, string[] To, decimal amount);
         ReturnObject SignData(string data, string privateKey);
         ReturnObject CreateNewAddress(string WalletId, string password = "");
+        Task<ReturnObject> SendTransactionAsysn(string From, string To, decimal amount);
         
+
     }
 }

@@ -129,7 +129,7 @@ namespace Vakapay.BitcoinBusiness
 
 
                 blockchainTransaction.Status = Status.StatusCompleted;
-                blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+                blockchainTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                 blockchainTransaction.Hash = idTransaction;
                 blockchainTransaction.BlockHash = (string) transactionInfo["blockhash"];
                 blockchainTransaction.BlockNumber = (string) blockInfo["height"];
@@ -201,7 +201,7 @@ namespace Vakapay.BitcoinBusiness
 
                 foreach (var detail in details)
                 {
-                    var time = CommonHelper.GetUnixTimestamp().ToString();
+                    var time = CommonHelper.GetUnixTimestamp();
                     var rawTransaction = new BitcoinWithdrawTransaction
                     {
                         Id = CommonHelper.GenerateUuid(),
@@ -214,8 +214,8 @@ namespace Vakapay.BitcoinBusiness
                         ToAddress = (string) detail["address"],
                         Fee = (decimal) detail["fee"] * -1,
                         Status = Status.StatusCompleted,
-                        CreatedAt = time,
-                        UpdatedAt = time
+                        CreatedAt = (int)time,
+                        UpdatedAt = (int)time
                     };
 
                     var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Insert(rawTransaction);
@@ -291,7 +291,7 @@ namespace Vakapay.BitcoinBusiness
                 var bitcoinRawTransactionRepo =
                     VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
 
-                var time = CommonHelper.GetUnixTimestamp().ToString();
+                var time = CommonHelper.GetUnixTimestamp();
                 var rawTransaction = new BitcoinWithdrawTransaction
                 {
                     Id = CommonHelper.GenerateUuid(),
@@ -304,8 +304,8 @@ namespace Vakapay.BitcoinBusiness
                     ToAddress = toAddress,
                     Fee = (decimal) transactionInfo["fee"] * -1,
                     Status = Status.StatusCompleted,
-                    CreatedAt = time,
-                    UpdatedAt = time
+                    CreatedAt = (int)time,
+                    UpdatedAt = (int)time
                 };
 
                 var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Insert(rawTransaction);

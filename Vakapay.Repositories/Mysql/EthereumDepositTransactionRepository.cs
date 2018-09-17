@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -93,6 +94,37 @@ namespace Vakapay.Repositories.Mysql
 					Message = e.Message
 				};
 			}
+		}
+
+
+		public IBlockchainTransaction FindTransactionPending()
+		{
+			throw new NotImplementedException();
+		}
+
+		public IBlockchainTransaction FindTransactionError()
+		{
+			throw new NotImplementedException();
+		}
+
+		public IBlockchainTransaction FindTransactionByStatus(string status)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

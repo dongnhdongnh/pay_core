@@ -20,6 +20,8 @@ namespace Vakapay.Models.Entities
         public string Status { get; set; }
         public string CreatedAt { get; set; }
         public string UpdatedAt { get; set; }
+        public int InProcess { get; set; }
+        public int Version { get; set; }
     }
 
     public partial class BitcoinDepositTransaction

@@ -61,8 +61,8 @@ namespace Vakapay.TestBitcoin
                     FromAddress = "",
                     ToAddress = "n1noYY4HBM38MxHN7cxir1fxtq2XjAprWi",
                     Fee = 0,
-                    CreatedAt = CommonHelper.GetUnixTimestamp().ToString(),
-                    UpdatedAt = CommonHelper.GetUnixTimestamp().ToString(),
+                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
+                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     Status = Status.StatusPending,
                 };
 

@@ -1,18 +1,20 @@
 ﻿using System;
 namespace Vakapay.Models.Domains
 {
-    public interface IBlockchainTransaction
+    public abstract class IBlockchainTransaction
     {
-        string Id { get; set; }
-        string Hash { get; set; }
-        string BlockNumber { get; set; }
-        string NetworkName { get; set; }
-        decimal Amount { get; set; }
-        string FromAddress { get; set; }
-        string ToAddress { get; set; }
-        decimal Fee { get; set; }
-        string Status { get; set; }
-        string CreatedAt { get; set; }
-        string UpdatedAt { get; set; }
+        public string Id { get; set; }
+        public string Hash { get; set; }
+        public string BlockNumber { get; set; }
+        public string NetworkName { get; set; }
+        public decimal Amount { get; set; }
+        public string FromAddress { get; set; }
+        public string ToAddress { get; set; }
+        public decimal Fee { get; set; }
+        public string Status { get; set; }
+        public int CreatedAt { get; set; }
+        public int UpdatedAt { get; set; }
+        public int InProcess { get; set; }
+        public int Version { get; set; }
     }
 }

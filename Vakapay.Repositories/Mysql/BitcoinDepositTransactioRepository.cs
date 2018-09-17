@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
 using NLog;
 using Vakapay.Models.Domains;
@@ -16,6 +17,7 @@ namespace Vakapay.Repositories.Mysql
         IBitcoinDepositTransactioRepository
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
+        public static string tableName = "bitcoindeposittransaction";
         private IBitcoinDepositTransactioRepository _BitcoinDepositTransactioRepositoryImplementation;
 
         public BitcoinDepositTransactioRepository(string connectionString) : base(connectionString)
@@ -33,7 +35,6 @@ namespace Vakapay.Repositories.Mysql
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-
                 var isSuccess = Connection.Update(objectUpdate);
                 var status = !string.IsNullOrEmpty(isSuccess.ToString()) ? Status.StatusSuccess : Status.StatusError;
                 logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
@@ -170,6 +171,70 @@ namespace Vakapay.Repositories.Mysql
                 logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
                 throw e;
             }
+        }
+
+        
+
+        
+
+        public IBlockchainTransaction FindTransactionPending()
+        {
+            return new BitcoinDepositTransaction();
+        }
+
+        public IBlockchainTransaction FindTransactionError()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBlockchainTransaction FindTransactionByStatus(string status)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                string SqlCommand = "Update " + tableName + " Set Version = Version + 1, OnProcess = 1 Where Id = @Id and Version = @Version";
+
+                var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version});
+                if (update == 1)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusSuccess,
+                        Message = "Update Success",
+                    };
+                }
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = "Update Fail",
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.ToString()
+                };
+            }
+            
+
+        }
+
+        public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -164,6 +165,37 @@ namespace Vakapay.Repositories.Mysql
             {
                 throw e;
             }
+        }
+
+
+        public IBlockchainTransaction FindTransactionPending()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBlockchainTransaction FindTransactionError()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBlockchainTransaction FindTransactionByStatus(string status)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
         }
     }
 }

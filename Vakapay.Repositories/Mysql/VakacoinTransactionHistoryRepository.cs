@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Dapper;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -61,6 +62,37 @@ namespace Vakapay.Repositories.Mysql
         public List<VakacoinTransactionHistory> FindBySql(string sqlString)
         {
             throw new System.NotImplementedException();
+        }
+
+
+        public IBlockchainTransaction FindTransactionPending()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBlockchainTransaction FindTransactionError()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBlockchainTransaction FindTransactionByStatus(string status)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -4,13 +4,14 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Repositories.Base
 {
-    public interface IRepositoryBase<T>
+    public interface IRepositoryBase<TModel>
     {
-        ReturnObject Update(T objectUpdate);
+        ReturnObject Update(TModel objectUpdate);
         ReturnObject Delete(string Id);
-        ReturnObject Insert(T objectInsert);
-        T FindById(string Id);
-        List<T> FindBySql(string sqlString);
-        
+        ReturnObject Insert(TModel objectInsert);
+        TModel FindById(string Id);
+        List<TModel> FindBySql(string sqlString);
+        //ReturnObject SafeUpdate(TModel objectUpdate);
+
     }
 }

@@ -6,7 +6,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-	public interface IEthereumDepositTransactionRepository : IRepositoryBase<EthereumDepositTransaction>
+	public interface IEthereumDepositTransactionRepository : IRepositoryBlockchainTransaction<EthereumDepositTransaction>
 	{
 	}
 }

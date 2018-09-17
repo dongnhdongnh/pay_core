@@ -4,7 +4,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IBitcoinDepositTransactioRepository : IRepositoryBase<BitcoinDepositTransaction>
+    public interface IBitcoinDepositTransactioRepository : IRepositoryBlockchainTransaction<BitcoinDepositTransaction>
     {
         List<BitcoinDepositTransaction> FindWhere(BitcoinDepositTransaction objectTransaction);
     }
