@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Net;
+using NLog;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
@@ -16,6 +17,7 @@ namespace Vakapay.BitcoinBusiness
     public class BitcoinBusiness : BlockchainBusiness
     {
         private BitcoinRpc bitcoinRpc { get; set; }
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         public IVakapayRepositoryFactory factory { get; set; }
         public IDbConnection dbconnect { get; set; }
 
@@ -78,6 +80,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "CreateNewAddAddress exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -111,7 +114,9 @@ namespace Vakapay.BitcoinBusiness
                     foreach (BitcoinWithdrawTransaction pending in pendings)
                     {
                         // send 
-                        SendTransaction(pending);
+                        logger.Error(JsonHelper.SerializeObject(pending), "runSendTransaction before");
+                        var result = SendTransaction(pending);
+                        logger.Error(JsonHelper.SerializeObject(result), "runSendTransaction result");
                     }
                 }
 
@@ -119,6 +124,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "runSendTransaction exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -140,7 +146,8 @@ namespace Vakapay.BitcoinBusiness
                     return new ReturnObject
                     {
                         Status = Status.StatusError,
-                        Message = "WithRawtransaction Not Found"
+                        Message = "WithRawtransaction Not Found",
+                        Data = blockchainTransaction.Id
                     };
 
                 string currentVersionWithRaw = blockchainTransaction.Version.ToString();
@@ -169,7 +176,6 @@ namespace Vakapay.BitcoinBusiness
 
                 var results = bitcoinRpc.SendToAddress(blockchainTransaction.ToAddress,
                     Convert.ToDecimal(blockchainTransaction.Amount));
-
 
                 if (results.Status == Status.StatusError)
                     return results;
@@ -213,15 +219,12 @@ namespace Vakapay.BitcoinBusiness
 
                 //
                 return ResultAddBitcoinRawTransactionAddress;
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = ""
-                };
+
                 //deposit
             }
             catch (Exception e)
             {
+                logger.Error(e, "SendTransaction exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -310,6 +313,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "SendManyTransaction exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -394,6 +398,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "SendFromTransaction exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -422,6 +427,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "TransactionByTxidBlockchain exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -450,6 +456,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "ListtransactionByAccount exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -482,6 +489,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "UpdateBalanceWallet exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -505,6 +513,9 @@ namespace Vakapay.BitcoinBusiness
                 new Dictionary<string, string> {{"Status", Status.StatusPending}};
             var resultAddBitcoinRawTransactionAddress =
                 bitcoinRawTransactionRepo.QuerySearch(openWith);
+
+            logger.Error("aaaaaaaaaaaaa", "SendTransaction exception");
+            Console.WriteLine(1);
 //            var transaction = bitcoinRpc.GetTransaction(Id);
 //            var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
 //            //Console.WriteLine(transaction);
@@ -513,45 +524,6 @@ namespace Vakapay.BitcoinBusiness
 //            var blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data)["result"];
         }
 
-        /// <summary>
-        /// Send coins to address. Returns txid.
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="amount"></param>
-        /// <param name="comment"></param>
-        /// <param name="commentTo"></param>
-//        public ReturnObject SendToAddress(string address,
-//            float amount,
-//            string comment = "",
-//            string commentTo = "")
-//        {
-//            try
-//            {
-//                var results = bitcoinRpc.SendToAddress(address, amount, comment, commentTo);
-//                if (results.Status == Status.StatusError)
-//                    return results;
-//
-//                var idTransaction = results.Data;
-//                //add database vakaxa
-//                var bitcoinRawTransactionRepo =
-//                    vakapayRepositoryvakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
-//
-//                //
-//                return new ReturnObject
-//                {
-//                    Status = Status.StatusSuccess,
-//                    Data = idTransaction
-//                };
-//            }
-//            catch (Exception e)
-//            {
-//                return new ReturnObject
-//                {
-//                    Status = Status.StatusError,
-//                    Message = e.Message
-//                };
-//            }
-//        }
 
         /// <summary>
         /// If [account] is not specified, returns the server's total available balance.
@@ -575,6 +547,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "GetBalance exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
