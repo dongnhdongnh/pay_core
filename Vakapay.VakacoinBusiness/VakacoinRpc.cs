@@ -243,7 +243,6 @@ namespace Vakapay.VakacoinBusiness
         //Return arraylist of Transaction in a block
         public ArrayList GetAllTransactionsInBlock(string blockNumber)
         {
-            Console.WriteLine("Scan block: "+blockNumber);
             try
             {
                 var block = DefaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber}).Result;

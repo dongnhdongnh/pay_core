@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -19,6 +20,7 @@ namespace Vakapay.ScanVakaCoin
         private int lastBlock;
         private ArrayList errorBlocks;
         private System.Runtime.Caching.MemoryCache cache;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         static void Main(string[] args)
         {
@@ -51,12 +53,10 @@ namespace Vakapay.ScanVakaCoin
             //lastBlock = GetFromCache()
             lastBlock = 0;
             errorBlocks = new ArrayList();
-            
+
             cache = new System.Runtime.Caching.MemoryCache("ScanVakacoinCache");
             if (cache["lastBlock"] != null)
                 lastBlock = (int) cache["lastBlock"];
-            
-            
         }
 
         private void Processing()
@@ -64,6 +64,7 @@ namespace Vakapay.ScanVakaCoin
             while (true)
             {
                 int headBlock = rpc.GetHeadBlockNumber();
+                logger.Info("Head Block = "+headBlock);
                 if (headBlock > lastBlock)
                 {
                     if (lastBlock == 0)
@@ -88,7 +89,7 @@ namespace Vakapay.ScanVakaCoin
             catch (Exception e)
             {
                 errorBlocks.Add(headBlock);
-                Console.WriteLine(e);
+                logger.Error(e);
                 throw;
             }
         }
@@ -96,11 +97,12 @@ namespace Vakapay.ScanVakaCoin
         //Run program in not first time
         private void Run(int headBlock)
         {
-            int tmp = lastBlock+1;
+            int tmp = lastBlock + 1;
             for (int processingBlock = tmp; processingBlock <= headBlock; processingBlock++)
             {
                 try
                 {
+                    logger.Info("Scan block "+processingBlock);
                     var transactions = rpc.GetAllTransactionsInBlock(processingBlock.ToString());
                     ReceivedProcess(transactions);
                     lastBlock = processingBlock;
@@ -109,7 +111,7 @@ namespace Vakapay.ScanVakaCoin
                 catch (Exception e)
                 {
                     errorBlocks.Add(processingBlock);
-                    Console.WriteLine("Error when process block " + processingBlock, e);
+                    logger.Error("Error when process block " + processingBlock, e);
                     throw;
                 }
             }
@@ -131,11 +133,12 @@ namespace Vakapay.ScanVakaCoin
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error when process block " + block + " again", e);
+                            logger.Error("Error when process block " + block + " again", e);
                             throw;
                         }
                     }
                 }
+
                 System.Threading.Thread.Sleep(60000);
             }
         }
@@ -145,53 +148,53 @@ namespace Vakapay.ScanVakaCoin
             // process each transaction in arraylist of transactions
             foreach (var transaction in transactions)
             {
-                var jsonTrx = JObject.Parse(transaction.ToString())["transaction"];
+                try
+                {
+                    var jsonTrx = JObject.Parse(transaction.ToString())["transaction"];
 //                Console.WriteLine(jsonTrx.ToString());
-                
-                //check name of action in transaction
-                var actionName = jsonTrx["actions"][0]["name"];
-                if (actionName == null)
-                    continue;
-                if (actionName.ToString() != "transfer")
+
+                    //check name of action in transaction
+                    var actionName = jsonTrx["actions"][0]["name"];
+                    if (actionName == null)
                         continue;
-                
-                //check data is valid json
-                if (!JsonHelper.IsValidJson(jsonTrx["actions"][0]["data"].ToString()))
-                    continue;
-                    
-                //check quantity and to_address in transaction
-                var quantity = jsonTrx["actions"][0]["data"]["quantity"];
-                var _to = jsonTrx["actions"][0]["data"]["to"];
-                
-                //if quantity == null, process next transaction in arraylist
-                if (quantity == null || _to == null)
-                {
-                    continue;
-                }
+                    if (actionName.ToString() != "transfer")
+                        continue;
 
-                string _quantity = quantity.ToString();
-                if (!String.IsNullOrEmpty(_quantity))
-                {
-                    //check symbol in quantity
-                    var symbol = _quantity.Split(" ")[1];
-                    if (symbol == "EOS" || symbol == "VAKA")
+                    //check data is valid json
+                    if (!JsonHelper.IsValidJson(jsonTrx["actions"][0]["data"].ToString()))
+                        continue;
+
+                    //check quantity and to_address in transaction
+                    var quantity = jsonTrx["actions"][0]["data"]["quantity"];
+                    var _to = jsonTrx["actions"][0]["data"]["to"];
+
+                    //if quantity == null, process next transaction in arraylist
+                    if (quantity == null || _to == null)
                     {
-                        string to = _to.ToString();
+                        continue;
+                    }
 
-                        // if receiver doesn't exist in wallet table, process next transaction
-                        if (!walletBusiness.CheckExistedAddress(to))
+                    string _quantity = quantity.ToString();
+                    if (!String.IsNullOrEmpty(_quantity))
+                    {
+                        //check symbol in quantity
+                        var symbol = _quantity.Split(" ")[1];
+                        if (symbol == "EOS" || symbol == "VAKA")
                         {
-                            Console.WriteLine(to+ " is not exist in Wallet!!!");
-                            continue;
-                        }
+                            string to = _to.ToString();
 
-                        string from = jsonTrx["actions"][0]["data"]["from"].ToString();
-                        decimal amount = decimal.Parse(_quantity.Split(" ")[0]);
-                        string transactionTime = jsonTrx["expiration"].ToString();
-                        string status = "success";
+                            // if receiver doesn't exist in wallet table, process next transaction
+                            if (!walletBusiness.CheckExistedAddress(to))
+                            {
+                                Console.WriteLine(to + " is not exist in Wallet!!!");
+                                continue;
+                            }
 
-                        try
-                        {
+                            string from = jsonTrx["actions"][0]["data"]["from"].ToString();
+                            decimal amount = decimal.Parse(_quantity.Split(" ")[0]);
+                            string transactionTime = jsonTrx["expiration"].ToString();
+                            string status = "success";
+
                             // save to VakacoinTransactionHistory
                             ReturnObject result =
                                 vakacoinBusiness.CreateTransactionHistory(from, to, amount, transactionTime, status);
@@ -201,12 +204,12 @@ namespace Vakapay.ScanVakaCoin
 
                             Console.WriteLine(to + " was received " + amount + " " + symbol);
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            throw;
-                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    logger.Error(e);
+                    throw;
                 }
             }
         }
