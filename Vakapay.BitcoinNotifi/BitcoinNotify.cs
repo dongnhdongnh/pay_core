@@ -14,6 +14,7 @@ namespace Vakapay.BitcoinNotifi
     class BitcoinNotify
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static WalletBusiness.WalletBusiness mWalletBusiness;
 
         static void Main(string[] args)
         {
@@ -54,7 +55,7 @@ namespace Vakapay.BitcoinNotifi
                 }
                 else
                 {
-                    //show log transaction is exist
+                    logger.Debug("BitcoinNotify BtcTransactionDetailsModel is not exist");
                 }
             }
             catch (Exception e)
@@ -63,6 +64,13 @@ namespace Vakapay.BitcoinNotifi
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="btcDepositTransactionRepository"></param>
+        /// <param name="address"></param>
+        /// <param name="transactionId"></param>
+        /// <returns></returns>
         private static BitcoinDepositTransaction GetDepositTransaction(
             IBitcoinDepositTransactioRepository btcDepositTransactionRepository, String address, String transactionId)
         {
@@ -91,7 +99,12 @@ namespace Vakapay.BitcoinNotifi
         }
 
 
-        // handle notify transaction receiver
+        /// <summary>
+        /// handle notify transaction receiver
+        /// </summary>
+        /// <param name="transactionModel"></param>
+        /// <param name="transactionModelDetail"></param>
+        /// <param name="btcBussines"></param>
         private static void HandleNotifyDataReceiver(BTCTransactionModel transactionModel,
             BTCTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBussines)
         {
@@ -149,6 +162,13 @@ namespace Vakapay.BitcoinNotifi
                         CreateNewBtcDepositTransaction(transactionModel, transactionModelDetail,
                             btcDepositTransactionRepository, currentTime);
                     }
+
+                    // update balance 
+                    if (mWalletBusiness != null)
+                    {
+                        mWalletBusiness.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
+                            "Bitcoin");
+                    }
                 }
             }
             catch (Exception e)
@@ -157,6 +177,13 @@ namespace Vakapay.BitcoinNotifi
             }
         }
 
+        /// <summary>
+        /// CreateNewBtcDepositTransaction
+        /// </summary>
+        /// <param name="transactionModel"></param>
+        /// <param name="transactionModelDetail"></param>
+        /// <param name="btcDepositTransactionRepository"></param>
+        /// <param name="currentTime"></param>
         private static void CreateNewBtcDepositTransaction(BTCTransactionModel transactionModel,
             BTCTransactionDetailModel transactionModelDetail,
             IBitcoinDepositTransactioRepository btcDepositTransactionRepository, string currentTime
@@ -190,6 +217,13 @@ namespace Vakapay.BitcoinNotifi
             }
         }
 
+        /// <summary>
+        /// GetBtcWithdrawTransaction
+        /// </summary>
+        /// <param name="bitcoinRawTransactionRepository"></param>
+        /// <param name="address"></param>
+        /// <param name="transactionId"></param>
+        /// <returns></returns>
         private static BitcoinWithdrawTransaction GetBtcWithdrawTransaction(
             IBitcoinRawTransactionRepository bitcoinRawTransactionRepository, String address, String transactionId)
         {
@@ -217,6 +251,12 @@ namespace Vakapay.BitcoinNotifi
             }
         }
 
+        /// <summary>
+        /// HandleNotifyDataSend
+        /// </summary>
+        /// <param name="transactionModel"></param>
+        /// <param name="transactionModelDetail"></param>
+        /// <param name="btcBussines"></param>
         private static void HandleNotifyDataSend(BTCTransactionModel transactionModel,
             BTCTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBussines)
         {
