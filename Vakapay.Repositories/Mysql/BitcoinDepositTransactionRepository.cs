@@ -13,7 +13,7 @@ using Vakapay.Repositories.Mysql.Base;
 namespace Vakapay.Repositories.Mysql
 {
     public class BitcoinDepositTransactionRepository : MysqlBaseConnection,
-        IBitcoinDepositTransactioRepository
+        IBitcoinDepositTransactionRepository
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private const string TableName = "bitcoindeposittransaction";
@@ -143,7 +143,7 @@ namespace Vakapay.Repositories.Mysql
                     Connection.Open();
 
 
-                string sQuery = "SELECT * FROM " + TableName + " WHERE Hash = @HASH";
+                var sQuery = "SELECT * FROM " + TableName + " WHERE Hash = @HASH";
 
                 var result = Connection.QueryFirst<BitcoinDepositTransaction>(sQuery,
                     new {HASH = objectTransaction.Hash});
