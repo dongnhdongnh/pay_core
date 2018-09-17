@@ -284,8 +284,8 @@ namespace Vakapay.BitcoinNotifi
                         ToAddress = transactionModelDetail.Address,
                         Fee = 0,
                         Status = Status.StatusCompleted,
-                        CreatedAt = (int)currentTime,
-                        UpdatedAt = (int)currentTime
+                        CreatedAt = (int) currentTime,
+                        UpdatedAt = (int) currentTime
                     };
                     logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
                                  newBtcWithdrawTransaction);

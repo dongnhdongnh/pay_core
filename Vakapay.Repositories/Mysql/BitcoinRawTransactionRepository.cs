@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using Newtonsoft.Json.Linq;
@@ -27,6 +29,52 @@ namespace Vakapay.Repositories.Mysql
 
         public BitcoinRawTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
         {
+        }
+
+        string tableName = "bitcoinwithdrawtransaction";
+
+        public string QuerySearch(Dictionary<string, string> models)
+        {
+            string sQuery = "SELECT * FROM bitcoinwithdrawtransaction WHERE 1 = 1";
+            foreach (var model in models)
+            {
+                sQuery += String.Format(" AND {0}='{1}'", model.Key, model.Value);
+            }
+
+            return sQuery;
+        }
+
+        public string QueryUpdate(object updateValue, Dictionary<string, string> whereValue)
+        {
+            StringBuilder updateStr = new StringBuilder("");
+            StringBuilder whereStr = new StringBuilder("");
+
+            int count = 0;
+
+            foreach (PropertyInfo prop in updateValue.GetType().GetProperties())
+            {
+                if (prop.GetValue(updateValue, null) != null)
+                {
+                    if (count > 0)
+                        updateStr.Append(",");
+                    updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(updateValue, null));
+                    count++;
+                }
+            }
+
+            count = 0;
+            foreach (var model in whereValue)
+            {
+                if (count > 0)
+                    whereStr.Append(" AND ");
+                whereStr.AppendFormat(" {0}='{1}'", model.Key, model.Value);
+                count++;
+            }
+
+
+            string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", tableName, updateStr, whereStr);
+
+            return output;
         }
 
         public ReturnObject Update(BitcoinWithdrawTransaction objectUpdate)
@@ -167,6 +215,33 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
+        public ReturnObject ExcuteSQL(string sqlString)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var result = Connection.Execute(sqlString);
+
+
+                var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot Excute" : "Excute Success"
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
 
         public IBlockchainTransaction FindTransactionPending()
         {
