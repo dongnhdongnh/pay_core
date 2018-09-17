@@ -82,7 +82,7 @@ namespace Vakapay.ScanVakaCoin
             try
             {
                 var transactions = _rpc.GetAllTransactionsInBlock(headBlock.ToString());
-                ReceivedProcess(transactions);
+                ReceivedProcess(headBlock, transactions);
                 _lastBlock = headBlock;
                 _cache.Set("lastBlock", _lastBlock, DateTimeOffset.MaxValue);
             }
@@ -104,7 +104,7 @@ namespace Vakapay.ScanVakaCoin
                 {
                     logger.Info("Scan block "+processingBlock);
                     var transactions = _rpc.GetAllTransactionsInBlock(processingBlock.ToString());
-                    ReceivedProcess(transactions);
+                    ReceivedProcess(processingBlock, transactions);
                     _lastBlock = processingBlock;
                     _cache.Set("lastBlock", _lastBlock, DateTimeOffset.MaxValue);
                 }
@@ -128,7 +128,7 @@ namespace Vakapay.ScanVakaCoin
                         try
                         {
                             var transactions = _rpc.GetAllTransactionsInBlock(block.ToString());
-                            ReceivedProcess(transactions);
+                            ReceivedProcess(block, transactions);
                             _errorBlocks.Remove(block);
                         }
                         catch (Exception e)
@@ -143,7 +143,7 @@ namespace Vakapay.ScanVakaCoin
             }
         }
 
-        private void ReceivedProcess(ArrayList transactions)
+        private void ReceivedProcess(int blockNumber, ArrayList transactions)
         {
             // process each transaction in arraylist of transactions
             foreach (var transaction in transactions)
@@ -172,6 +172,8 @@ namespace Vakapay.ScanVakaCoin
                     {
                         continue;
                     }
+                    
+                    var trxId = JObject.Parse(transaction.ToString())["id"].ToString();
 
                     string _quantity = quantity.ToString();
                     if (!String.IsNullOrEmpty(_quantity))
@@ -196,7 +198,7 @@ namespace Vakapay.ScanVakaCoin
 
                             // save to VakacoinTransactionHistory
                             ReturnObject result =
-                                _vakacoinBusiness.CreateTransactionHistory(from, to, amount, transactionTime, status);
+                                _vakacoinBusiness.CreateTransactionHistory(trxId, from, to, blockNumber, amount, transactionTime, status);
 
                             //update Balance in Wallet
                             _walletBusiness.UpdateBalance(to, amount, symbol);

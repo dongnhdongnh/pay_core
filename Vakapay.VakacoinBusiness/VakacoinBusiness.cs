@@ -39,7 +39,7 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public ReturnObject CreateTransactionHistory(string from, string to, decimal amount, string transactionTime, string status)
+        public ReturnObject CreateTransactionHistory(string trxId, string from, string to, int blockNumber, decimal amount, string transactionTime, string status)
         {
             try
             {
@@ -48,8 +48,10 @@ namespace Vakapay.VakacoinBusiness
                 var transaction = new VakacoinTransactionHistory
                 {
                     Id = CommonHelper.GenerateUuid(),
+                    TrxId = trxId,
                     From = from,
                     To = to,
+                    BlockNumber = blockNumber,
                     Amount = amount,
                     TransactionTime = transactionTime,
                     CreatedTime =  DateTime.UtcNow,
