@@ -96,7 +96,7 @@ namespace Vakapay.BitcoinBusiness
                 var bitcoinRawTransactionRepo =
                     VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
 
-                Dictionary<string, string> search =
+                var search =
                     new Dictionary<string, string>
                     {
                         {"Status", Status.StatusPending},
@@ -104,20 +104,18 @@ namespace Vakapay.BitcoinBusiness
                         {"Version", 0.ToString()}
                     };
 
-                List<BitcoinWithdrawTransaction> pendings =
+                var pendings =
                     bitcoinRawTransactionRepo.FindBySql(bitcoinRawTransactionRepo.QuerySearch(search));
                 var data = new JArray();
                 if (pendings.Count <= 0) throw new Exception("NO PENING");
-                else
+                
+                foreach (var pending in pendings)
                 {
-                    foreach (BitcoinWithdrawTransaction pending in pendings)
-                    {
-                        // send 
-                        Logger.Error(JsonHelper.SerializeObject(pending), "runSendTransaction before");
-                        var result = SendTransaction(pending);
-                        Logger.Error(JsonHelper.SerializeObject(result), "runSendTransaction result");
-                        data.Add(result);
-                    }
+                    // send 
+                    Logger.Error(JsonHelper.SerializeObject(pending), "runSendTransaction before");
+                    var result = SendTransaction(pending);
+                    Logger.Error(JsonHelper.SerializeObject(result), "runSendTransaction result");
+                    data.Add(result);
                 }
 
                 return new ReturnObject
@@ -137,7 +135,7 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        public ReturnObject SendTransaction(BitcoinWithdrawTransaction blockchainTransaction)
+        private ReturnObject SendTransaction(BitcoinWithdrawTransaction blockchainTransaction)
         {
             try
             {
@@ -154,16 +152,16 @@ namespace Vakapay.BitcoinBusiness
                         Data = blockchainTransaction.Id
                     };
 
-                string currentVersionWithRaw = blockchainTransaction.Version.ToString();
+                var currentVersionWithRaw = blockchainTransaction.Version.ToString();
 
                 // set wwhere
-                Dictionary<string, string> blockchainTransactionWhere =
+                var blockchainTransactionWhere =
                     new Dictionary<string, string>
                     {
                         {"Id", blockchainTransaction.Id},
                         {"Amount", blockchainTransaction.Amount.ToString()},
                         {"Fee", blockchainTransaction.Fee.ToString()},
-                        {"Version", currentVersionWithRaw},
+                        {"Version", currentVersionWithRaw}
                     };
 
 
@@ -171,7 +169,7 @@ namespace Vakapay.BitcoinBusiness
                 blockchainTransaction.Version = blockchainTransaction.Version + 1;
 
                 //get sql update withDraw
-                string queryUpdate =
+                var queryUpdate =
                     bitcoinRawTransactionRepo.QueryUpdate(blockchainTransaction, blockchainTransactionWhere);
 
                 // tranh send 2 lan
@@ -415,12 +413,12 @@ namespace Vakapay.BitcoinBusiness
         /// <summary>
         /// gettransaction by txid
         /// </summary>
-        /// <param name="Txid"></param>
-        public ReturnObject TransactionByTxidBlockchain(String Txid)
+        /// <param name="txid"></param>
+        public ReturnObject TransactionByTxidBlockchain(string txid)
         {
             try
             {
-                var results = BitcoinRpc.GetTransaction(Txid);
+                var results = BitcoinRpc.GetTransaction(txid);
                 if (results.Status == Status.StatusError)
                     return results;
 
@@ -444,12 +442,12 @@ namespace Vakapay.BitcoinBusiness
         /// <summary>
         /// gettransaction by Account
         /// </summary>
-        /// <param name="Account"></param>
-        public ReturnObject ListtransactionByAccount(String Account)
+        /// <param name="account"></param>
+        public ReturnObject ListtransactionByAccount(string account)
         {
             try
             {
-                var results = BitcoinRpc.ListTransactions(Account);
+                var results = BitcoinRpc.ListTransactions(account);
                 if (results.Status == Status.StatusError)
                     return results;
 
@@ -473,14 +471,14 @@ namespace Vakapay.BitcoinBusiness
         /**
          * update balance Wallet
          */
-        public ReturnObject UpdateBalanceWallet(decimal balance, string WalletId, int version)
+        public ReturnObject UpdateBalanceWallet(decimal balance, string walletId, int version)
         {
             try
             {
                 var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection);
 
                 //chua biet walletid, version lay tu dau
-                var walletCheck = walletRepository.FindById(WalletId);
+                var walletCheck = walletRepository.FindById(walletId);
 
 
                 if (walletCheck == null)
@@ -490,7 +488,7 @@ namespace Vakapay.BitcoinBusiness
                         Message = "Wallet not found"
                     };
 
-                return walletRepository.UpdateBalanceWallet(balance, WalletId, version);
+                return walletRepository.UpdateBalanceWallet(balance, walletId, version);
             }
             catch (Exception e)
             {
@@ -506,8 +504,8 @@ namespace Vakapay.BitcoinBusiness
         /// <summary>
         /// test 
         /// </summary>
-        /// <param name="Id"></param>
-        public void test(String Id)
+        /// <param name="id"></param>
+        public void Test(string id)
         {
             //add database vakaxa
 //            var bitcoinRawTransactionRepo =
