@@ -4,10 +4,12 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
+
 	public interface IEthereumWithdrawTransactionRepository : IRepositoryBlockchainTransaction<EthereumWithdrawTransaction>
 	{
-		string Query_Search(string SearchName, string SearchData);
-		string Query_Update(object updatevalues, object selectorvalue);
+		string Query_Search(object whereValue);
+		string Query_Update(object updateValue, object whereValue);
 		ReturnObject ExcuteSQL(string sqlString);
+		
 	}
 }

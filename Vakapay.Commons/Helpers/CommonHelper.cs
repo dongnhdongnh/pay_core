@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -67,6 +68,12 @@ namespace Vakapay.Commons.Helpers
 			char[] _trim_hex = new char[] { '0', 'x' };
 			return int.TryParse(hex.TrimStart(_trim_hex), System.Globalization.NumberStyles.HexNumber, null, out result);
 
+		}
+
+		public static string GetPropertyName<T, P>(Expression<Func<T, P>> propertyDelegate)
+		{
+			var expression = (MemberExpression)propertyDelegate.Body;
+			return expression.Member.Name;
 		}
 	}
 }

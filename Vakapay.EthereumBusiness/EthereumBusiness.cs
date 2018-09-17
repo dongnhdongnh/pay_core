@@ -27,7 +27,15 @@ namespace Vakapay.EthereumBusiness
 			try
 			{
 				var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-				List<EthereumWithdrawTransaction> pendings = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search("Status", Status.StatusPending));
+				//EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
+				//{
+				//	Status = Status.StatusPending
+				//};
+				List<EthereumWithdrawTransaction> pendings = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(
+				new
+				{
+					Status = Status.StatusPending,
+				}));
 				Console.WriteLine(pendings.Count);
 				if (pendings.Count <= 0) throw new Exception("NO PENING");
 				else
@@ -61,6 +69,7 @@ namespace Vakapay.EthereumBusiness
 				var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
 				blockchainTransaction.Hash = _getter.result.ToString();
 				blockchainTransaction.Status = Status.StatusCompleted;
+				blockchainTransaction.InProcess = 1;
 				blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
 				int _currentVersion = blockchainTransaction.Version;
 				blockchainTransaction.Version = _currentVersion + 1;
@@ -70,7 +79,7 @@ namespace Vakapay.EthereumBusiness
 					Amount = blockchainTransaction.Amount,
 					Fee = blockchainTransaction.Fee,
 					Version = _currentVersion,
-					//InProcess = _currentVersion
+					//InProcess = 1
 				};
 				return ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, blockchainTransactionWhere));
 
@@ -215,7 +224,15 @@ namespace Vakapay.EthereumBusiness
 
 			//	String _query = String.Format("SELECT * FROM vakapay.ethereumwithdrawtransaction Where Status='{0}'", Status.StatusPending);
 			var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search("Status", Status.StatusPending));
+			//EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
+			//{
+			//	Status = Status.StatusPending
+			//};
+			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(
+			new
+			{
+				Status = Status.StatusPending,
+			}));
 			if (_pending.Count <= 0)
 			{
 				Console.WriteLine("No pending");

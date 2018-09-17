@@ -13,50 +13,82 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	
-    public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
+
+	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
     {
         public static string tableName = "ethereumwithdrawtransaction";
-        public string Query_Search(string SearchName, string SearchData)
-        {
-            return String.Format("SELECT * FROM {2} Where {0}='{1}'", SearchName, SearchData, tableName);
-        }
+        public string Query_Search(object whereValue)
+		{
+			// return String.Format("SELECT * FROM {2} Where {0}='{1}'", SearchName, SearchData, tableName);
+			//StringBuilder updateStr = new StringBuilder("");
+			StringBuilder whereStr = new StringBuilder("");
 
-        public string Query_Update(object updatevalues, object selectorvalue)
-        {
-            StringBuilder updateStr = new StringBuilder("");
-            StringBuilder whereStr = new StringBuilder("");
+			int count = 0;
+			//foreach (PropertyInfo prop in searchValue.GetType().GetProperties())
+			//{
+			//	if (prop.GetValue(searchValue, null) != null)
+			//	{
+			//		if (count > 0)
+			//			updateStr.Append(",");
+			//		updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(searchValue, null));
+			//		count++;
+			//	}
+			//}
 
-            int count = 0;
-            foreach (PropertyInfo prop in updatevalues.GetType().GetProperties())
-            {
-                if (prop.GetValue(updatevalues, null) != null)
-                {
-                    if (count > 0)
-                        updateStr.Append(",");
-                    updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(updatevalues, null));
-                    count++;
-                }
-            }
-
-            // if (whereStr != null)
-            count = 0;
-            foreach (PropertyInfo prop in selectorvalue.GetType().GetProperties())
-            {
-                if (prop.GetValue(selectorvalue, null) != null)
-                {
-                    if (count > 0)
-                        whereStr.Append(" AND ");
-                    whereStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(selectorvalue, null));
-                    count++;
-                }
-            }
+			// if (whereStr != null)
+			//count = 0;
+			foreach (PropertyInfo prop in whereValue.GetType().GetProperties())
+			{
+				if (prop.GetValue(whereValue, null) != null)
+				{
+					if (count > 0)
+						whereStr.Append(" AND ");
+					whereStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(whereValue, null));
+					count++;
+				}
+			}
 
 
-            string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", tableName, updateStr, whereStr);
-            Console.WriteLine(output);
-            return output;
-        }
+			string output = string.Format("SELECT * FROM {0} WHERE {1}", tableName, whereStr);
+			Console.WriteLine(output);
+			return output;
+		}
+
+		public string Query_Update(object updateValue, object whereValue)
+		{
+			StringBuilder updateStr = new StringBuilder("");
+			StringBuilder whereStr = new StringBuilder("");
+
+			int count = 0;
+			foreach (PropertyInfo prop in updateValue.GetType().GetProperties())
+			{
+				if (prop.GetValue(updateValue, null) != null)
+				{
+					if (count > 0)
+						updateStr.Append(",");
+					updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(updateValue, null));
+					count++;
+				}
+			}
+
+			// if (whereStr != null)
+			count = 0;
+			foreach (PropertyInfo prop in whereValue.GetType().GetProperties())
+			{
+				if (prop.GetValue(whereValue, null) != null)
+				{
+					if (count > 0)
+						whereStr.Append(" AND ");
+					whereStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(whereValue, null));
+					count++;
+				}
+			}
+
+
+			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", tableName, updateStr, whereStr);
+			Console.WriteLine(output);
+			return output;
+		}
 
         public EthereumWithdrawnTransactionRepository(string connectionString) : base(connectionString)
         {
@@ -199,4 +231,5 @@ namespace Vakapay.Repositories.Mysql
             throw new NotImplementedException();
         }
     }
+
 }

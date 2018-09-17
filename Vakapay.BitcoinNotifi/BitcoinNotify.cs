@@ -14,7 +14,7 @@ namespace Vakapay.BitcoinNotifi
     class BitcoinNotify
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private static WalletBusiness.WalletBusiness mWalletBusiness;
+        private static WalletBusiness.WalletBusiness _mWalletBusiness;
 
         static void Main(string[] args)
         {
@@ -33,8 +33,8 @@ namespace Vakapay.BitcoinNotifi
                     UserName = "bitcoinrpc",
                     Password = "wqfgewgewi"
                 };
-                var btcBussines = new BitcoinBusiness.BitcoinBusiness(persistenceFactory, bitcoinConnect);
-                ReturnObject transaction = btcBussines.GetTransaction(args[0]);
+                var btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory, bitcoinConnect);
+                ReturnObject transaction = btcBusiness.GetTransaction(args[0]);
                 logger.Debug("BitcoinNotify =>> BTCTransactionModel: " + transaction.Data);
                 BTCTransactionModel transactionModel = BTCTransactionModel.FromJson(transaction.Data);
                 if (transactionModel.BtcTransactionDetailsModel != null &&
@@ -44,12 +44,12 @@ namespace Vakapay.BitcoinNotifi
                     {
                         if (transactionModelDetail.Category.Equals("receive"))
                         {
-                            HandleNotifyDataReceiver(transactionModel, transactionModelDetail, btcBussines);
+                            HandleNotifyDataReceiver(transactionModel, transactionModelDetail, btcBusiness);
                         }
                         else
                         {
                             // if isExist(by address and transactionId) then update, else insert
-                            HandleNotifyDataSend(transactionModel, transactionModelDetail, btcBussines);
+                            HandleNotifyDataSend(transactionModel, transactionModelDetail, btcBusiness);
                         }
                     }
                 }
@@ -104,16 +104,16 @@ namespace Vakapay.BitcoinNotifi
         /// </summary>
         /// <param name="transactionModel"></param>
         /// <param name="transactionModelDetail"></param>
-        /// <param name="btcBussines"></param>
+        /// <param name="btcBusiness"></param>
         private static void HandleNotifyDataReceiver(BTCTransactionModel transactionModel,
-            BTCTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBussines)
+            BTCTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBusiness)
         {
             try
             {
                 logger.Debug("HandleNotifiDataReceiver start");
 
-                var btcDepositTransactionRepository = btcBussines
-                    .factory.GetBitcoinDepositTransactioRepository(btcBussines.dbconnect);
+                var btcDepositTransactionRepository = btcBusiness
+                    .factory.GetBitcoinDepositTransactioRepository(btcBusiness.dbconnect);
 
                 logger.Debug("HandleNotifiDataReceiver start1");
                 var currentBtcDepositTransaction = GetDepositTransaction(btcDepositTransactionRepository,
@@ -139,8 +139,8 @@ namespace Vakapay.BitcoinNotifi
                 else
                 {
                     logger.Debug("HandleNotifiDataReceiver with confirm > 0");
-                    IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBussines
-                        .factory.GeBitcoinRawTransactionRepository(btcBussines.dbconnect);
+                    IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBusiness
+                        .factory.GeBitcoinRawTransactionRepository(btcBusiness.dbconnect);
                     BitcoinWithdrawTransaction currentBtcWithdrawTransaction =
                         GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
                             transactionModel.Txid);
@@ -166,11 +166,8 @@ namespace Vakapay.BitcoinNotifi
                     }
 
                     // update balance 
-                    if (mWalletBusiness != null)
-                    {
-                        mWalletBusiness.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
-                            "Bitcoin");
-                    }
+                    _mWalletBusiness?.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
+                        "Bitcoin");
                 }
             }
             catch (Exception e)
@@ -258,19 +255,19 @@ namespace Vakapay.BitcoinNotifi
         /// </summary>
         /// <param name="transactionModel"></param>
         /// <param name="transactionModelDetail"></param>
-        /// <param name="btcBussines"></param>
+        /// <param name="btcBusiness"></param>
         private static void HandleNotifyDataSend(BTCTransactionModel transactionModel,
-            BTCTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBussines)
+            BTCTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBusiness)
         {
             try
             {
                 logger.Debug("HandleNotifyDataSend start");
-                IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBussines
-                    .factory.GeBitcoinRawTransactionRepository(btcBussines.dbconnect);
+                IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBusiness
+                    .factory.GeBitcoinRawTransactionRepository(btcBusiness.dbconnect);
 
                 BitcoinWithdrawTransaction currentBtcWithdrawTransaction =
-                    GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, "mwfHq6NigeDDV7MrBHdyZhQdUWeYqPCFLV",
-                        "beb4bd560b68cc5c28e772322d8f2caee67bf76364c62dc62a724f46154e9b6b");
+                    GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
+                        transactionModel.Txid);
                 logger.Debug("HandleNotifyDataSend =>> btcWithdrawTransaction: " + currentBtcWithdrawTransaction);
                 if (currentBtcWithdrawTransaction == null)
                 {
