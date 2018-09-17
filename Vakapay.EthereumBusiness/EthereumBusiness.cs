@@ -185,14 +185,14 @@ namespace Vakapay.EthereumBusiness
 		}
 
 		bool isScanning = false;
-		public void AutoScanBlock()
+		public void AutoScanBlock(WalletBusiness.WalletBusiness wallet)
 		{
-			Thread scanThread = new Thread(DoAutoScanBlock);
+			Thread scanThread = new Thread(() => DoAutoScanBlock(wallet));
 			scanThread.Start();
 
 
 		}
-		void DoAutoScanBlock()
+		void DoAutoScanBlock(WalletBusiness.WalletBusiness wallet)
 		{
 			while (true)
 
@@ -200,7 +200,7 @@ namespace Vakapay.EthereumBusiness
 
 				Console.WriteLine("is scan=" + isScanning);
 				if (!isScanning)
-					ScanBlock(null);
+					ScanBlock(wallet);
 				Thread.Sleep(5000);
 
 			}

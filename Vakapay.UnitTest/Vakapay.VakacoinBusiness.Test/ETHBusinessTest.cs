@@ -79,6 +79,11 @@ namespace Vakapay.VakacoinBusiness.Test
 			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}
+		[Test]
+		public void CreateNewTransactionMultirun()
+		{
+			
+		}
 
 		[Test]
 		public void CreateNewTransaction()
