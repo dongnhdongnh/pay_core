@@ -241,4 +241,4 @@ _Pvt_Extensions
 .DS_Store
 
 # json
-Vakaxa.ApiServer/ClientApp/package-lock.json
+Vakaxa.ApiServer/package-lock.json

@@ -21,7 +21,7 @@ namespace Vakapay.VakacoinBusiness
         private const string ActivePermission = "active";
         private const string TransferAction = "transfer";
         private VakaApi DefaultApi { get; }
-        public Logger Logger { get; } = NLog.LogManager.GetCurrentClassLogger();
+        private Logger Logger { get; } = NLog.LogManager.GetCurrentClassLogger();
 
         public VakacoinRpc(string endPointUrl, string chainId = null)
         {
@@ -68,14 +68,18 @@ namespace Vakapay.VakacoinBusiness
 
         public bool CheckAccountExist(string accountName)
         {
-            var values = new Dictionary<string, string>
-            {
-                { "account_name", accountName },
-            };
+            var exist = false;
 
-            var result = HttpClientHelper.PostRequest(GetAccountPostUrl(), values);
-            var jResult= JObject.Parse(result);
-            var exist = jResult["error"] == null;
+            try
+            {
+                var result = DefaultApi.GetAccount(new GetAccountRequest() {AccountName = accountName}).Result;
+                exist = true;
+            }
+            catch (Exception e)
+            {
+                exist = false;
+            }
+
             return exist;
         }
 
