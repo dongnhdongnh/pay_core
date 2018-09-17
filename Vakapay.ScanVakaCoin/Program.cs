@@ -151,7 +151,6 @@ namespace Vakapay.ScanVakaCoin
                 try
                 {
                     var jsonTrx = JObject.Parse(transaction.ToString())["transaction"];
-//                Console.WriteLine(jsonTrx.ToString());
 
                     //check name of action in transaction
                     var actionName = jsonTrx["actions"][0]["name"];
@@ -186,7 +185,7 @@ namespace Vakapay.ScanVakaCoin
                             // if receiver doesn't exist in wallet table, process next transaction
                             if (!_walletBusiness.CheckExistedAddress(to))
                             {
-                                Console.WriteLine(to + " is not exist in Wallet!!!");
+                                logger.Info(to + " is not exist in Wallet!!!");
                                 continue;
                             }
 
@@ -202,7 +201,7 @@ namespace Vakapay.ScanVakaCoin
                             //update Balance in Wallet
                             _walletBusiness.UpdateBalance(to, amount, symbol);
 
-                            Console.WriteLine(to + " was received " + amount + " " + symbol);
+                            logger.Info(to + " was received " + amount + " " + symbol);
                         }
                     }
                 }

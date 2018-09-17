@@ -11,12 +11,9 @@ namespace Vakapay.VakacoinBusiness
 
     public class VakacoinBusiness : BlockchainBusiness
     {
-        private VakacoinRpc VakacoinRpc { get; set; }
-
         public VakacoinBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
             : base(vakapayRepositoryFactory, isNewConnection)
         {
-            VakacoinRpc = new VakacoinRpc("http://127.0.0.1:8000");
         }
 
         /// <summary>
