@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
 using Vakapay.Cryptography;
@@ -20,24 +21,34 @@ namespace Vakapay.VakacoinBusiness
         private const string ActivePermission = "active";
         private const string TransferAction = "transfer";
         private VakaApi DefaultApi { get; }
+        public Logger Logger { get; } = NLog.LogManager.GetCurrentClassLogger();
 
         public VakacoinRpc(string endPointUrl, string chainId = null)
         {
-            EndPointUrl = endPointUrl;
+            try
+            {
+                EndPointUrl = endPointUrl;
 
-            var vakaConfig = new VakaConfigurator()
-            {
-                HttpEndpoint = EndPointUrl,
-            };
-            DefaultApi = new VakaApi(vakaConfig);
-            
-            if (string.IsNullOrEmpty(chainId))
-            {
-                var getInfoResult = DefaultApi.GetInfo().Result;
-                chainId = getInfoResult.ChainId;
+                var vakaConfig = new VakaConfigurator()
+                {
+                    HttpEndpoint = EndPointUrl,
+                };
+                DefaultApi = new VakaApi(vakaConfig);
+
+                if (string.IsNullOrEmpty(chainId))
+                {
+                    var getInfoResult = DefaultApi.GetInfo().Result;
+                    chainId = getInfoResult.ChainId;
+                }
+
+                this.ChainID = chainId;
+                DefaultApi.Config.ChainId = ChainID;
             }
-            
-            ChainID = chainId;
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                throw;
+            }
         }
 
         private string GetAccountPostUrl()
@@ -82,6 +93,7 @@ namespace Vakapay.VakacoinBusiness
             }
             catch (Exception e)
             {
+                Logger.Error(e);
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -100,6 +112,7 @@ namespace Vakapay.VakacoinBusiness
                 var vakaConfig = new VakaConfigurator()
                 {
                     HttpEndpoint = EndPointUrl,
+                    ChainId = this.ChainID
                 };
 
                 var vaka = new Vaka(vakaConfig);
@@ -151,6 +164,7 @@ namespace Vakapay.VakacoinBusiness
             }
             catch (Exception e)
             {
+                Logger.Error(e);
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -167,6 +181,7 @@ namespace Vakapay.VakacoinBusiness
                 {
                     SignProvider = new DefaultSignProvider(sPrivateKey),
                     HttpEndpoint = EndPointUrl,
+                    ChainId = this.ChainID
                 };
                 
                 var vaka = new Vaka(vakaConfig);
@@ -200,6 +215,7 @@ namespace Vakapay.VakacoinBusiness
             }
             catch (Exception e)
             {
+                Logger.Error(e);
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -226,6 +242,7 @@ namespace Vakapay.VakacoinBusiness
             }
             catch (Exception e)
             {
+                Logger.Error(e);
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -261,6 +278,7 @@ namespace Vakapay.VakacoinBusiness
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                Logger.Error(e);
                 return null;
             }
         }
