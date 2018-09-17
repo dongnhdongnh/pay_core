@@ -26,8 +26,13 @@ namespace Vakapay.BitcoinNotifi
                 };
 
                 var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-
-                var btcBussines = new BitcoinBusiness.BitcoinBusiness(persistenceFactory);
+                var bitcoinConnect = new BitcoinRPCConnect
+                {
+                    Host = "http://127.0.0.1:18443",
+                    UserName = "bitcoinrpc",
+                    Password = "wqfgewgewi"
+                };
+                var btcBussines = new BitcoinBusiness.BitcoinBusiness(persistenceFactory, bitcoinConnect);
                 ReturnObject transaction = btcBussines.GetTransaction(args[0]);
                 logger.Debug("BitcoinNotify =>> BTCTransactionModel: " + transaction.Data);
                 BTCTransactionModel transactionModel = BTCTransactionModel.FromJson(transaction.Data);
