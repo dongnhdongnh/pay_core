@@ -80,6 +80,7 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
+                logger.Error(e, "CreateNewAddAddress exception");
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -113,7 +114,9 @@ namespace Vakapay.BitcoinBusiness
                     foreach (BitcoinWithdrawTransaction pending in pendings)
                     {
                         // send 
-                        SendTransaction(pending);
+                        logger.Error(JsonHelper.SerializeObject(pending), "runSendTransaction before");
+                        var result = SendTransaction(pending);
+                        logger.Error(JsonHelper.SerializeObject(result), "runSendTransaction result");
                     }
                 }
 
@@ -143,7 +146,8 @@ namespace Vakapay.BitcoinBusiness
                     return new ReturnObject
                     {
                         Status = Status.StatusError,
-                        Message = "WithRawtransaction Not Found"
+                        Message = "WithRawtransaction Not Found",
+                        Data = blockchainTransaction.Id
                     };
 
                 string currentVersionWithRaw = blockchainTransaction.Version.ToString();
@@ -172,7 +176,6 @@ namespace Vakapay.BitcoinBusiness
 
                 var results = bitcoinRpc.SendToAddress(blockchainTransaction.ToAddress,
                     Convert.ToDecimal(blockchainTransaction.Amount));
-
 
                 if (results.Status == Status.StatusError)
                     return results;
@@ -216,7 +219,7 @@ namespace Vakapay.BitcoinBusiness
 
                 //
                 return ResultAddBitcoinRawTransactionAddress;
-               
+
                 //deposit
             }
             catch (Exception e)
@@ -510,7 +513,7 @@ namespace Vakapay.BitcoinBusiness
                 new Dictionary<string, string> {{"Status", Status.StatusPending}};
             var resultAddBitcoinRawTransactionAddress =
                 bitcoinRawTransactionRepo.QuerySearch(openWith);
-            
+
             logger.Error("aaaaaaaaaaaaa", "SendTransaction exception");
             Console.WriteLine(1);
 //            var transaction = bitcoinRpc.GetTransaction(Id);

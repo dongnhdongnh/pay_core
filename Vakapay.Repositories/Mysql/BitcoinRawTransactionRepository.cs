@@ -230,7 +230,8 @@ namespace Vakapay.Repositories.Mysql
                 return new ReturnObject
                 {
                     Status = status,
-                    Message = status == Status.StatusError ? "Cannot Excute" : "Excute Success"
+                    Message = status == Status.StatusError ? "Cannot Excute" : "Excute Success",
+                    Data = sqlString
                 };
             }
             catch (Exception e)
@@ -238,7 +239,8 @@ namespace Vakapay.Repositories.Mysql
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
-                    Message = e.Message
+                    Message = e.Message,
+                    Data = sqlString
                 };
             }
         }
