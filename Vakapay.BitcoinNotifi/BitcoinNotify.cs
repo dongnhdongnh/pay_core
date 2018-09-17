@@ -14,7 +14,7 @@ namespace Vakapay.BitcoinNotifi
     class BitcoinNotify
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
-        private static WalletBusiness.WalletBusiness _mWalletBusiness;
+        private static readonly WalletBusiness.WalletBusiness WalletBusiness = null;
 
         static void Main(string[] args)
         {
@@ -76,19 +76,15 @@ namespace Vakapay.BitcoinNotifi
         {
             try
             {
-                List<BitcoinDepositTransaction> listBtcDepositTransactions = btcDepositTransactionRepository.FindWhere(
-                    new BitcoinDepositTransaction()
+                BitcoinDepositTransaction depositTransaction = btcDepositTransactionRepository.FindOneWhere(
+                    new BitcoinDepositTransaction
                     {
                         Hash = transactionId,
                         ToAddress = address
                     });
-                logger.Debug("GetDepositTransaction from DB: " + listBtcDepositTransactions.Count);
-                if (listBtcDepositTransactions.Count > 0)
-                {
-                    return listBtcDepositTransactions.ElementAt(0);
-                }
+                logger.Debug("GetDepositTransaction from DB: " + depositTransaction.ToJson());
 
-                return null;
+                return depositTransaction;
             }
 
             catch (Exception e)
@@ -120,7 +116,7 @@ namespace Vakapay.BitcoinNotifi
                     transactionModelDetail.Address, transactionModel.Txid);
                 logger.Debug("HandleNotifiDataReceiver =>> currentBtcDepositTransaction: " +
                              currentBtcDepositTransaction);
-                var currentTime = CommonHelper.GetUnixTimestamp().ToString();
+                var currentTime = CommonHelper.GetUnixTimestamp();
                 if (transactionModel.Confirmations == 0)
                 {
                     logger.Debug("HandleNotifiDataReceiver with confirm = 0");
@@ -166,7 +162,7 @@ namespace Vakapay.BitcoinNotifi
                     }
 
                     // update balance 
-                    _mWalletBusiness?.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
+                    WalletBusiness?.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
                         "Bitcoin");
                 }
             }
@@ -185,7 +181,7 @@ namespace Vakapay.BitcoinNotifi
         /// <param name="currentTime"></param>
         private static void CreateNewBtcDepositTransaction(BTCTransactionModel transactionModel,
             BTCTransactionDetailModel transactionModelDetail,
-            IBitcoinDepositTransactioRepository btcDepositTransactionRepository, string currentTime
+            IBitcoinDepositTransactioRepository btcDepositTransactionRepository, long currentTime
         )
         {
             try
@@ -284,8 +280,8 @@ namespace Vakapay.BitcoinNotifi
                         ToAddress = transactionModelDetail.Address,
                         Fee = 0,
                         Status = Status.StatusCompleted,
-                        CreatedAt = (int) currentTime,
-                        UpdatedAt = (int) currentTime
+                        CreatedAt =  currentTime,
+                        UpdatedAt =  currentTime
                     };
                     logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
                                  newBtcWithdrawTransaction);

@@ -8,23 +8,21 @@ using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
-using Vakapay.Models.Repositories.Base;
 using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class BitcoinDepositTransactioRepository : MysqlBaseConnection,
+    public class BitcoinDepositTransactionRepository : MysqlBaseConnection,
         IBitcoinDepositTransactioRepository
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-        public static string tableName = "bitcoindeposittransaction";
-        private IBitcoinDepositTransactioRepository _BitcoinDepositTransactioRepositoryImplementation;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private const string TableName = "bitcoindeposittransaction";
 
-        public BitcoinDepositTransactioRepository(string connectionString) : base(connectionString)
+        public BitcoinDepositTransactionRepository(string connectionString) : base(connectionString)
         {
         }
 
-        public BitcoinDepositTransactioRepository(IDbConnection dbConnection) : base(dbConnection)
+        public BitcoinDepositTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
         {
         }
 
@@ -37,7 +35,7 @@ namespace Vakapay.Repositories.Mysql
                     Connection.Open();
                 var isSuccess = Connection.Update(objectUpdate);
                 var status = !string.IsNullOrEmpty(isSuccess.ToString()) ? Status.StatusSuccess : Status.StatusError;
-                logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
+                Logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -47,7 +45,7 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                logger.Error("BitcoinDepositTransactioRepository =>> update fail: " + e.Message);
+                Logger.Error("BitcoinDepositTransactioRepository =>> update fail: " + e.Message);
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -57,14 +55,14 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public ReturnObject Delete(string Id)
+        public ReturnObject Delete(string id)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                var result = Connection.Delete(new BitcoinDepositTransaction {Id = Id});
+                var result = Connection.Delete(new BitcoinDepositTransaction {Id = id});
                 var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
                 return new ReturnObject
                 {
@@ -74,8 +72,8 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                logger.Error("BitcoinDepositTransactioRepository =>> Delete fail: " + e.Message);
-                throw e;
+                Logger.Error("BitcoinDepositTransactioRepository =>> Delete fail: " + e.Message);
+                throw;
             }
         }
 
@@ -89,7 +87,7 @@ namespace Vakapay.Repositories.Mysql
 
                 var result = Connection.InsertTask<string, BitcoinDepositTransaction>(objectInsert);
                 var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-                logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
+                Logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
                 return new ReturnObject
                 {
                     Status = status,
@@ -99,7 +97,7 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
+                Logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -108,8 +106,8 @@ namespace Vakapay.Repositories.Mysql
                 };
             }
         }
-        
-        public List<BitcoinDepositTransaction> FindWhere(BitcoinDepositTransaction rawtransaction)
+
+        public List<BitcoinDepositTransaction> FindWhere(BitcoinDepositTransaction bitcoinDepositTransaction)
         {
             try
             {
@@ -117,14 +115,14 @@ namespace Vakapay.Repositories.Mysql
                     Connection.Open();
 
 
-                string sQuery = "SELECT * FROM bitcoindeposittransaction WHERE 1 = 1";
+                string sQuery = "SELECT * FROM " + TableName + " WHERE 1 = 1";
 
 
-                if (!string.IsNullOrEmpty(rawtransaction.Hash))
-                    sQuery += " AND Hash" + "='" + rawtransaction.Hash + "'";
+                if (!string.IsNullOrEmpty(bitcoinDepositTransaction.Hash))
+                    sQuery += " AND Hash" + "='" + bitcoinDepositTransaction.Hash + "'";
 
-                if (!string.IsNullOrEmpty(rawtransaction.ToAddress))
-                    sQuery += " AND ToAddress" + "='" + rawtransaction.ToAddress + "'";
+                if (!string.IsNullOrEmpty(bitcoinDepositTransaction.ToAddress))
+                    sQuery += " AND ToAddress" + "='" + bitcoinDepositTransaction.ToAddress + "'";
 
 
                 var result = Connection.Query<BitcoinDepositTransaction>(sQuery);
@@ -132,29 +130,51 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                logger.Error("BitcoinDepositTransactioRepository =>> FindWhere fail: " + e.Message);
-                throw e;
+                Logger.Error("BitcoinDepositTransactioRepository =>> FindWhere fail: " + e.Message);
+                return null;
             }
         }
-        
-        public BitcoinDepositTransaction FindById(string Id)
+
+        public BitcoinDepositTransaction FindOneWhere(BitcoinDepositTransaction objectTransaction)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                string sQuery = "SELECT * FROM bitcoindeposittransaction WHERE Id = @ID";
 
-                var result = Connection.QuerySingleOrDefault<BitcoinDepositTransaction>(sQuery, new {ID = Id});
+                string sQuery = "SELECT * FROM " + TableName + " WHERE Hash = @HASH";
+
+                var result = Connection.QueryFirst<BitcoinDepositTransaction>(sQuery,
+                    new {HASH = objectTransaction.Hash});
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("BitcoinDepositTransactioRepository =>> FindWhere fail: " + e.Message);
+                return null;
+            }
+        }
+
+        public BitcoinDepositTransaction FindById(string id)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var sQuery = "SELECT * FROM " + TableName + " WHERE Id = @ID";
+
+                var result = Connection.QuerySingleOrDefault<BitcoinDepositTransaction>(sQuery, new {ID = id});
 
 
                 return result;
             }
             catch (Exception e)
             {
-                logger.Error("BitcoinDepositTransactioRepository =>> FindById fail: " + e.Message);
-                throw e;
+                Logger.Error("BitcoinDepositTransactioRepository =>> FindById fail: " + e.Message);
+                return null;
             }
         }
 
@@ -171,14 +191,11 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
-                throw e;
+                Logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
+                return null;
             }
         }
 
-        
-
-        
 
         public IBlockchainTransaction FindTransactionPending()
         {
@@ -201,9 +218,10 @@ namespace Vakapay.Repositories.Mysql
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-                string SqlCommand = "Update " + tableName + " Set Version = Version + 1, OnProcess = 1 Where Id = @Id and Version = @Version";
+                string sqlCommand = "Update " + TableName +
+                                    " Set Version = Version + 1, OnProcess = 1 Where Id = @ID and Version = @VERSION";
 
-                var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version});
+                var update = Connection.Execute(sqlCommand, new {ID = transaction.Id, VERSION = transaction.Version});
                 if (update == 1)
                 {
                     return new ReturnObject
@@ -212,6 +230,7 @@ namespace Vakapay.Repositories.Mysql
                         Message = "Update Success",
                     };
                 }
+
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -226,8 +245,6 @@ namespace Vakapay.Repositories.Mysql
                     Message = e.ToString()
                 };
             }
-            
-
         }
 
         public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)

@@ -12,8 +12,8 @@ namespace Vakapay.Models.Domains
         public string ToAddress { get; set; }
         public decimal Fee { get; set; }
         public string Status { get; set; }
-        public int CreatedAt { get; set; }
-        public int UpdatedAt { get; set; }
+        public long CreatedAt { get; set; }
+        public long UpdatedAt { get; set; }
         public int InProcess { get; set; }
         public int Version { get; set; }
     }

@@ -7,5 +7,6 @@ namespace Vakapay.Models.Repositories
     public interface IBitcoinDepositTransactioRepository : IRepositoryBlockchainTransaction<BitcoinDepositTransaction>
     {
         List<BitcoinDepositTransaction> FindWhere(BitcoinDepositTransaction objectTransaction);
+        BitcoinDepositTransaction FindOneWhere(BitcoinDepositTransaction objectTransaction);
     }
 }
