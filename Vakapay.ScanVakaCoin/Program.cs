@@ -13,13 +13,13 @@ namespace Vakapay.ScanVakaCoin
 {
     class Program
     {
-        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory;
-        private VakacoinBusiness.VakacoinBusiness vakacoinBusiness;
-        private WalletBusiness.WalletBusiness walletBusiness;
-        private VakacoinRpc rpc;
-        private int lastBlock;
-        private ArrayList errorBlocks;
-        private System.Runtime.Caching.MemoryCache cache;
+        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
+        private VakacoinBusiness.VakacoinBusiness _vakacoinBusiness;
+        private WalletBusiness.WalletBusiness _walletBusiness;
+        private VakacoinRpc _rpc;
+        private int _lastBlock;
+        private ArrayList _errorBlocks;
+        private System.Runtime.Caching.MemoryCache _cache;
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         static void Main(string[] args)
@@ -43,31 +43,31 @@ namespace Vakapay.ScanVakaCoin
             {
                 ConnectionString = Configuration.GetSection("ConnectionStrings").Value
             };
-            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            vakacoinBusiness = new VakacoinBusiness.VakacoinBusiness(PersistenceFactory);
-            walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+            _vakacoinBusiness = new VakacoinBusiness.VakacoinBusiness(_persistenceFactory);
+            _walletBusiness = new WalletBusiness.WalletBusiness(_persistenceFactory);
 
-            rpc = new VakacoinRpc(Configuration.GetSection("EndpointUrl").Value);
+            _rpc = new VakacoinRpc(Configuration.GetSection("EndpointUrl").Value);
 
             //lastBlock = GetFromCache()
-            lastBlock = 0;
-            errorBlocks = new ArrayList();
+            _lastBlock = 0;
+            _errorBlocks = new ArrayList();
 
-            cache = new System.Runtime.Caching.MemoryCache("ScanVakacoinCache");
-            if (cache["lastBlock"] != null)
-                lastBlock = (int) cache["lastBlock"];
+            _cache = new System.Runtime.Caching.MemoryCache("ScanVakacoinCache");
+            if (_cache["lastBlock"] != null)
+                _lastBlock = (int) _cache["lastBlock"];
         }
 
         private void Processing()
         {
             while (true)
             {
-                int headBlock = rpc.GetHeadBlockNumber();
+                int headBlock = _rpc.GetHeadBlockNumber();
                 logger.Info("Head Block = "+headBlock);
-                if (headBlock > lastBlock)
+                if (headBlock > _lastBlock)
                 {
-                    if (lastBlock == 0)
+                    if (_lastBlock == 0)
                         FirstRun(headBlock);
                     else Run(headBlock);
                 }
@@ -81,14 +81,14 @@ namespace Vakapay.ScanVakaCoin
         {
             try
             {
-                var transactions = rpc.GetAllTransactionsInBlock(headBlock.ToString());
+                var transactions = _rpc.GetAllTransactionsInBlock(headBlock.ToString());
                 ReceivedProcess(transactions);
-                lastBlock = headBlock;
-                cache.Set("lastBlock", lastBlock, DateTimeOffset.MaxValue);
+                _lastBlock = headBlock;
+                _cache.Set("lastBlock", _lastBlock, DateTimeOffset.MaxValue);
             }
             catch (Exception e)
             {
-                errorBlocks.Add(headBlock);
+                _errorBlocks.Add(headBlock);
                 logger.Error(e);
                 throw;
             }
@@ -97,20 +97,20 @@ namespace Vakapay.ScanVakaCoin
         //Run program in not first time
         private void Run(int headBlock)
         {
-            int tmp = lastBlock + 1;
+            int tmp = _lastBlock + 1;
             for (int processingBlock = tmp; processingBlock <= headBlock; processingBlock++)
             {
                 try
                 {
                     logger.Info("Scan block "+processingBlock);
-                    var transactions = rpc.GetAllTransactionsInBlock(processingBlock.ToString());
+                    var transactions = _rpc.GetAllTransactionsInBlock(processingBlock.ToString());
                     ReceivedProcess(transactions);
-                    lastBlock = processingBlock;
-                    cache.Set("lastBlock", lastBlock, DateTimeOffset.MaxValue);
+                    _lastBlock = processingBlock;
+                    _cache.Set("lastBlock", _lastBlock, DateTimeOffset.MaxValue);
                 }
                 catch (Exception e)
                 {
-                    errorBlocks.Add(processingBlock);
+                    _errorBlocks.Add(processingBlock);
                     logger.Error(e, " Error when process block ", processingBlock);
                     throw;
                 }
@@ -121,15 +121,15 @@ namespace Vakapay.ScanVakaCoin
         {
             while (true)
             {
-                if (errorBlocks != null && errorBlocks.Count > 0)
+                if (_errorBlocks != null && _errorBlocks.Count > 0)
                 {
-                    foreach (int block in errorBlocks)
+                    foreach (int block in _errorBlocks)
                     {
                         try
                         {
-                            var transactions = rpc.GetAllTransactionsInBlock(block.ToString());
+                            var transactions = _rpc.GetAllTransactionsInBlock(block.ToString());
                             ReceivedProcess(transactions);
-                            errorBlocks.Remove(block);
+                            _errorBlocks.Remove(block);
                         }
                         catch (Exception e)
                         {
@@ -184,7 +184,7 @@ namespace Vakapay.ScanVakaCoin
                             string to = _to.ToString();
 
                             // if receiver doesn't exist in wallet table, process next transaction
-                            if (!walletBusiness.CheckExistedAddress(to))
+                            if (!_walletBusiness.CheckExistedAddress(to))
                             {
                                 Console.WriteLine(to + " is not exist in Wallet!!!");
                                 continue;
@@ -197,10 +197,10 @@ namespace Vakapay.ScanVakaCoin
 
                             // save to VakacoinTransactionHistory
                             ReturnObject result =
-                                vakacoinBusiness.CreateTransactionHistory(from, to, amount, transactionTime, status);
+                                _vakacoinBusiness.CreateTransactionHistory(from, to, amount, transactionTime, status);
 
                             //update Balance in Wallet
-                            walletBusiness.UpdateBalance(to, amount, symbol);
+                            _walletBusiness.UpdateBalance(to, amount, symbol);
 
                             Console.WriteLine(to + " was received " + amount + " " + symbol);
                         }
