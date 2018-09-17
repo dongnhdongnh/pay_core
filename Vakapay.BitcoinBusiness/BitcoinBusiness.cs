@@ -108,14 +108,14 @@ namespace Vakapay.BitcoinBusiness
                     bitcoinRawTransactionRepo.FindBySql(bitcoinRawTransactionRepo.QuerySearch(search));
                 var data = new JArray();
                 if (pendings.Count <= 0) throw new Exception("NO PENING");
-                
+
                 foreach (var pending in pendings)
                 {
                     // send 
-                    Logger.Error(JsonHelper.SerializeObject(pending), "runSendTransaction before");
+                    Logger.Debug("runSendTransaction before" + JsonHelper.SerializeObject(pending));
                     var result = SendTransaction(pending);
-                    Logger.Error(JsonHelper.SerializeObject(result), "runSendTransaction result");
-                    data.Add(result);
+                    Logger.Debug("runSendTransaction result" + JsonHelper.SerializeObject(result));
+                    data.Add(result.Data);
                 }
 
                 return new ReturnObject
@@ -174,6 +174,7 @@ namespace Vakapay.BitcoinBusiness
 
                 // tranh send 2 lan
                 var resulUpdate = bitcoinRawTransactionRepo.ExcuteSQL(queryUpdate);
+
                 if (resulUpdate.Status == Status.StatusError)
                     return resulUpdate;
 
