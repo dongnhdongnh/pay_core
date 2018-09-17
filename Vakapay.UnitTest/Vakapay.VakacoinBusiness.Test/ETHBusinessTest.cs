@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -32,6 +33,29 @@ namespace Vakapay.VakacoinBusiness.Test
 			Assert.IsNotNull(outPut);
 		}
 
+		[TestCase(10)]
+		public void FakePeningTransaction(int numOfTrans)
+		{
+			var repositoryConfig = new RepositoryConfiguration
+			{
+				ConnectionString = ETHBusinessTest.ConnectionString
+			};
+
+			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
+			var _trans = new EthereumWithdrawTransaction()
+			{
+				FromAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
+				ToAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
+				Amount = 10
+			};
+			ReturnObject outPut = null;
+			for (int i = 0; i < numOfTrans; i++)
+				outPut = _ethBus.FakePendingTransaction(_trans);
+			Console.WriteLine(JsonHelper.SerializeObject(outPut));
+			Assert.IsNotNull(outPut);
+		}
+
 		[Test]
 		public void CreateNewTransaction()
 		{
@@ -49,7 +73,7 @@ namespace Vakapay.VakacoinBusiness.Test
 				ToAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
 				Amount = 10
 			};
-			var outPut = _ethBus.SendTransaction(_trans);
+			var outPut = _ethBus.RunSendTransaction();
 			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}
@@ -70,7 +94,7 @@ namespace Vakapay.VakacoinBusiness.Test
 			Assert.IsTrue(block > 0);
 		}
 
-	
+
 
 	}
 }

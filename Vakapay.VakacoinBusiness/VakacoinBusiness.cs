@@ -3,7 +3,6 @@ using System.Data;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
-using Vakapay.Cryptography;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.VakacoinBusiness
@@ -57,7 +56,7 @@ namespace Vakapay.VakacoinBusiness
                     Amount = amount,
                     TransactionTime = transactionTime,
                     CreatedTime =  DateTime.UtcNow,
-                    status = status
+                    Status = status
                 };
                 var vakacoinRepo = VakapayRepositoryFactory.GetVakacoinTransactionHistoryRepository(DbConnection);
 

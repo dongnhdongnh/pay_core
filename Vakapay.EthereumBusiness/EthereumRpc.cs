@@ -35,7 +35,7 @@ namespace Vakapay.EthereumBusiness
 				// Set a default policy level for the "http:" and "https" schemes.
 				HttpRequestCachePolicy policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
 				HttpWebRequest.DefaultCachePolicy = policy;
-				var httpWebRequest = (HttpWebRequest)WebRequest.Create(EndPointUrl);
+				var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://127.0.0.1:9900");
 				// Define a cache policy for this request only. 
 				HttpRequestCachePolicy noCachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
 				httpWebRequest.CachePolicy = noCachePolicy;
@@ -61,6 +61,8 @@ namespace Vakapay.EthereumBusiness
 				}
 				//Console.WriteLine("FROM CACHE:" + httpWebRequest.GetResponse().IsFromCache);
 				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+				//if (httpResponse == null)
+				//	Console.WriteLine("No response from ETH node");
 				//Console.WriteLine("IsFromCache? {0}", httpResponse.IsFromCache);
 				using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
 				{

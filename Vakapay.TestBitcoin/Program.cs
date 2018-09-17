@@ -24,8 +24,13 @@ namespace Vakapay.TestBitcoin
 
 
                 var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-
-                var bitcoinRpc = new BitcoinBusiness(PersistenceFactory);
+                var bitcoinConnect = new BitcoinRPCConnect
+                {
+                    Host = "http://127.0.0.1:18443",
+                    UserName = "bitcoinrpc",
+                    Password = "wqfgewgewi"
+                };
+                var bitcoinRpc = new BitcoinBusiness(PersistenceFactory, bitcoinConnect);
                 //  bitcoinRpc.test("a");
                 //bitcoinRpc.test("18382a96c79dc20a8b345c4e88708661a887cdfad22f27770638483805359d14");
 
@@ -33,7 +38,7 @@ namespace Vakapay.TestBitcoin
                 var address = bitcoinRpc.CreateNewAddAddress("815f09b4-e329-498d-bd0c-c389d0f6fb32");
                 Console.WriteLine(JsonHelper.SerializeObject(address).ToString());
                 //bitcoinRpc.test("18382a96c79dc20a8b345c4e88708661a887cdfad22f27770638483805359d14");
-
+                return;
                 //send many
                 var mutil = new JObject();
                 mutil.Add("2Mv5zhXas6Erc5bVRoSPXYGvqqoybyrghSS", 1);
