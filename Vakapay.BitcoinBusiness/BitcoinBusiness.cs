@@ -19,13 +19,14 @@ namespace Vakapay.BitcoinBusiness
         public IDbConnection dbconnect { get; set; }
 
 
-        public BitcoinBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) :
+        public BitcoinBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, BitcoinRPCConnect RPCconnect,
+            bool isNewConnection = true) :
             base(_vakapayRepositoryFactory, isNewConnection)
         {
             factory = _vakapayRepositoryFactory;
             dbconnect = DbConnection;
-            bitcoinRpc = new BitcoinRpc("http://127.0.0.1:18443");
-            bitcoinRpc.Credentials = new NetworkCredential("bitcoinrpc", "wqfgewgewi");
+            bitcoinRpc = new BitcoinRpc(RPCconnect.Host, RPCconnect.UserName, RPCconnect.Password);
+            //bitcoinRpc.Credentials = new NetworkCredential("bitcoinrpc", "wqfgewgewi");
         }
 
         // <summary>
@@ -125,8 +126,7 @@ namespace Vakapay.BitcoinBusiness
                 }
 
 
-                //add database vakaxa
-
+                //update database vakaxa
 
                 blockchainTransaction.Status = Status.StatusCompleted;
                 blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();

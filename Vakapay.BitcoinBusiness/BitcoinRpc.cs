@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
 using System.IO;
+using System.Net;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.Models.Domains;
@@ -16,14 +14,15 @@ namespace Vakapay.BitcoinBusiness
         {
         }
 
-        public BitcoinRpc(string a_sUri)
+        public BitcoinRpc(string a_sUri, string userName, string password)
         {
             Url = new Uri(a_sUri);
+            Credentials = new NetworkCredential(userName, password);
         }
 
-        public Uri Url;
+        public readonly Uri Url;
 
-        public ICredentials Credentials;
+        public readonly ICredentials Credentials;
 
         public ReturnObject InvokeMethod(string a_sMethod, params object[] a_params)
         {
@@ -53,9 +52,9 @@ namespace Vakapay.BitcoinBusiness
                         joe.Add(new JProperty("params", props));
                     }
                 }
-              
+
                 string s = JsonConvert.SerializeObject(joe);
-                
+
                 // serialize json for the request
                 byte[] byteArray = Encoding.UTF8.GetBytes(s);
                 webRequest.ContentLength = byteArray.Length;
@@ -90,17 +89,15 @@ namespace Vakapay.BitcoinBusiness
                                     return new ReturnObject
                                     {
                                         Status = Status.StatusCompleted,
-                                        Data = results["result"].ToString(),
+                                        Data = results["result"].ToString()
                                     };
                                 }
-                                else
+
+                                return new ReturnObject
                                 {
-                                    return new ReturnObject
-                                    {
-                                        Status = Status.StatusError,
-                                        Message = results["error"].ToString(),
-                                    };
-                                }
+                                    Status = Status.StatusError,
+                                    Message = results["error"].ToString()
+                                };
                             }
                         }
                     }
@@ -467,7 +464,7 @@ namespace Vakapay.BitcoinBusiness
                 return returnError(e);
             }
         }
-        
+
         /**
          * amounts are double-precision floating point numbers
          */
@@ -481,7 +478,6 @@ namespace Vakapay.BitcoinBusiness
                     mutiAddress,
                     minconf,
                     comment
-                  
                 );
             }
             catch (Exception e)
@@ -521,7 +517,8 @@ namespace Vakapay.BitcoinBusiness
         /**
          *  <amount> is a real and is rounded to 8 decimal places. Returns the transaction ID <txid> if successful.
          */
-        public ReturnObject SendToAddress(string a_address, decimal a_amount, string a_comment = "", string a_commentTo = "")
+        public ReturnObject SendToAddress(string a_address, decimal a_amount, string a_comment = "",
+            string a_commentTo = "")
         {
             try
             {

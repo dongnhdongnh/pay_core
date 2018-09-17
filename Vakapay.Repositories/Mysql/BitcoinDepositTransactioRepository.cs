@@ -73,6 +73,7 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
+                logger.Error("BitcoinDepositTransactioRepository =>> Delete fail: " + e.Message);
                 throw e;
             }
         }
@@ -130,6 +131,7 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
+                logger.Error("BitcoinDepositTransactioRepository =>> FindWhere fail: " + e.Message);
                 throw e;
             }
         }
@@ -150,6 +152,7 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
+                logger.Error("BitcoinDepositTransactioRepository =>> FindById fail: " + e.Message);
                 throw e;
             }
         }
