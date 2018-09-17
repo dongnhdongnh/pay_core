@@ -61,6 +61,8 @@ namespace Vakapay.EthereumBusiness
 				}
 				//Console.WriteLine("FROM CACHE:" + httpWebRequest.GetResponse().IsFromCache);
 				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+				//if (httpResponse == null)
+				//	Console.WriteLine("No response from ETH node");
 				//Console.WriteLine("IsFromCache? {0}", httpResponse.IsFromCache);
 				using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
 				{

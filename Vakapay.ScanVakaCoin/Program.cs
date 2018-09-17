@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -12,13 +13,14 @@ namespace Vakapay.ScanVakaCoin
 {
     class Program
     {
-        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory;
-        private VakacoinBusiness.VakacoinBusiness vakacoinBusiness;
-        private WalletBusiness.WalletBusiness walletBusiness;
-        private VakacoinRpc rpc;
-        private int lastBlock;
-        private ArrayList errorBlocks;
-        private System.Runtime.Caching.MemoryCache cache;
+        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
+        private VakacoinBusiness.VakacoinBusiness _vakacoinBusiness;
+        private WalletBusiness.WalletBusiness _walletBusiness;
+        private VakacoinRpc _rpc;
+        private int _lastBlock;
+        private ArrayList _errorBlocks;
+        private System.Runtime.Caching.MemoryCache _cache;
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         static void Main(string[] args)
         {
@@ -41,32 +43,31 @@ namespace Vakapay.ScanVakaCoin
             {
                 ConnectionString = Configuration.GetSection("ConnectionStrings").Value
             };
-            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            vakacoinBusiness = new VakacoinBusiness.VakacoinBusiness(PersistenceFactory);
-            walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+            _vakacoinBusiness = new VakacoinBusiness.VakacoinBusiness(_persistenceFactory);
+            _walletBusiness = new WalletBusiness.WalletBusiness(_persistenceFactory);
 
-            rpc = new VakacoinRpc(Configuration.GetSection("EndpointUrl").Value);
+            _rpc = new VakacoinRpc(Configuration.GetSection("EndpointUrl").Value);
 
             //lastBlock = GetFromCache()
-            lastBlock = 0;
-            errorBlocks = new ArrayList();
-            
-            cache = new System.Runtime.Caching.MemoryCache("ScanVakacoinCache");
-            if (cache["lastBlock"] != null)
-                lastBlock = (int) cache["lastBlock"];
-            
-            
+            _lastBlock = 0;
+            _errorBlocks = new ArrayList();
+
+            _cache = new System.Runtime.Caching.MemoryCache("ScanVakacoinCache");
+            if (_cache["lastBlock"] != null)
+                _lastBlock = (int) _cache["lastBlock"];
         }
 
         private void Processing()
         {
             while (true)
             {
-                int headBlock = rpc.GetHeadBlockNumber();
-                if (headBlock > lastBlock)
+                int headBlock = _rpc.GetHeadBlockNumber();
+                logger.Info("Head Block = "+headBlock);
+                if (headBlock > _lastBlock)
                 {
-                    if (lastBlock == 0)
+                    if (_lastBlock == 0)
                         FirstRun(headBlock);
                     else Run(headBlock);
                 }
@@ -80,15 +81,15 @@ namespace Vakapay.ScanVakaCoin
         {
             try
             {
-                var transactions = rpc.GetAllTransactionsInBlock(headBlock.ToString());
+                var transactions = _rpc.GetAllTransactionsInBlock(headBlock.ToString());
                 ReceivedProcess(transactions);
-                lastBlock = headBlock;
-                cache.Set("lastBlock", lastBlock, DateTimeOffset.MaxValue);
+                _lastBlock = headBlock;
+                _cache.Set("lastBlock", _lastBlock, DateTimeOffset.MaxValue);
             }
             catch (Exception e)
             {
-                errorBlocks.Add(headBlock);
-                Console.WriteLine(e);
+                _errorBlocks.Add(headBlock);
+                logger.Error(e);
                 throw;
             }
         }
@@ -96,20 +97,21 @@ namespace Vakapay.ScanVakaCoin
         //Run program in not first time
         private void Run(int headBlock)
         {
-            int tmp = lastBlock+1;
+            int tmp = _lastBlock + 1;
             for (int processingBlock = tmp; processingBlock <= headBlock; processingBlock++)
             {
                 try
                 {
-                    var transactions = rpc.GetAllTransactionsInBlock(processingBlock.ToString());
+                    logger.Info("Scan block "+processingBlock);
+                    var transactions = _rpc.GetAllTransactionsInBlock(processingBlock.ToString());
                     ReceivedProcess(transactions);
-                    lastBlock = processingBlock;
-                    cache.Set("lastBlock", lastBlock, DateTimeOffset.MaxValue);
+                    _lastBlock = processingBlock;
+                    _cache.Set("lastBlock", _lastBlock, DateTimeOffset.MaxValue);
                 }
                 catch (Exception e)
                 {
-                    errorBlocks.Add(processingBlock);
-                    Console.WriteLine("Error when process block " + processingBlock, e);
+                    _errorBlocks.Add(processingBlock);
+                    logger.Error(e, " Error when process block ", processingBlock);
                     throw;
                 }
             }
@@ -119,23 +121,24 @@ namespace Vakapay.ScanVakaCoin
         {
             while (true)
             {
-                if (errorBlocks != null && errorBlocks.Count > 0)
+                if (_errorBlocks != null && _errorBlocks.Count > 0)
                 {
-                    foreach (int block in errorBlocks)
+                    foreach (int block in _errorBlocks)
                     {
                         try
                         {
-                            var transactions = rpc.GetAllTransactionsInBlock(block.ToString());
+                            var transactions = _rpc.GetAllTransactionsInBlock(block.ToString());
                             ReceivedProcess(transactions);
-                            errorBlocks.Remove(block);
+                            _errorBlocks.Remove(block);
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("Error when process block " + block + " again", e);
+                            logger.Error(e, " Error when process block " + block + " again");
                             throw;
                         }
                     }
                 }
+
                 System.Threading.Thread.Sleep(60000);
             }
         }
@@ -145,68 +148,68 @@ namespace Vakapay.ScanVakaCoin
             // process each transaction in arraylist of transactions
             foreach (var transaction in transactions)
             {
-                var jsonTrx = JObject.Parse(transaction.ToString())["transaction"];
+                try
+                {
+                    var jsonTrx = JObject.Parse(transaction.ToString())["transaction"];
 //                Console.WriteLine(jsonTrx.ToString());
-                
-                //check name of action in transaction
-                var actionName = jsonTrx["actions"][0]["name"];
-                if (actionName == null)
-                    continue;
-                if (actionName.ToString() != "transfer")
+
+                    //check name of action in transaction
+                    var actionName = jsonTrx["actions"][0]["name"];
+                    if (actionName == null)
                         continue;
-                
-                //check data is valid json
-                if (!JsonHelper.IsValidJson(jsonTrx["actions"][0]["data"].ToString()))
-                    continue;
-                    
-                //check quantity and to_address in transaction
-                var quantity = jsonTrx["actions"][0]["data"]["quantity"];
-                var _to = jsonTrx["actions"][0]["data"]["to"];
-                
-                //if quantity == null, process next transaction in arraylist
-                if (quantity == null || _to == null)
-                {
-                    continue;
-                }
+                    if (actionName.ToString() != "transfer")
+                        continue;
 
-                string _quantity = quantity.ToString();
-                if (!String.IsNullOrEmpty(_quantity))
-                {
-                    //check symbol in quantity
-                    var symbol = _quantity.Split(" ")[1];
-                    if (symbol == "EOS" || symbol == "VAKA")
+                    //check data is valid json
+                    if (!JsonHelper.IsValidJson(jsonTrx["actions"][0]["data"].ToString()))
+                        continue;
+
+                    //check quantity and to_address in transaction
+                    var quantity = jsonTrx["actions"][0]["data"]["quantity"];
+                    var _to = jsonTrx["actions"][0]["data"]["to"];
+
+                    //if quantity == null, process next transaction in arraylist
+                    if (quantity == null || _to == null)
                     {
-                        string to = _to.ToString();
+                        continue;
+                    }
 
-                        // if receiver doesn't exist in wallet table, process next transaction
-                        if (!walletBusiness.CheckExistedAddress(to))
+                    string _quantity = quantity.ToString();
+                    if (!String.IsNullOrEmpty(_quantity))
+                    {
+                        //check symbol in quantity
+                        var symbol = _quantity.Split(" ")[1];
+                        if (symbol == "EOS" || symbol == "VAKA")
                         {
-                            Console.WriteLine(to+ " is not exist in Wallet!!!");
-                            continue;
-                        }
+                            string to = _to.ToString();
 
-                        string from = jsonTrx["actions"][0]["data"]["from"].ToString();
-                        decimal amount = decimal.Parse(_quantity.Split(" ")[0]);
-                        string transactionTime = jsonTrx["expiration"].ToString();
-                        string status = "success";
+                            // if receiver doesn't exist in wallet table, process next transaction
+                            if (!_walletBusiness.CheckExistedAddress(to))
+                            {
+                                Console.WriteLine(to + " is not exist in Wallet!!!");
+                                continue;
+                            }
 
-                        try
-                        {
+                            string from = jsonTrx["actions"][0]["data"]["from"].ToString();
+                            decimal amount = decimal.Parse(_quantity.Split(" ")[0]);
+                            string transactionTime = jsonTrx["expiration"].ToString();
+                            string status = "success";
+
                             // save to VakacoinTransactionHistory
                             ReturnObject result =
-                                vakacoinBusiness.CreateTransactionHistory(from, to, amount, transactionTime, status);
+                                _vakacoinBusiness.CreateTransactionHistory(from, to, amount, transactionTime, status);
 
                             //update Balance in Wallet
-                            walletBusiness.UpdateBalance(to, amount, symbol);
+                            _walletBusiness.UpdateBalance(to, amount, symbol);
 
                             Console.WriteLine(to + " was received " + amount + " " + symbol);
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            throw;
-                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    logger.Error(e);
+                    throw;
                 }
             }
         }
