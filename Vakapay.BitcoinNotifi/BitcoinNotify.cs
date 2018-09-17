@@ -146,6 +146,8 @@ namespace Vakapay.BitcoinNotifi
                             transactionModel.Txid);
                     if (currentBtcWithdrawTransaction != null)
                     {
+                        currentBtcWithdrawTransaction.BlockHash = transactionModel.Blockhash;
+                        currentBtcDepositTransaction.UpdatedAt = currentTime;
                         bitcoinRawTransactionRepository.Update(currentBtcWithdrawTransaction);
                     }
 
