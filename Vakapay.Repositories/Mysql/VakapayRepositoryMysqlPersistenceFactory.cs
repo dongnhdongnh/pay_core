@@ -66,7 +66,7 @@ namespace Vakapay.Repositories.Mysql
 		}
 		public IBitcoinDepositTransactioRepository GetBitcoinDepositTransactioRepository(IDbConnection dbConnection)
 		{
-			return new BitcoinDepositTransactioRepository(dbConnection);
+			return new BitcoinDepositTransactionRepository(dbConnection);
 		}
 	}
 }

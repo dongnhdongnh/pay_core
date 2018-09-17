@@ -87,7 +87,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 var sendTransaction = await rpcClass.SendTransactionAsyn(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
                 pendingTransaction.InProcess = 0;
-                pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                pendingTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp();
                 var result = await RepoQuery.SafeUpdate(pendingTransaction);
                 transactionDbSend.Commit();
                 return new ReturnObject

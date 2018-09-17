@@ -203,7 +203,7 @@ namespace Vakapay.BitcoinBusiness
                 //update database vakaxa
 
                 blockchainTransaction.Status = Status.StatusCompleted;
-                blockchainTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp();
                 blockchainTransaction.Hash = idTransaction;
                 blockchainTransaction.BlockHash = (string) transactionInfo["blockhash"];
                 blockchainTransaction.BlockNumber = (string) blockInfo["height"];
@@ -278,7 +278,7 @@ namespace Vakapay.BitcoinBusiness
 
                 foreach (var detail in details)
                 {
-                    int time = (int) CommonHelper.GetUnixTimestamp();
+                    var time = CommonHelper.GetUnixTimestamp();
                     var rawTransaction = new BitcoinWithdrawTransaction
                     {
                         Id = CommonHelper.GenerateUuid(),
@@ -369,7 +369,7 @@ namespace Vakapay.BitcoinBusiness
                 var bitcoinRawTransactionRepo =
                     VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
 
-                int time = (int) CommonHelper.GetUnixTimestamp();
+                var time = CommonHelper.GetUnixTimestamp();
                 var rawTransaction = new BitcoinWithdrawTransaction
                 {
                     Id = CommonHelper.GenerateUuid(),
