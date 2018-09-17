@@ -111,7 +111,7 @@ namespace Vakapay.ScanVakaCoin
                 catch (Exception e)
                 {
                     errorBlocks.Add(processingBlock);
-                    logger.Error("Error when process block " + processingBlock, e);
+                    logger.Error(e, " Error when process block ", processingBlock);
                     throw;
                 }
             }
@@ -133,7 +133,7 @@ namespace Vakapay.ScanVakaCoin
                         }
                         catch (Exception e)
                         {
-                            logger.Error("Error when process block " + block + " again", e);
+                            logger.Error(e, " Error when process block " + block + " again");
                             throw;
                         }
                     }
