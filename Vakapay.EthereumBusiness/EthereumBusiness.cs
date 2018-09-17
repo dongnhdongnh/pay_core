@@ -9,6 +9,7 @@ namespace Vakapay.EthereumBusiness
 {
 	using BlockchainBusiness;
 	using System.Collections.Generic;
+	using System.Dynamic;
 	using System.Linq;
 	using System.Threading;
 	using Vakapay.Models.Entities.ETH;
@@ -27,15 +28,14 @@ namespace Vakapay.EthereumBusiness
 			try
 			{
 				var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-				//EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
-				//{
-				//	Status = Status.StatusPending
-				//};
-				List<EthereumWithdrawTransaction> pendings = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(
-				new
+				EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
 				{
-					Status = Status.StatusPending,
-				}));
+					Status = Status.StatusPending
+				};
+				var searchDic = new Dictionary<string, string>();
+				searchDic.Add(nameof(_searchValue.Status), _searchValue.Status);
+
+				List<EthereumWithdrawTransaction> pendings = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(searchDic));
 				Console.WriteLine(pendings.Count);
 				if (pendings.Count <= 0) throw new Exception("NO PENING");
 				else
@@ -228,11 +228,13 @@ namespace Vakapay.EthereumBusiness
 			//{
 			//	Status = Status.StatusPending
 			//};
-			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(
-			new
+			EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
 			{
-				Status = Status.StatusPending,
-			}));
+				Status = Status.StatusPending
+			};
+			var searchDic = new Dictionary<string, string>();
+			searchDic.Add(nameof(_searchValue.Status), _searchValue.Status);
+			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(searchDic));
 			if (_pending.Count <= 0)
 			{
 				Console.WriteLine("No pending");

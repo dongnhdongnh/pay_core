@@ -15,39 +15,36 @@ namespace Vakapay.Repositories.Mysql
 {
 
 	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
-    {
-        public static string tableName = "ethereumwithdrawtransaction";
-        public string Query_Search(object whereValue)
+	{
+		String tableName = "vakapay.ethereumwithdrawtransaction";
+		public string Query_Search(Dictionary<string, string> whereValue)
 		{
 			// return String.Format("SELECT * FROM {2} Where {0}='{1}'", SearchName, SearchData, tableName);
 			//StringBuilder updateStr = new StringBuilder("");
 			StringBuilder whereStr = new StringBuilder("");
 
 			int count = 0;
-			//foreach (PropertyInfo prop in searchValue.GetType().GetProperties())
+
+			//foreach (PropertyInfo prop in whereValue.GetType().GetProperties())
 			//{
-			//	if (prop.GetValue(searchValue, null) != null)
+			//	if (prop.GetValue(whereValue, null) != null)
 			//	{
 			//		if (count > 0)
-			//			updateStr.Append(",");
-			//		updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(searchValue, null));
+			//			whereStr.Append(" AND ");
+			//		whereStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(whereValue, null));
 			//		count++;
 			//	}
 			//}
-
-			// if (whereStr != null)
-			//count = 0;
-			foreach (PropertyInfo prop in whereValue.GetType().GetProperties())
+			foreach (var prop in whereValue)
 			{
-				if (prop.GetValue(whereValue, null) != null)
+				if (prop.Value != null)
 				{
 					if (count > 0)
 						whereStr.Append(" AND ");
-					whereStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(whereValue, null));
+					whereStr.AppendFormat(" {0}='{1}'", prop.Key, prop.Value);
 					count++;
 				}
 			}
-
 
 			string output = string.Format("SELECT * FROM {0} WHERE {1}", tableName, whereStr);
 			Console.WriteLine(output);
