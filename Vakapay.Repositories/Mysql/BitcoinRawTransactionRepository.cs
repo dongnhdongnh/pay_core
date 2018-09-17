@@ -6,12 +6,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-using Newtonsoft.Json.Linq;
 using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
-using Vakapay.Models.Repositories.Base;
 using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
@@ -31,14 +29,14 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        string tableName = "bitcoinwithdrawtransaction";
+        private const string TableName = "bitcoinwithdrawtransaction";
 
         public string QuerySearch(Dictionary<string, string> models)
         {
-            string sQuery = "SELECT * FROM bitcoinwithdrawtransaction WHERE 1 = 1";
+            var sQuery = "SELECT * FROM bitcoinwithdrawtransaction WHERE 1 = 1";
             foreach (var model in models)
             {
-                sQuery += String.Format(" AND {0}='{1}'", model.Key, model.Value);
+                sQuery += string.Format(" AND {0}='{1}'", model.Key, model.Value);
             }
 
             return sQuery;
@@ -46,20 +44,18 @@ namespace Vakapay.Repositories.Mysql
 
         public string QueryUpdate(object updateValue, Dictionary<string, string> whereValue)
         {
-            StringBuilder updateStr = new StringBuilder("");
-            StringBuilder whereStr = new StringBuilder("");
+            var updateStr = new StringBuilder("");
+            var whereStr = new StringBuilder("");
 
-            int count = 0;
+            var count = 0;
 
-            foreach (PropertyInfo prop in updateValue.GetType().GetProperties())
+            foreach (var prop in updateValue.GetType().GetProperties())
             {
-                if (prop.GetValue(updateValue, null) != null)
-                {
-                    if (count > 0)
-                        updateStr.Append(",");
-                    updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(updateValue, null));
-                    count++;
-                }
+                if (prop.GetValue(updateValue, null) == null) continue;
+                if (count > 0)
+                    updateStr.Append(",");
+                updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(updateValue, null));
+                count++;
             }
 
             count = 0;
@@ -72,7 +68,7 @@ namespace Vakapay.Repositories.Mysql
             }
 
 
-            string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", tableName, updateStr, whereStr);
+            var output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
 
             return output;
         }
@@ -106,19 +102,19 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public ReturnObject Delete(string Id)
+        public ReturnObject Delete(string id)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                var result = Connection.Delete(new BitcoinWithdrawTransaction {Id = Id});
+                var result = Connection.Delete(new BitcoinWithdrawTransaction {Id = id});
                 var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
                 return new ReturnObject
                 {
                     Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
                 };
             }
             catch (Exception e)
@@ -136,7 +132,7 @@ namespace Vakapay.Repositories.Mysql
 
 
                 var result = Connection.InsertTask<string, BitcoinWithdrawTransaction>(objectInsert);
-                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+                var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
                 return new ReturnObject
                 {
                     Status = status,
@@ -151,16 +147,16 @@ namespace Vakapay.Repositories.Mysql
         }
 
 
-        public BitcoinWithdrawTransaction FindById(string Id)
+        public BitcoinWithdrawTransaction FindById(string id)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                string sQuery = "SELECT * FROM bitcoinwithdrawtransaction WHERE Id = @ID";
+                var sQuery = "SELECT * FROM " + TableName + " WHERE Id = @ID";
 
-                var result = Connection.QuerySingleOrDefault<BitcoinWithdrawTransaction>(sQuery, new {ID = Id});
+                var result = Connection.QuerySingleOrDefault<BitcoinWithdrawTransaction>(sQuery, new {ID = id});
 
 
                 return result;
@@ -179,7 +175,7 @@ namespace Vakapay.Repositories.Mysql
                     Connection.Open();
 
 
-                string sQuery = "SELECT * FROM bitcoinwithdrawtransaction WHERE 1 = 1";
+                var sQuery = "SELECT * FROM " + TableName + " WHERE 1 = 1";
 
 
                 if (!string.IsNullOrEmpty(rawtransaction.Hash))
