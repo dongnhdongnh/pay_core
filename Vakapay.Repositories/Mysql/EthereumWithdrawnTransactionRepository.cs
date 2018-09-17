@@ -19,22 +19,8 @@ namespace Vakapay.Repositories.Mysql
 		String tableName = "vakapay.ethereumwithdrawtransaction";
 		public string Query_Search(Dictionary<string, string> whereValue)
 		{
-			// return String.Format("SELECT * FROM {2} Where {0}='{1}'", SearchName, SearchData, tableName);
-			//StringBuilder updateStr = new StringBuilder("");
 			StringBuilder whereStr = new StringBuilder("");
-
 			int count = 0;
-
-			//foreach (PropertyInfo prop in whereValue.GetType().GetProperties())
-			//{
-			//	if (prop.GetValue(whereValue, null) != null)
-			//	{
-			//		if (count > 0)
-			//			whereStr.Append(" AND ");
-			//		whereStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(whereValue, null));
-			//		count++;
-			//	}
-			//}
 			foreach (var prop in whereValue)
 			{
 				if (prop.Value != null)
