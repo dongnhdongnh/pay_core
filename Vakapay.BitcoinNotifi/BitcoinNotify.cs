@@ -109,7 +109,7 @@ namespace Vakapay.BitcoinNotifi
                 logger.Debug("HandleNotifiDataReceiver start");
 
                 var btcDepositTransactionRepository = btcBusiness
-                    .factory.GetBitcoinDepositTransactioRepository(btcBusiness.dbconnect);
+                    .Factory.GetBitcoinDepositTransactioRepository(btcBusiness.Dbconnect);
 
                 logger.Debug("HandleNotifiDataReceiver start1");
                 var currentBtcDepositTransaction = GetDepositTransaction(btcDepositTransactionRepository,
@@ -136,7 +136,7 @@ namespace Vakapay.BitcoinNotifi
                 {
                     logger.Debug("HandleNotifiDataReceiver with confirm > 0");
                     IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBusiness
-                        .factory.GeBitcoinRawTransactionRepository(btcBusiness.dbconnect);
+                        .Factory.GeBitcoinRawTransactionRepository(btcBusiness.Dbconnect);
                     BitcoinWithdrawTransaction currentBtcWithdrawTransaction =
                         GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
                             transactionModel.Txid);
@@ -259,7 +259,7 @@ namespace Vakapay.BitcoinNotifi
             {
                 logger.Debug("HandleNotifyDataSend start");
                 IBitcoinRawTransactionRepository bitcoinRawTransactionRepository = btcBusiness
-                    .factory.GeBitcoinRawTransactionRepository(btcBusiness.dbconnect);
+                    .Factory.GeBitcoinRawTransactionRepository(btcBusiness.Dbconnect);
 
                 BitcoinWithdrawTransaction currentBtcWithdrawTransaction =
                     GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
