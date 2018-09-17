@@ -159,7 +159,8 @@ namespace Vakapay.BitcoinBusiness
                     new Dictionary<string, string>
                     {
                         {"Id", blockchainTransaction.Id},
-                        {"Version", currentVersionWithRaw}
+                        {"Version", currentVersionWithRaw},
+                        {"InProcess", 0.ToString()}
                     };
 
 
