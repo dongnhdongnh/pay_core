@@ -1,15 +1,13 @@
 using System;
-using System.Data;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
-
+using Vakapay.WalletBusiness;
 namespace Vakapay.EthereumBusiness
 {
 	using BlockchainBusiness;
 	using System.Collections.Generic;
-	using System.Dynamic;
 	using System.Linq;
 	using System.Threading;
 	using Vakapay.Models.Entities.ETH;
@@ -89,7 +87,7 @@ namespace Vakapay.EthereumBusiness
 				var _rpcResult = ethereumRpc.SendTransactionWithPassphrase(blockchainTransaction.FromAddress, blockchainTransaction.ToAddress, blockchainTransaction.Amount, "password");
 				if (_rpcResult.Status == Status.StatusError)
 					return _rpcResult;
-
+				Console.WriteLine("SendTransaction==>rpc result");
 				//After call RPC,update transaction Hash to DB 
 				EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
 				blockchainTransaction.Hash = _getter.result.ToString();
@@ -202,7 +200,7 @@ namespace Vakapay.EthereumBusiness
 
 				Console.WriteLine("is scan=" + isScanning);
 				if (!isScanning)
-					ScanBlock();
+					ScanBlock(null);
 				Thread.Sleep(5000);
 
 			}
@@ -212,8 +210,10 @@ namespace Vakapay.EthereumBusiness
 		/// Scan all blocks and checkBalance or check transaction inprocess
 		/// </summary>
 		/// <returns></returns>
-		public int ScanBlock()
+		public int ScanBlock(WalletBusiness.WalletBusiness wallet)
 		{
+
+
 			Console.WriteLine("START NEW SCAN");
 			isScanning = true;
 			long _time = CommonHelper.GetUnixTimestamp();
@@ -304,13 +304,35 @@ namespace Vakapay.EthereumBusiness
 						Console.WriteLine("HELLO " + _currentPending.Hash);
 						_currentPending.BlockNumber = _trans.blockNumber;
 						_currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+						_currentPending.InProcess = 0;
 						ethereumWithdrawRepo.Update(_currentPending);
 						_transactionInProcess.RemoveAt(i);
 					}
 
 				}
 			}
+			//check wallet balance and update 
+			foreach (EthRPCJson.BlockInfor _block in blocks)
+			{
 
+				foreach (EthRPCJson.TransactionInfor _trans in _block.transactions)
+				{
+					string _toAddress = _trans.to;
+					if (!wallet.CheckExistedAddress(_toAddress))
+					{
+						//logger.Info(to + " is not exist in Wallet!!!");
+						continue;
+					}
+					else
+					{
+						//Console.WriteLine("value" + _trans.value);
+						int _transaValue = 0;
+						if (_trans.value.HexToInt(out _transaValue))
+							wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, NetworkName.ETH);
+					}
+				}
+			}
+			//Update Done
 			_time = CommonHelper.GetUnixTimestamp() - _time;
 			Console.WriteLine(blocks.Count + ",Time=" + _time);
 			isScanning = false;
