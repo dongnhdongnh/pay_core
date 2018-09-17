@@ -32,6 +32,7 @@ namespace Vakapay.EthereumBusiness
 				{
 					Status = Status.StatusPending
 				};
+				Console.WriteLine("OK");
 				var searchDic = new Dictionary<string, string>();
 				searchDic.Add(nameof(_searchValue.Status), _searchValue.Status);
 
@@ -70,18 +71,23 @@ namespace Vakapay.EthereumBusiness
 				blockchainTransaction.Hash = _getter.result.ToString();
 				blockchainTransaction.Status = Status.StatusCompleted;
 				blockchainTransaction.InProcess = 1;
-				blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+				blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 				int _currentVersion = blockchainTransaction.Version;
 				blockchainTransaction.Version = _currentVersion + 1;
 				EthereumWithdrawTransaction blockchainTransactionWhere = new EthereumWithdrawTransaction()
 				{
 					Id = blockchainTransaction.Id,
-					Amount = blockchainTransaction.Amount,
-					Fee = blockchainTransaction.Fee,
+
 					Version = _currentVersion,
 					//InProcess = 1
 				};
-				return ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, blockchainTransactionWhere));
+				Dictionary<string, string> _updateQuery = new Dictionary<string, string>();
+				_updateQuery.Add(nameof(blockchainTransactionWhere.Id), blockchainTransactionWhere.Id);
+
+				_updateQuery.Add(nameof(blockchainTransactionWhere.Version), blockchainTransactionWhere.Version.ToString());
+				string output = ethereumwithdrawRepo.Query_Update(blockchainTransaction, _updateQuery);
+				Console.WriteLine("output= " + output);
+				return ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, _updateQuery));
 
 			}
 			catch (Exception e)
@@ -109,8 +115,8 @@ namespace Vakapay.EthereumBusiness
 				blockchainTransaction.Id = CommonHelper.GenerateUuid();
 				// blockchainTransaction.Hash = (String)_getter.result;
 				blockchainTransaction.Status = Status.StatusPending;
-				blockchainTransaction.CreatedAt = CommonHelper.GetUnixTimestamp().ToString();
-				blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+				blockchainTransaction.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
+				blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 
 				return ethereumwithdrawRepo.Insert(blockchainTransaction);
 
@@ -233,9 +239,9 @@ namespace Vakapay.EthereumBusiness
 				Status = Status.StatusPending
 			};
 			var searchDic = new Dictionary<string, string>();
-			searchDic.Add(nameof(_searchValue.Status), _searchValue.Status);
-			List<EthereumWithdrawTransaction> _pending = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(searchDic));
-			if (_pending.Count <= 0)
+			searchDic.Add(nameof(_searchValue.InProcess), "1");
+			List<EthereumWithdrawTransaction> _transactionInProcess = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(searchDic));
+			if (_transactionInProcess.Count <= 0)
 			{
 				Console.WriteLine("No pending");
 				isScanning = false;
@@ -279,24 +285,24 @@ namespace Vakapay.EthereumBusiness
 			var ethereumWithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
 			foreach (EthRPCJson.BlockInfor _block in blocks)
 			{
-				if (_pending.Count <= 0)
+				if (_transactionInProcess.Count <= 0)
 				{
 					//SCAN DONE:
 					isScanning = false;
 					return 0;
 				}
-				for (int i = _pending.Count - 1; i >= 0; i--)
+				for (int i = _transactionInProcess.Count - 1; i >= 0; i--)
 				{
-					EthereumWithdrawTransaction _currentPending = _pending[i];
+					EthereumWithdrawTransaction _currentPending = _transactionInProcess[i];
 					EthRPCJson.TransactionInfor _trans = _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
 					if (_trans != null)
 					{
 						Console.WriteLine("HELLO " + _currentPending.Hash);
 						_currentPending.BlockNumber = _trans.blockNumber;
-						_currentPending.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+						_currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 						_currentPending.Status = Status.StatusCompleted;
 						ethereumWithdrawRepo.Update(_currentPending);
-						_pending.RemoveAt(i);
+						_transactionInProcess.RemoveAt(i);
 					}
 
 				}
