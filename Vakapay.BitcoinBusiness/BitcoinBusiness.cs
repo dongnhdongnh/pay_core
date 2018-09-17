@@ -104,7 +104,7 @@ namespace Vakapay.BitcoinBusiness
 
                 List<BitcoinWithdrawTransaction> pendings =
                     bitcoinRawTransactionRepo.FindBySql(bitcoinRawTransactionRepo.QuerySearch(search));
-                
+
                 if (pendings.Count <= 0) throw new Exception("NO PENING");
                 else
                 {
@@ -160,14 +160,15 @@ namespace Vakapay.BitcoinBusiness
 
                 string queryUpdate =
                     bitcoinRawTransactionRepo.QueryUpdate(blockchainTransaction, blockchainTransactionWhere);
-                
+
                 // tranh send 2 lan
                 var resulUpdate = bitcoinRawTransactionRepo.ExcuteSQL(queryUpdate);
                 if (resulUpdate.Status == Status.StatusError)
                     return resulUpdate;
 
 
-                var results = bitcoinRpc.SendToAddress(blockchainTransaction.ToAddress, Convert.ToDecimal(blockchainTransaction.Amount));
+                var results = bitcoinRpc.SendToAddress(blockchainTransaction.ToAddress,
+                    Convert.ToDecimal(blockchainTransaction.Amount));
 
 
                 if (results.Status == Status.StatusError)
@@ -211,7 +212,7 @@ namespace Vakapay.BitcoinBusiness
 //                UpdateBalanceWallet(balanceChange, "97f3f010-658c-46eb-92a4-52b6a3f51e15", 159900);
 
                 //
-                //  return ResultAddBitcoinRawTransactionAddress;
+                return ResultAddBitcoinRawTransactionAddress;
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
@@ -374,7 +375,7 @@ namespace Vakapay.BitcoinBusiness
                     NetworkName = "Bitcoin",
                     Amount = (decimal) amount,
                     FromAddress = "",
-                    ToAddress = toAddress,  
+                    ToAddress = toAddress,
                     Fee = (decimal) transactionInfo["fee"] * -1,
                     Status = Status.StatusCompleted,
                     CreatedAt = time,
