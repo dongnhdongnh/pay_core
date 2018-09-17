@@ -85,7 +85,7 @@ namespace Vakapay.Repositories.Mysql
                 logger.Debug("BitcoinRawTransactionRepository =>> insert status: " + status);
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = status,
                     Message = status == Status.StatusError ? "Cannot Update" : "Update Success",
                     Data = ""
                 };
@@ -219,8 +219,7 @@ namespace Vakapay.Repositories.Mysql
                     Connection.Open();
 
                 var result = Connection.Execute(sqlString);
-
-
+                    
                 var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
 
                 return new ReturnObject
