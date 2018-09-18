@@ -326,8 +326,8 @@ namespace Vakapay.EthereumBusiness
 					{
 						Console.WriteLine("HELLO " + _currentPending.Hash);
 						_currentPending.BlockNumber = _trans.blockNumber;
-						_currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
-						_currentPending.InProcess = 0;
+						_currentPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+						_currentPending.Status = Status.StatusCompleted;
 						ethereumWithdrawRepo.Update(_currentPending);
 						_transactionInProcess.RemoveAt(i);
 					}

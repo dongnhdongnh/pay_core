@@ -299,7 +299,7 @@ namespace Vakapay.BitcoinBusiness
                     {
                         Id = CommonHelper.GenerateUuid(),
                         Hash = idTransaction,
-                        BlockNumber = (string) blockInfo["height"],
+                        BlockNumber = (int) blockInfo["height"],
                         BlockHash = (string) transactionInfo["blockhash"],
                         NetworkName = "Bitcoin",
                         Amount = (decimal) detail["amount"] * -1,
@@ -390,7 +390,7 @@ namespace Vakapay.BitcoinBusiness
                 {
                     Id = CommonHelper.GenerateUuid(),
                     Hash = idTransaction,
-                    BlockNumber = (string) blockInfo["height"],
+                    BlockNumber = (int) blockInfo["height"],
                     BlockHash = (string) transactionInfo["blockhash"],
                     NetworkName = "Bitcoin",
                     Amount = (decimal) amount,

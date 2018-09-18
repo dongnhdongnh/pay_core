@@ -39,13 +39,19 @@ namespace Vakapay.BlockchainBusiness.Base
              */
             // find transaction pending
             var pendingTransaction =  RepoQuery.FindTransactionPending();
-            if(pendingTransaction == null)
+            if(pendingTransaction == null || pendingTransaction.Id == null)
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
                     Message = "Not found Transaction"
                 };
+            if (DbConnection.State != ConnectionState.Open)
+            {
+                Console.WriteLine(DbConnection.State);
+                DbConnection.Open();
+            }
             
+               
             //begin first transaction
             var transactionScope = DbConnection.BeginTransaction();
             try
@@ -87,8 +93,18 @@ namespace Vakapay.BlockchainBusiness.Base
                 var sendTransaction = await rpcClass.SendTransactionAsync(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
                 pendingTransaction.InProcess = 0;
-                pendingTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp();
+                pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                pendingTransaction.Hash = sendTransaction.Data;
                 var result = await RepoQuery.SafeUpdate(pendingTransaction);
+                if (result.Status == Status.StatusError)
+                {
+                    transactionDbSend.Rollback();
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Cannot Save Transaction Status"
+                    };
+                }
                 transactionDbSend.Commit();
                 return new ReturnObject
                 {
@@ -99,12 +115,11 @@ namespace Vakapay.BlockchainBusiness.Base
             }
             catch (Exception e)
             {
+                //release lock
+                var resultRelease = RepoQuery.ReleaseLock(pendingTransaction);
+                Console.WriteLine(JsonHelper.SerializeObject(resultRelease));
                 transactionDbSend.Rollback();
-                return new ReturnObject
-                {
-                    Status = Status.StatusSuccess,
-                    Message = e.ToString()
-                };
+                throw e;
             }
             
             

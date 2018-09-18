@@ -59,7 +59,7 @@ namespace Vakapay.TestBitcoin
                 {
                     Id = CommonHelper.GenerateUuid(),
                     Hash = "",
-                    BlockNumber = "",
+                    BlockNumber = 0,
                     BlockHash = "",
                     NetworkName = "Bitcoin",
                     Amount = 1,
