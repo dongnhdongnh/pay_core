@@ -7,6 +7,5 @@ namespace Vakapay.Models.Entities
 	[Table("ethereumwithdrawtransaction")]
 	public class EthereumWithdrawTransaction : IBlockchainTransaction
 	{
-		
 	}
 }

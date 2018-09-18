@@ -50,13 +50,16 @@ CREATE TABLE `ethereumwithdrawtransaction` (
   `Hash` varchar(200) DEFAULT NULL,
   `BlockNumber` varchar(200) DEFAULT NULL,
   `NetworkName` varchar(200) DEFAULT NULL,
-  `Amount` decimal(20,0) NOT NULL,
+  `Amount` decimal(20,8) NOT NULL,
   `FromAddress` varchar(200) NOT NULL,
   `ToAddress` varchar(200) NOT NULL,
   `Fee` varchar(200) NOT NULL,
   `Status` varchar(200) DEFAULT NULL,
   `CreatedAt` int(11) NOT NULL,
-  `UpdatedAt` int(11) NOT NULL
+  `UpdatedAt` int(11) NOT NULL,
+  `InProcess` int(11) NOT NULL,
+  `Version` int(11) NOT NULL,
+        PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -100,19 +103,44 @@ CREATE TABLE `bitcoinaddress` (
 -- Table structure for table `bitcoinwithdrawtransaction`
 --
 
-CREATE TABLE `bitcoinwithdrawtransaction` (
-  `Id` varchar(200) NOT NULL,
-  `Hash` varchar(200) DEFAULT NULL,
-  `BlockNumber` varchar(200) DEFAULT NULL,
-  `BlockHash` varchar(200) DEFAULT NULL,
-  `NetworkName` varchar(200) DEFAULT NULL,
-  `Amount` decimal(20,0) NOT NULL,
-  `FromAddress` varchar(200) NOT NULL,
-  `ToAddress` varchar(200) NOT NULL,
-  `Fee` varchar(200) NOT NULL,
-  `Status` varchar(200) DEFAULT NULL,
-  `CreatedAt` int(11) NOT NULL,
-  `UpdatedAt` int(11) NOT NULL
+CREATE TABLE bitcoinwithdrawtransaction (
+  Id varchar(200) NOT NULL,
+  Hash varchar(200) DEFAULT NULL,
+  BlockNumber varchar(200) DEFAULT NULL,
+  BlockHash varchar(200) DEFAULT NULL,
+  NetworkName varchar(200) DEFAULT NULL,
+  Amount decimal(20,8) NOT NULL,
+  FromAddress varchar(200) NOT NULL,
+  ToAddress varchar(200) NOT NULL,
+  Fee varchar(200) NOT NULL,
+  Status varchar(200) DEFAULT NULL,
+  CreatedAt int(11) NOT NULL,
+  UpdatedAt int(11) NOT NULL,
+  InProcess int(11) NOT NULL,
+  Version int(11) NOT NULL,
+  PRIMARY KEY (Id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Table structure for table bitcoindeposittransaction
+--
+
+CREATE TABLE bitcoindeposittransaction (
+  Id varchar(200) NOT NULL,
+  Hash varchar(200) DEFAULT NULL,
+  BlockNumber varchar(200) DEFAULT NULL,
+  BlockHash varchar(200) DEFAULT NULL,
+  NetworkName varchar(200) DEFAULT NULL,
+  Amount decimal(20,8) NOT NULL,
+  FromAddress varchar(200) NOT NULL,
+  ToAddress varchar(200) NOT NULL,
+  Fee varchar(200) NOT NULL,
+  Status varchar(200) DEFAULT NULL,
+  CreatedAt int(11) NOT NULL,
+  UpdatedAt int(11) NOT NULL,
+  InProcess int(11) NOT NULL,
+  Version int(11) NOT NULL,
+   PRIMARY KEY (Id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

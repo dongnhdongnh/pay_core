@@ -28,7 +28,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="privateKey"></param>
         /// <typeparam name="IBlockchainTransaction"></typeparam>
         /// <returns></returns>
-        public async Task<ReturnObject> SendTransactionAsysn<IBlockchainTransaction>(IRepositoryBlockchainTransaction<IBlockchainTransaction> RepoQuery, IBlockchainRpc rpcClass, string privateKey = "")
+        public async Task<ReturnObject> SendTransactionAsync<IBlockchainTransaction>(IRepositoryBlockchainTransaction<IBlockchainTransaction> RepoQuery, IBlockchainRPC rpcClass, string privateKey = "")
         {
             /*
              * 1. Query Transaction Withdraw pending
@@ -90,7 +90,7 @@ namespace Vakapay.BlockchainBusiness.Base
             {
                 //Call RPC Transaction
                 //TODO EDIT RPC Class
-                var sendTransaction = await rpcClass.SendTransactionAsyn(pendingTransaction);
+                var sendTransaction = await rpcClass.SendTransactionAsync(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
                 pendingTransaction.InProcess = 0;
                 pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();

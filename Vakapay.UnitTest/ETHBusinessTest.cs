@@ -9,7 +9,7 @@ using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
-namespace Vakapay.VakacoinBusiness.Test
+namespace Vakapay.UnitTest
 {
 	[TestFixture]
 	class ETHBusinessTest
@@ -33,6 +33,30 @@ namespace Vakapay.VakacoinBusiness.Test
 			Assert.IsNotNull(outPut);
 		}
 
+		[Test]
+		public void FakeWalletID()
+		{
+			var repositoryConfig = new RepositoryConfiguration
+			{
+				ConnectionString = ETHBusinessTest.ConnectionString
+			};
+
+			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			var WalletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+			var user = new User
+			{
+				Id = CommonHelper.GenerateUuid(),
+			};
+			var blockChainNetwork = new BlockchainNetwork
+			{
+				Name = NetworkName.ETH,
+				Status = Status.StatusActive,
+				Sysbol = "ETH",
+				Id = CommonHelper.GenerateUuid()
+			};
+			var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
+		}
+
 		[TestCase(10)]
 		public void FakePeningTransaction(int numOfTrans)
 		{
@@ -54,6 +78,11 @@ namespace Vakapay.VakacoinBusiness.Test
 				outPut = _ethBus.FakePendingTransaction(_trans);
 			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
+		}
+		[Test]
+		public void CreateNewTransactionMultirun()
+		{
+			
 		}
 
 		[Test]
@@ -88,8 +117,9 @@ namespace Vakapay.VakacoinBusiness.Test
 			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			var WalletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
 			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
-			int block = _ethBus.ScanBlock();
+			int block = _ethBus.ScanBlock(WalletBusiness);
 
 			Assert.IsTrue(block > 0);
 		}

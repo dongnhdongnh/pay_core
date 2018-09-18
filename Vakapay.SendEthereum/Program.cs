@@ -75,7 +75,7 @@ namespace Vakapay.SendEthereum
                     var rpc = new EthereumRpc("http://localhost:8545");
 
                     var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
-                    var resultSend = ethereumBusiness.SendTransactionAsysn(ethereumRepo, rpc, "");
+                    var resultSend = ethereumBusiness.SendTransactionAsync(ethereumRepo, rpc, "");
                     Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
                 
                     

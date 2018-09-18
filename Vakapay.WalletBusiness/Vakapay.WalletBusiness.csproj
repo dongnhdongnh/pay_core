@@ -1,12 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj" />
-      <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
-    </ItemGroup>
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NLog">
+      <Version>4.5.9</Version>
+    </PackageReference>
+    <PackageReference Include="NLog.Config">
+      <Version>4.5.9</Version>
+    </PackageReference>
+  </ItemGroup>
 </Project>

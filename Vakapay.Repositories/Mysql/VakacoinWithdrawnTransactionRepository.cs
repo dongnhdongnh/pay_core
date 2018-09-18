@@ -15,9 +15,9 @@ using Vakapay.Repositories.Mysql.Base;
 namespace Vakapay.Repositories.Mysql
 {
 
-	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
+	public class VakacoinWithdrawnTransactionRepository : MysqlBaseConnection, IVakacoinWithdrawTransactionRepository
 	{
-		String tableName = "vakapay.ethereumwithdrawtransaction";
+		String tableName = "vakapay.vakacoinwithdrawtransaction";
 		public string Query_Search(Dictionary<string, string> whereValue)
 		{
 			StringBuilder whereStr = new StringBuilder("");
@@ -75,11 +75,11 @@ namespace Vakapay.Repositories.Mysql
 			return output;
 		}
 
-		public EthereumWithdrawnTransactionRepository(string connectionString) : base(connectionString)
+		public VakacoinWithdrawnTransactionRepository(string connectionString) : base(connectionString)
 		{
 		}
 
-		public EthereumWithdrawnTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
+		public VakacoinWithdrawnTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
 		{
 		}
 
@@ -88,18 +88,18 @@ namespace Vakapay.Repositories.Mysql
 			throw new NotImplementedException();
 		}
 
-		public EthereumWithdrawTransaction FindById(string Id)
+		public VakacoinWithdrawTransaction FindById(string Id)
 		{
 			throw new NotImplementedException();
 		}
 
-		public List<EthereumWithdrawTransaction> FindBySql(string sqlString)
+		public List<VakacoinWithdrawTransaction> FindBySql(string sqlString)
 		{
 			try
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList();
+				var result = Connection.Query<VakacoinWithdrawTransaction>(sqlString).ToList();
 
 
 				return result;
@@ -110,13 +110,13 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public ReturnObject Insert(EthereumWithdrawTransaction objectInsert)
+		public ReturnObject Insert(VakacoinWithdrawTransaction objectInsert)
 		{
 			try
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				var result = Connection.InsertTask<string, EthereumWithdrawTransaction>(objectInsert);
+				var result = Connection.InsertTask<string, VakacoinWithdrawTransaction>(objectInsert);
 				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
 				return new ReturnObject
 				{
@@ -134,13 +134,13 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public ReturnObject Update(EthereumWithdrawTransaction objectUpdate)
+		public ReturnObject Update(VakacoinWithdrawTransaction objectUpdate)
 		{
 			try
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				var result = Connection.Update<EthereumWithdrawTransaction>(objectUpdate);
+				var result = Connection.Update<VakacoinWithdrawTransaction>(objectUpdate);
 				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
 				return new ReturnObject
 				{
@@ -197,130 +197,32 @@ namespace Vakapay.Repositories.Mysql
 
 		public IBlockchainTransaction FindTransactionPending()
 		{
-	        try
-	        {
-		        return FindTransactionByStatus(Status.StatusPending);
-	        }
-	        catch (Exception e)
-	        {
-		        throw e;
-	        }
+			throw new NotImplementedException();
 		}
 
 		public IBlockchainTransaction FindTransactionError()
 		{
-	        try
-	        {
-		        return FindTransactionByStatus(Status.StatusError);
-	        }
-	        catch (Exception e)
-	        {
-		        throw e;
-	        }
+			throw new NotImplementedException();
 		}
 
 		public IBlockchainTransaction FindTransactionByStatus(string status)
 		{
-	        try
-	        {
-				if(Connection.State != ConnectionState.Open)
-					Connection.Open();
-
-		        var sqlString = $"Select * from {tableName} where Status = @status and InProcess = 0";
-		        var result = Connection.QueryFirstOrDefault<EthereumWithdrawTransaction>(sqlString, new {status = status});
-		        return result;
-	        }
-	        catch (Exception e)
-	        {
-		        throw e;
-	        }
+			throw new NotImplementedException();
 		}
 
 		public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
 		{
-	        try
-	        {
-		        if (Connection.State != ConnectionState.Open)
-			        Connection.Open();
-		        string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 1 Where Id = @Id and Version = @Version and InProcess = 0";
-
-		        var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version});
-		        if (update == 1)
-		        {
-			        return new ReturnObject
-			        {
-				        Status = Status.StatusSuccess,
-				        Message = "Update Success",
-			        };
-		        }
-		        return new ReturnObject
-		        {
-			        Status = Status.StatusError,
-			        Message = "Update Fail",
-		        };
-	        }
-	        catch (Exception e)
-	        {
-		        throw e;
-	        }
+			throw new NotImplementedException();
 		}
 
 		public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
 		{
-	        try
-	        {
-		        if (Connection.State != ConnectionState.Open)
-			        Connection.Open();
-		        string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 0 Where Id = @Id and Version = @Version and InProcess = 1";
-
-		        var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version});
-		        if (update == 1)
-		        {
-			        return new ReturnObject
-			        {
-				        Status = Status.StatusSuccess,
-				        Message = "Update Success",
-			        };
-		        }
-		        return new ReturnObject
-		        {
-			        Status = Status.StatusError,
-			        Message = "Update Fail",
-		        };
-	        }
-	        catch (Exception e)
-	        {
-		        throw e;
-	        }
+			throw new NotImplementedException();
 		}
 
 		public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
 		{
-	        try
-	        {
-		        if (Connection.State != ConnectionState.Open)
-			        Connection.Open();
-		        string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 0, Status = @Status, UpdatedAt = @UpdatedAt Where Id = @Id and Version = @Version and InProcess = 1";
-
-		        var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version, Status = transaction.Status, UpdatedAt = transaction.UpdatedAt});
-		        if (update == 1)
-		        {
-			        return new ReturnObject
-			        {
-				        Status = Status.StatusSuccess,
-				        Message = "Update Success",
-			        };
-		        }
-		        return new ReturnObject
-		        {
-			        Status = Status.StatusError,
-			        Message = "Update Fail",
-		        };
-	        }
-	        catch (Exception e)
-	        {
-		        throw e;
-	        }
+			throw new NotImplementedException();
 		}
 
 		public object GetTransaction()
@@ -342,4 +244,5 @@ namespace Vakapay.Repositories.Mysql
 			_transaction.Rollback();
 		}
 	}
+
 }

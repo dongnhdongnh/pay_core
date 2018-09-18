@@ -12,9 +12,9 @@ using Vakapay.EthereumBussiness;
 namespace Vakapay.EthereumBusiness
 {
 	/// <summary>
-	/// This class is communicate with ethereum network throught rpc api
+	/// This class is communicate with ethereum network throught RPCClient api
 	/// </summary>
-	public class EthereumRpc : IBlockchainRpc
+	public class EthereumRpc : IBlockchainRPC
 	{
 
 		private static string rootAddress = "0x12890d2cce102216644c59dae5baed380d84830c";
@@ -147,7 +147,9 @@ namespace Vakapay.EthereumBusiness
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_getTransactionByBlockNumberAndIndex, new Object[] { blockNumber.IntToHex(), transactionIndex.IntToHex() });
 		}
 
-		
+
+		public string EndPointURL { get; set; }
+
 		public ReturnObject CreateNewAddress(string password)
 		{
 			throw new NotImplementedException();
@@ -177,12 +179,13 @@ namespace Vakapay.EthereumBusiness
 		{
 			throw new NotImplementedException();
 		}
+
 		/// <summary>
 		/// Send Transaction Async
 		/// </summary>
 		/// <param name="blockchainTransaction"></param>
 		/// <returns></returns>
-		public async Task<ReturnObject> SendTransactionAsyn(IBlockchainTransaction blockchainTransaction)
+		public async Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
 		{
 			try
 			{

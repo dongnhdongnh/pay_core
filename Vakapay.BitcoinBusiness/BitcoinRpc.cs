@@ -14,9 +14,9 @@ namespace Vakapay.BitcoinBusiness
         {
         }
 
-        public BitcoinRpc(string a_sUri, string userName, string password)
+        public BitcoinRpc(string aSUri, string userName, string password)
         {
-            Url = new Uri(a_sUri);
+            Url = new Uri(aSUri);
             Credentials = new NetworkCredential(userName, password);
         }
 
@@ -24,27 +24,27 @@ namespace Vakapay.BitcoinBusiness
 
         public readonly ICredentials Credentials;
 
-        public ReturnObject InvokeMethod(string a_sMethod, params object[] a_params)
+        public ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
         {
             try
             {
                 HttpWebRequest webRequest = (HttpWebRequest) WebRequest.Create(Url);
 
                 webRequest.Credentials = Credentials;
-                webRequest.ContentType = "application/json-rpc";
+                webRequest.ContentType = "application/json-RPCClient";
                 webRequest.Method = "POST";
 
                 JObject joe = new JObject();
                 joe["jsonrpc"] = "1.0";
                 joe["id"] = "1";
-                joe["method"] = a_sMethod;
+                joe["method"] = aSMethod;
 
-                if (a_params != null)
+                if (aParams != null)
                 {
-                    if (a_params.Length > 0)
+                    if (aParams.Length > 0)
                     {
                         JArray props = new JArray();
-                        foreach (var p in a_params)
+                        foreach (var p in aParams)
                         {
                             props.Add(p);
                         }
@@ -113,11 +113,11 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        public void BackupWallet(string a_destination)
+        public void BackupWallet(string aDestination)
         {
             try
             {
-                InvokeMethod("backupwallet", a_destination);
+                InvokeMethod("backupwallet", aDestination);
             }
             catch (Exception e)
             {
@@ -129,11 +129,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          * Returns the account associated with the given address.
          */
-        public ReturnObject GetAccount(string a_address)
+        public ReturnObject GetAccount(string aAddress)
         {
             try
             {
-                return InvokeMethod("getaccount", a_address);
+                return InvokeMethod("getaccount", aAddress);
             }
             catch (Exception e)
             {
@@ -144,11 +144,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          * Returns the current bitcoin address for receiving payments to this account. If <account> does not exist, it will be created along with an associated new address that will be returned.
          */
-        public ReturnObject GetAccountAddress(string a_account)
+        public ReturnObject GetAccountAddress(string aAccount)
         {
             try
             {
-                return InvokeMethod("getaccountaddress", a_account);
+                return InvokeMethod("getaccountaddress", aAccount);
             }
             catch (Exception e)
             {
@@ -166,16 +166,16 @@ namespace Vakapay.BitcoinBusiness
          * If [account] is not specified, returns the server's total available balance.
            If [account] is specified, returns the balance in the account.
          */
-        public ReturnObject GetBalance(string a_account = null, int a_minconf = 1)
+        public ReturnObject GetBalance(string aAccount = null, int aMinconf = 1)
         {
             try
             {
-                if (a_account == null)
+                if (aAccount == null)
                 {
                     return InvokeMethod("getbalance");
                 }
 
-                return InvokeMethod("getbalance", a_account, a_minconf);
+                return InvokeMethod("getbalance", aAccount, aMinconf);
             }
             catch (Exception e)
             {
@@ -183,11 +183,11 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        public ReturnObject GetBlockByCount(int a_height)
+        public ReturnObject GetBlockByCount(int aHeight)
         {
             try
             {
-                return InvokeMethod("getblockbycount", a_height);
+                return InvokeMethod("getblockbycount", aHeight);
             }
             catch (Exception e)
             {
@@ -270,11 +270,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          * Returns a new bitcoin address for receiving payments. If [account] is specified payments received with the address will be credited to [account].
          */
-        public ReturnObject GetNewAddress(string a_account = "")
+        public ReturnObject GetNewAddress(string aAccount = "")
         {
             try
             {
-                return InvokeMethod("getnewaddress", a_account);
+                return InvokeMethod("getnewaddress", aAccount);
             }
             catch (Exception e)
             {
@@ -285,11 +285,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          * Returns the total amount received by addresses with [account] in transactions with at least [minconf] confirmations. If [account] not provided return will include all transactions to all accounts.
          */
-        public ReturnObject GetReceivedByAccount(string a_account, int a_minconf = 1)
+        public ReturnObject GetReceivedByAccount(string aAccount, int aMinconf = 1)
         {
             try
             {
-                return InvokeMethod("getreceivedbyaccount", a_account, a_minconf);
+                return InvokeMethod("getreceivedbyaccount", aAccount, aMinconf);
             }
             catch (Exception e)
             {
@@ -300,11 +300,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          * Returns the amount received by <bitcoinaddress> in transactions with at least [minconf] confirmations. It correctly handles the case where someone has sent to the address in multiple transactions. Keep in mind that addresses are only ever used for receiving transactions. Works only for addresses in the local wallet, external addresses will always show 0
          */
-        public ReturnObject GetReceivedByAddress(string a_address, int a_minconf = 1)
+        public ReturnObject GetReceivedByAddress(string aAddress, int aMinconf = 1)
         {
             try
             {
-                return InvokeMethod("getreceivedbyaddress", a_address, a_minconf);
+                return InvokeMethod("getreceivedbyaddress", aAddress, aMinconf);
             }
             catch (Exception e)
             {
@@ -325,11 +325,11 @@ namespace Vakapay.BitcoinBusiness
             "amount"
             "fee"
          */
-        public ReturnObject GetTransaction(string a_txid)
+        public ReturnObject GetTransaction(string aTxid)
         {
             try
             {
-                return InvokeMethod("gettransaction", a_txid);
+                return InvokeMethod("gettransaction", aTxid);
             }
             catch (Exception e)
             {
@@ -345,11 +345,11 @@ namespace Vakapay.BitcoinBusiness
             "target" : little endian hash target
            If [data] is specified, tries to solve the block and returns true if it was successful.
          */
-        public ReturnObject GetWork(string a_data = "")
+        public ReturnObject GetWork(string aData = "")
         {
             try
             {
-                return InvokeMethod("getwork", a_data);
+                return InvokeMethod("getwork", aData);
             }
             catch (Exception e)
             {
@@ -357,11 +357,11 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        public ReturnObject Help(string a_command = "")
+        public ReturnObject Help(string aCommand = "")
         {
             try
             {
-                return InvokeMethod("help", a_command);
+                return InvokeMethod("help", aCommand);
             }
             catch (Exception e)
             {
@@ -372,11 +372,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          * Returns Object that has account names as keys, account balances as values.
          */
-        public ReturnObject ListAccounts(int a_minconf = 1)
+        public ReturnObject ListAccounts(int aMinconf = 1)
         {
             try
             {
-                return InvokeMethod("listaccounts", a_minconf);
+                return InvokeMethod("listaccounts", aMinconf);
             }
             catch (Exception e)
             {
@@ -390,11 +390,11 @@ namespace Vakapay.BitcoinBusiness
             "amount" : total amount received by addresses with this account
             "confirmations" : number of confirmations of the most recent transaction included
         */
-        public ReturnObject ListReceivedByAccount(int a_minconf = 1, bool a_includeEmpty = false)
+        public ReturnObject ListReceivedByAccount(int aMinconf = 1, bool aIncludeEmpty = false)
         {
             try
             {
-                return InvokeMethod("listreceivedbyaccount", a_minconf, a_includeEmpty);
+                return InvokeMethod("listreceivedbyaccount", aMinconf, aIncludeEmpty);
             }
             catch (Exception e)
             {
@@ -410,11 +410,11 @@ namespace Vakapay.BitcoinBusiness
             "confirmations" : number of confirmations of the most recent transaction included
            To get a list of accounts on the system, execute bitcoind listreceivedbyaddress 0 true
          */
-        public ReturnObject ListReceivedByAddress(int a_minconf = 1, bool a_includeEmpty = false)
+        public ReturnObject ListReceivedByAddress(int aMinconf = 1, bool aIncludeEmpty = false)
         {
             try
             {
-                return InvokeMethod("listreceivedbyaddress", a_minconf, a_includeEmpty);
+                return InvokeMethod("listreceivedbyaddress", aMinconf, aIncludeEmpty);
             }
             catch (Exception e)
             {
@@ -425,11 +425,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          * Returns up to [count] most recent transactions skipping the first [from] transactions for account [account]. If [account] not provided it'll return recent transactions from all accounts.
          */
-        public ReturnObject ListTransactions(string a_account, int a_count = 10)
+        public ReturnObject ListTransactions(string aAccount, int aCount = 10)
         {
             try
             {
-                return InvokeMethod("listtransactions", a_account, a_count);
+                return InvokeMethod("listtransactions", aAccount, aCount);
             }
             catch (Exception e)
             {
@@ -441,22 +441,22 @@ namespace Vakapay.BitcoinBusiness
          * Move from one account in your wallet to another
          */
         public ReturnObject Move(
-            string a_fromAccount,
-            string a_toAccount,
-            float a_amount,
-            int a_minconf = 1,
-            string a_comment = ""
+            string aFromAccount,
+            string aToAccount,
+            float aAmount,
+            int aMinconf = 1,
+            string aComment = ""
         )
         {
             try
             {
                 return InvokeMethod(
                     "move",
-                    a_fromAccount,
-                    a_toAccount,
-                    a_amount,
-                    a_minconf,
-                    a_comment
+                    aFromAccount,
+                    aToAccount,
+                    aAmount,
+                    aMinconf,
+                    aComment
                 );
             }
             catch (Exception e)
@@ -489,23 +489,23 @@ namespace Vakapay.BitcoinBusiness
         /**
          *  <amount> is a real and is rounded to 8 decimal places. Will send the given amount to the given address, ensuring the account has a valid balance using [minconf] confirmations. Returns the transaction ID if successful (not in JSON object).
          */
-        public ReturnObject SendFrom(string a_fromAccount,
-            string a_toAddress,
-            double a_amount,
-            int a_minconf = 1,
-            string a_comment = "",
-            string a_commentTo = "")
+        public ReturnObject SendFrom(string aFromAccount,
+            string aToAddress,
+            double aAmount,
+            int aMinconf = 1,
+            string aComment = "",
+            string aCommentTo = "")
         {
             try
             {
                 return InvokeMethod(
                     "sendfrom",
-                    a_fromAccount,
-                    a_toAddress,
-                    a_amount,
-                    a_minconf,
-                    a_comment,
-                    a_commentTo
+                    aFromAccount,
+                    aToAddress,
+                    aAmount,
+                    aMinconf,
+                    aComment,
+                    aCommentTo
                 );
             }
             catch (Exception e)
@@ -517,12 +517,12 @@ namespace Vakapay.BitcoinBusiness
         /**
          *  <amount> is a real and is rounded to 8 decimal places. Returns the transaction ID <txid> if successful.
          */
-        public ReturnObject SendToAddress(string a_address, decimal a_amount, string a_comment = "",
-            string a_commentTo = "")
+        public ReturnObject SendToAddress(string aAddress, decimal aAmount, string aComment = "",
+            string aCommentTo = "")
         {
             try
             {
-                return InvokeMethod("sendtoaddress", a_address, a_amount, a_comment, a_commentTo);
+                return InvokeMethod("sendtoaddress", aAddress, aAmount, aComment, aCommentTo);
             }
             catch (Exception e)
             {
@@ -533,11 +533,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          *  Sets the account associated with the given address. Assigning address that is already assigned to the same account will create a new address associated with that account.
          */
-        public void SetAccount(string a_address, string a_account)
+        public void SetAccount(string aAddress, string aAccount)
         {
             try
             {
-                InvokeMethod("setaccount", a_address, a_account);
+                InvokeMethod("setaccount", aAddress, aAccount);
             }
             catch (Exception e)
             {
@@ -549,11 +549,11 @@ namespace Vakapay.BitcoinBusiness
         /**
          *  <generate> is true or false to turn generation on or off. Generation is limited to [genproclimit] processors, -1 is unlimited.
          */
-        public void SetGenerate(bool a_generate, int a_genproclimit = 1)
+        public void SetGenerate(bool aGenerate, int aGenproclimit = 1)
         {
             try
             {
-                InvokeMethod("setgenerate", a_generate, a_genproclimit);
+                InvokeMethod("setgenerate", aGenerate, aGenproclimit);
             }
             catch (Exception e)
             {
@@ -575,11 +575,11 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        public ReturnObject ValidateAddress(string a_address)
+        public ReturnObject ValidateAddress(string aAddress)
         {
             try
             {
-                return InvokeMethod("validateaddress", a_address);
+                return InvokeMethod("validateaddress", aAddress);
             }
             catch (Exception e)
             {
@@ -592,7 +592,7 @@ namespace Vakapay.BitcoinBusiness
         /**
          * The getbestblockhash RPC returns the header hash of the most recent block on the best block chain.
          */
-        public ReturnObject getBestBlockHash()
+        public ReturnObject GetBestBlockHash()
         {
             try
             {
@@ -667,7 +667,7 @@ namespace Vakapay.BitcoinBusiness
         /**
          * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.
          */
-        public ReturnObject getBlockHeader(string hash)
+        public ReturnObject GetBlockHeader(string hash)
         {
             try
             {
@@ -682,7 +682,7 @@ namespace Vakapay.BitcoinBusiness
         /**
          * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.(sequentially)
          */
-        public ReturnObject getBlockHeader(string hash, bool isSequentially)
+        public ReturnObject GetBlockHeader(string hash, bool isSequentially)
         {
             try
             {
