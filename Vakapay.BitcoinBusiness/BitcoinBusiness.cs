@@ -182,7 +182,10 @@ namespace Vakapay.BitcoinBusiness
                     blockchainTransaction.Amount);
 
                 if (results.Status == Status.StatusError)
-                    return results;
+                {
+                    RollbackWithSraw(blockchainTransaction);
+                    throw new Exception("RPC ERROR");
+                }
 
                 var idTransaction = results.Data;
 
@@ -218,6 +221,26 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
+        /**
+         * rollback version when send error
+         */
+        private void RollbackWithSraw(BitcoinWithdrawTransaction blockchainTransaction)
+        {
+            try
+            {
+                var bitcoinRawTransactionRepo =
+                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+
+                blockchainTransaction.Version = 0;
+                blockchainTransaction.InProcess = 0;
+
+                bitcoinRawTransactionRepo.Update(blockchainTransaction);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
 
         /// <summary>
         /// amounts are double-precision floating point numbers. Returns the transaction ID if successful.
