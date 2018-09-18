@@ -86,6 +86,7 @@ namespace Vakapay.SendEthereum
             catch (Exception e)
             {
                 connection.Close();
+                Console.WriteLine("Send Ethereum error with message: ");
                 Console.WriteLine(e.ToString());
             }
             
