@@ -60,7 +60,6 @@ namespace Vakapay.SendBitcoin
                 while (true)
                 {
                     Console.WriteLine("Start Send Bitcoin....");
-
                     var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
 
                     var bitcoinRepo = repoFactory.GetBitcoinDepositTransactionRepository(connection);
