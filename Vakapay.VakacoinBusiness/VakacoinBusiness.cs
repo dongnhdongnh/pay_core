@@ -11,9 +11,14 @@ namespace Vakapay.VakacoinBusiness
 
     public class VakacoinBusiness : BlockchainBusiness
     {
+        private IVakacoinTransactionHistoryRepository VakacoinHistoryRepo { get; set; }
+        private IPendingVakacoinTransactionRepository PendingVakacoinTransRepo { get; set; }
+
         public VakacoinBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
             : base(vakapayRepositoryFactory, isNewConnection)
         {
+            VakacoinHistoryRepo = VakapayRepositoryFactory.GetVakacoinTransactionHistoryRepository(DbConnection);
+            PendingVakacoinTransRepo = VakapayRepositoryFactory.GetPendingVakacoinTransactionRepository(DbConnection);
         }
 
         /// <summary>
@@ -25,8 +30,6 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-
-                
                 return new ReturnObject { };
             }
             catch (Exception e)
@@ -39,11 +42,12 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public ReturnObject CreateTransactionHistory(string trxId, string from, string to, int blockNumber, decimal amount, string transactionTime, string status)
+        public ReturnObject CreateTransactionHistory(string trxId, string from, string to, int blockNumber,
+            decimal amount, string transactionTime, string status)
         {
             try
             {
-                if(DbConnection.State != ConnectionState.Open)
+                if (DbConnection.State != ConnectionState.Open)
                     DbConnection.Open();
                 var transaction = new VakacoinTransactionHistory
                 {
@@ -54,12 +58,10 @@ namespace Vakapay.VakacoinBusiness
                     BlockNumber = blockNumber,
                     Amount = amount,
                     TransactionTime = transactionTime,
-                    CreatedTime =  DateTime.UtcNow,
+                    CreatedTime = DateTime.UtcNow,
                     Status = status
                 };
-                var vakacoinRepo = VakapayRepositoryFactory.GetVakacoinTransactionHistoryRepository(DbConnection);
-
-                var result = vakacoinRepo.Insert(transaction);
+                var result = VakacoinHistoryRepo.Insert(transaction);
                 return result;
             }
             catch (Exception e)
@@ -71,5 +73,7 @@ namespace Vakapay.VakacoinBusiness
                 };
             }
         }
+
+//        public ReturnObject 
     }
 }

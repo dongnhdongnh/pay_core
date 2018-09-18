@@ -45,24 +45,24 @@ namespace Vakapay.TestWallet
                 {
                     Console.WriteLine(JsonHelper.SerializeObject(VARIABLE));
                 }
+                
+//                var user = new User
+//                {
+//                    Id = CommonHelper.GenerateUuid(),
+//                };
+//                var blockChainNetwork = new BlockchainNetwork
+//                {
+//                    Name = "Ethereum",
+//                    Status = Status.StatusActive,
+//                    Sysbol = "ETH",
+//                    Id = CommonHelper.GenerateUuid()
+//                };
+//
+//                var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
 
-				var user = new User
-				{
-					Id = CommonHelper.GenerateUuid(),
-				};
-				var blockChainNetwork = new BlockchainNetwork
-				{
-					Name = "Ethereum",
-					Status = Status.StatusActive,
-					Sysbol = "ETH",
-					Id = CommonHelper.GenerateUuid()
-				};
-
-				var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
-
-				//                Console.WriteLine(JsonHelper.SerializeObject(walletLst));
-
-			}
+//                Console.WriteLine(JsonHelper.SerializeObject(walletLst));
+ 
+            }
             catch (Exception e)
             {
                 Console.WriteLine(e);
