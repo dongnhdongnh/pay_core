@@ -1,18 +1,27 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 using NLog;
 using Vakapay.BlockchainBusiness;
+using Vakapay.Models.Domains;
 using Vakapay.VakacoinBusiness;
 using VakaSharp.Api.v1;
+using VakaSharp.CustomTypes;
+using Action = VakaSharp.Api.v1.Action;
 
 namespace Vakapay.ScanVakaCoin
 {
     public class VakacoinChainHelper: IChainHelper
     {
         private VakacoinRPC _rpcClient;
+        private VakacoinBusiness.VakacoinBusiness _vakacoinBusiness;
+        private WalletBusiness.WalletBusiness _walletBusiness;
         private int _blockInterval;
 
         public const String TRANSACTION_STATUS_EXECUTED = "executed";
+        public const String TRANSACTION_ACTION_TRANSFER = "transfer";
+        public readonly static String[] TRANSACTION_SYMBOL_ARRAY = { "EOS", "VAKA" };
         
         public IBlockchainRPC RpcClient
         {
@@ -20,9 +29,12 @@ namespace Vakapay.ScanVakaCoin
             set { _rpcClient = (VakacoinRPC) value; }
         }
 
-        public VakacoinChainHelper(int blockInterval)
+        public VakacoinChainHelper(int blockInterval, VakacoinRPC rpcClient, VakacoinBusiness.VakacoinBusiness vakacoinBusiness, WalletBusiness.WalletBusiness walletBusiness)
         {
             _blockInterval = blockInterval;
+            _rpcClient = rpcClient;
+            _vakacoinBusiness = vakacoinBusiness;
+            _walletBusiness = walletBusiness;
         }
         
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -34,7 +46,7 @@ namespace Vakapay.ScanVakaCoin
             while (true)
             {
                 uint lastIrreversibleBlock = _rpcClient.GetLastIrreversibleBlockNum().GetValueOrDefault();
-                logger.Info("Last Irreversible Block = " + lastIrreversibleBlock);
+                logger.Info("Last Irreversible Block: {0}", lastIrreversibleBlock);
                 
                 // Parse transactions from current block to last trusted block
                 for (uint blockNum = startBlock; blockNum <= lastIrreversibleBlock; blockNum++)
@@ -50,80 +62,48 @@ namespace Vakapay.ScanVakaCoin
 
         public void ParseTransaction(object block)
         {
-            ParseTransaction((GetBlockResponse) block);
+            GetBlockResponse blockResponse = (GetBlockResponse) block;
+            foreach ((Action action, PackedTransaction packedTransaction) in GetListAction(blockResponse))
+            {
+                if (action.Data.Equals(null))
+                    return;
+                if (action.Name == TRANSACTION_ACTION_TRANSFER)
+                    ParseValidTransferAction(action, packedTransaction, blockResponse);
+            }
         }
 
-        public void ParseTransaction(GetBlockResponse block)
+        public void ParseValidTransferAction(Action action, PackedTransaction packedTransaction, GetBlockResponse blockResponse)
         {
-            Console.WriteLine(block.BlockNum);
-            foreach (var transaction in block.Transactions)
+            TransferData transferData = JsonConvert.DeserializeObject<TransferData>(action.Data.ToString());
+            if (String.IsNullOrEmpty(transferData.Quantity))
+                return;
+            if (TRANSACTION_SYMBOL_ARRAY.Contains(transferData.Symbol()))
             {
-                if (transaction.Status != TRANSACTION_STATUS_EXECUTED)
-                {
+                // If receiver doesn't exist in wallet table then stop
+                if (!_walletBusiness.CheckExistedAndUpdateByAddress(transferData.To, transferData.Amount(),
+                    transferData.Symbol()))
+                    return;
+                
+                // Save to table in db
+                _vakacoinBusiness.CreateTransactionHistory(packedTransaction.Id, transferData.From, transferData.To,
+                    Int32.Parse(blockResponse.BlockNum.ToString()), transferData.Amount(),
+                    blockResponse.Timestamp.ToString(), Status.StatusSuccess);
+
+                logger.Info("{0} was received {1}", transferData.To, transferData.Quantity);
+            }
+        }
+
+        public IEnumerable<(Action, PackedTransaction)> GetListAction(GetBlockResponse block)
+        {
+            logger.Info(String.Format("Blog number {0} produced on {1}", block.BlockNum, block.Timestamp));
+            foreach (TransactionReceipt transactionReceipt in block.Transactions)
+            {
+                if (transactionReceipt.Status != TRANSACTION_STATUS_EXECUTED || transactionReceipt.Trx is String)
                     continue;
-                }
-//                // process each transaction in arraylist of transactions
-//            foreach (var transaction in transactions)
-//            {
-//                try
-//                {
-//                    var jsonTrx = JObject.Parse(transaction.ToString())["transaction"];
-//
-//                    //check name of action in transaction
-//                    var actionName = jsonTrx["actions"][0]["name"];
-//                    if (actionName == null)
-//                        continue;
-//                    if (actionName.ToString() != "transfer")
-//                        continue;
-//
-//                    //check data is valid json
-//                    if (!JsonHelper.IsValidJson(jsonTrx["actions"][0]["data"].ToString()))
-//                        continue;
-//
-//                    //check quantity and to_address in transaction
-//                    var quantity = jsonTrx["actions"][0]["data"]["quantity"];
-//                    var _to = jsonTrx["actions"][0]["data"]["to"];
-//
-//                    //if quantity == null, process next transaction in arraylist
-//                    if (quantity == null || _to == null)
-//                    {
-//                        continue;
-//                    }
-//
-//                    var trxId = JObject.Parse(transaction.ToString())["id"].ToString();
-//
-//                    string _quantity = quantity.ToString();
-//                    if (!String.IsNullOrEmpty(_quantity))
-//                    {
-//                        //check symbol in quantity
-//                        var symbol = _quantity.Split(" ")[1];
-//                        if (symbol == "EOS" || symbol == "VAKA")
-//                        {
-//                            string to = _to.ToString();
-//                            string from = jsonTrx["actions"][0]["data"]["from"].ToString();
-//                            decimal amount = decimal.Parse(_quantity.Split(" ")[0]);
-//                            string transactionTime = jsonTrx["expiration"].ToString();
-//                            string status = "success";
-//
-//                            // if receiver doesn't exist in wallet table, process next transaction
-//                            if (!_walletBusiness.CheckExistedAndUpdateByAddress(to, amount, symbol))
-//                                continue;
-//
-//                            // save to VakacoinTransactionHistory
-//                            ReturnObject result =
-//                                _vakacoinBusiness.CreateTransactionHistory(trxId, from, to, blockNumber, amount,
-//                                    transactionTime, status);
-//
-//                            logger.Info(to + " was received " + amount + " " + symbol);
-//                        }
-//                    }
-//                }
-//                catch (Exception e)
-//                {
-//                    logger.Error(e);
-//                    throw;
-//                }
-//            }
+
+                PackedTransaction packedTransaction = JsonConvert.DeserializeObject<PackedTransaction>(transactionReceipt.Trx.ToString());
+                foreach (Action action in packedTransaction.Transaction.Actions)
+                    yield return (action, packedTransaction);
             }
         }
     }
