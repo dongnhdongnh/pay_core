@@ -7,12 +7,12 @@ namespace Vakapay.UnitTest
     [TestFixture]
     public class VakacoinRpcTest
     {
-        private VakacoinRpc _rpc;
+        private VakacoinRPC _rpc;
         
         [SetUp]
         public void Setup()
         {
-            _rpc = new VakacoinRpc("http://127.0.0.1:8000");
+            _rpc = new VakacoinRPC("http://127.0.0.1:8000");
         }
         
         [TestCase("vaka", true)]

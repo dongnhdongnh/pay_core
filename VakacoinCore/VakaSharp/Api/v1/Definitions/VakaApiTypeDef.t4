@@ -376,7 +376,7 @@
             {
 				new Field() { Name = "cpu_amount", Type = "string" },
 				new Field() { Name = "net_amount", Type = "string" }
-            }
+            string}
         },
 
 		new ApiType()

@@ -31,7 +31,7 @@ namespace Vakapay.BitcoinBusiness
                 HttpWebRequest webRequest = (HttpWebRequest) WebRequest.Create(Url);
 
                 webRequest.Credentials = Credentials;
-                webRequest.ContentType = "application/json-rpc";
+                webRequest.ContentType = "application/json-RPCClient";
                 webRequest.Method = "POST";
 
                 JObject joe = new JObject();
