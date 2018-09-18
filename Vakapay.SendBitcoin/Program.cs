@@ -13,7 +13,7 @@ namespace Vakapay.SendBitcoin
 {
     class Program
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         static void Main()
         {
@@ -63,8 +63,8 @@ namespace Vakapay.SendBitcoin
 
                     var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
 
-                    var ethereumRepo = repoFactory.GetBitcoinDepositTransactionRepository(connection);
-                    var resultSend = bitcoinBusiness.SendTransactionAsync(ethereumRepo, rpc, "");
+                    var bitcoinRepo = repoFactory.GetBitcoinDepositTransactionRepository(connection);
+                    var resultSend = bitcoinBusiness.SendTransactionAsync(bitcoinRepo, rpc, "");
                     Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
                     Console.WriteLine("Send Bitcoin End...");

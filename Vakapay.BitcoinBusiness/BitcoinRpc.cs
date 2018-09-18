@@ -718,9 +718,17 @@ namespace Vakapay.BitcoinBusiness
 
         public string EndPointURL { get; set; }
 
-        public ReturnObject CreateNewAddress(string password)
+        public ReturnObject CreateNewAddress(string account)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = GetNewAddress(account);
+                return result;
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         public ReturnObject CreateNewAddress()
