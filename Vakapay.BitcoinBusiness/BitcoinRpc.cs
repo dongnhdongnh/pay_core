@@ -2,17 +2,19 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.BlockchainBusiness;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.BitcoinBusiness
 {
-    public class BitcoinRpc
+    public class BitcoinRpc : IBlockchainRPC
     {
-        public BitcoinRpc()
-        {
-        }
+        private readonly Uri Url;
+
+        private readonly ICredentials Credentials;
 
         public BitcoinRpc(string aSUri, string userName, string password)
         {
@@ -20,11 +22,10 @@ namespace Vakapay.BitcoinBusiness
             Credentials = new NetworkCredential(userName, password);
         }
 
-        public readonly Uri Url;
 
-        public readonly ICredentials Credentials;
+        private IBlockchainRPC _blockchainRpcImplementation;
 
-        public ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
+        private ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
         {
             try
             {
@@ -713,6 +714,69 @@ namespace Vakapay.BitcoinBusiness
                 Status = Status.StatusError,
                 Message = e.Message
             };
+        }
+
+        public string EndPointURL { get; set; }
+
+        public ReturnObject CreateNewAddress(string account)
+        {
+            try
+            {
+                var result = GetNewAddress(account);
+                return result;
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        public ReturnObject CreateNewAddress()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject CreateNewAddress(string privateKey, string publicKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SendRawTransaction(string data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject GetBalance(string address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SignTransaction(string privateKey, object[] transactionData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
+        {
+            try
+            {
+                var resultSend = SendToAddress(blockchainTransaction.ToAddress, blockchainTransaction.Amount);
+                return resultSend;
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        public ReturnObject GetBlockByNumber(int blockNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject FindTransactionByHash(string hash)
+        {
+            throw new NotImplementedException();
         }
     }
 }
