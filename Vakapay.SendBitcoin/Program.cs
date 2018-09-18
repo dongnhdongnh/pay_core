@@ -15,10 +15,6 @@ namespace Vakapay.SendBitcoin
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        private static Timer _timer;
-        private static BitcoinBusiness.BitcoinBusiness _btcBusiness;
-        private const int TimeInterval = 1000;
-
         static void Main()
         {
             try
@@ -63,7 +59,7 @@ namespace Vakapay.SendBitcoin
             {
                 while (true)
                 {
-                    Console.WriteLine("Start Send Ethereum....");
+                    Console.WriteLine("Start Send Bitcoin....");
 
                     var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
 
@@ -71,13 +67,13 @@ namespace Vakapay.SendBitcoin
                     var resultSend = bitcoinBusiness.SendTransactionAsync(ethereumRepo, rpc, "");
                     Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
-                    Console.WriteLine("Send Ethereum End...");
+                    Console.WriteLine("Send Bitcoin End...");
                     Thread.Sleep(1000);
                 }
             }
             catch (Exception e)
             {
-                connection.Close();
+                logger.Error(e, "Send Bitcoin");
                 Console.WriteLine(e.ToString());
             }
         }
