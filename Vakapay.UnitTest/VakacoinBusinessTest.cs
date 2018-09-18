@@ -5,6 +5,7 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.UnitTest
 {
+    using VakacoinBusiness;
     [TestFixture]
     public class VakacoinBusinessTest
     {

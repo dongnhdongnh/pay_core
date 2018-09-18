@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Vakapay.Models.Domains;
+using Vakapay.VakacoinBusiness;
 
 namespace Vakapay.UnitTest
 {
