@@ -210,12 +210,20 @@ namespace Vakapay.WalletBusiness
 
                 var id = wallet.Id;
                 var version = wallet.Version;
-
-                int retry = 0;
-                // try UpdateBalance 5 times at most
+                
+                var result = UpdateBalance(amount, id, version);
+                if (result.Status == Status.StatusSuccess)
+                    return true;
+    
+                // if update unsuccess, try UpdateBalance 5 times at most
+                int retry = 1;
                 while (retry < 5)
                 {
-                    var result = UpdateBalance(amount, id, version, addr, networkName);
+                    wallet = FindByAddressAndNetworkName(addr, networkName);
+                    id = wallet.Id;
+                    version = wallet.Version;
+                    
+                    result = UpdateBalance(amount, id, version);
                     if (result.Status == Status.StatusSuccess)
                         return true;
                     retry++;
@@ -248,14 +256,14 @@ namespace Vakapay.WalletBusiness
             }
         }
 
-        private ReturnObject UpdateBalance(decimal amount, string id, int version, string addr, string networkName)
+        private ReturnObject UpdateBalance(decimal amount, string id, int version)
         {
             try
             {
                 if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var result = walletRepository.UpdateBalanceWallet(amount, id, version, addr, networkName);
+                var result = walletRepository.UpdateBalanceWallet2(amount, id, version);
 
                 return result;
             }

@@ -107,15 +107,15 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public ReturnObject UpdateBalanceWallet(decimal amount, string id, int version, string addr, string networkName)
+        public ReturnObject UpdateBalanceWallet2(decimal amount, string id, int version)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-                Int32 unixTimestamp = (Int32) (DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                Int32 unixTimestamp = (Int32) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
                 string sQuery =
-                    "UPDATE wallet SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdateAt = @TIMESTAMP WHERE Id = @ID AND Version = @VERSION AND Address = @ADDRESS AND NetworkName = @NETWORKNAME";
+                    "UPDATE wallet SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID";
 
                 var result = Connection.Query(sQuery,
                     new
@@ -123,8 +123,6 @@ namespace Vakapay.Repositories.Mysql
                         ID = id,
                         VERSION = version,
                         AMOUNT = amount,
-                        ADDRESS = addr,
-                        NETWORKNAME = networkName,
                         TIMESTAMP = unixTimestamp
                     });
 
