@@ -67,7 +67,8 @@ namespace Vakapay.SendBitcoin
             Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
                 e.SignalTime);
 
-            _btcBusiness.RunSendTransaction();
+           var result =  _btcBusiness.RunSendTransaction();
+            logger.Debug("RunSendTransaction result : " + JsonHelper.SerializeObject(result));
         }
     }
 }

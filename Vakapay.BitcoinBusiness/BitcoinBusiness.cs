@@ -112,9 +112,9 @@ namespace Vakapay.BitcoinBusiness
                 foreach (var pending in pendings)
                 {
                     // send 
-                    Logger.Debug("runSendTransaction before" + JsonHelper.SerializeObject(pending));
+                    Logger.Debug("SendTransaction before" + JsonHelper.SerializeObject(pending));
                     var result = SendTransaction(pending);
-                    Logger.Debug("runSendTransaction result" + JsonHelper.SerializeObject(result));
+                    Logger.Debug("SendTransaction result" + JsonHelper.SerializeObject(result));
                     data.Add(result.Data);
                 }
 
