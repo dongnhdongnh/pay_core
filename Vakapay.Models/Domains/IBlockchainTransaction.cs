@@ -5,7 +5,7 @@ namespace Vakapay.Models.Domains
     {
         public string Id { get; set; }
         public string Hash { get; set; }
-        public string BlockNumber { get; set; }
+        public int BlockNumber { get; set; }
         public string NetworkName { get; set; }
         public decimal Amount { get; set; }
         public string FromAddress { get; set; }

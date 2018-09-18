@@ -1,4 +1,5 @@
-﻿using Vakapay.Models.Domains;
+﻿using System;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories.Base;
 

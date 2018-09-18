@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Cache;
+using System.Threading.Tasks;
+using Vakapay.BlockchainBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities.ETH;
 using Vakapay.Commons.Helpers;
@@ -12,13 +14,16 @@ namespace Vakapay.EthereumBusiness
 	/// <summary>
 	/// This class is communicate with ethereum network throught rpc api
 	/// </summary>
-	public class EthereumRpc
+	public class EthereumRpc : IBlockchainRpc
 	{
-		public string EndPointUrl { get; set; }
 
-		public EthereumRpc(string endPointUrl)
+		private static string rootAddress = "0x12890d2cce102216644c59dae5baed380d84830c";
+		private static string rootPassword = "password";
+		public string endpointRpc { get; set; }
+
+		public EthereumRpc(string url)
 		{
-			EndPointUrl = endPointUrl;
+			endpointRpc = url;
 		}
 
 		/// <summary>
@@ -35,7 +40,7 @@ namespace Vakapay.EthereumBusiness
 				// Set a default policy level for the "http:" and "https" schemes.
 				HttpRequestCachePolicy policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
 				HttpWebRequest.DefaultCachePolicy = policy;
-				var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://127.0.0.1:9900");
+				var httpWebRequest = (HttpWebRequest)WebRequest.Create(endpointRpc);
 				// Define a cache policy for this request only. 
 				HttpRequestCachePolicy noCachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
 				httpWebRequest.CachePolicy = noCachePolicy;
@@ -142,9 +147,77 @@ namespace Vakapay.EthereumBusiness
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_getTransactionByBlockNumberAndIndex, new Object[] { blockNumber.IntToHex(), transactionIndex.IntToHex() });
 		}
 
+		
+		public ReturnObject CreateNewAddress(string password)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ReturnObject CreateNewAddress()
+		{
+			throw new NotImplementedException();
+		}
+
+		public ReturnObject CreateNewAddress(string privateKey, string publicKey)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ReturnObject SendRawTransaction(string data)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ReturnObject GetBalance(string address)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ReturnObject SignTransaction(string privateKey, object[] transactionData)
+		{
+			throw new NotImplementedException();
+		}
+		/// <summary>
+		/// Send Transaction Async
+		/// </summary>
+		/// <param name="blockchainTransaction"></param>
+		/// <returns></returns>
+		public async Task<ReturnObject> SendTransactionAsyn(IBlockchainTransaction blockchainTransaction)
+		{
+			try
+			{
+				var resultSend = SendTransactionWithPassphrase(rootAddress, blockchainTransaction.ToAddress,
+					blockchainTransaction.Amount, rootPassword);
+				return resultSend;
+			}
+			catch (Exception e)
+			{
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+		}
+
+		public ReturnObject GetBlockByNumber(int blockNumber)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<ReturnObject> GetBlockByNumberAsyn(int blockNumber)
+		{
+			throw new NotImplementedException();
+		}
+
 		public ReturnObject FindTransactionByHash(string hash)
 		{
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_getTransactionByHash, new Object[] { hash });
+		}
+
+		public async Task<ReturnObject> FindTransactionByHashAsyn(string transactionHash)
+		{
+			throw new NotImplementedException();
 		}
 
 		public ReturnObject FindBlockByHash(string hash)

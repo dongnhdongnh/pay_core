@@ -132,7 +132,7 @@ namespace Vakapay.BitcoinBusiness
                 blockchainTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                 blockchainTransaction.Hash = idTransaction;
                 blockchainTransaction.BlockHash = (string) transactionInfo["blockhash"];
-                blockchainTransaction.BlockNumber = (string) blockInfo["height"];
+                blockchainTransaction.BlockNumber = (int) blockInfo["height"];
 
 
                 var ResultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Update(blockchainTransaction);
@@ -206,7 +206,7 @@ namespace Vakapay.BitcoinBusiness
                     {
                         Id = CommonHelper.GenerateUuid(),
                         Hash = idTransaction,
-                        BlockNumber = (string) blockInfo["height"],
+                        BlockNumber = (int) blockInfo["height"],
                         BlockHash = (string) transactionInfo["blockhash"],
                         NetworkName = "Bitcoin",
                         Amount = (decimal) detail["amount"] * -1,
@@ -296,7 +296,7 @@ namespace Vakapay.BitcoinBusiness
                 {
                     Id = CommonHelper.GenerateUuid(),
                     Hash = idTransaction,
-                    BlockNumber = (string) blockInfo["height"],
+                    BlockNumber = (int) blockInfo["height"],
                     BlockHash = (string) transactionInfo["blockhash"],
                     NetworkName = "Bitcoin",
                     Amount = (decimal) amount,

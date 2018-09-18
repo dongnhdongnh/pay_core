@@ -203,32 +203,130 @@ namespace Vakapay.Repositories.Mysql
 
         public IBlockchainTransaction FindTransactionPending()
         {
-            throw new NotImplementedException();
+	        try
+	        {
+		        return FindTransactionByStatus(Status.StatusPending);
+	        }
+	        catch (Exception e)
+	        {
+		        throw e;
+	        }
         }
 
         public IBlockchainTransaction FindTransactionError()
         {
-            throw new NotImplementedException();
+	        try
+	        {
+		        return FindTransactionByStatus(Status.StatusError);
+	        }
+	        catch (Exception e)
+	        {
+		        throw e;
+	        }
         }
 
         public IBlockchainTransaction FindTransactionByStatus(string status)
         {
-            throw new NotImplementedException();
+	        try
+	        {
+				if(Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+		        var sqlString = $"Select * from {tableName} where Status = @status and InProcess = 0";
+		        var result = Connection.QueryFirstOrDefault<EthereumWithdrawTransaction>(sqlString, new {status = status});
+		        return result;
+	        }
+	        catch (Exception e)
+	        {
+		        throw e;
+	        }
         }
 
         public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
         {
-            throw new NotImplementedException();
+	        try
+	        {
+		        if (Connection.State != ConnectionState.Open)
+			        Connection.Open();
+		        string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 1 Where Id = @Id and Version = @Version and InProcess = 0";
+
+		        var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version});
+		        if (update == 1)
+		        {
+			        return new ReturnObject
+			        {
+				        Status = Status.StatusSuccess,
+				        Message = "Update Success",
+			        };
+		        }
+		        return new ReturnObject
+		        {
+			        Status = Status.StatusError,
+			        Message = "Update Fail",
+		        };
+	        }
+	        catch (Exception e)
+	        {
+		        throw e;
+	        }
         }
 
         public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
         {
-            throw new NotImplementedException();
+	        try
+	        {
+		        if (Connection.State != ConnectionState.Open)
+			        Connection.Open();
+		        string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 0 Where Id = @Id and Version = @Version and InProcess = 1";
+
+		        var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version});
+		        if (update == 1)
+		        {
+			        return new ReturnObject
+			        {
+				        Status = Status.StatusSuccess,
+				        Message = "Update Success",
+			        };
+		        }
+		        return new ReturnObject
+		        {
+			        Status = Status.StatusError,
+			        Message = "Update Fail",
+		        };
+	        }
+	        catch (Exception e)
+	        {
+		        throw e;
+	        }
         }
 
         public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
         {
-            throw new NotImplementedException();
+	        try
+	        {
+		        if (Connection.State != ConnectionState.Open)
+			        Connection.Open();
+		        string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 0, Status = @Status, UpdatedAt = @UpdatedAt Where Id = @Id and Version = @Version and InProcess = 1";
+
+		        var update = Connection.Execute(SqlCommand, new {Id = transaction.Id, Version = transaction.Version, Status = transaction.Status, UpdatedAt = transaction.UpdatedAt});
+		        if (update == 1)
+		        {
+			        return new ReturnObject
+			        {
+				        Status = Status.StatusSuccess,
+				        Message = "Update Success",
+			        };
+		        }
+		        return new ReturnObject
+		        {
+			        Status = Status.StatusError,
+			        Message = "Update Fail",
+		        };
+	        }
+	        catch (Exception e)
+	        {
+		        throw e;
+	        }
         }
     }
 

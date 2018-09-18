@@ -70,7 +70,7 @@ namespace Vakapay.EthereumBusiness
 				blockchainTransaction.Hash = _getter.result.ToString();
 				blockchainTransaction.Status = Status.StatusCompleted;
 				blockchainTransaction.InProcess = 1;
-				blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+				blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 				int _currentVersion = blockchainTransaction.Version;
 				blockchainTransaction.Version = _currentVersion + 1;
 				EthereumWithdrawTransaction blockchainTransactionWhere = new EthereumWithdrawTransaction()
@@ -109,8 +109,8 @@ namespace Vakapay.EthereumBusiness
 				blockchainTransaction.Id = CommonHelper.GenerateUuid();
 				// blockchainTransaction.Hash = (String)_getter.result;
 				blockchainTransaction.Status = Status.StatusPending;
-				blockchainTransaction.CreatedAt = CommonHelper.GetUnixTimestamp().ToString();
-				blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+				blockchainTransaction.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
+				blockchainTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
 
 				return ethereumwithdrawRepo.Insert(blockchainTransaction);
 
@@ -291,7 +291,7 @@ namespace Vakapay.EthereumBusiness
 					{
 						Console.WriteLine("HELLO " + _currentPending.Hash);
 						_currentPending.BlockNumber = _trans.blockNumber;
-						_currentPending.UpdatedAt = CommonHelper.GetUnixTimestamp().ToString();
+						_currentPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
 						_currentPending.Status = Status.StatusCompleted;
 						ethereumWithdrawRepo.Update(_currentPending);
 						_pending.RemoveAt(i);

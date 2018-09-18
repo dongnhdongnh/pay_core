@@ -277,7 +277,7 @@ namespace Vakapay.BitcoinNotifi
                     {
                         Id = CommonHelper.GenerateUuid(),
                         Hash = transactionModel.Txid,
-                        BlockNumber = "",
+                        BlockNumber = 0,
                         NetworkName = "Bitcoin",
                         Amount = transactionModel.Amount,
                         FromAddress = transactionModelDetail.Account,
