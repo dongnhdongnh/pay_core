@@ -145,7 +145,7 @@ namespace Vakapay.Repositories.Mysql
 
                 var sQuery = "SELECT * FROM " + TableName + " WHERE Hash = @HASH";
 
-                var result = Connection.QueryFirst<BitcoinDepositTransaction>(sQuery,
+                var result = Connection.QueryFirstOrDefault<BitcoinDepositTransaction>(sQuery,
                     new {HASH = objectTransaction.Hash});
 
                 return result;
