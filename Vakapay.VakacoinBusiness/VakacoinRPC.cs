@@ -326,7 +326,7 @@ namespace Vakapay.VakacoinBusiness
         /// </summary>
         /// <param name="blockchainTransaction"></param>
         /// <returns></returns>
-        public Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
+        public Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
         {
             throw new NotImplementedException();
         }

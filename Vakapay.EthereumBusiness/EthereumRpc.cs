@@ -185,7 +185,7 @@ namespace Vakapay.EthereumBusiness
 		/// </summary>
 		/// <param name="blockchainTransaction"></param>
 		/// <returns></returns>
-		public async Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
+		public async Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
 		{
 			try
 			{

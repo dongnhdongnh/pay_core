@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Vakapay.Models.Domains
 {
-    public abstract class IBlockchainTransaction
+    public abstract class BlockchainTransaction
     {
         public string Id { get; set; }
         public string Hash { get; set; }

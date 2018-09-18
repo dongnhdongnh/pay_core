@@ -3,7 +3,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-    public class EthereumDepositTransaction : IBlockchainTransaction
+    public class EthereumDepositTransaction : BlockchainTransaction
     {
         
     }

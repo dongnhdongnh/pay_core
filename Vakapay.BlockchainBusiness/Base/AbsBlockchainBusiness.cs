@@ -26,9 +26,11 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
         /// <param name="privateKey"></param>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TBlockchainTransaction"></typeparam>
         /// <returns></returns>
-        public async Task<ReturnObject> SendTransactionAsync<T>(IRepositoryBlockchainTransaction<T> repoQuery, IBlockchainRPC rpcClass, string privateKey = "")
+        public async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
+            IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
+            string privateKey = "")
         {
             /*
              * 1. Query Transaction Withdraw pending

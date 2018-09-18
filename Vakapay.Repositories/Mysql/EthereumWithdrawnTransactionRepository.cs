@@ -195,7 +195,7 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public IBlockchainTransaction FindTransactionPending()
+		public BlockchainTransaction FindTransactionPending()
 		{
 	        try
 	        {
@@ -207,7 +207,7 @@ namespace Vakapay.Repositories.Mysql
 	        }
 		}
 
-		public IBlockchainTransaction FindTransactionError()
+		public BlockchainTransaction FindTransactionError()
 		{
 	        try
 	        {
@@ -219,7 +219,7 @@ namespace Vakapay.Repositories.Mysql
 	        }
 		}
 
-		public IBlockchainTransaction FindTransactionByStatus(string status)
+		public BlockchainTransaction FindTransactionByStatus(string status)
 		{
 	        try
 	        {
@@ -236,7 +236,7 @@ namespace Vakapay.Repositories.Mysql
 	        }
 		}
 
-		public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
+		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
 		{
 	        try
 	        {
@@ -265,7 +265,7 @@ namespace Vakapay.Repositories.Mysql
 	        }
 		}
 
-		public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
+		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
 		{
 	        try
 	        {
@@ -294,7 +294,7 @@ namespace Vakapay.Repositories.Mysql
 	        }
 		}
 
-		public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
+		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
 		{
 	        try
 	        {

@@ -3,7 +3,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-	public class VakacoinWithdrawTransaction : IBlockchainTransaction
+	public class VakacoinWithdrawTransaction : BlockchainTransaction
 	{
 		//public string Id { get ; set ; }
 		//public string Hash { get ; set ; }

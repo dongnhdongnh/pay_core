@@ -48,7 +48,7 @@ namespace Vakapay.BlockchainBusiness
         /// </summary>
         /// <param name="blockchainTransaction"></param>
         /// <returns></returns>
-        Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction);
+        Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction);
         /// <summary>
         /// Get block by block number
         /// </summary>

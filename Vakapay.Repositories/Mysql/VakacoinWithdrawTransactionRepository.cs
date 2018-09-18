@@ -195,32 +195,32 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public IBlockchainTransaction FindTransactionPending()
+		public BlockchainTransaction FindTransactionPending()
 		{
 			throw new NotImplementedException();
 		}
 
-		public IBlockchainTransaction FindTransactionError()
+		public BlockchainTransaction FindTransactionError()
 		{
 			throw new NotImplementedException();
 		}
 
-		public IBlockchainTransaction FindTransactionByStatus(string status)
+		public BlockchainTransaction FindTransactionByStatus(string status)
 		{
 			throw new NotImplementedException();
 		}
 
-		public async Task<ReturnObject> LockForProcess(IBlockchainTransaction transaction)
+		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
 		{
 			throw new NotImplementedException();
 		}
 
-		public async Task<ReturnObject> ReleaseLock(IBlockchainTransaction transaction)
+		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
 		{
 			throw new NotImplementedException();
 		}
 
-		public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
+		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
 		{
 			throw new NotImplementedException();
 		}

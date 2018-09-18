@@ -5,7 +5,7 @@ using Vakapay.Models.Domains;
 namespace Vakapay.Models.Entities
 {
     [Table("bitcoindeposittransaction")]
-    public partial class BitcoinDepositTransaction : IBlockchainTransaction
+    public partial class BitcoinDepositTransaction : BlockchainTransaction
     {
         public string BlockHash { get; set; }
     }

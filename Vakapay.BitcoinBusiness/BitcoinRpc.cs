@@ -756,7 +756,7 @@ namespace Vakapay.BitcoinBusiness
             throw new NotImplementedException();
         }
 
-        public async Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
+        public async Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
         {
             try
             {
