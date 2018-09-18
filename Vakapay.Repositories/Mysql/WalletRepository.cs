@@ -84,30 +84,7 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public ReturnObject UpdateBalanceWallet(decimal amount, string Id, int version)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                string sQuery = "UPDATE wallet SET Balance = Balance + @AMOUNT WHERE Id = @ID AND Version = @VERSION";
-
-                var result = Connection.Query(sQuery, new {ID = Id, VERSION = version, AMOUNT = amount});
-
-                var status = !String.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-                };
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-        public ReturnObject UpdateBalanceWallet2(decimal amount, string id, int version)
+        public ReturnObject UpdateBalanceWallet(decimal amount, string id, int version)
         {
             try
             {
@@ -115,7 +92,7 @@ namespace Vakapay.Repositories.Mysql
                     Connection.Open();
                 Int32 unixTimestamp = (Int32) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
                 string sQuery =
-                    "UPDATE wallet SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID";
+                    "UPDATE wallet SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID AND Version = @VERSION";
 
                 var result = Connection.Query(sQuery,
                     new

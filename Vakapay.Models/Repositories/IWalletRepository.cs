@@ -7,7 +7,6 @@ namespace Vakapay.Models.Repositories
     public interface IWalletRepository : IRepositoryBase<Wallet>
     {
         ReturnObject UpdateBalanceWallet(decimal amount, string Id, int version);
-        ReturnObject UpdateBalanceWallet2(decimal amount, string id, int version);
         Wallet FindByAddress(string address, string networkName);
     }
 }

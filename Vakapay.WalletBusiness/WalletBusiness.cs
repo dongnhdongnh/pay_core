@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using NLog;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -14,6 +15,8 @@ namespace Vakapay.WalletBusiness
         private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
 
         private readonly IDbConnection ConnectionDb;
+
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public WalletBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
         {
@@ -162,10 +165,8 @@ namespace Vakapay.WalletBusiness
                 var wallet = FindByAddress(addr);
                 if (wallet != null)
                     return true;
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
             catch (Exception e)
             {
@@ -210,25 +211,13 @@ namespace Vakapay.WalletBusiness
 
                 var id = wallet.Id;
                 var version = wallet.Version;
-                
+
                 var result = UpdateBalance(amount, id, version);
                 if (result.Status == Status.StatusSuccess)
                     return true;
-    
-                // if update unsuccess, try UpdateBalance 5 times at most
-                int retry = 1;
-                while (retry < 5)
-                {
-                    wallet = FindByAddressAndNetworkName(addr, networkName);
-                    id = wallet.Id;
-                    version = wallet.Version;
-                    
-                    result = UpdateBalance(amount, id, version);
-                    if (result.Status == Status.StatusSuccess)
-                        return true;
-                    retry++;
-                }
 
+                // can't update Balance
+                logger.Error("Error when update Balance: Address = " + addr + "; Amount = " + amount + "; NetworkName = " + networkName);
                 return false;
             }
             catch (Exception e)
@@ -263,7 +252,7 @@ namespace Vakapay.WalletBusiness
                 if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var result = walletRepository.UpdateBalanceWallet2(amount, id, version);
+                var result = walletRepository.UpdateBalanceWallet(amount, id, version);
 
                 return result;
             }
