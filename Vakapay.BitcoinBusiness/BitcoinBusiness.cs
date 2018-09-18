@@ -159,9 +159,8 @@ namespace Vakapay.BitcoinBusiness
                     new Dictionary<string, string>
                     {
                         {"Id", blockchainTransaction.Id},
-                        {"Amount", blockchainTransaction.Amount.ToString()},
-                        {"Fee", blockchainTransaction.Fee.ToString()},
-                        {"Version", currentVersionWithRaw}
+                        {"Version", currentVersionWithRaw},
+                        {"InProcess", 0.ToString()}
                     };
 
 
@@ -178,9 +177,9 @@ namespace Vakapay.BitcoinBusiness
                 if (resulUpdate.Status == Status.StatusError)
                     return resulUpdate;
 
-
+                //send 
                 var results = BitcoinRpc.SendToAddress(blockchainTransaction.ToAddress,
-                    Convert.ToDecimal(blockchainTransaction.Amount));
+                    blockchainTransaction.Amount);
 
                 if (results.Status == Status.StatusError)
                     return results;
@@ -193,33 +192,15 @@ namespace Vakapay.BitcoinBusiness
                     return transaction;
                 var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
 
-
-//                //block
-//                var blockInfo = new JObject();
-//                if (!string.IsNullOrEmpty((string) transactionInfo["blockhash"]))
-//                {
-//                    var block = bitcoinRpc.GetBlock((string) transactionInfo["blockhash"]);
-//                    if (block.Status == Status.StatusError)
-//                        return block;
-//                    blockInfo = JsonConvert.DeserializeObject<JObject>(block.Data);
-//                }
-
                 //update database vakaxa
-
                 blockchainTransaction.Status = Status.StatusCompleted;
                 blockchainTransaction.UpdatedAt = CommonHelper.GetUnixTimestamp();
                 blockchainTransaction.Hash = idTransaction;
                 blockchainTransaction.BlockHash = (string) transactionInfo["blockhash"];
-                //  blockchainTransaction.BlockNumber = (string) blockInfo["height"];
 
 
                 //update where 
                 var resultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Update(blockchainTransaction);
-
-//                //update balance wallet
-//                decimal balanceChange = (decimal) transactionInfo["amount"] + (decimal) transactionInfo["fee"];
-//                // Id va version dang tam fix cung de test
-//                UpdateBalanceWallet(balanceChange, "97f3f010-658c-46eb-92a4-52b6a3f51e15", 159900);
 
                 //
                 return resultAddBitcoinRawTransactionAddress;

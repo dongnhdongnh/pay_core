@@ -50,13 +50,16 @@ CREATE TABLE `ethereumwithdrawtransaction` (
   `Hash` varchar(200) DEFAULT NULL,
   `BlockNumber` varchar(200) DEFAULT NULL,
   `NetworkName` varchar(200) DEFAULT NULL,
-  `Amount` decimal(20,0) NOT NULL,
+  `Amount` decimal(20,8) NOT NULL,
   `FromAddress` varchar(200) NOT NULL,
   `ToAddress` varchar(200) NOT NULL,
   `Fee` varchar(200) NOT NULL,
   `Status` varchar(200) DEFAULT NULL,
   `CreatedAt` int(11) NOT NULL,
-  `UpdatedAt` int(11) NOT NULL
+  `UpdatedAt` int(11) NOT NULL,
+  `InProcess` int(11) NOT NULL,
+  `Version` int(11) NOT NULL,
+        PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -106,7 +109,7 @@ CREATE TABLE `bitcoinwithdrawtransaction` (
   `BlockNumber` varchar(200) DEFAULT NULL,
   `BlockHash` varchar(200) DEFAULT NULL,
   `NetworkName` varchar(200) DEFAULT NULL,
-  `Amount` decimal(20,0) NOT NULL,
+  `Amount` decimal(20,8) NOT NULL,
   `FromAddress` varchar(200) NOT NULL,
   `ToAddress` varchar(200) NOT NULL,
   `Fee` varchar(200) NOT NULL,
