@@ -183,8 +183,9 @@ namespace Vakapay.BitcoinBusiness
 
                 if (results.Status == Status.StatusError)
                 {
-                    RollbackWithSraw(blockchainTransaction);
-                    throw new Exception("RPC ERROR");
+                    // RollbackWithSraw(blockchainTransaction);
+                    throw new Exception("Can't send transaction : " +
+                                        JsonHelper.SerializeObject(blockchainTransaction));
                 }
 
                 var idTransaction = results.Data;
@@ -192,7 +193,7 @@ namespace Vakapay.BitcoinBusiness
                 //get transaction
                 var transaction = BitcoinRpc.GetTransaction(idTransaction);
                 if (transaction.Status == Status.StatusError)
-                    return transaction;
+                    throw new Exception("Can't gettransaction : " + JsonHelper.SerializeObject(blockchainTransaction));
                 var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
 
                 //update database vakaxa
@@ -204,6 +205,12 @@ namespace Vakapay.BitcoinBusiness
 
                 //update where 
                 var resultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Update(blockchainTransaction);
+                if (resultAddBitcoinRawTransactionAddress.Status == Status.StatusError)
+                {
+                    // RollbackWithSraw(blockchainTransaction);
+                    throw new Exception("Can't update status bitcoin withdraw : " +
+                                        JsonHelper.SerializeObject(blockchainTransaction));
+                }
 
                 //
                 return resultAddBitcoinRawTransactionAddress;
