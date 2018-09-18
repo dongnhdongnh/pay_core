@@ -64,7 +64,7 @@ namespace Vakapay.ScanVakaCoin
             while (true)
             {
                 int headBlock = _rpc.GetHeadBlockNumber();
-                logger.Info("Head Block = "+headBlock);
+                logger.Info("Head Block = " + headBlock);
                 if (headBlock > _lastBlock)
                 {
                     if (_lastBlock == 0)
@@ -102,7 +102,7 @@ namespace Vakapay.ScanVakaCoin
             {
                 try
                 {
-                    logger.Info("Scan block "+processingBlock);
+                    logger.Info("Scan block " + processingBlock);
                     var transactions = _rpc.GetAllTransactionsInBlock(processingBlock.ToString());
                     ReceivedProcess(processingBlock, transactions);
                     _lastBlock = processingBlock;
@@ -172,7 +172,7 @@ namespace Vakapay.ScanVakaCoin
                     {
                         continue;
                     }
-                    
+
                     var trxId = JObject.Parse(transaction.ToString())["id"].ToString();
 
                     string _quantity = quantity.ToString();
@@ -183,25 +183,19 @@ namespace Vakapay.ScanVakaCoin
                         if (symbol == "EOS" || symbol == "VAKA")
                         {
                             string to = _to.ToString();
-
-                            // if receiver doesn't exist in wallet table, process next transaction
-                            if (!_walletBusiness.CheckExistedAddress(to))
-                            {
-                                logger.Info(to + " is not exist in Wallet!!!");
-                                continue;
-                            }
-
                             string from = jsonTrx["actions"][0]["data"]["from"].ToString();
                             decimal amount = decimal.Parse(_quantity.Split(" ")[0]);
                             string transactionTime = jsonTrx["expiration"].ToString();
                             string status = "success";
 
+                            // if receiver doesn't exist in wallet table, process next transaction
+                            if (!_walletBusiness.CheckExistedAndUpdateByAddress(to, amount, symbol))
+                                continue;
+
                             // save to VakacoinTransactionHistory
                             ReturnObject result =
-                                _vakacoinBusiness.CreateTransactionHistory(trxId, from, to, blockNumber, amount, transactionTime, status);
-
-                            //update Balance in Wallet
-                            _walletBusiness.UpdateBalance(to, amount, symbol);
+                                _vakacoinBusiness.CreateTransactionHistory(trxId, from, to, blockNumber, amount,
+                                    transactionTime, status);
 
                             logger.Info(to + " was received " + amount + " " + symbol);
                         }
