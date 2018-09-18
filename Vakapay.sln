@@ -49,7 +49,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.Commons", "Vakapay.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.BlockchainBusiness", "Vakapay.BlockchainBusiness\Vakapay.BlockchainBusiness.csproj", "{C4A74298-85C5-4323-89B1-C4F68AE7595C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.VakacoinBusiness.Test", "Vakapay.UnitTest\Vakapay.VakacoinBusiness.Test\Vakapay.VakacoinBusiness.Test.csproj", "{746C5A9D-0C25-413B-B88C-7077A2E29186}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.UnitTest", "Vakapay.UnitTest\Vakapay.UnitTest.csproj", "{746C5A9D-0C25-413B-B88C-7077A2E29186}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestBitcoin", "Vakapay.TestBitcoin\Vakapay.TestBitcoin.csproj", "{AE3BB503-61F4-4BD4-BD39-D742C110250D}"
 EndProject
