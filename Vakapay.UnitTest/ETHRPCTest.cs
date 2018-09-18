@@ -4,7 +4,7 @@ using System.Text;
 using NUnit.Framework;
 using Vakapay.EthereumBusiness;
 
-namespace Vakapay.VakacoinBusiness.Test
+namespace Vakapay.UnitTest
 {
 
 	[TestFixture]

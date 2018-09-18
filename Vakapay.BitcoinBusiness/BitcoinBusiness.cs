@@ -182,14 +182,18 @@ namespace Vakapay.BitcoinBusiness
                     blockchainTransaction.Amount);
 
                 if (results.Status == Status.StatusError)
-                    return results;
+                {
+                    // RollbackWithSraw(blockchainTransaction);
+                    throw new Exception("Can't send transaction : " +
+                                        JsonHelper.SerializeObject(blockchainTransaction));
+                }
 
                 var idTransaction = results.Data;
 
                 //get transaction
                 var transaction = BitcoinRpc.GetTransaction(idTransaction);
                 if (transaction.Status == Status.StatusError)
-                    return transaction;
+                    throw new Exception("Can't gettransaction : " + JsonHelper.SerializeObject(blockchainTransaction));
                 var transactionInfo = JsonConvert.DeserializeObject<JObject>(transaction.Data);
 
                 //update database vakaxa
@@ -201,6 +205,12 @@ namespace Vakapay.BitcoinBusiness
 
                 //update where 
                 var resultAddBitcoinRawTransactionAddress = bitcoinRawTransactionRepo.Update(blockchainTransaction);
+                if (resultAddBitcoinRawTransactionAddress.Status == Status.StatusError)
+                {
+                    // RollbackWithSraw(blockchainTransaction);
+                    throw new Exception("Can't update status bitcoin withdraw : " +
+                                        JsonHelper.SerializeObject(blockchainTransaction));
+                }
 
                 //
                 return resultAddBitcoinRawTransactionAddress;
@@ -218,6 +228,27 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
+        /**
+         * rollback version when send error
+         */
+        private void RollbackWithSraw(BitcoinWithdrawTransaction blockchainTransaction)
+        {
+            try
+            {
+                var bitcoinRawTransactionRepo =
+                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+
+                blockchainTransaction.Version = 0;
+                blockchainTransaction.InProcess = 0;
+
+                bitcoinRawTransactionRepo.Update(blockchainTransaction);
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, "RollbackWithSraw exception");
+                throw;
+            }
+        }
 
         /// <summary>
         /// amounts are double-precision floating point numbers. Returns the transaction ID if successful.

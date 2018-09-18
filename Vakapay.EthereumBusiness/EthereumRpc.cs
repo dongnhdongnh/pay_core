@@ -10,7 +10,7 @@ using Vakapay.EthereumBussiness;
 namespace Vakapay.EthereumBusiness
 {
 	/// <summary>
-	/// This class is communicate with ethereum network throught rpc api
+	/// This class is communicate with ethereum network throught RPCClient api
 	/// </summary>
 	public class EthereumRpc
 	{

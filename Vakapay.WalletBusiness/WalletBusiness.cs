@@ -15,14 +15,14 @@ namespace Vakapay.WalletBusiness
 
         private readonly IDbConnection ConnectionDb;
 
-        public WalletBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true) 
+        public WalletBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
         {
             vakapayRepositoryFactory = _vakapayRepositoryFactory;
             ConnectionDb = isNewConnection
                 ? vakapayRepositoryFactory.GetDbConnection()
                 : vakapayRepositoryFactory.GetOldConnection();
         }
-        
+
         /// <summary>
         /// //Find All Blockchain network active
         /// each Blockchain network, make one wallet
@@ -33,7 +33,7 @@ namespace Vakapay.WalletBusiness
         {
             return null;
         }
-        
+
         /// <summary>
         /// make new wallet for user
         /// </summary>
@@ -48,12 +48,11 @@ namespace Vakapay.WalletBusiness
             //commit transaction
             try
             {
-                
-                if(ConnectionDb.State != ConnectionState.Open)
+                if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var userCheck = userRepository.FindById(user.Id);
-                if(userCheck == null)
+                if (userCheck == null)
                     return new ReturnObject
                     {
                         Status = Status.StatusError,
@@ -74,26 +73,22 @@ namespace Vakapay.WalletBusiness
                     NetworkName = blockchainNetwork.Name,
                     UpdatedAt = 0,
                     UserId = user.Id
-                    
                 };
 
                 var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
 
                 var resultMakeWallet = walletRepo.Insert(wallet);
                 return resultMakeWallet;
-
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw e;
-
             }
 
-            
-            
+
             //return null;
         }
-        
+
         /// <summary>
         /// Find all wallet of user
         /// </summary>
@@ -109,6 +104,7 @@ namespace Vakapay.WalletBusiness
         {
             return new List<T>();
         }
+
         /// <summary>
         /// This function will make withdraw from wallet
         /// </summary>
@@ -133,7 +129,7 @@ namespace Vakapay.WalletBusiness
 
         public ReturnObject UpdateBalance(string toAddress, decimal addedBlance, string networkName)
         {
-            Console.WriteLine("update blance for "+ toAddress + ": "+addedBlance);
+            Console.WriteLine("update blance for " + toAddress + ": " + addedBlance);
             return new ReturnObject
             {
                 Status = "Success",
@@ -145,21 +141,20 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                if(ConnectionDb.State != ConnectionState.Open)
+                if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                
+
                 var result = walletRepository.FindBySql("SELECT * FROM wallet");
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e);
                 throw e;
             }
         }
-        
-        
+
         public bool CheckExistedAddress(String addr)
         {
             try
@@ -176,23 +171,101 @@ namespace Vakapay.WalletBusiness
             {
                 Console.WriteLine(e);
                 return false;
-            } 
+            }
         }
 
         public Wallet FindByAddress(string addr)
         {
             try
             {
-                if(ConnectionDb.State != ConnectionState.Open)
+                if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
                 var result = walletRepository.FindBySql($"SELECT * FROM wallet WHERE Address = '{addr}'");
 
-                if (result.Count > 0 && result.Any() )
+                if (result.Count > 0 && result.Any())
                 {
                     return result[0];
-                }               
+                }
+
                 return null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        // check wallet exists or not. Then update balance for this
+        public bool CheckExistedAndUpdateByAddress(string addr, decimal amount, string networkName)
+        {
+            try
+            {
+                var wallet = FindByAddressAndNetworkName(addr, networkName);
+
+                //check existed
+                if (wallet == null)
+                    return false;
+
+                var id = wallet.Id;
+                var version = wallet.Version;
+                
+                var result = UpdateBalance(amount, id, version);
+                if (result.Status == Status.StatusSuccess)
+                    return true;
+    
+                // if update unsuccess, try UpdateBalance 5 times at most
+                int retry = 1;
+                while (retry < 5)
+                {
+                    wallet = FindByAddressAndNetworkName(addr, networkName);
+                    id = wallet.Id;
+                    version = wallet.Version;
+                    
+                    result = UpdateBalance(amount, id, version);
+                    if (result.Status == Status.StatusSuccess)
+                        return true;
+                    retry++;
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
+
+        private Wallet FindByAddressAndNetworkName(string addr, string networkName)
+        {
+            try
+            {
+                if (ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var result = walletRepository.FindByAddress(addr, networkName);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        private ReturnObject UpdateBalance(decimal amount, string id, int version)
+        {
+            try
+            {
+                if (ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var result = walletRepository.UpdateBalanceWallet2(amount, id, version);
+
+                return result;
             }
             catch (Exception e)
             {

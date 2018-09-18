@@ -27,9 +27,9 @@ namespace Vakapay.TestWallet
 
                 var vakacoinBusiness = new VakacoinBusiness.VakacoinBusiness(PersistenceFactory);
                 
-                VakacoinRpc rpc = new VakacoinRpc("http://api.eosnewyork.io");
+                VakacoinRPC rpc = new VakacoinRPC("http://api.eosnewyork.io");
 
-//                foreach (var VARIABLE in rpc.GetAllTransactionsInBlock("16302351"))
+//                foreach (var VARIABLE in RpcClient.GetAllTransactionsInBlock("16302351"))
 //                {
 //                    Console.WriteLine(VARIABLE.ToString());
 //                }
@@ -45,24 +45,24 @@ namespace Vakapay.TestWallet
                 {
                     Console.WriteLine(JsonHelper.SerializeObject(VARIABLE));
                 }
+                
+//                var user = new User
+//                {
+//                    Id = CommonHelper.GenerateUuid(),
+//                };
+//                var blockChainNetwork = new BlockchainNetwork
+//                {
+//                    Name = "Ethereum",
+//                    Status = Status.StatusActive,
+//                    Sysbol = "ETH",
+//                    Id = CommonHelper.GenerateUuid()
+//                };
+//
+//                var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
 
-				var user = new User
-				{
-					Id = CommonHelper.GenerateUuid(),
-				};
-				var blockChainNetwork = new BlockchainNetwork
-				{
-					Name = "Ethereum",
-					Status = Status.StatusActive,
-					Sysbol = "ETH",
-					Id = CommonHelper.GenerateUuid()
-				};
-
-				var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
-
-				//                Console.WriteLine(JsonHelper.SerializeObject(walletLst));
-
-			}
+//                Console.WriteLine(JsonHelper.SerializeObject(walletLst));
+ 
+            }
             catch (Exception e)
             {
                 Console.WriteLine(e);
