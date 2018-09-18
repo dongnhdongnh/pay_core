@@ -25,7 +25,6 @@ namespace Vakapay.SendEthereum
                     ConnectionString = connectionString
                 };
                 
-            
                 /*var connection = repoFactory.GetDbConnection();
                 ///One thread
                 while (true)

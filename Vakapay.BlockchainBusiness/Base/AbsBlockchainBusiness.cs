@@ -23,12 +23,12 @@ namespace Vakapay.BlockchainBusiness.Base
         /// Send Transaction with optimistic lock
         /// Send with multiple thread
         /// </summary>
-        /// <param name="RepoQuery"></param>
+        /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
         /// <param name="privateKey"></param>
-        /// <typeparam name="IBlockchainTransaction"></typeparam>
+        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public async Task<ReturnObject> SendTransactionAsync<IBlockchainTransaction>(IRepositoryBlockchainTransaction<IBlockchainTransaction> RepoQuery, IBlockchainRPC rpcClass, string privateKey = "")
+        public async Task<ReturnObject> SendTransactionAsync<T>(IRepositoryBlockchainTransaction<T> repoQuery, IBlockchainRPC rpcClass, string privateKey = "")
         {
             /*
              * 1. Query Transaction Withdraw pending
@@ -38,8 +38,8 @@ namespace Vakapay.BlockchainBusiness.Base
              * 5. Update Transaction Status
              */
             // find transaction pending
-            var pendingTransaction =  RepoQuery.FindTransactionPending();
-            if(pendingTransaction == null || pendingTransaction.Id == null)
+            var pendingTransaction =  repoQuery.FindTransactionPending();
+            if(pendingTransaction?.Id == null)
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
@@ -57,7 +57,7 @@ namespace Vakapay.BlockchainBusiness.Base
             try
             {
                 //lock transaction for process
-                var resultLock = await RepoQuery.LockForProcess(pendingTransaction);
+                var resultLock = await repoQuery.LockForProcess(pendingTransaction);
                 if (resultLock.Status == Status.StatusError)
                 {
                     transactionScope.Rollback();
@@ -95,7 +95,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 pendingTransaction.InProcess = 0;
                 pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                 pendingTransaction.Hash = sendTransaction.Data;
-                var result = await RepoQuery.SafeUpdate(pendingTransaction);
+                var result = await repoQuery.SafeUpdate(pendingTransaction);
                 if (result.Status == Status.StatusError)
                 {
                     transactionDbSend.Rollback();
@@ -116,7 +116,7 @@ namespace Vakapay.BlockchainBusiness.Base
             catch (Exception e)
             {
                 //release lock
-                var resultRelease = RepoQuery.ReleaseLock(pendingTransaction);
+                var resultRelease = repoQuery.ReleaseLock(pendingTransaction);
                 Console.WriteLine(JsonHelper.SerializeObject(resultRelease));
                 transactionDbSend.Rollback();
                 throw e;

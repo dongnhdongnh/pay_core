@@ -15,7 +15,7 @@ using Vakapay.Repositories.Mysql.Base;
 namespace Vakapay.Repositories.Mysql
 {
 
-	public class VakacoinWithdrawnTransactionRepository : MysqlBaseConnection, IVakacoinWithdrawTransactionRepository
+	public class VakacoinWithdrawTransactionRepository : MysqlBaseConnection, IVakacoinWithdrawTransactionRepository
 	{
 		String tableName = "vakapay.vakacoinwithdrawtransaction";
 		public string Query_Search(Dictionary<string, string> whereValue)
@@ -75,11 +75,11 @@ namespace Vakapay.Repositories.Mysql
 			return output;
 		}
 
-		public VakacoinWithdrawnTransactionRepository(string connectionString) : base(connectionString)
+		public VakacoinWithdrawTransactionRepository(string connectionString) : base(connectionString)
 		{
 		}
 
-		public VakacoinWithdrawnTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
+		public VakacoinWithdrawTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
 		{
 		}
 

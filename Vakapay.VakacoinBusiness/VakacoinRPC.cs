@@ -68,17 +68,22 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public ReturnObject CreateRandomAccount()
+        public ReturnObject CreateRandomAccount(string ownerPublicKey, string activePublicKey = "")
         {
             try
             {
+                if (string.IsNullOrEmpty(activePublicKey))
+                {
+                    activePublicKey = ownerPublicKey;
+                }
+                
                 var accountName = "";
                 do
                 {
                     accountName = CommonHelper.RandomAccountNameVakacoin();
                 } while (CheckAccountExist(accountName) == true);
 
-                return CreateAccount(accountName);
+                return CreateAccount(accountName, ownerPublicKey, activePublicKey);
             }
             catch (Exception e)
             {
@@ -91,11 +96,14 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public ReturnObject CreateAccount(string accountName)
+        public ReturnObject CreateAccount(string accountName, string ownerPublicKey, string activePublicKey = "")
         {
             try
             {
-                var keyPair = KeyManager.GenerateKeyPair();
+                if (string.IsNullOrEmpty(activePublicKey))
+                {
+                    activePublicKey = ownerPublicKey;
+                }
 
                 // start CreateTransaction
                 var vakaConfig = new VakaConfigurator()
@@ -123,7 +131,7 @@ namespace Vakapay.VakacoinBusiness
                                     threshold = 1,
                                     keys = new List<object>()
                                     {
-                                        new {key = keyPair.PublicKey, weight = 1}
+                                        new {key = ownerPublicKey, weight = 1}
                                     },
                                     accounts = new List<object>(),
                                     waits = new List<object>()
@@ -133,7 +141,7 @@ namespace Vakapay.VakacoinBusiness
                                     threshold = 1,
                                     keys = new List<object>()
                                     {
-                                        new {key = keyPair.PublicKey, weight = 1}
+                                        new {key = activePublicKey, weight = 1}
                                     },
                                     accounts = new List<object>(),
                                     waits = new List<object>()
@@ -147,8 +155,7 @@ namespace Vakapay.VakacoinBusiness
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
-                    Data = accountName,
-                    Message = keyPair.PrivateKey
+                    Data = accountName
                 };
             }
             catch (Exception e)
@@ -283,7 +290,7 @@ namespace Vakapay.VakacoinBusiness
                 return null;
             }
         }
-
+        
         public ReturnObject CreateNewAddress(string password)
         {
             throw new NotImplementedException();
@@ -314,6 +321,11 @@ namespace Vakapay.VakacoinBusiness
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Send asyn transaction with transaction data
+        /// </summary>
+        /// <param name="blockchainTransaction"></param>
+        /// <returns></returns>
         public Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
         {
             throw new NotImplementedException();

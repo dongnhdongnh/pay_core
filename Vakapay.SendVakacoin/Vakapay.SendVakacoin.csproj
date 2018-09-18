@@ -5,4 +5,25 @@
         <TargetFramework>netcoreapp2.1</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Configuration, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+        <HintPath>..\..\..\.nuget\packages\microsoft.extensions.configuration\2.2.0-preview2-35157\lib\netstandard2.0\Microsoft.Extensions.Configuration.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Configuration.Abstractions, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+        <HintPath>..\..\..\.nuget\packages\microsoft.extensions.configuration.abstractions\2.2.0-preview2-35157\lib\netstandard2.0\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json">
+            <Version>2.2.0-preview2-35157</Version>
+        </PackageReference>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+        <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
+        <ProjectReference Include="..\Vakapay.VakacoinBusiness\Vakapay.VakacoinBusiness.csproj" />
+    </ItemGroup>
+
 </Project>

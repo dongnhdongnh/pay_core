@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using Vakapay.Commons.Helpers;
+using Vakapay.Cryptography;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Entities;
@@ -13,6 +14,7 @@ namespace Vakapay.VakacoinBusiness
     {
         private IVakacoinTransactionHistoryRepository VakacoinHistoryRepo { get; set; }
         private IPendingVakacoinTransactionRepository PendingVakacoinTransRepo { get; set; }
+        private VakacoinRPC VakacoinRPCObj { get; set; }
 
         public VakacoinBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
             : base(vakapayRepositoryFactory, isNewConnection)
@@ -26,11 +28,36 @@ namespace Vakapay.VakacoinBusiness
         /// save account name to database
         /// </summary>
         /// <returns></returns>
-        public ReturnObject CreateNewAccount()
+        public ReturnObject CreateNewAccount(string walletId)
         {
             try
             {
-                return new ReturnObject { };
+                var keyPair = KeyManager.GenerateKeyPair();
+                
+                var result = VakacoinRPCObj.CreateRandomAccount(keyPair.PublicKey);
+                
+                if (result.Status == Status.StatusError)
+                    return result;
+
+                var repo = VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
+
+                //TODO Encrypt Password Before save
+                var returnObject = repo.Insert(new VakacoinAccount
+                {
+                    Status = Status.StatusActive,
+                    AccountName = result.Data,
+                    OwnerPrivateKey = keyPair.PrivateKey,
+                    OwnerPublicKey = keyPair.PublicKey,
+                    ActivePrivateKey = keyPair.PrivateKey,
+                    ActivePublicKey = keyPair.PublicKey,
+                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
+                    Id = CommonHelper.GenerateUuid(),
+                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
+                    WalletId = walletId
+
+                });
+                
+                return returnObject;
             }
             catch (Exception e)
             {
@@ -39,6 +66,7 @@ namespace Vakapay.VakacoinBusiness
                     Status = Status.StatusError,
                     Message = e.Message
                 };
+
             }
         }
 

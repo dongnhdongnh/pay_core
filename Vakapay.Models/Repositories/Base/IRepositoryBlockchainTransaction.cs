@@ -3,7 +3,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Repositories.Base
 {
-    public interface IRepositoryBlockchainTransaction<IBlockchainTransaction> : IRepositoryTransaction, IRepositoryBase<IBlockchainTransaction>
+    public interface IRepositoryBlockchainTransaction<T> : IRepositoryTransaction, IRepositoryBase<T>
     {
         
     }
