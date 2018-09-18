@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
+using Vakapay.BlockchainBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
 using Vakapay.Cryptography;
@@ -12,26 +15,27 @@ using Action=VakaSharp.Api.v1.Action;
 
 namespace Vakapay.VakacoinBusiness
 {
-    public class VakacoinRpc
+    public class VakacoinRPC: IBlockchainRPC
     {
-        private string EndPointUrl { get; }
+        public string EndPointURL { get; set; }
         private string ChainID { get; }
+        private VakaApi DefaultApi { get; }
+        private Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+        
         private const string CoreSymbol = "VAKA";
         private const string SystemTokenContract = "vaka.token";
         private const string ActivePermission = "active";
         private const string TransferAction = "transfer";
-        private VakaApi DefaultApi { get; }
-        private Logger Logger { get; } = NLog.LogManager.GetCurrentClassLogger();
 
-        public VakacoinRpc(string endPointUrl, string chainId = null)
+        public VakacoinRPC(string endPointUrl, string chainId = null)
         {
             try
             {
-                EndPointUrl = endPointUrl;
+                EndPointURL = endPointUrl;
 
                 var vakaConfig = new VakaConfigurator()
                 {
-                    HttpEndpoint = EndPointUrl,
+                    HttpEndpoint = EndPointURL,
                 };
                 DefaultApi = new VakaApi(vakaConfig);
 
@@ -41,7 +45,7 @@ namespace Vakapay.VakacoinBusiness
                     chainId = getInfoResult.ChainId;
                 }
 
-                this.ChainID = chainId;
+                ChainID = chainId;
                 DefaultApi.Config.ChainId = ChainID;
             }
             catch (Exception e)
@@ -51,36 +55,17 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        private string GetAccountPostUrl()
-        {
-            return EndPointUrl + "/v1/chain/get_account";
-        }
-
-        private string GetInfoPostUrl()
-        {
-            return EndPointUrl + "/v1/chain/get_info";
-        }
-
-        public ReturnObject CreateAddress(string password)
-        {
-            return null;
-        }
-
         public bool CheckAccountExist(string accountName)
         {
-            var exist = false;
-
             try
             {
-                var result = DefaultApi.GetAccount(new GetAccountRequest() {AccountName = accountName}).Result;
-                exist = true;
+                var account = DefaultApi.GetAccount(new GetAccountRequest() {AccountName = accountName}).Result;
+                return !account.AccountName.Equals("");
             }
             catch (Exception e)
             {
-                exist = false;
+                return false;
             }
-
-            return exist;
         }
 
         public ReturnObject CreateRandomAccount()
@@ -115,7 +100,7 @@ namespace Vakapay.VakacoinBusiness
                 // start CreateTransaction
                 var vakaConfig = new VakaConfigurator()
                 {
-                    HttpEndpoint = EndPointUrl,
+                    HttpEndpoint = EndPointURL,
                     ChainId = this.ChainID
                 };
 
@@ -184,7 +169,7 @@ namespace Vakapay.VakacoinBusiness
                 var vakaConfig = new VakaConfigurator()
                 {
                     SignProvider = new DefaultSignProvider(sPrivateKey),
-                    HttpEndpoint = EndPointUrl,
+                    HttpEndpoint = EndPointURL,
                     ChainId = this.ChainID
                 };
                 
@@ -236,7 +221,7 @@ namespace Vakapay.VakacoinBusiness
                 {
                     Code = SystemTokenContract,
                     Account = username,
-                    Symbol = "VAKA"
+                    Symbol = CoreSymbol
                 }).Result;
                 return new ReturnObject
                 {
@@ -255,18 +240,30 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public int GetHeadBlockNumber()
+        /// <summary>
+        /// Get last trusted block number
+        /// </summary>
+        /// <returns>Block number (can null)</returns>
+        public UInt32? GetLastIrreversibleBlockNum()
         {
-            var info = DefaultApi.GetInfo().Result;
-            return Int32.Parse(info.HeadBlockNum.ToString());
+            return DefaultApi.GetInfo().Result.LastIrreversibleBlockNum;
         }
 
-        //Return arraylist of Transaction in a block
-        public ArrayList GetAllTransactionsInBlock(string blockNumber)
+        /// <summary>
+        /// Get block info of specify number or id
+        /// </summary>
+        /// <param name="blockNumber">Specify number or id of block</param>
+        /// <returns>Block info</returns>
+        public GetBlockResponse GetBlockByNumber(uint blockNumber)
+        {
+            return DefaultApi.GetBlock(new GetBlockRequest {BlockNumOrId = blockNumber.ToString()}).Result;
+        }
+
+        public ArrayList GetAllTransactionsInBlock(uint blockNumber)
         {
             try
             {
-                var block = DefaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber}).Result;
+                var block = DefaultApi.GetBlock(new GetBlockRequest{BlockNumOrId =  blockNumber.ToString()}).Result;
                 List<TransactionReceipt> transactions = block.Transactions;
                 ArrayList jsonTrxs = new ArrayList();
                 foreach (var transaction in transactions)
@@ -285,6 +282,51 @@ namespace Vakapay.VakacoinBusiness
                 Logger.Error(e);
                 return null;
             }
+        }
+
+        public ReturnObject CreateNewAddress(string password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject CreateNewAddress()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject CreateNewAddress(string privateKey, string publicKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SendRawTransaction(string data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject GetBalance(string address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SignTransaction(string privateKey, object[] transactionData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject GetBlockByNumber(int blockNumber)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject FindTransactionByHash(string hash)
+        {
+            throw new NotImplementedException();
         }
     }
 }

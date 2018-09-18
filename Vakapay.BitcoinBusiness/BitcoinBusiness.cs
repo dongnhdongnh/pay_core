@@ -238,7 +238,8 @@ namespace Vakapay.BitcoinBusiness
             }
             catch (Exception e)
             {
-                throw e;
+                Logger.Error(e, "RollbackWithSraw exception");
+                throw;
             }
         }
 

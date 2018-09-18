@@ -25,17 +25,4 @@
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Api\v1\VakaApi.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>VakaApi.tt</DependentUpon>
-    </Compile>
-    <Compile Update="Api\v1\VakaTypes.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>VakaTypes.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
 </Project>

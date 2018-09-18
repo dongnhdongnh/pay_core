@@ -3,9 +3,9 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.BlockchainBusiness
 {
-    public interface IBlockchainRpc
+    public interface IBlockchainRPC
     {
-        string endpointRpc { get; set; }
+        string EndPointURL { get; set; }
         /// <summary>
         /// create new address with password
         /// </summary>
@@ -48,7 +48,7 @@ namespace Vakapay.BlockchainBusiness
         /// </summary>
         /// <param name="blockchainTransaction"></param>
         /// <returns></returns>
-        Task<ReturnObject> SendTransactionAsyn(IBlockchainTransaction blockchainTransaction);
+        Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction);
         /// <summary>
         /// Get block by block number
         /// </summary>
@@ -56,23 +56,10 @@ namespace Vakapay.BlockchainBusiness
         /// <returns></returns>
         ReturnObject GetBlockByNumber(int blockNumber);
         /// <summary>
-        /// Get block by number asyn
-        /// </summary>
-        /// <param name="blockNumber"></param>
-        /// <returns></returns>
-        Task<ReturnObject> GetBlockByNumberAsyn(int blockNumber);
-        /// <summary>
         /// Get Transaction by hash
         /// </summary>
         /// <param name="hash"></param>
         /// <returns></returns>
         ReturnObject FindTransactionByHash(string hash);
-        /// <summary>
-        /// Get transaction by hash asyn
-        /// </summary>
-        /// <param name="transactionHash"></param>
-        /// <returns></returns>
-        Task<ReturnObject> FindTransactionByHashAsyn(string transactionHash);
-
     }
 }
