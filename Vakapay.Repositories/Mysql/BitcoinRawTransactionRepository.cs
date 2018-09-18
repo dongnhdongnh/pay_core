@@ -297,14 +297,14 @@ namespace Vakapay.Repositories.Mysql
                     return new ReturnObject
                     {
                         Status = Status.StatusSuccess,
-                        Message = "Update Success",
+                        Message = "Update Success"
                     };
                 }
 
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
-                    Message = "Update Fail",
+                    Message = "Update Fail"
                 };
             }
             catch (Exception e)
@@ -328,14 +328,14 @@ namespace Vakapay.Repositories.Mysql
                     return new ReturnObject
                     {
                         Status = Status.StatusSuccess,
-                        Message = "Update Success",
+                        Message = "Update Success"
                     };
                 }
 
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
-                    Message = "Update Fail",
+                    Message = "Update Fail"
                 };
             }
             catch (Exception e)
@@ -373,7 +373,7 @@ namespace Vakapay.Repositories.Mysql
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
-                    Message = "Update Fail",
+                    Message = "Update Fail"
                 };
             }
             catch (Exception e)
