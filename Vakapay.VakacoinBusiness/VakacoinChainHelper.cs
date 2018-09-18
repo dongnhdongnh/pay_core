@@ -46,7 +46,7 @@ namespace Vakapay.ScanVakaCoin
             while (true)
             {
                 uint lastIrreversibleBlock = _rpcClient.GetLastIrreversibleBlockNum().GetValueOrDefault();
-                logger.Info("Last Irreversible Block: {0}", lastIrreversibleBlock);
+                logger.Info("Last Irreversible Block: " + lastIrreversibleBlock);
                 
                 // Parse transactions from current block to last trusted block
                 for (uint blockNum = startBlock; blockNum <= lastIrreversibleBlock; blockNum++)
@@ -89,7 +89,7 @@ namespace Vakapay.ScanVakaCoin
                     Int32.Parse(blockResponse.BlockNum.ToString()), transferData.Amount(),
                     blockResponse.Timestamp.ToString(), Status.StatusSuccess);
 
-                logger.Info("{0} was received {1}", transferData.To, transferData.Quantity);
+                logger.Info(String.Format("{0} was received {1}", transferData.To, transferData.Quantity));
             }
         }
 
