@@ -5,7 +5,7 @@ namespace Vakapay.BitcoinBusiness
 {
     public class BitcoinBusinessNew : AbsBlockchainBusiness
     {
-        public BitcoinBusiness1(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true) : base(vakapayRepositoryFactory, isNewConnection)
+        public BitcoinBusinessNew(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true) : base(vakapayRepositoryFactory, isNewConnection)
         {
             
         }
