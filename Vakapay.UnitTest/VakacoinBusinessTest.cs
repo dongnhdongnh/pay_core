@@ -3,8 +3,9 @@ using NUnit.Framework;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
-namespace Vakapay.VakacoinBusiness.Test
+namespace Vakapay.UnitTest
 {
+    using VakacoinBusiness;
     [TestFixture]
     public class VakacoinBusinessTest
     {

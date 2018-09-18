@@ -1,7 +1,8 @@
 using NUnit.Framework;
 using Vakapay.Models.Domains;
+using Vakapay.VakacoinBusiness;
 
-namespace Vakapay.VakacoinBusiness.Test
+namespace Vakapay.UnitTest
 {
     [TestFixture]
     public class VakacoinRpcTest

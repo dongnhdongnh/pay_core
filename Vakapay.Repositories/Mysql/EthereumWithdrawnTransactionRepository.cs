@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -157,15 +158,24 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public ReturnObject ExcuteSQL(string sqlString)
+		public ReturnObject ExcuteSQL(string sqlString, object transaction = null)
 		{
 			try
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
-				var result = Connection.Execute(sqlString);
 
+				var result = 0;
+				if (transaction != null)
+				{
+					MySqlTransaction _transaction = (MySqlTransaction)transaction;
+					result = Connection.Execute(sqlString, null, _transaction);
+				}
+				else
+				{
+					result = Connection.Execute(sqlString);
+				}
 
 				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
 				Console.WriteLine("Excute thing " + result);
@@ -213,6 +223,25 @@ namespace Vakapay.Repositories.Mysql
 		public async Task<ReturnObject> SafeUpdate(IBlockchainTransaction transaction)
 		{
 			throw new NotImplementedException();
+		}
+
+		public object GetTransaction()
+		{
+			if (Connection.State != ConnectionState.Open)
+				Connection.Open();
+			return Connection.BeginTransaction();
+		}
+
+		public void TransactionCommit(object transaction)
+		{
+			MySqlTransaction _transaction = (MySqlTransaction)transaction;
+			_transaction.Commit();
+		}
+
+		public void TransactionRollback(object transaction)
+		{
+			MySqlTransaction _transaction = (MySqlTransaction)transaction;
+			_transaction.Rollback();
 		}
 	}
 

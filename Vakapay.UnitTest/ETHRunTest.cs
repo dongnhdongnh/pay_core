@@ -4,7 +4,7 @@ using System.Text;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
-namespace Vakapay.VakacoinBusiness.Test
+namespace Vakapay.UnitTest
 {
 	class ETHRunTest
 	{
