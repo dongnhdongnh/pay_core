@@ -9,6 +9,9 @@ using Vakapay.BlockchainBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
 using Vakapay.Cryptography;
+using Vakapay.Models.Entities;
+using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql;
 using VakaSharp;
 using VakaSharp.Api.v1;
 using Action=VakaSharp.Api.v1.Action;
@@ -26,6 +29,8 @@ namespace Vakapay.VakacoinBusiness
         private const string SystemTokenContract = "vaka.token";
         private const string ActivePermission = "active";
         private const string TransferAction = "transfer";
+
+        public VakacoinAccountRepository AccountRepository { get; set; }
 
         public VakacoinRPC(string endPointUrl, string chainId = null)
         {
@@ -171,6 +176,11 @@ namespace Vakapay.VakacoinBusiness
         
         public ReturnObject SendTransaction(string sFrom, string sTo, string sAmount, string sMemo, string sPrivateKey)
         {
+            return SendTransactionAsync(sFrom, sTo, sAmount, sMemo, sPrivateKey).Result;
+        }
+        
+        public async Task<ReturnObject> SendTransactionAsync(string sFrom, string sTo, string sAmount, string sMemo, string sPrivateKey)
+        {
             try
             {
                 var vakaConfig = new VakaConfigurator()
@@ -182,7 +192,7 @@ namespace Vakapay.VakacoinBusiness
                 
                 var vaka = new Vaka(vakaConfig);
 
-                var result = vaka.CreateTransaction( new Transaction()
+                var result = await vaka.CreateTransaction( new Transaction()
                 {
                     Actions = new List<Action>()
                     {
@@ -201,7 +211,7 @@ namespace Vakapay.VakacoinBusiness
                             }
                         }
                     }
-                }).Result;
+                });
 
                 return new ReturnObject
                 {
@@ -326,9 +336,14 @@ namespace Vakapay.VakacoinBusiness
         /// </summary>
         /// <param name="blockchainTransaction"></param>
         /// <returns></returns>
-        public Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
+        public async Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
         {
-            throw new NotImplementedException();
+            var transaction = (VakacoinTransaction) blockchainTransaction;
+            
+            var senderInfo = AccountRepository.FindByAddress(blockchainTransaction.FromAddress);
+            
+            return await SendTransactionAsync(transaction.FromAddress, transaction.ToAddress,
+                transaction.GetStringAmount(), transaction.Memo, senderInfo.GetSecret());
         }
 
         public ReturnObject GetBlockByNumber(int blockNumber)

@@ -4,6 +4,7 @@ using Vakapay.BlockchainBusiness.Base;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
+using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.VakacoinBusiness
 {
@@ -12,6 +13,11 @@ namespace Vakapay.VakacoinBusiness
         public VakacoinBusinessNew(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true) : base(vakapayRepositoryFactory, isNewConnection)
         {
             
+        }
+
+        public void SetAccountRepositotyForRpc(VakacoinRPC rpc)
+        {
+            rpc.AccountRepository = (VakacoinAccountRepository) VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
         }
 
         public ReturnObject SendTransaction(string From, string To, decimal amount)
