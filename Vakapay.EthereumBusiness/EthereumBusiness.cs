@@ -242,7 +242,7 @@ namespace Vakapay.EthereumBusiness
 			long _time = CommonHelper.GetUnixTimestamp();
 			//Get lastBlock from last time
 			int LastBlock = -1;
-			int.TryParse(CacheHelper.GetCacheString(CacheHelper.CacheKey.KEY_ETH_LASTSCANBLOCK), out LastBlock);
+			int.TryParse(CacheHelper.GetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK), out LastBlock);
 			if (LastBlock < 0)
 				LastBlock = 0;
 			//Get number of block
@@ -298,7 +298,7 @@ namespace Vakapay.EthereumBusiness
 					blocks.Add(_block);
 				}
 			}
-			CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_ETH_LASTSCANBLOCK, blockNumber.ToString());
+			CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, blockNumber.ToString());
 			if (blocks.Count <= 0)
 			{
 				Console.WriteLine("NO BLOCK");
