@@ -47,7 +47,7 @@ namespace Vakapay.Commons.Helpers
 
 		public class CacheKey
 		{
-			public const String KEY_ETH_LASTSCANBLOCK = "KEY_ETH_LASTSCANBLOCK";
+			public const String KEY_SCANBLOCK_LASTSCANBLOCK = "KEY_{0}_LASTSCANBLOCK";
 		}
 	}
 }
