@@ -52,15 +52,20 @@ namespace Vakapay.WalletBusiness
             try
             {
                 if (ConnectionDb.State != ConnectionState.Open)
+                {
                     ConnectionDb.Open();
+                }
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
+                {
                     return new ReturnObject
                     {
                         Status = Status.StatusError,
                         Message = "User Not Found"
                     };
+                }
+                    
                 /*//var ethereum = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory);
                 /*var resultMakeaddress = ethereum.CreateNewAddAddress();
                 if (resultMakeaddress.Status == Status.StatusError)
@@ -79,8 +84,8 @@ namespace Vakapay.WalletBusiness
                 };
 
                 var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-
                 var resultMakeWallet = walletRepo.Insert(wallet);
+
                 return resultMakeWallet;
             }
             catch (Exception e)
