@@ -42,7 +42,7 @@ namespace Vakapay.SendVakacoin
         {
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            var business = new VakacoinBusinessNew(repoFactory);
+            var business = new VakacoinBusiness.VakacoinBusiness(repoFactory);
             var connection = repoFactory.GetDbConnection();
             try
             {

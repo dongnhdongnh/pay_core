@@ -1,16 +1,19 @@
 using System;
 using System.Data;
+using System.Threading.Tasks;
+using Vakapay.BlockchainBusiness.Base;
 using Vakapay.Commons.Helpers;
 using Vakapay.Cryptography;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Entities;
+using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.VakacoinBusiness
 {
     using BlockchainBusiness;
 
-    public class VakacoinBusiness : BlockchainBusiness
+    public class VakacoinBusiness : AbsBlockchainBusiness, IBlockchainBusiness
     {
         private IVakacoinDepositTransactionRepository VakacoinDepositRepo { get; set; }
         private VakacoinRPC VakacoinRPCObj { get; set; }
@@ -19,6 +22,11 @@ namespace Vakapay.VakacoinBusiness
             : base(vakapayRepositoryFactory, isNewConnection)
         {
             VakacoinDepositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
+        }
+        
+        public void SetAccountRepositotyForRpc(VakacoinRPC rpc)
+        {
+            rpc.AccountRepository = (VakacoinAccountRepository) VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
         }
 
         /// <summary>
@@ -103,6 +111,34 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-//        public ReturnObject 
+        public ReturnObject SendTransaction(string From, string To, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SendTransaction(string From, string To, decimal amount, string Password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SendMultiTransaction(string From, string[] To, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SignData(string data, string privateKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject CreateNewAddress(string WalletId, string password = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ReturnObject> SendTransactionAsysn(string From, string To, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
