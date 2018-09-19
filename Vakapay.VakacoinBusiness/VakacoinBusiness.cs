@@ -12,15 +12,13 @@ namespace Vakapay.VakacoinBusiness
 
     public class VakacoinBusiness : BlockchainBusiness
     {
-        private IVakacoinTransactionHistoryRepository VakacoinHistoryRepo { get; set; }
-        private IPendingVakacoinTransactionRepository PendingVakacoinTransRepo { get; set; }
+        private IVakacoinDepositTransactionRepository VakacoinDepositRepo { get; set; }
         private VakacoinRPC VakacoinRPCObj { get; set; }
 
         public VakacoinBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
             : base(vakapayRepositoryFactory, isNewConnection)
         {
-            VakacoinHistoryRepo = VakapayRepositoryFactory.GetVakacoinTransactionHistoryRepository(DbConnection);
-            PendingVakacoinTransRepo = VakapayRepositoryFactory.GetPendingVakacoinTransactionRepository(DbConnection);
+            VakacoinDepositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
         }
 
         /// <summary>
@@ -33,9 +31,9 @@ namespace Vakapay.VakacoinBusiness
             try
             {
                 var keyPair = KeyManager.GenerateKeyPair();
-                
+
                 var result = VakacoinRPCObj.CreateRandomAccount(keyPair.PublicKey);
-                
+
                 if (result.Status == Status.StatusError)
                     return result;
 
@@ -50,13 +48,12 @@ namespace Vakapay.VakacoinBusiness
                     OwnerPublicKey = keyPair.PublicKey,
                     ActivePrivateKey = keyPair.PrivateKey,
                     ActivePublicKey = keyPair.PublicKey,
-                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
+                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     Id = CommonHelper.GenerateUuid(),
-                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
+                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId
-
                 });
-                
+
                 return returnObject;
             }
             catch (Exception e)
@@ -66,30 +63,34 @@ namespace Vakapay.VakacoinBusiness
                     Status = Status.StatusError,
                     Message = e.Message
                 };
-
             }
         }
 
-        public ReturnObject CreateTransactionHistory(string trxId, string from, string to, int blockNumber,
-            decimal amount, string transactionTime, string status)
+        public ReturnObject CreateDepositTransaction(string trxId, int blockNumber, string networkName, decimal amount,
+            string fromAddress, string toAddress, decimal fee, string status)
         {
             try
             {
                 if (DbConnection.State != ConnectionState.Open)
                     DbConnection.Open();
-                var transaction = new VakacoinTransactionHistory
+                int currentTimestamp = (int) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+                var transaction = new VakacoinDepositTransaction
                 {
                     Id = CommonHelper.GenerateUuid(),
                     TrxId = trxId,
-                    From = from,
-                    To = to,
                     BlockNumber = blockNumber,
+                    NetworkName = networkName,
                     Amount = amount,
-                    TransactionTime = transactionTime,
-                    CreatedTime = DateTime.UtcNow,
-                    Status = status
+                    FromAddress = fromAddress,
+                    ToAddress = toAddress,
+                    Fee = fee,
+                    Status = status,
+                    CreatedAt = currentTimestamp,
+                    UpdatedAt = currentTimestamp,
+                    InProcess = 0,
+                    Version = 0
                 };
-                var result = VakacoinHistoryRepo.Insert(transaction);
+                var result = VakacoinDepositRepo.Insert(transaction);
                 return result;
             }
             catch (Exception e)

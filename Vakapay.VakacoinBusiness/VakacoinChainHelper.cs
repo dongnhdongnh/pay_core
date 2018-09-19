@@ -12,7 +12,7 @@ using Action = VakaSharp.Api.v1.Action;
 
 namespace Vakapay.ScanVakaCoin
 {
-    public class VakacoinChainHelper: IChainHelper
+    public class VakacoinChainHelper : IChainHelper
     {
         private VakacoinRPC _rpcClient;
         private VakacoinBusiness.VakacoinBusiness _vakacoinBusiness;
@@ -21,22 +21,23 @@ namespace Vakapay.ScanVakaCoin
 
         public const String TRANSACTION_STATUS_EXECUTED = "executed";
         public const String TRANSACTION_ACTION_TRANSFER = "transfer";
-        public readonly static String[] TRANSACTION_SYMBOL_ARRAY = { "EOS", "VAKA" };
-        
+        public readonly static String[] TRANSACTION_SYMBOL_ARRAY = {"EOS", "VAKA"};
+
         public IBlockchainRPC RpcClient
         {
             get { return _rpcClient; }
             set { _rpcClient = (VakacoinRPC) value; }
         }
 
-        public VakacoinChainHelper(int blockInterval, VakacoinRPC rpcClient, VakacoinBusiness.VakacoinBusiness vakacoinBusiness, WalletBusiness.WalletBusiness walletBusiness)
+        public VakacoinChainHelper(int blockInterval, VakacoinRPC rpcClient,
+            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, WalletBusiness.WalletBusiness walletBusiness)
         {
             _blockInterval = blockInterval;
             _rpcClient = rpcClient;
             _vakacoinBusiness = vakacoinBusiness;
             _walletBusiness = walletBusiness;
         }
-        
+
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public IEnumerable<object> StreamBlock(uint startBlock = 0)
@@ -47,13 +48,13 @@ namespace Vakapay.ScanVakaCoin
             {
                 uint lastIrreversibleBlock = _rpcClient.GetLastIrreversibleBlockNum().GetValueOrDefault();
                 logger.Info("Last Irreversible Block: " + lastIrreversibleBlock);
-                
+
                 // Parse transactions from current block to last trusted block
                 for (uint blockNum = startBlock; blockNum <= lastIrreversibleBlock; blockNum++)
                 {
                     yield return _rpcClient.GetBlockByNumber(blockNum);
                 }
-                
+
                 // Done above then next to continuous block
                 startBlock = lastIrreversibleBlock + 1;
                 System.Threading.Thread.Sleep(_blockInterval);
@@ -72,7 +73,8 @@ namespace Vakapay.ScanVakaCoin
             }
         }
 
-        public void ParseValidTransferAction(Action action, PackedTransaction packedTransaction, GetBlockResponse blockResponse)
+        public void ParseValidTransferAction(Action action, PackedTransaction packedTransaction,
+            GetBlockResponse blockResponse)
         {
             TransferData transferData = JsonConvert.DeserializeObject<TransferData>(action.Data.ToString());
             if (String.IsNullOrEmpty(transferData.Quantity))
@@ -83,11 +85,11 @@ namespace Vakapay.ScanVakaCoin
                 if (!_walletBusiness.CheckExistedAndUpdateByAddress(transferData.To, transferData.Amount(),
                     transferData.Symbol()))
                     return;
-                
+
                 // Save to table in db
-                _vakacoinBusiness.CreateTransactionHistory(packedTransaction.Id, transferData.From, transferData.To,
-                    Int32.Parse(blockResponse.BlockNum.ToString()), transferData.Amount(),
-                    blockResponse.Timestamp.ToString(), Status.StatusSuccess);
+                _vakacoinBusiness.CreateDepositTransaction(packedTransaction.Id, (int) blockResponse.BlockNum,
+                    transferData.Symbol(), transferData.Amount(), transferData.From, transferData.To, 0,
+                    Status.StatusSuccess);
 
                 logger.Info(String.Format("{0} was received {1}", transferData.To, transferData.Quantity));
             }
@@ -101,7 +103,8 @@ namespace Vakapay.ScanVakaCoin
                 if (transactionReceipt.Status != TRANSACTION_STATUS_EXECUTED || transactionReceipt.Trx is String)
                     continue;
 
-                PackedTransaction packedTransaction = JsonConvert.DeserializeObject<PackedTransaction>(transactionReceipt.Trx.ToString());
+                PackedTransaction packedTransaction =
+                    JsonConvert.DeserializeObject<PackedTransaction>(transactionReceipt.Trx.ToString());
                 foreach (Action action in packedTransaction.Transaction.Actions)
                     yield return (action, packedTransaction);
             }
