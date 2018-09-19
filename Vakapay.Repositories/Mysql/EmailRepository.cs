@@ -16,53 +16,15 @@ namespace Vakapay.Repositories.Mysql
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private const string TableName = "emailQueue";
 
-        public EmailRepository(string connectionString) : base(connectionString)
-        {
-        }
-
-        public EmailRepository(IDbConnection dbConnection) : base(dbConnection)
-        {
-        }
-
-
-        public BlockchainTransaction FindTransactionPending()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public BlockchainTransaction FindTransactionError()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public BlockchainTransaction FindTransactionByStatus(string status)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
-        {
-            throw new System.NotImplementedException();
-        }
 
         public ReturnObject Update(EmailQueue objectUpdate)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public ReturnObject Delete(string id)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public ReturnObject Insert(EmailQueue objectInsert)
@@ -97,17 +59,26 @@ namespace Vakapay.Repositories.Mysql
 
         public EmailQueue FindById(string id)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public List<EmailQueue> FindBySql(string sqlString)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public List<BitcoinDepositTransaction> FindWhere(EmailQueue emailQueue)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+
+        public EmailRepository(string connectionString) : base(connectionString)
+        {
+        }
+
+        public EmailRepository(IDbConnection dbConnection) : base(dbConnection)
+        {
         }
     }
 }

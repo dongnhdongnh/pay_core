@@ -4,7 +4,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IEmailRepository : IRepositoryBlockchainTransaction<EmailQueue>
+    public interface IEmailRepository : IRepositoryBase<EmailQueue>
     {
         List<BitcoinDepositTransaction> FindWhere(EmailQueue emailQueue);
     }

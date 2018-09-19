@@ -252,6 +252,11 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
+        public List<BlockchainTransaction> FindTransactionsPending()
+        {
+            throw new NotImplementedException();
+        }
+
         public BlockchainTransaction FindTransactionError()
         {
             try

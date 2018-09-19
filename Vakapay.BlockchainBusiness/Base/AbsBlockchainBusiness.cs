@@ -7,7 +7,6 @@ using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
-using Vakapay.WalletBusiness;
 
 namespace Vakapay.BlockchainBusiness.Base
 {

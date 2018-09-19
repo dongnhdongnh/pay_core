@@ -208,6 +208,11 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
+        public ReturnObject GetBlockHaveTransactionByNumber(int i)
+        {
+            throw new NotImplementedException();
+        }
+
         public ReturnObject GetConnectionCount()
         {
             try

@@ -202,6 +202,11 @@ namespace Vakapay.Repositories.Mysql
             return new BitcoinDepositTransaction();
         }
 
+        public List<BlockchainTransaction> FindTransactionsPending()
+        {
+            throw new NotImplementedException();
+        }
+
         public BlockchainTransaction FindTransactionError()
         {
             throw new NotImplementedException();
