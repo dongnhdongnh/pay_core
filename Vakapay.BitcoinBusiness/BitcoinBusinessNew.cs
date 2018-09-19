@@ -10,7 +10,7 @@ using Vakapay.Models.Repositories;
 
 namespace Vakapay.BitcoinBusiness
 {
-    public class BitcoinBusinessNew : AbsBlockchainBusiness
+    public class BitcoinBusinessNew : AbsBlockchainBusiness, IBlockchainBusiness
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -78,6 +78,35 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        
+
+        public ReturnObject SendTransaction(string From, string To, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SendTransaction(string From, string To, decimal amount, string Password)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SendMultiTransaction(string From, string[] To, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SignData(string data, string privateKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject CreateNewAddress(string WalletId, string password = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ReturnObject> SendTransactionAsysn(string From, string To, decimal amount)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

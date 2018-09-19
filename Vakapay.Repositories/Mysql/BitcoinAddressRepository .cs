@@ -120,5 +120,10 @@ namespace Vakapay.Repositories.Mysql
                 throw e;
             }
         }
+
+        public BitcoinAddress FindByAddress(string address)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

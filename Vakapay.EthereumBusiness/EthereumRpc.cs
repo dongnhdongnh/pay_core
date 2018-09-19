@@ -213,6 +213,11 @@ namespace Vakapay.EthereumBusiness
 			throw new NotImplementedException();
 		}
 
+		public ReturnObject GetBlockHaveTransactionByNumber(int i)
+		{
+			throw new NotImplementedException();
+		}
+
 		public ReturnObject FindTransactionByHash(string hash)
 		{
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_getTransactionByHash, new Object[] { hash });

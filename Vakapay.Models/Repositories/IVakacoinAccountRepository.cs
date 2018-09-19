@@ -3,7 +3,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IVakacoinAccountRepository : IRepositoryBase<VakacoinAccount>
+    public interface IVakacoinAccountRepository : IRepositoryBase<VakacoinAccount>, IAddressRepository<VakacoinAccount>
     {
         
     }

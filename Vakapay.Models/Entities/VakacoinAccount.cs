@@ -1,7 +1,9 @@
 ﻿using System;
+using Vakapay.Models.Domains;
+
 namespace Vakapay.Models.Entities
 {
-    public class VakacoinAccount
+    public class VakacoinAccount : IBlockchainAddress
     {
         public string Id { get; set; }
         public string AccountName { get; set; }
@@ -13,5 +15,15 @@ namespace Vakapay.Models.Entities
         public string Status { get; set; }
         public int CreatedAt { get; set; }
         public int UpdatedAt { get; set; }
+        
+        public string GetAddress()
+        {
+            return AccountName;
+        }
+
+        public string GetSecret()
+        {
+            return ActivePrivateKey;
+        }
     }
 }

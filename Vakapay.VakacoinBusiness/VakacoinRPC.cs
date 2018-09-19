@@ -336,6 +336,16 @@ namespace Vakapay.VakacoinBusiness
             throw new NotImplementedException();
         }
 
+        public ReturnObject GetBlockNumber()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject GetBlockHaveTransactionByNumber(int i)
+        {
+            throw new NotImplementedException();
+        }
+
         public ReturnObject FindTransactionByHash(string hash)
         {
             throw new NotImplementedException();

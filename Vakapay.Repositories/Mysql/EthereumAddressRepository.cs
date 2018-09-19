@@ -58,5 +58,10 @@ namespace Vakapay.Repositories.Mysql
 		{
 			throw new System.NotImplementedException();
 		}
-	}
+
+	    public EthereumAddress FindByAddress(string address)
+	    {
+		    throw new NotImplementedException();
+	    }
+    }
 }
