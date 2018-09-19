@@ -33,7 +33,7 @@ namespace Vakapay.BitcoinNotifi
                     UserName = "bitcoinrpc",
                     Password = "wqfgewgewi"
                 };
-                
+
                 // var btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory, bitcoinConnect);
                 var btcBusiness = new BitcoinBusinessNew(persistenceFactory);
                 var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
@@ -156,11 +156,52 @@ namespace Vakapay.BitcoinNotifi
                     // update balance 
                     WalletBusiness?.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
                         "Bitcoin");
+
+                    //insert new email data
+                    CreateDataEmail(btcBusiness, currentTime, transactionModelDetail);
                 }
             }
             catch (Exception e)
             {
                 Logger.Error(e, "HandleNotifiDataReceiver exception");
+            }
+        }
+
+        /// <summary>
+        /// CreateDataEmail after receiver bitcoin
+        /// </summary>
+        /// <param name="btcBusiness"></param>
+        /// <param name="currentTime"></param>
+        /// <param name="transactionModelDetail"></param>
+        private static void CreateDataEmail(BitcoinBusinessNew btcBusiness, long currentTime,
+            BtcTransactionDetailModel transactionModelDetail)
+        {
+            try
+            {
+                var emailRepository =
+                    btcBusiness.VakapayRepositoryFactory.GetEmailRepository(btcBusiness.DbConnection);
+                var userRepository = btcBusiness.VakapayRepositoryFactory.GetUserRepository(btcBusiness.DbConnection);
+                var email = userRepository.FindEmailByAddressOfWallet(transactionModelDetail.Address);
+                if (email != null)
+                {
+                    var emailQueue = new EmailQueue
+                    {
+                        Id = CommonHelper.GenerateUuid(),
+                        ToEmail = email,
+                        Content = "You just received " + transactionModelDetail.Amount +
+                                  " bitcoin from the address " + transactionModelDetail.Address,
+                        Subject = "Notify receiver Bitcoin",
+                        Status = Status.StatusPending,
+                        CreatedAt = currentTime,
+                        UpdatedAt = currentTime
+                    };
+                    var result = emailRepository.Insert(emailQueue);
+                    Logger.Debug("CreateDataEmail =>> result: " + result);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error("CreateDataEmail error", e);
             }
         }
 

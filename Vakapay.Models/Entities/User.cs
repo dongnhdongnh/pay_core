@@ -1,6 +1,9 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Vakapay.Models.Entities
 {
+    [Table("user")]
     public class User
     {
         public User()

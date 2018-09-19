@@ -4,8 +4,8 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IUserRepository : IRepositoryBase<User>
+    public interface IEmailRepository : IRepositoryBlockchainTransaction<EmailQueue>
     {
-        string FindEmailByAddressOfWallet(string walletOfAddress);
+        List<BitcoinDepositTransaction> FindWhere(EmailQueue emailQueue);
     }
 }

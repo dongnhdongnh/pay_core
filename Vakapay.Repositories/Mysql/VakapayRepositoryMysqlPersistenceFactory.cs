@@ -83,5 +83,9 @@ namespace Vakapay.Repositories.Mysql
 		{
 			return new PendingVakacoinTransactionRepository(dbConnection);
 		}
+		public IEmailRepository GetEmailRepository(IDbConnection dbConnection)
+		{
+			return new EmailRepository(dbConnection);
+		}
 	}
 }
