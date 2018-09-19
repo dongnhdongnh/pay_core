@@ -60,12 +60,7 @@ namespace Vakapay.BlockchainBusiness
 		/// </summary>
 		/// <returns></returns>
 		ReturnObject GetBlockNumber();
-		/// <summary>
-		/// get block that have transaction
-		/// </summary>
-		/// <param name="i"></param>
-		/// <returns></returns>
-		ReturnObject GetBlockHaveTransactionByNumber(int i);
+
 		/// <summary>
 		/// Get Transaction by hash
 		/// </summary>

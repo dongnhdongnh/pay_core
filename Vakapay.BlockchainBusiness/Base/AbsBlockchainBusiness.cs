@@ -191,10 +191,10 @@ namespace Vakapay.BlockchainBusiness.Base
 			}
 		}
 
-		public async Task<ReturnObject> ScanBlockAsyn<TBlockchainTransaction>(string networkName,
+		public async Task<ReturnObject> ScanBlockAsyn<TBlockchainTransaction, TBlockInfor>(string networkName,
 				 WalletBusiness.WalletBusiness wallet,
 				 IRepositoryBlockchainTransaction<TBlockchainTransaction> withdrawRepoQuery,
-				 IBlockchainRPC rpcClass)
+				 IBlockchainRPC rpcClass) where TBlockInfor : IBlockInfor
 		{
 			try
 			{
@@ -204,6 +204,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				int.TryParse(CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName)), out lastBlock);
 				if (lastBlock < 0)
 					lastBlock = 0;
+				Console.WriteLine(lastBlock);
 				//get blockNumber:
 				var _result = rpcClass.GetBlockNumber();
 				if (_result.Status == Status.StatusError)
@@ -222,11 +223,11 @@ namespace Vakapay.BlockchainBusiness.Base
 				}
 				//Get list of new block that have transactions
 				Console.WriteLine("SCAN FROM " + lastBlock + "___" + blockNumber);
-				List<IBlockInfor> blocks = new List<IBlockInfor>();
+				List<TBlockInfor> blocks = new List<TBlockInfor>();
 				for (int i = lastBlock; i <= blockNumber; i++)
 				{
 					if (i < 0) continue;
-					_result = rpcClass.GetBlockHaveTransactionByNumber(i);
+					_result = rpcClass.GetBlockByNumber(i);
 					if (_result.Status == Status.StatusError)
 					{
 
@@ -234,7 +235,8 @@ namespace Vakapay.BlockchainBusiness.Base
 					}
 					if (_result.Data == null)
 						continue;
-					IBlockInfor _block = JsonHelper.DeserializeObject<IBlockInfor>(_result.Data.ToString());
+					Console.WriteLine(_result.Data.ToString());
+					TBlockInfor _block = JsonHelper.DeserializeObject<TBlockInfor>(_result.Data.ToString());
 					if (_block.transactions.Length > 0)
 					{
 						blocks.Add(_block);
@@ -247,7 +249,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				}
 				//Get done,List<> blocks now contains all block that have transaction
 				//check Transaction and update:
-				foreach (IBlockInfor _block in blocks)
+				foreach (TBlockInfor _block in blocks)
 				{
 					if (withdrawPendingTransactions.Count <= 0)
 					{
@@ -272,7 +274,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				}
 
 				//check wallet balance and update 
-				foreach (IBlockInfor _block in blocks)
+				foreach (TBlockInfor _block in blocks)
 				{
 
 					foreach (ITransactionInfor _trans in _block.transactions)

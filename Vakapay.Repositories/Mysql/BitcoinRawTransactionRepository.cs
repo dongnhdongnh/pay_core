@@ -286,8 +286,11 @@ namespace Vakapay.Repositories.Mysql
                 throw e;
             }
         }
-
-        public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
+		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
+		{
+			throw new NotImplementedException();
+		}
+		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
         {
             try
             {

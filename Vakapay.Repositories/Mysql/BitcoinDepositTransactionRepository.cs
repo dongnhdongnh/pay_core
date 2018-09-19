@@ -261,5 +261,10 @@ namespace Vakapay.Repositories.Mysql
         {
             throw new NotImplementedException();
         }
-    }
+
+		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
+		{
+			throw new NotImplementedException();
+		}
+	}
 }

@@ -10,7 +10,8 @@ namespace Vakapay.Models.Repositories.Base
 		List<BlockchainTransaction> FindTransactionsPending();
 		BlockchainTransaction FindTransactionError();
         BlockchainTransaction FindTransactionByStatus(string status);
-        Task<ReturnObject> LockForProcess(BlockchainTransaction transaction);
+		List<BlockchainTransaction> FindTransactionsByStatus(string status);
+		Task<ReturnObject> LockForProcess(BlockchainTransaction transaction);
         Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction);
         Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction);
     }

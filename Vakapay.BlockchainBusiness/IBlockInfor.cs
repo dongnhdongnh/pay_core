@@ -7,7 +7,7 @@ namespace Vakapay.BlockchainBusiness
 	public abstract class IBlockInfor
 	{
 
-		public int number;
+		public string number;
 		public string hash;
 		public ITransactionInfor[] transactions;
 		public string transactionsRoot;

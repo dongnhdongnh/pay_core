@@ -205,7 +205,37 @@ namespace Vakapay.EthereumBusiness
 
 		public ReturnObject GetBlockByNumber(int blockNumber)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				ReturnObject _result = EthereumSendRPC(EthereumRPCList.RPCName.eth_getBlockByNumber, new Object[] { blockNumber.IntToHex(), true });
+				Console.WriteLine(_result);
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				else
+				{
+					//	Console.WriteLine();
+					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+					return new ReturnObject
+					{
+						Status = Status.StatusCompleted,
+						Data = JsonHelper.SerializeObject(_getter.result)
+					};
+				}
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+
+
 		}
 
 		public async Task<ReturnObject> GetBlockByNumberAsyn(int blockNumber)
@@ -213,10 +243,7 @@ namespace Vakapay.EthereumBusiness
 			throw new NotImplementedException();
 		}
 
-		public ReturnObject GetBlockHaveTransactionByNumber(int i)
-		{
-			throw new NotImplementedException();
-		}
+
 
 		public ReturnObject FindTransactionByHash(string hash)
 		{

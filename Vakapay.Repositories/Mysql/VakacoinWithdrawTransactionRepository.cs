@@ -248,6 +248,11 @@ namespace Vakapay.Repositories.Mysql
 			MySqlTransaction _transaction = (MySqlTransaction)transaction;
 			_transaction.Rollback();
 		}
+
+		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 }
