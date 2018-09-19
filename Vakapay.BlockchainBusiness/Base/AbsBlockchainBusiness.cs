@@ -10,8 +10,9 @@ namespace Vakapay.BlockchainBusiness.Base
 {
     public abstract class AbsBlockchainBusiness
     {
-        public  IVakapayRepositoryFactory VakapayRepositoryFactory { get; }
+        public IVakapayRepositoryFactory VakapayRepositoryFactory { get; }
         public IDbConnection DbConnection { get; }
+
         public AbsBlockchainBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
         {
             VakapayRepositoryFactory = vakapayRepositoryFactory;
@@ -19,6 +20,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 ? VakapayRepositoryFactory.GetDbConnection()
                 : VakapayRepositoryFactory.GetOldConnection();
         }
+
         /// <summary>
         /// Send Transaction with optimistic lock
         /// Send with multiple thread
@@ -40,8 +42,8 @@ namespace Vakapay.BlockchainBusiness.Base
              * 5. Update Transaction Status
              */
             // find transaction pending
-            var pendingTransaction =  repoQuery.FindTransactionPending();
-            if(pendingTransaction?.Id == null)
+            var pendingTransaction = repoQuery.FindTransactionPending();
+            if (pendingTransaction?.Id == null)
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
@@ -52,8 +54,8 @@ namespace Vakapay.BlockchainBusiness.Base
                 Console.WriteLine(DbConnection.State);
                 DbConnection.Open();
             }
-            
-               
+
+
             //begin first transaction
             var transactionScope = DbConnection.BeginTransaction();
             try
@@ -69,6 +71,7 @@ namespace Vakapay.BlockchainBusiness.Base
                         Message = "Cannot Lock For Process"
                     };
                 }
+
                 //commit transaction
                 transactionScope.Commit();
             }
@@ -81,10 +84,10 @@ namespace Vakapay.BlockchainBusiness.Base
                     Message = e.ToString()
                 };
             }
-            
+
             //Update Version to Model
             pendingTransaction.Version += 1;
-            
+
             //start send and update
 
             var transactionDbSend = DbConnection.BeginTransaction();
@@ -95,7 +98,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 var sendTransaction = await rpcClass.SendTransactionAsync(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
                 pendingTransaction.InProcess = 0;
-                pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                pendingTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                 pendingTransaction.Hash = sendTransaction.Data;
                 var result = await repoQuery.SafeUpdate(pendingTransaction);
                 if (result.Status == Status.StatusError)
@@ -107,13 +110,13 @@ namespace Vakapay.BlockchainBusiness.Base
                         Message = "Cannot Save Transaction Status"
                     };
                 }
+
                 transactionDbSend.Commit();
                 return new ReturnObject
                 {
                     Status = sendTransaction.Status,
                     Message = sendTransaction.Message
                 };
-                
             }
             catch (Exception e)
             {
@@ -123,15 +126,45 @@ namespace Vakapay.BlockchainBusiness.Base
                 transactionDbSend.Rollback();
                 throw e;
             }
-            
-            
         }
 
-        
 
-        public async Task<ReturnObject> CreateAddressAsyn()
+        public async Task<ReturnObject> CreateAddressAsyn<TBlockchainAddress>(
+            IRepositoryBlockchainAddress<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
+            string other)
         {
-            return null;
+            try
+            {
+                var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection);
+
+                var walletCheck = walletRepository.FindById(walletId);
+
+                if (walletCheck == null)
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Wallet Not Found"
+                    };
+
+                var results = rpcClass.CreateNewAddress(other);
+                if (results.Status == Status.StatusError)
+                    return results;
+
+                var address = results.Data;
+
+
+                var resultAddBitcoinAddress = await repoQuery.InsertAddress(walletId, other);
+                //
+                return resultAddBitcoinAddress;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
         }
 
         public async Task<ReturnObject> ScanBlockAsyn()
