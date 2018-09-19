@@ -181,7 +181,7 @@ namespace Vakapay.BitcoinNotifi
                 var emailRepository =
                     btcBusiness.VakapayRepositoryFactory.GetEmailRepository(btcBusiness.DbConnection);
                 var userRepository = btcBusiness.VakapayRepositoryFactory.GetUserRepository(btcBusiness.DbConnection);
-                var email = userRepository.FindEmailByAddressOfWallet(transactionModelDetail.Address);
+                var email = userRepository.FindEmailByBitcoinAddress(transactionModelDetail.Address);
                 if (email != null)
                 {
                     var emailQueue = new EmailQueue
@@ -201,7 +201,7 @@ namespace Vakapay.BitcoinNotifi
             }
             catch (Exception e)
             {
-                Logger.Error("CreateDataEmail error", e);
+                Logger.Error("CreateDataEmail error: ", e.Message);
             }
         }
 

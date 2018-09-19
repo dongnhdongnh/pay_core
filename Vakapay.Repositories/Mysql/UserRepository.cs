@@ -50,7 +50,7 @@ namespace Vakapay.Repositories.Mysql
             throw new NotImplementedException();
         }
 
-        public string FindEmailByAddressOfWallet(string addressOfWallet)
+        public string FindEmailByBitcoinAddress(string bitcoinAddress)
         {
             try
             {
@@ -60,10 +60,10 @@ namespace Vakapay.Repositories.Mysql
                 var sQuery = "SELECT Email FROM " + TableName +
                              " t1 INNER JOIN " + TableNameWallet + " t2 ON t1.Id = t2.UserId INNER JOIN " +
                              TableNameBitcoinAddress + " t3 ON t2.Id = t3.WalletId " +
-                             "WHERE t3.Address = @AddressOfWallet;";
+                             "WHERE t3.Address = @BitcoinAddress;";
 
 
-                var result = Connection.QueryFirstOrDefault<string>(sQuery, new {AddressOfWallet = addressOfWallet});
+                var result = Connection.QueryFirstOrDefault<string>(sQuery, new {BitcoinAddress = bitcoinAddress});
                 Logger.Error("UserRepository =>> FindEmailByAddressOfWallet result: " + result);
                 return result;
             }

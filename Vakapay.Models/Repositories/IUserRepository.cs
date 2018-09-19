@@ -6,6 +6,6 @@ namespace Vakapay.Models.Repositories
 {
     public interface IUserRepository : IRepositoryBase<User>
     {
-        string FindEmailByAddressOfWallet(string walletOfAddress);
+        string FindEmailByBitcoinAddress(string bitcoinAddress);
     }
 }
