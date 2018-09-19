@@ -650,20 +650,6 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        /**
-         * The getblockhash RPC returns the header hash of a block at the given height in the local best block chain.
-         */
-        public ReturnObject GetBlockHash(int height)
-        {
-            try
-            {
-                return InvokeMethod("getblockhash", height);
-            }
-            catch (Exception e)
-            {
-                return returnError(e);
-            }
-        }
 
         /**
          * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.
@@ -769,14 +755,31 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
+        /**
+         * The getblockhash RPC returns the header hash of a block at the given height in the local best block chain.
+         */
         public ReturnObject GetBlockByNumber(int blockNumber)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return InvokeMethod("getblockhash", blockNumber);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
 
         public ReturnObject FindTransactionByHash(string hash)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return InvokeMethod("gettransaction", hash);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
     }
 }
