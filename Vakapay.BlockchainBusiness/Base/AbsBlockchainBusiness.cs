@@ -130,8 +130,7 @@ namespace Vakapay.BlockchainBusiness.Base
 
 
         /// <summary>
-        /// Send Transaction with optimistic lock
-        /// Send with multiple thread
+        /// Created Address with optimistic lock
         /// </summary>
         /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
@@ -144,7 +143,7 @@ namespace Vakapay.BlockchainBusiness.Base
             string other = "")
         {
             try
-            {
+            { 
                 var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection);
 
                 var walletCheck = walletRepository.FindById(walletId);

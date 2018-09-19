@@ -2,6 +2,7 @@ using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -60,6 +61,11 @@ namespace Vakapay.Repositories.Mysql
 		}
 
 	    public EthereumAddress FindByAddress(string address)
+	    {
+		    throw new NotImplementedException();
+	    }
+	    
+	    public Task<ReturnObject> InsertAddress(string address, string walletId, string other)
 	    {
 		    throw new NotImplementedException();
 	    }
