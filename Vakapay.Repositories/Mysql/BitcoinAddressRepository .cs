@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -12,6 +14,8 @@ namespace Vakapay.Repositories.Mysql
 {
     public class BitcoinAddressRepository : MysqlBaseConnection, IBitcoinAddressRepository
     {
+        private IBitcoinAddressRepository _bitcoinAddressRepositoryImplementation;
+
         public BitcoinAddressRepository(string connectionString) : base(connectionString)
         {
         }
@@ -29,6 +33,9 @@ namespace Vakapay.Repositories.Mysql
         {
             throw new System.NotImplementedException();
         }
+
+
+        private const string TableName = "bitcoinaddress";
 
         public ReturnObject Insert(BitcoinAddress objectInsert)
         {
@@ -83,6 +90,30 @@ namespace Vakapay.Repositories.Mysql
                 var result = Connection.Query<BitcoinAddress>(sqlString);
 
                 return result.ToList();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task<ReturnObject> InsertAddress(string address, string walletId, string account = "")
+        {
+            try
+            {
+                var time = (int) CommonHelper.GetUnixTimestamp();
+
+                var bcAddress = new BitcoinAddress
+                {
+                    Id = CommonHelper.GenerateUuid(),
+                    Address = address,
+                    Status = Status.StatusActive,
+                    WalletId = walletId,
+                    CreatedAt = time,
+                    UpdatedAt = time
+                };
+
+                return Insert(bcAddress);
             }
             catch (Exception e)
             {

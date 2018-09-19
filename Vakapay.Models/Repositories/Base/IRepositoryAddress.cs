@@ -5,6 +5,6 @@ namespace Vakapay.Models.Repositories.Base
 {
     public interface IRepositoryAddress
     {
-        Task<ReturnObject> InsertAddress(string walletId, string other);
+        Task<ReturnObject> InsertAddress(string address, string walletId, string other);
     }
 }
