@@ -4,12 +4,12 @@ using System.Text;
 
 namespace Vakapay.BlockchainBusiness
 {
-	public abstract class IBlockInfor
+	public abstract class IBlockInfor<TTransactionInfor> where TTransactionInfor : ITransactionInfor
 	{
 
 		public string number;
 		public string hash;
-		public ITransactionInfor[] transactions;
+		public TTransactionInfor[] transactions;
 		public string transactionsRoot;
 		public string totalDifficulty;
 	}

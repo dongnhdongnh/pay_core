@@ -138,6 +138,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
+			
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 				var result = Connection.Update<VakacoinWithdrawTransaction>(objectUpdate);
@@ -250,6 +251,11 @@ namespace Vakapay.Repositories.Mysql
 		}
 
 		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
+		{
+			throw new NotImplementedException();
+		}
+
+		public List<BlockchainTransaction> FindTransactionsInProcess()
 		{
 			throw new NotImplementedException();
 		}

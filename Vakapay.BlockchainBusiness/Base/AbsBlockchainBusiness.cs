@@ -191,10 +191,13 @@ namespace Vakapay.BlockchainBusiness.Base
 			}
 		}
 
-		public async Task<ReturnObject> ScanBlockAsyn<TBlockchainTransaction, TBlockInfor>(string networkName,
+		public async Task<ReturnObject> ScanBlockAsyn<TBlockchainTransaction, TBlockInfor, TTransactionInfor>(string networkName,
 				 WalletBusiness.WalletBusiness wallet,
 				 IRepositoryBlockchainTransaction<TBlockchainTransaction> withdrawRepoQuery,
-				 IBlockchainRPC rpcClass) where TBlockInfor : IBlockInfor
+				 IBlockchainRPC rpcClass)
+			where TBlockchainTransaction : BlockchainTransaction
+			where TTransactionInfor : ITransactionInfor
+			where TBlockInfor : IBlockInfor<TTransactionInfor>
 		{
 			try
 			{
@@ -211,12 +214,12 @@ namespace Vakapay.BlockchainBusiness.Base
 				{
 					throw new Exception("Cant GetBlockNumber");
 				}
-				if (int.TryParse(_result.Data.ToString(), out blockNumber))
+				if (!int.TryParse(_result.Data.ToString(), out blockNumber))
 				{
 					throw new Exception("Cant parse block number");
 				}
 				//Search transactions which need to scan:
-				var withdrawPendingTransactions = withdrawRepoQuery.FindTransactionsPending();
+				var withdrawPendingTransactions = withdrawRepoQuery.FindTransactionsInProcess();
 				if (withdrawPendingTransactions.Count <= 0)
 				{
 					throw new Exception("withdrawPendingTransactions.Count <= 0");
@@ -235,14 +238,16 @@ namespace Vakapay.BlockchainBusiness.Base
 					}
 					if (_result.Data == null)
 						continue;
-					Console.WriteLine(_result.Data.ToString());
+					//Console.WriteLine(_result.Data.ToString());
 					TBlockInfor _block = JsonHelper.DeserializeObject<TBlockInfor>(_result.Data.ToString());
+					Console.WriteLine("BLock hash:" + _block.hash);
 					if (_block.transactions.Length > 0)
 					{
 						blocks.Add(_block);
 					}
 				}
-				CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, blockNumber.ToString());
+				//CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, blockNumber.ToString());
+				CacheHelper.SetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName), blockNumber.ToString());
 				if (blocks.Count <= 0)
 				{
 					throw new Exception("no blocks have transaction");
@@ -260,13 +265,20 @@ namespace Vakapay.BlockchainBusiness.Base
 					{
 						BlockchainTransaction _currentPending = withdrawPendingTransactions[i];
 						ITransactionInfor _trans = _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
+						int _blockNumber = -1;
+
+
 						if (_trans != null)
 						{
+							_trans.blockNumber.HexToInt(out _blockNumber);
 							Console.WriteLine("HELLO " + _currentPending.Hash);
-							_currentPending.BlockNumber = _trans.blockNumber;
+							_currentPending.BlockNumber = _blockNumber;
 							_currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 							_currentPending.Status = Status.StatusCompleted;
-							withdrawRepoQuery.Update((TBlockchainTransaction)(object)_currentPending);
+							_currentPending.InProcess = 0;
+							Console.WriteLine("CaLL UPDATE");
+
+							withdrawRepoQuery.Update((TBlockchainTransaction)_currentPending);
 							withdrawPendingTransactions.RemoveAt(i);
 						}
 

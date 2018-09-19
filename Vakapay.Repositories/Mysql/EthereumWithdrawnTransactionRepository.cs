@@ -138,6 +138,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
+				Console.WriteLine("update on res");
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 				var result = Connection.Update<EthereumWithdrawTransaction>(objectUpdate);
@@ -371,6 +372,21 @@ namespace Vakapay.Repositories.Mysql
 			_transaction.Rollback();
 		}
 
+		public List<BlockchainTransaction> FindTransactionsInProcess()
+		{
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
 
+				var sqlString = $"Select * from {tableName} where InProcess = 1";
+				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList<BlockchainTransaction>();
+				return result;
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+		}
 	}
 }

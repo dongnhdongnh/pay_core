@@ -272,7 +272,40 @@ namespace Vakapay.EthereumBusiness
 		}
 		public ReturnObject GetBlockNumber()
 		{
-			return EthereumSendRPC(EthereumRPCList.RPCName.eth_blockNumber);
+
+			try
+			{
+				var _result = EthereumSendRPC(EthereumRPCList.RPCName.eth_blockNumber);
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				else
+				{
+					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+					int _blockNumber = -1;
+					if (!_getter.result.ToString().HexToInt(out _blockNumber))
+					{
+						throw new Exception("cant get int from hex");
+					}
+					return new ReturnObject
+					{
+						Status = Status.StatusCompleted,
+						Data = _blockNumber.ToString()
+					};
+				}
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+			//return 
 		}
 
 	}

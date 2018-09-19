@@ -11,7 +11,7 @@ namespace Vakapay.BlockchainBusiness
 		public string value;
 		public string hash;
 		public string blockHash;
-		public int blockNumber;
+		public string blockNumber;
 		public string transactionIndex;
 		public string gas;
 		public string gasPrice;

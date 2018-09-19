@@ -389,5 +389,10 @@ namespace Vakapay.Repositories.Mysql
                 throw e;
             }
         }
-    }
+
+		public List<BlockchainTransaction> FindTransactionsInProcess()
+		{
+			throw new NotImplementedException();
+		}
+	}
 }
