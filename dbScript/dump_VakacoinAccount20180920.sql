@@ -35,6 +35,7 @@ CREATE TABLE `vakacoinaccount` (
   `OwnerPublicKey` varchar(60) DEFAULT NULL,
   `ActivePrivateKey` varchar(60) DEFAULT NULL,
   `ActivePublicKey` varchar(60) DEFAULT NULL,
+  `Password` varchar(60) DEFAULT NULL,
   
   PRIMARY KEY (`Id`)
 )

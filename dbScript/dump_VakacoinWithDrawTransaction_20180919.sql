@@ -19,10 +19,10 @@
 -- Table structure for table `VakacoinWithDrawTransaction`
 --
 
-DROP TABLE IF EXISTS `VakacoinWithDrawTransaction`;
+DROP TABLE IF EXISTS `vakacoinwithdrawtransaction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `VakacoinWithDrawTransaction` (
+CREATE TABLE `vakacoinwithdrawtransaction` (
   `Id` varchar(200) NOT NULL,
   `TrxId` varchar(100) DEFAULT NULL,
   `Hash` varchar(100) DEFAULT NULL,
