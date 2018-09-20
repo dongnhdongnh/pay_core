@@ -68,7 +68,7 @@ namespace Vakapay.Commons.Helpers
 			StringBuilder whereStr = new StringBuilder("");
 
 			int count = 0;
-			foreach (var prop in whereValue)
+			foreach (var prop in updateValue)
 			{
 				if (prop.Value != null)
 				{

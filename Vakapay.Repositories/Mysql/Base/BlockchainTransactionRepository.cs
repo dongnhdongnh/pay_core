@@ -118,6 +118,7 @@ namespace Vakapay.Repositories.Mysql
 
 		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
 		{
+			Console.WriteLine("LockForProcess");
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "1");
@@ -158,7 +159,7 @@ namespace Vakapay.Repositories.Mysql
 
 		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
 		{
-
+			Console.WriteLine("ReleaseLock");
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "0");
@@ -200,6 +201,7 @@ namespace Vakapay.Repositories.Mysql
 
 		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
 		{
+			Console.WriteLine("SafeUpdate");
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "0");
