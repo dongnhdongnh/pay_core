@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Vakapay.BlockchainBusiness
+namespace Vakapay.Models.Domains
 {
 	public abstract class IBlockInfor<TTransactionInfor> where TTransactionInfor : ITransactionInfor
 	{

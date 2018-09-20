@@ -12,9 +12,6 @@
     <None Remove="Vakapay.Commons\obj\Debug\netcoreapp2.1\Vakapay.Commons.assets.cache" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Domains\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Vakapay.Commons\Vakapay.Commons.csproj" />
   </ItemGroup>
 </Project>

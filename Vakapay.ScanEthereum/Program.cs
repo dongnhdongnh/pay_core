@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading;
-using Vakapay.BlockchainBusiness;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -36,16 +36,16 @@ namespace Vakapay.ScanEthereum
 				//while (true)
 				{
 
-					Console.WriteLine("Start Send Ethereum....");
+					Console.WriteLine("==========Start Scan Ethereum==========");
 
 					var rpc = new EthereumRpc("http://localhost:9900");
 
 					var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
-					var resultSend = ethereumBusiness.ScanBlockAsyn<EthereumWithdrawTransaction, ETHBlockInfor, ETHTransaction>(NetworkName.ETH, WalletBusiness, ethereumRepo, rpc);
+					var resultSend = ethereumBusiness.ScanBlockAsyn<EthereumWithdrawTransaction, ETHEntities.ETHBlockInfor, ETHEntities.ETHTransaction>(NetworkName.ETH, WalletBusiness, ethereumRepo, rpc);
 					Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
 
-					Console.WriteLine("Send Ethereum End...");
+					Console.WriteLine("==========Scan Ethereum End==========");
 					Thread.Sleep(100000);
 				}
 			}
@@ -58,11 +58,5 @@ namespace Vakapay.ScanEthereum
 		}
 	}
 
-	public class ETHBlockInfor : IBlockInfor<ETHTransaction>
-	{
 
-	}
-
-	public class ETHTransaction : ITransactionInfor
-	{ }
 }
