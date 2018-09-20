@@ -144,7 +144,36 @@ namespace Vakapay.EthereumBusiness
 
 		public ReturnObject CreateNewAddress(string password)
 		{
-			return EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
+			try
+			{
+				ReturnObject _result = EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
+				Console.WriteLine(_result);
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				else
+				{
+					//	Console.WriteLine();
+					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+					return new ReturnObject
+					{
+						Status = Status.StatusCompleted,
+						Data = _getter.result.ToString()
+					};
+				}
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+
 		}
 
 		public ReturnObject CreateNewAddress()

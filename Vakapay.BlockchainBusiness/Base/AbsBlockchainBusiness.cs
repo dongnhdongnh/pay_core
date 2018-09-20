@@ -167,14 +167,14 @@ namespace Vakapay.BlockchainBusiness.Base
 
 				var result = await repoQuery.InsertAddress(address, walletId, other);
 				//
-				if (result.Status == Status.StatusError)
-				{
-					return new ReturnObject
-					{
-						Status = Status.StatusSuccess,
-						Message = "Cannot Insert Address"
-					};
-				}
+				//if (result.Status == Status.StatusError)
+				//{
+				//	return new ReturnObject
+				//	{
+				//		Status = Status.StatusSuccess,
+				//		Message = "Cannot Insert Address"
+				//	};
+				//}
 
 				return new ReturnObject
 				{

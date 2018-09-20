@@ -35,11 +35,15 @@ namespace Vakapay.UnitTest
 					{
 						ConnectionString = ETHBusinessTest.ConnectionString
 					};
-
+					Console.WriteLine("MAKE NEW");
 					_PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 				}
 				return _PersistenceFactory;
 
+			}
+			set
+			{
+				this._PersistenceFactory = value;
 			}
 		}
 		const String RPCEndpoint = "http://localhost:9900";
@@ -48,13 +52,20 @@ namespace Vakapay.UnitTest
 		[Test]
 		public void CreateNewAddress()
 		{
+			Console.WriteLine("WTF");
+			var repositoryConfig = new RepositoryConfiguration
+			{
+				ConnectionString = ETHBusinessTest.ConnectionString
+			};
+			Console.WriteLine("MAKE NEW");
+			PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 			var connection = PersistenceFactory.GetDbConnection();
 			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
 			var ethAddressRepos = PersistenceFactory.GetEthereumAddressRepository(connection);
 			string walletID = CommonHelper.RandomString(15);
 			string pass = CommonHelper.RandomString(15);
 			var outPut = _ethBus.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, RPCClass, walletID, pass);
-			Console.WriteLine(JsonHelper.SerializeObject(outPut));
+			//			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}
 
