@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -12,6 +13,9 @@ namespace Vakapay.Repositories.Mysql
 {
     public class VakacoinAccountRepository : MysqlBaseConnection, IVakacoinAccountRepository
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private const string TableName = "vakacoinaccount";
+        
         public VakacoinAccountRepository(string connectionString) : base(connectionString)
         {
         }
@@ -60,9 +64,23 @@ namespace Vakapay.Repositories.Mysql
             throw new System.NotImplementedException();
         }
 
-        public VakacoinAccount FindByAddress(string address)
+        public VakacoinAccount FindByAddress(string address) //FindByAccountName
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                const string sQuery = "SELECT * FROM " + TableName + " WHERE AccountName = @AC";
+                var result = Connection.QuerySingleOrDefault<VakacoinAccount>(sQuery, new {AC = address});
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("Find Vakacoin Account by AccountName Fail =>> fail: " + e.Message);
+                throw;
+            }
+            
         }
 
         public Task<ReturnObject> InsertAddress(string address, string walletId, string other)

@@ -313,7 +313,7 @@ namespace Vakapay.VakacoinBusiness
 
         public ReturnObject CreateNewAddress(string privateKey, string publicKey)
         {
-            throw new NotImplementedException();
+            return CreateRandomAccount(publicKey);
         }
 
         public ReturnObject SendRawTransaction(string data)
@@ -323,7 +323,7 @@ namespace Vakapay.VakacoinBusiness
 
         public ReturnObject GetBalance(string address)
         {
-            throw new NotImplementedException();
+            return GetCurrencyBalance(address);
         }
 
         public ReturnObject SignTransaction(string privateKey, object[] transactionData)
@@ -338,12 +338,21 @@ namespace Vakapay.VakacoinBusiness
         /// <returns></returns>
         public async Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
         {
-            var transaction = (VakacoinTransaction) blockchainTransaction;
-            
-            var senderInfo = AccountRepository.FindByAddress(blockchainTransaction.FromAddress);
-            
-            return await SendTransactionAsync(transaction.FromAddress, transaction.ToAddress,
-                transaction.GetStringAmount(), transaction.Memo, senderInfo.GetSecret());
+            try
+            {
+                var transaction = (VakacoinTransaction) blockchainTransaction;
+
+                var senderInfo = AccountRepository.FindByAddress(blockchainTransaction.FromAddress);
+
+                return await SendTransactionAsync(transaction.FromAddress, transaction.ToAddress,
+                    transaction.GetStringAmount(), transaction.Memo, senderInfo.GetSecret());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                Logger.Error(e);
+                return null;
+            }
         }
 
         public ReturnObject GetBlockByNumber(int blockNumber)

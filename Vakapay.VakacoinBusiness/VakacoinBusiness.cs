@@ -24,7 +24,7 @@ namespace Vakapay.VakacoinBusiness
             VakacoinDepositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
         }
         
-        public void SetAccountRepositotyForRpc(VakacoinRPC rpc)
+        public void SetAccountRepositoryForRpc(VakacoinRPC rpc)
         {
             rpc.AccountRepository = (VakacoinAccountRepository) VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
         }
