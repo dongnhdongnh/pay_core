@@ -26,7 +26,7 @@ namespace Vakapay.Repositories.Mysql.Base
                     Connection.Open();
                 var result = Connection.Update(objectUpdate);
                 var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
-                Logger.Debug( GetClassName() + " =>> insert status: " + status);
+                Logger.Debug( GetClassName() + " =>> update status: " + status);
                 return new ReturnObject
                 {
                     Status = status,
@@ -40,7 +40,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
-                    Message = "Cannot insert: " + e.Message,
+                    Message = "Cannot update: " + e.Message,
                     Data = ""
                 };
             }
@@ -55,15 +55,22 @@ namespace Vakapay.Repositories.Mysql.Base
 
                 var result = Connection.Delete(FindById(Id));
                 var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+                Logger.Debug( GetClassName() + " =>> Delete status: " + status);
                 return new ReturnObject
                 {
                     Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+                    Message = status == Status.StatusError ? "Cannot delete" : "Delete Success"
                 };
             }
             catch (Exception e)
             {
-                throw e;
+                Logger.Error( GetClassName() + " =>> Delete fail: " + e.Message);
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = "Cannot delete: " + e.Message,
+                    Data = ""
+                };
             }
         }
 
@@ -75,6 +82,7 @@ namespace Vakapay.Repositories.Mysql.Base
                     Connection.Open();
                 var result = Connection.InsertTask<string, TModel>(objectInsert);
                 var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+                Logger.Debug( GetClassName() + " =>> insert status: " + status);
                 return new ReturnObject
                 {
                     Status = status,
@@ -125,7 +133,7 @@ namespace Vakapay.Repositories.Mysql.Base
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
         }
     }
