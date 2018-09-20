@@ -10,11 +10,11 @@ namespace Vakapay.Repositories.Mysql.Base
 {
 	public abstract class MySqlBaseRepository<TModel> : MysqlBaseConnection, IRepositoryBase<TModel>
 	{
-		public MySqlBaseRepository(string connectionString) : base(connectionString, typeof(TModel).Name)
+		public MySqlBaseRepository(string connectionString) : base(connectionString, typeof(TModel).Name.ToLower())
 		{
 		}
 
-		public MySqlBaseRepository(IDbConnection dbConnection) : base(dbConnection, typeof(TModel).Name)
+		public MySqlBaseRepository(IDbConnection dbConnection) : base(dbConnection, typeof(TModel).Name.ToLower())
 		{
 		}
 
