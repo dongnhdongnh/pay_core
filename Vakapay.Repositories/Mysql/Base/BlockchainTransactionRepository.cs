@@ -118,9 +118,14 @@ namespace Vakapay.Repositories.Mysql
 
 		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
 		{
+			var _setQuery = new Dictionary<string, string>();
+			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
+			_setQuery.Add(nameof(transaction.InProcess), "1");
 			var _updateQuery = new Dictionary<string, string>();
 			_updateQuery.Add(nameof(transaction.Id), transaction.Id);
-			return this.ExcuteSQL(SqlHelper.Query_Update(TableName, transaction, _updateQuery));
+			_updateQuery.Add(nameof(transaction.Version), transaction.Version.ToString());
+			_updateQuery.Add(nameof(transaction.InProcess), "0");
+			return this.ExcuteSQL(SqlHelper.Query_Update(TableName, _setQuery, _updateQuery));
 
 			//try
 			//{
