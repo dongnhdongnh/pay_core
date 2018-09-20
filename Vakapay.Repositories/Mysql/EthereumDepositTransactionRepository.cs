@@ -12,7 +12,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumDepositTransactionRepository : MySqlBaseRepository<EthereumDepositTransaction>, IEthereumDepositTransactionRepository
+	public class EthereumDepositTransactionRepository : BlockchainTransactionRepository<EthereumDepositTransaction>, IEthereumDepositTransactionRepository
 	{
 		public EthereumDepositTransactionRepository(string connectionString) : base(connectionString)
 		{
@@ -97,49 +97,49 @@ namespace Vakapay.Repositories.Mysql
 //		}
 
 
-		public BlockchainTransaction FindTransactionPending()
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<BlockchainTransaction> FindTransactionsPending()
-		{
-			throw new NotImplementedException();
-		}
-
-		public BlockchainTransaction FindTransactionError()
-		{
-			throw new NotImplementedException();
-		}
-
-		public BlockchainTransaction FindTransactionByStatus(string status)
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<BlockchainTransaction> FindTransactionsInProcess()
-		{
-			throw new NotImplementedException();
-		}
+//		public BlockchainTransaction FindTransactionPending()
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<BlockchainTransaction> FindTransactionsPending()
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public BlockchainTransaction FindTransactionError()
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public BlockchainTransaction FindTransactionByStatus(string status)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<BlockchainTransaction> FindTransactionsInProcess()
+//		{
+//			throw new NotImplementedException();
+//		}
 	}
 }

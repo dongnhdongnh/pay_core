@@ -12,7 +12,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class BitcoinDepositTransactionRepository : MySqlBaseRepository<BitcoinDepositTransaction>,
+    public class BitcoinDepositTransactionRepository : BlockchainTransactionRepository<BitcoinDepositTransaction>,
         IBitcoinDepositTransactionRepository
     {
 //        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -197,79 +197,79 @@ namespace Vakapay.Repositories.Mysql
 //        }
 
 
-        public BlockchainTransaction FindTransactionPending()
-        {
-            return new BitcoinDepositTransaction();
-        }
-
-        public List<BlockchainTransaction> FindTransactionsPending()
-        {
-            throw new NotImplementedException();
-        }
-
-        public BlockchainTransaction FindTransactionError()
-        {
-            throw new NotImplementedException();
-        }
-
-        public BlockchainTransaction FindTransactionByStatus(string status)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                string sqlCommand = "Update " + TableName +
-                                    " Set Version = Version + 1, OnProcess = 1 Where Id = @ID and Version = @VERSION";
-
-                var update = Connection.Execute(sqlCommand, new {ID = transaction.Id, VERSION = transaction.Version});
-                if (update == 1)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusSuccess,
-                        Message = "Update Success",
-                    };
-                }
-
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = "Update Fail",
-                };
-            }
-            catch (Exception e)
-            {
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = e.ToString()
-                };
-            }
-        }
-
-        public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
-        {
-            throw new NotImplementedException();
-        }
-
-		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<BlockchainTransaction> FindTransactionsInProcess()
-		{
-			throw new NotImplementedException();
-		}
+//        public BlockchainTransaction FindTransactionPending()
+//        {
+//            return new BitcoinDepositTransaction();
+//        }
+//
+//        public List<BlockchainTransaction> FindTransactionsPending()
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//        public BlockchainTransaction FindTransactionError()
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//        public BlockchainTransaction FindTransactionByStatus(string status)
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//        public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//                string sqlCommand = "Update " + TableName +
+//                                    " Set Version = Version + 1, OnProcess = 1 Where Id = @ID and Version = @VERSION";
+//
+//                var update = Connection.Execute(sqlCommand, new {ID = transaction.Id, VERSION = transaction.Version});
+//                if (update == 1)
+//                {
+//                    return new ReturnObject
+//                    {
+//                        Status = Status.StatusSuccess,
+//                        Message = "Update Success",
+//                    };
+//                }
+//
+//                return new ReturnObject
+//                {
+//                    Status = Status.StatusError,
+//                    Message = "Update Fail",
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                return new ReturnObject
+//                {
+//                    Status = Status.StatusError,
+//                    Message = e.ToString()
+//                };
+//            }
+//        }
+//
+//        public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//        public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<BlockchainTransaction> FindTransactionsInProcess()
+//		{
+//			throw new NotImplementedException();
+//		}
 	}
 }

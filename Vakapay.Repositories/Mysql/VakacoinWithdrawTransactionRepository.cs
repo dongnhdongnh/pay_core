@@ -15,7 +15,7 @@ using Vakapay.Repositories.Mysql.Base;
 namespace Vakapay.Repositories.Mysql
 {
 
-	public class VakacoinWithdrawTransactionRepository : MySqlBaseRepository<VakacoinWithdrawTransaction>, IVakacoinWithdrawTransactionRepository
+	public class VakacoinWithdrawTransactionRepository : BlockchainTransactionRepository<VakacoinWithdrawTransaction>, IVakacoinWithdrawTransactionRepository
 	{
 //		String TableName = "vakapay.vakacoinwithdrawtransaction";
 		public string Query_Search(Dictionary<string, string> whereValue)
@@ -195,41 +195,41 @@ namespace Vakapay.Repositories.Mysql
 				};
 			}
 		}
-
-		public BlockchainTransaction FindTransactionPending()
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<BlockchainTransaction> FindTransactionsPending()
-		{
-			throw new NotImplementedException();
-		}
-
-		public BlockchainTransaction FindTransactionError()
-		{
-			throw new NotImplementedException();
-		}
-
-		public BlockchainTransaction FindTransactionByStatus(string status)
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
-		{
-			throw new NotImplementedException();
-		}
+//
+//		public BlockchainTransaction FindTransactionPending()
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<BlockchainTransaction> FindTransactionsPending()
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public BlockchainTransaction FindTransactionError()
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public BlockchainTransaction FindTransactionByStatus(string status)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
+//		{
+//			throw new NotImplementedException();
+//		}
 
 		public object GetTransaction()
 		{
@@ -249,16 +249,16 @@ namespace Vakapay.Repositories.Mysql
 			MySqlTransaction _transaction = (MySqlTransaction)transaction;
 			_transaction.Rollback();
 		}
-
-		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<BlockchainTransaction> FindTransactionsInProcess()
-		{
-			throw new NotImplementedException();
-		}
+//
+//		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<BlockchainTransaction> FindTransactionsInProcess()
+//		{
+//			throw new NotImplementedException();
+//		}
 	}
 
 }
