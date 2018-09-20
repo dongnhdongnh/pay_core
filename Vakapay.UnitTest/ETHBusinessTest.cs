@@ -50,7 +50,7 @@ namespace Vakapay.UnitTest
 		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 		Vakapay.EthereumBusiness.EthereumBusiness _ethBus;
 		[Test]
-		public void CreateNewAddress()
+		public async System.Threading.Tasks.Task CreateNewAddressAsync()
 		{
 			Console.WriteLine("WTF");
 			var repositoryConfig = new RepositoryConfiguration
@@ -64,7 +64,7 @@ namespace Vakapay.UnitTest
 			var ethAddressRepos = PersistenceFactory.GetEthereumAddressRepository(connection);
 			string walletID = CommonHelper.RandomString(15);
 			string pass = CommonHelper.RandomString(15);
-			var outPut = _ethBus.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, RPCClass, walletID, pass);
+			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, RPCClass, walletID, pass);
 			//			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}

@@ -36,30 +36,30 @@ namespace Vakapay.Repositories.Mysql
 		//			throw new System.NotImplementedException();
 		//		}
 		//
-		public ReturnObject Insert1Async(EthereumAddress objectInsert)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.InsertTask<string, EthereumAddress>(objectInsert);
-				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-				};
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine("FAIL" + e.ToString());
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.ToString()
-				};
-			}
-		}
+		//public ReturnObject Insert1Async(EthereumAddress objectInsert)
+		//{
+		//	try
+		//	{
+		//		if (Connection.State != ConnectionState.Open)
+		//			Connection.Open();
+		//		var result = Connection.InsertTask<string, EthereumAddress>(objectInsert);
+		//		var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+		//		return new ReturnObject
+		//		{
+		//			Status = status,
+		//			Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+		//		};
+		//	}
+		//	catch (Exception e)
+		//	{
+		//		Console.WriteLine("FAIL" + e.ToString());
+		//		return new ReturnObject
+		//		{
+		//			Status = Status.StatusError,
+		//			Message = e.ToString()
+		//		};
+		//	}
+		//}
 		//
 		//		public EthereumAddress FindById(string Id)
 		//		{
@@ -85,10 +85,11 @@ namespace Vakapay.Repositories.Mysql
 				WalletId = walletId,
 				Password = other,
 				CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
-				UpdatedAt = (int)CommonHelper.GetUnixTimestamp()
+				UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
+				Status = Status.StatusActive
 			};
 
-			return Task.Run(() => this.Insert1Async(insertObject));
+			return Task.Run(() => this.Insert(insertObject));
 			//return new Task() { };
 			//throw new NotImplementedException();
 		}
