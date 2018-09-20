@@ -14,7 +14,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class BitcoinRawTransactionRepository : MysqlBaseConnection,
+    public class BitcoinRawTransactionRepository : MySqlBaseRepository<BitcoinWithdrawTransaction>,
         IBitcoinRawTransactionRepository
     {
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -29,7 +29,7 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        private const string TableName = "bitcoinwithdrawtransaction";
+//        private const string TableName = "bitcoinwithdrawtransaction";
 
         public string QuerySearch(Dictionary<string, string> models)
         {
@@ -72,100 +72,100 @@ namespace Vakapay.Repositories.Mysql
 
             return output;
         }
-
-        public ReturnObject Update(BitcoinWithdrawTransaction objectUpdate)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var isSuccess = Connection.Update(objectUpdate);
-                var status = !string.IsNullOrEmpty(isSuccess.ToString()) ? Status.StatusSuccess : Status.StatusError;
-                logger.Debug("BitcoinRawTransactionRepository =>> insert status: " + status);
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot Update" : "Update Success",
-                    Data = ""
-                };
-            }
-            catch (Exception e)
-            {
-                logger.Error("BitcoinRawTransactionRepository =>> update fail: " + e.Message);
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = "Cannot update: " + e.Message,
-                    Data = ""
-                };
-            }
-        }
-
-        public ReturnObject Delete(string id)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var result = Connection.Delete(new BitcoinWithdrawTransaction {Id = id});
-                var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-                };
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-        public ReturnObject Insert(BitcoinWithdrawTransaction objectInsert)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-
-                var result = Connection.InsertTask<string, BitcoinWithdrawTransaction>(objectInsert);
-                var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
-                    Data = result
-                };
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-
-        public BitcoinWithdrawTransaction FindById(string id)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var sQuery = "SELECT * FROM " + TableName + " WHERE Id = @ID";
-
-                var result = Connection.QuerySingleOrDefault<BitcoinWithdrawTransaction>(sQuery, new {ID = id});
-
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
+//
+//        public ReturnObject Update(BitcoinWithdrawTransaction objectUpdate)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                var isSuccess = Connection.Update(objectUpdate);
+//                var status = !string.IsNullOrEmpty(isSuccess.ToString()) ? Status.StatusSuccess : Status.StatusError;
+//                logger.Debug("BitcoinRawTransactionRepository =>> insert status: " + status);
+//                return new ReturnObject
+//                {
+//                    Status = status,
+//                    Message = status == Status.StatusError ? "Cannot Update" : "Update Success",
+//                    Data = ""
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                logger.Error("BitcoinRawTransactionRepository =>> update fail: " + e.Message);
+//                return new ReturnObject
+//                {
+//                    Status = Status.StatusError,
+//                    Message = "Cannot update: " + e.Message,
+//                    Data = ""
+//                };
+//            }
+//        }
+//
+//        public ReturnObject Delete(string id)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                var result = Connection.Delete(new BitcoinWithdrawTransaction {Id = id});
+//                var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
+//                return new ReturnObject
+//                {
+//                    Status = status,
+//                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
+//
+//        public ReturnObject Insert(BitcoinWithdrawTransaction objectInsert)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//
+//                var result = Connection.InsertTask<string, BitcoinWithdrawTransaction>(objectInsert);
+//                var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//                return new ReturnObject
+//                {
+//                    Status = status,
+//                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
+//                    Data = result
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
+//
+//
+//        public BitcoinWithdrawTransaction FindById(string id)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                var sQuery = "SELECT * FROM " + TableName + " WHERE Id = @ID";
+//
+//                var result = Connection.QuerySingleOrDefault<BitcoinWithdrawTransaction>(sQuery, new {ID = id});
+//
+//
+//                return result;
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
 
         public List<BitcoinWithdrawTransaction> FindWhere(BitcoinWithdrawTransaction rawtransaction)
         {
@@ -194,22 +194,22 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public List<BitcoinWithdrawTransaction> FindBySql(string sqlString)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var result = Connection.Query<BitcoinWithdrawTransaction>(sqlString);
-
-                return result.ToList();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
+//        public List<BitcoinWithdrawTransaction> FindBySql(string sqlString)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                var result = Connection.Query<BitcoinWithdrawTransaction>(sqlString);
+//
+//                return result.ToList();
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
 
         public ReturnObject ExcuteSQL(string sqlString)
         {

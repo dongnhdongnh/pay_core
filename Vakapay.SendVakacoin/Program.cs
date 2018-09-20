@@ -51,11 +51,12 @@ namespace Vakapay.SendVakacoin
                     Console.WriteLine("Start Send Vakacoin...");
                         
                     var rpc = new VakacoinRPC("http://127.0.0.1:8000");
+                    
+                    business.SetAccountRepositoryForRpc(rpc);
 
                     var repo = repoFactory.GetVakacoinWithdrawTransactionRepository(connection);
                     var resultSend = business.SendTransactionAsync(repo, rpc, "");
                     Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
-                
                     
                     Console.WriteLine("Send Vakacoin End...");
                     Thread.Sleep(1000);

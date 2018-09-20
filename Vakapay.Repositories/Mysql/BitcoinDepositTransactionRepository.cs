@@ -12,12 +12,12 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class BitcoinDepositTransactionRepository : MysqlBaseConnection,
+    public class BitcoinDepositTransactionRepository : MySqlBaseRepository<BitcoinDepositTransaction>,
         IBitcoinDepositTransactionRepository
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private const string TableName = "bitcoindeposittransaction";
-
+//        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+//        private const string TableName = "bitcoindeposittransaction";
+//
         public BitcoinDepositTransactionRepository(string connectionString) : base(connectionString)
         {
         }
@@ -25,87 +25,87 @@ namespace Vakapay.Repositories.Mysql
         public BitcoinDepositTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
         {
         }
-
-
-        public ReturnObject Update(BitcoinDepositTransaction objectUpdate)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                var isSuccess = Connection.Update(objectUpdate);
-                var status = !string.IsNullOrEmpty(isSuccess.ToString()) ? Status.StatusSuccess : Status.StatusError;
-                Logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = status == Status.StatusError ? "Cannot Update" : "Update Success",
-                    Data = ""
-                };
-            }
-            catch (Exception e)
-            {
-                Logger.Error("BitcoinDepositTransactioRepository =>> update fail: " + e.Message);
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = "Cannot insert: " + e.Message,
-                    Data = ""
-                };
-            }
-        }
-
-        public ReturnObject Delete(string id)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var result = Connection.Delete(new BitcoinDepositTransaction {Id = id});
-                var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
-                };
-            }
-            catch (Exception e)
-            {
-                Logger.Error("BitcoinDepositTransactioRepository =>> Delete fail: " + e.Message);
-                throw;
-            }
-        }
-
-        public ReturnObject Insert(BitcoinDepositTransaction objectInsert)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-
-                var result = Connection.InsertTask<string, BitcoinDepositTransaction>(objectInsert);
-                var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-                Logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
-                    Data = result
-                };
-            }
-            catch (Exception e)
-            {
-                Logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = "Cannot insert: " + e.Message,
-                    Data = ""
-                };
-            }
-        }
+//
+//
+//        public ReturnObject Update(BitcoinDepositTransaction objectUpdate)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//                var isSuccess = Connection.Update(objectUpdate);
+//                var status = !string.IsNullOrEmpty(isSuccess.ToString()) ? Status.StatusSuccess : Status.StatusError;
+//                Logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
+//                return new ReturnObject
+//                {
+//                    Status = Status.StatusError,
+//                    Message = status == Status.StatusError ? "Cannot Update" : "Update Success",
+//                    Data = ""
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                Logger.Error("BitcoinDepositTransactioRepository =>> update fail: " + e.Message);
+//                return new ReturnObject
+//                {
+//                    Status = Status.StatusError,
+//                    Message = "Cannot insert: " + e.Message,
+//                    Data = ""
+//                };
+//            }
+//        }
+//
+//        public ReturnObject Delete(string id)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                var result = Connection.Delete(new BitcoinDepositTransaction {Id = id});
+//                var status = !string.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
+//                return new ReturnObject
+//                {
+//                    Status = status,
+//                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                Logger.Error("BitcoinDepositTransactioRepository =>> Delete fail: " + e.Message);
+//                throw;
+//            }
+//        }
+//
+//        public ReturnObject Insert(BitcoinDepositTransaction objectInsert)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//
+//                var result = Connection.InsertTask<string, BitcoinDepositTransaction>(objectInsert);
+//                var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//                Logger.Debug("BitcoinDepositTransactioRepository =>> insert status: " + status);
+//                return new ReturnObject
+//                {
+//                    Status = status,
+//                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success",
+//                    Data = result
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                Logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
+//                return new ReturnObject
+//                {
+//                    Status = Status.StatusError,
+//                    Message = "Cannot insert: " + e.Message,
+//                    Data = ""
+//                };
+//            }
+//        }
 
         public List<BitcoinDepositTransaction> FindWhere(BitcoinDepositTransaction bitcoinDepositTransaction)
         {
@@ -157,44 +157,44 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public BitcoinDepositTransaction FindById(string id)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var sQuery = "SELECT * FROM " + TableName + " WHERE Id = @ID";
-
-                var result = Connection.QuerySingleOrDefault<BitcoinDepositTransaction>(sQuery, new {ID = id});
-
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                Logger.Error("BitcoinDepositTransactioRepository =>> FindById fail: " + e.Message);
-                return null;
-            }
-        }
-
-        public List<BitcoinDepositTransaction> FindBySql(string sqlString)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var result = Connection.Query<BitcoinDepositTransaction>(sqlString);
-
-                return result.ToList();
-            }
-            catch (Exception e)
-            {
-                Logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
-                return null;
-            }
-        }
+//        public BitcoinDepositTransaction FindById(string id)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                var sQuery = "SELECT * FROM " + TableName + " WHERE Id = @ID";
+//
+//                var result = Connection.QuerySingleOrDefault<BitcoinDepositTransaction>(sQuery, new {ID = id});
+//
+//
+//                return result;
+//            }
+//            catch (Exception e)
+//            {
+//                Logger.Error("BitcoinDepositTransactioRepository =>> FindById fail: " + e.Message);
+//                return null;
+//            }
+//        }
+//
+//        public List<BitcoinDepositTransaction> FindBySql(string sqlString)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                var result = Connection.Query<BitcoinDepositTransaction>(sqlString);
+//
+//                return result.ToList();
+//            }
+//            catch (Exception e)
+//            {
+//                Logger.Error("BitcoinDepositTransactioRepository =>> insert fail: " + e.Message);
+//                return null;
+//            }
+//        }
 
 
         public BlockchainTransaction FindTransactionPending()

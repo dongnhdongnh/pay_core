@@ -12,7 +12,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class VakacoinDepositTransactionRepository : MysqlBaseConnection, IVakacoinDepositTransactionRepository
+	public class VakacoinDepositTransactionRepository : MySqlBaseRepository<VakacoinDepositTransaction>, IVakacoinDepositTransactionRepository
 	{
 		public VakacoinDepositTransactionRepository(string connectionString) : base(connectionString)
 		{
@@ -22,79 +22,79 @@ namespace Vakapay.Repositories.Mysql
 		{
 		}
 
-		public ReturnObject Delete(string Id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public VakacoinDepositTransaction FindById(string Id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<VakacoinDepositTransaction> FindBySql(string sqlString)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Query<VakacoinDepositTransaction>(sqlString).ToList();
-
-				return result;
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
-
-		public ReturnObject Insert(VakacoinDepositTransaction objectInsert)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.InsertTask<string, VakacoinDepositTransaction>(objectInsert);
-				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-				};
-			}
-			catch (Exception e)
-			{
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-		}
-
-		public ReturnObject Update(VakacoinDepositTransaction objectUpdate)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Update<VakacoinDepositTransaction>(objectUpdate);
-				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
-				};
-			}
-			catch (Exception e)
-			{
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-		}
+//		public ReturnObject Delete(string Id)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public VakacoinDepositTransaction FindById(string Id)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<VakacoinDepositTransaction> FindBySql(string sqlString)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.Query<VakacoinDepositTransaction>(sqlString).ToList();
+//
+//				return result;
+//			}
+//			catch (Exception e)
+//			{
+//				return null;
+//			}
+//		}
+//
+//		public ReturnObject Insert(VakacoinDepositTransaction objectInsert)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.InsertTask<string, VakacoinDepositTransaction>(objectInsert);
+//				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//				return new ReturnObject
+//				{
+//					Status = status,
+//					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+//				};
+//			}
+//			catch (Exception e)
+//			{
+//				return new ReturnObject
+//				{
+//					Status = Status.StatusError,
+//					Message = e.Message
+//				};
+//			}
+//		}
+//
+//		public ReturnObject Update(VakacoinDepositTransaction objectUpdate)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.Update<VakacoinDepositTransaction>(objectUpdate);
+//				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+//				return new ReturnObject
+//				{
+//					Status = status,
+//					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
+//				};
+//			}
+//			catch (Exception e)
+//			{
+//				return new ReturnObject
+//				{
+//					Status = Status.StatusError,
+//					Message = e.Message
+//				};
+//			}
+//		}
 
 
 		public BlockchainTransaction FindTransactionPending()

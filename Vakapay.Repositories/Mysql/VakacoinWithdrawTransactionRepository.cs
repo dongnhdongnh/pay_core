@@ -15,9 +15,9 @@ using Vakapay.Repositories.Mysql.Base;
 namespace Vakapay.Repositories.Mysql
 {
 
-	public class VakacoinWithdrawTransactionRepository : MysqlBaseConnection, IVakacoinWithdrawTransactionRepository
+	public class VakacoinWithdrawTransactionRepository : MySqlBaseRepository<VakacoinWithdrawTransaction>, IVakacoinWithdrawTransactionRepository
 	{
-		String tableName = "vakapay.vakacoinwithdrawtransaction";
+//		String TableName = "vakapay.vakacoinwithdrawtransaction";
 		public string Query_Search(Dictionary<string, string> whereValue)
 		{
 			StringBuilder whereStr = new StringBuilder("");
@@ -33,7 +33,7 @@ namespace Vakapay.Repositories.Mysql
 				}
 			}
 
-			string output = string.Format("SELECT * FROM {0} WHERE {1}", tableName, whereStr);
+			string output = string.Format("SELECT * FROM {0} WHERE {1}", TableName, whereStr);
 			Console.WriteLine(output);
 			return output;
 		}
@@ -70,7 +70,7 @@ namespace Vakapay.Repositories.Mysql
 
 
 
-			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", tableName, updateStr, whereStr);
+			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
 			Console.WriteLine(output);
 			return output;
 		}
@@ -83,81 +83,81 @@ namespace Vakapay.Repositories.Mysql
 		{
 		}
 
-		public ReturnObject Delete(string Id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public VakacoinWithdrawTransaction FindById(string Id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<VakacoinWithdrawTransaction> FindBySql(string sqlString)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Query<VakacoinWithdrawTransaction>(sqlString).ToList();
-
-
-				return result;
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
-
-		public ReturnObject Insert(VakacoinWithdrawTransaction objectInsert)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.InsertTask<string, VakacoinWithdrawTransaction>(objectInsert);
-				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-				};
-			}
-			catch (Exception e)
-			{
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-		}
-
-		public ReturnObject Update(VakacoinWithdrawTransaction objectUpdate)
-		{
-			try
-			{
-			
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Update<VakacoinWithdrawTransaction>(objectUpdate);
-				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
-				};
-			}
-			catch (Exception e)
-			{
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-		}
+//		public ReturnObject Delete(string Id)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public VakacoinWithdrawTransaction FindById(string Id)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<VakacoinWithdrawTransaction> FindBySql(string sqlString)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.Query<VakacoinWithdrawTransaction>(sqlString).ToList();
+//
+//
+//				return result;
+//			}
+//			catch (Exception e)
+//			{
+//				return null;
+//			}
+//		}
+//
+//		public ReturnObject Insert(VakacoinWithdrawTransaction objectInsert)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.InsertTask<string, VakacoinWithdrawTransaction>(objectInsert);
+//				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//				return new ReturnObject
+//				{
+//					Status = status,
+//					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+//				};
+//			}
+//			catch (Exception e)
+//			{
+//				return new ReturnObject
+//				{
+//					Status = Status.StatusError,
+//					Message = e.Message
+//				};
+//			}
+//		}
+//
+//		public ReturnObject Update(VakacoinWithdrawTransaction objectUpdate)
+//		{
+//			try
+//			{
+//			
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.Update<VakacoinWithdrawTransaction>(objectUpdate);
+//				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+//				return new ReturnObject
+//				{
+//					Status = status,
+//					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
+//				};
+//			}
+//			catch (Exception e)
+//			{
+//				return new ReturnObject
+//				{
+//					Status = Status.StatusError,
+//					Message = e.Message
+//				};
+//			}
+//		}
 
 		public ReturnObject ExcuteSQL(string sqlString, object transaction = null)
 		{

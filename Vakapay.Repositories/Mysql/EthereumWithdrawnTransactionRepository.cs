@@ -15,9 +15,9 @@ using Vakapay.Repositories.Mysql.Base;
 namespace Vakapay.Repositories.Mysql
 {
 
-	public class EthereumWithdrawnTransactionRepository : MysqlBaseConnection, IEthereumWithdrawTransactionRepository
+	public class EthereumWithdrawnTransactionRepository : MySqlBaseRepository<EthereumWithdrawTransaction>, IEthereumWithdrawTransactionRepository
 	{
-		String tableName = "vakapay.ethereumwithdrawtransaction";
+//		String TableName = "vakapay.ethereumwithdrawtransaction";
 		public string Query_Search(Dictionary<string, string> whereValue)
 		{
 			StringBuilder whereStr = new StringBuilder("");
@@ -33,7 +33,7 @@ namespace Vakapay.Repositories.Mysql
 				}
 			}
 
-			string output = string.Format("SELECT * FROM {0} WHERE {1}", tableName, whereStr);
+			string output = string.Format("SELECT * FROM {0} WHERE {1}", TableName, whereStr);
 			Console.WriteLine(output);
 			return output;
 		}
@@ -70,7 +70,7 @@ namespace Vakapay.Repositories.Mysql
 
 
 
-			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", tableName, updateStr, whereStr);
+			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
 			Console.WriteLine(output);
 			return output;
 		}
@@ -83,81 +83,81 @@ namespace Vakapay.Repositories.Mysql
 		{
 		}
 
-		public ReturnObject Delete(string Id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public EthereumWithdrawTransaction FindById(string Id)
-		{
-			throw new NotImplementedException();
-		}
-
-		public List<EthereumWithdrawTransaction> FindBySql(string sqlString)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList();
-
-
-				return result;
-			}
-			catch (Exception e)
-			{
-				return null;
-			}
-		}
-
-		public ReturnObject Insert(EthereumWithdrawTransaction objectInsert)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.InsertTask<string, EthereumWithdrawTransaction>(objectInsert);
-				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-				};
-			}
-			catch (Exception e)
-			{
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-		}
-
-		public ReturnObject Update(EthereumWithdrawTransaction objectUpdate)
-		{
-			try
-			{
-				Console.WriteLine("update on res");
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Update<EthereumWithdrawTransaction>(objectUpdate);
-				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
-				};
-			}
-			catch (Exception e)
-			{
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-		}
+//		public ReturnObject Delete(string Id)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public EthereumWithdrawTransaction FindById(string Id)
+//		{
+//			throw new NotImplementedException();
+//		}
+//
+//		public List<EthereumWithdrawTransaction> FindBySql(string sqlString)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList();
+//
+//
+//				return result;
+//			}
+//			catch (Exception e)
+//			{
+//				return null;
+//			}
+//		}
+//
+//		public ReturnObject Insert(EthereumWithdrawTransaction objectInsert)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.InsertTask<string, EthereumWithdrawTransaction>(objectInsert);
+//				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//				return new ReturnObject
+//				{
+//					Status = status,
+//					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+//				};
+//			}
+//			catch (Exception e)
+//			{
+//				return new ReturnObject
+//				{
+//					Status = Status.StatusError,
+//					Message = e.Message
+//				};
+//			}
+//		}
+//
+//		public ReturnObject Update(EthereumWithdrawTransaction objectUpdate)
+//		{
+//			try
+//			{
+//				Console.WriteLine("update on res");
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.Update<EthereumWithdrawTransaction>(objectUpdate);
+//				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+//				return new ReturnObject
+//				{
+//					Status = status,
+//					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
+//				};
+//			}
+//			catch (Exception e)
+//			{
+//				return new ReturnObject
+//				{
+//					Status = Status.StatusError,
+//					Message = e.Message
+//				};
+//			}
+//		}
 
 		public ReturnObject ExcuteSQL(string sqlString, object transaction = null)
 		{
@@ -239,7 +239,7 @@ namespace Vakapay.Repositories.Mysql
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 				Console.WriteLine("FIND TRANSACTION BY STATUS");
-				var sqlString = $"Select * from {tableName} where Status = @status and InProcess = 0";
+				var sqlString = $"Select * from {TableName} where Status = @status and InProcess = 0";
 				var result = Connection.QueryFirstOrDefault<EthereumWithdrawTransaction>(sqlString, new { status = status });
 				return result;
 			}
@@ -256,7 +256,7 @@ namespace Vakapay.Repositories.Mysql
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 				Console.WriteLine("FIND TRANSACTION BY STATUS");
-				var sqlString = $"Select * from {tableName} where Status = @status and InProcess = 0";
+				var sqlString = $"Select * from {TableName} where Status = @status and InProcess = 0";
 				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString, new { status = status }).ToList<BlockchainTransaction>();
 				return result;
 			}
@@ -272,7 +272,7 @@ namespace Vakapay.Repositories.Mysql
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 1 Where Id = @Id and Version = @Version and InProcess = 0";
+				string SqlCommand = "Update " + TableName + " Set Version = Version + 1, InProcess = 1 Where Id = @Id and Version = @Version and InProcess = 0";
 
 				var update = Connection.Execute(SqlCommand, new { Id = transaction.Id, Version = transaction.Version });
 				if (update == 1)
@@ -301,7 +301,7 @@ namespace Vakapay.Repositories.Mysql
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 0 Where Id = @Id and Version = @Version and InProcess = 1";
+				string SqlCommand = "Update " + TableName + " Set Version = Version + 1, InProcess = 0 Where Id = @Id and Version = @Version and InProcess = 1";
 
 				var update = Connection.Execute(SqlCommand, new { Id = transaction.Id, Version = transaction.Version });
 				if (update == 1)
@@ -330,7 +330,7 @@ namespace Vakapay.Repositories.Mysql
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				string SqlCommand = "Update " + tableName + " Set Version = Version + 1, InProcess = 0, Status = @Status, UpdatedAt = @UpdatedAt Where Id = @Id and Version = @Version and InProcess = 1";
+				string SqlCommand = "Update " + TableName + " Set Version = Version + 1, InProcess = 0, Status = @Status, UpdatedAt = @UpdatedAt Where Id = @Id and Version = @Version and InProcess = 1";
 
 				var update = Connection.Execute(SqlCommand, new { Id = transaction.Id, Version = transaction.Version, Status = transaction.Status, UpdatedAt = transaction.UpdatedAt });
 				if (update == 1)
@@ -379,7 +379,7 @@ namespace Vakapay.Repositories.Mysql
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 
-				var sqlString = $"Select * from {tableName} where InProcess = 1";
+				var sqlString = $"Select * from {TableName} where InProcess = 1";
 				var result = Connection.Query<EthereumWithdrawTransaction>(sqlString).ToList<BlockchainTransaction>();
 				return result;
 			}

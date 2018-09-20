@@ -17,7 +17,7 @@ namespace Vakapay.UnitTest
         
         [TestCase("vaka", true)]
         [TestCase("vaka.n.exist", false)]
-        [TestCase("vaka.n.exist.AccountNameTooLong", false)]
+        [TestCase("ERROR", false)]
         [TestCase("vaka.no.exist.account.name.too.long", false)]
         [TestCase("@@@", false)]
         public void CheckAccountExist(string xyz, bool result)

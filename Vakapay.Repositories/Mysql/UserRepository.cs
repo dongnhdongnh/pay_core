@@ -10,10 +10,10 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class UserRepository : MysqlBaseConnection, IUserRepository
+    public class UserRepository : MySqlBaseRepository<User>, IUserRepository
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private const string TableName = "user";
+//        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+//        private const string TableName = "user";
         private const string TableNameWallet = "wallet";
         private const string TableNameBitcoinAddress = "bitcoinaddress";
 
@@ -25,30 +25,30 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        public ReturnObject Update(User objectUpdate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ReturnObject Delete(string id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public ReturnObject Insert(User objectInsert)
-        {
-            throw new NotImplementedException();
-        }
-
-        public User FindById(string id)
-        {
-            return new User();
-        }
-
-        public List<User> FindBySql(string sqlString)
-        {
-            throw new NotImplementedException();
-        }
+//        public ReturnObject Update(User objectUpdate)
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//        public ReturnObject Delete(string id)
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//        public ReturnObject Insert(User objectInsert)
+//        {
+//            throw new NotImplementedException();
+//        }
+//
+//        public User FindById(string id)
+//        {
+//            return new User();
+//        }
+//
+//        public List<User> FindBySql(string sqlString)
+//        {
+//            throw new NotImplementedException();
+//        }
 
         public string FindEmailByBitcoinAddress(string bitcoinAddress)
         {

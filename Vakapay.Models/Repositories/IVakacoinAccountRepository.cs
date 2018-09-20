@@ -5,6 +5,6 @@ namespace Vakapay.Models.Repositories
 {
     public interface IVakacoinAccountRepository : IRepositoryBase<VakacoinAccount>, IAddressRepository<VakacoinAccount>
     {
-        
+        VakacoinAccount FindByAccountName(string accountName);
     }
 }

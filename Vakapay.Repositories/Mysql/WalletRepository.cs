@@ -11,7 +11,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class WalletRepository : MysqlBaseConnection, IWalletRepository
+    public class WalletRepository : MySqlBaseRepository<Wallet>, IWalletRepository
     {
         public WalletRepository(string connectionString) : base(connectionString)
         {
@@ -21,68 +21,68 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        public ReturnObject Update(Wallet objectUpdate)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public ReturnObject Delete(string Id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public ReturnObject Insert(Wallet objectInsert)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                var result = Connection.InsertTask<string, Wallet>(objectInsert);
-                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-                };
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-        public Wallet FindById(string Id)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                string sQuery = "SELECT * FROM wallet WHERE Id = @ID";
-                var result = Connection.QuerySingleOrDefault<Wallet>(sQuery, new {ID = Id});
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
-        public List<Wallet> FindBySql(string sqlString)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                var result = Connection.Query<Wallet>(sqlString);
-                return result.ToList();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
+//        public ReturnObject Update(Wallet objectUpdate)
+//        {
+//            throw new System.NotImplementedException();
+//        }
+//
+//        public ReturnObject Delete(string Id)
+//        {
+//            throw new System.NotImplementedException();
+//        }
+//
+//        public ReturnObject Insert(Wallet objectInsert)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//                var result = Connection.InsertTask<string, Wallet>(objectInsert);
+//                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//                return new ReturnObject
+//                {
+//                    Status = status,
+//                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
+//
+//        public Wallet FindById(string Id)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                string sQuery = "SELECT * FROM wallet WHERE Id = @ID";
+//                var result = Connection.QuerySingleOrDefault<Wallet>(sQuery, new {ID = Id});
+//
+//                return result;
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
+//
+//        public List<Wallet> FindBySql(string sqlString)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//                var result = Connection.Query<Wallet>(sqlString);
+//                return result.ToList();
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
 
         public ReturnObject UpdateBalanceWallet(decimal amount, string id, int version)
         {
