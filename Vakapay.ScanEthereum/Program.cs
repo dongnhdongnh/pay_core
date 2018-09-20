@@ -28,7 +28,7 @@ namespace Vakapay.ScanEthereum
 
 			var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-			var ethereumBusiness = new EthereumBusinessNew(repoFactory);
+			var ethereumBusiness = new EthereumBusiness.EthereumBusiness(repoFactory);
 			var WalletBusiness = new WalletBusiness.WalletBusiness(repoFactory);
 			var connection = repoFactory.GetDbConnection();
 			try

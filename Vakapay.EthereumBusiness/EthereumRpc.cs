@@ -17,13 +17,14 @@ namespace Vakapay.EthereumBusiness
 	public class EthereumRpc : IBlockchainRPC
 	{
 
+		public string EndPointURL { get; set; }
 		private static string rootAddress = "0x12890d2cce102216644c59dae5baed380d84830c";
 		private static string rootPassword = "password";
-		public string endpointRpc { get; set; }
+
 
 		public EthereumRpc(string url)
 		{
-			endpointRpc = url;
+			EndPointURL = url;
 		}
 
 		/// <summary>
@@ -40,7 +41,7 @@ namespace Vakapay.EthereumBusiness
 				// Set a default policy level for the "http:" and "https" schemes.
 				HttpRequestCachePolicy policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
 				HttpWebRequest.DefaultCachePolicy = policy;
-				var httpWebRequest = (HttpWebRequest)WebRequest.Create(endpointRpc);
+				var httpWebRequest = (HttpWebRequest)WebRequest.Create(EndPointURL);
 				// Define a cache policy for this request only. 
 				HttpRequestCachePolicy noCachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
 				httpWebRequest.CachePolicy = noCachePolicy;
@@ -131,16 +132,7 @@ namespace Vakapay.EthereumBusiness
 			};
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_sendTransaction, new Object[] { _sender });
 		}
-		/// <summary>
-		/// This function will be create ethereum address with password
-		/// return Return Object with data property is address generated
-		/// </summary>
-		/// <param name="password"></param>
-		/// <returns></returns>
-		public ReturnObject CreateAddress(string password)
-		{
-			return EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
-		}
+
 
 		public ReturnObject FindTransactionByBlockNumberAndIndex(int blockNumber, int transactionIndex)
 		{
@@ -148,11 +140,11 @@ namespace Vakapay.EthereumBusiness
 		}
 
 
-		public string EndPointURL { get; set; }
+
 
 		public ReturnObject CreateNewAddress(string password)
 		{
-			throw new NotImplementedException();
+			return EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
 		}
 
 		public ReturnObject CreateNewAddress()

@@ -63,7 +63,7 @@ namespace Vakapay.SendEthereum
         {
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            var ethereumBusiness = new EthereumBusinessNew(repoFactory);
+            var ethereumBusiness = new EthereumBusiness.EthereumBusiness(repoFactory);
             var connection = repoFactory.GetDbConnection();
             try
             {

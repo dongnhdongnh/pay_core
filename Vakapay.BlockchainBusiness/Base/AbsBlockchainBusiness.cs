@@ -32,7 +32,7 @@ namespace Vakapay.BlockchainBusiness.Base
 		/// <param name="privateKey"></param>
 		/// <typeparam name="TBlockchainTransaction"></typeparam>
 		/// <returns></returns>
-		public async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
+		public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
 			IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
 			string privateKey = "")
 		{
@@ -140,8 +140,8 @@ namespace Vakapay.BlockchainBusiness.Base
 		/// <param name="other"></param>
 		/// <typeparam name="TBlockchainTransaction"></typeparam>
 		/// <returns></returns>
-		public async Task<ReturnObject> CreateAddressAsyn<TBlockchainAddress>(
-			IRepositoryBlockchainAddress<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
+		public virtual async Task<ReturnObject> CreateAddressAsyn<TBlockchainAddress>(
+			IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
 			string other = "")
 		{
 			try
@@ -191,7 +191,7 @@ namespace Vakapay.BlockchainBusiness.Base
 			}
 		}
 
-		public async Task<ReturnObject> ScanBlockAsyn<TBlockchainTransaction, TBlockInfor, TTransactionInfor>(string networkName,
+		public virtual async Task<ReturnObject> ScanBlockAsyn<TBlockchainTransaction, TBlockInfor, TTransactionInfor>(string networkName,
 				 WalletBusiness.WalletBusiness wallet,
 				 IRepositoryBlockchainTransaction<TBlockchainTransaction> withdrawRepoQuery,
 				 IBlockchainRPC rpcClass)
