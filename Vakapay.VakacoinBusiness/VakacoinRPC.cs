@@ -343,9 +343,10 @@ namespace Vakapay.VakacoinBusiness
                 var transaction = (VakacoinTransaction) blockchainTransaction;
 
                 var senderInfo = AccountRepository.FindByAddress(blockchainTransaction.FromAddress);
+                var memo = transaction.Memo ?? "";
 
                 return await SendTransactionAsync(transaction.FromAddress, transaction.ToAddress,
-                    transaction.GetStringAmount(), transaction.Memo, senderInfo.GetSecret());
+                    transaction.GetStringAmount(), memo, senderInfo.GetSecret());
             }
             catch (Exception e)
             {

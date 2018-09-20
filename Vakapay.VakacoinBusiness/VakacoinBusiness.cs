@@ -59,6 +59,50 @@ namespace Vakapay.VakacoinBusiness
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     Id = CommonHelper.GenerateUuid(),
                     UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    WalletId = walletId,
+                });
+
+                return returnObject;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+        
+        /// <summary>
+        /// Add existed account to database
+        /// save account name to database
+        /// </summary>
+        /// <returns></returns>
+        public ReturnObject AddAccount(string walletId, string accountName, string ownerPrivateKey, string ownerPublicKey, string activePrivateKey = "", string activePublicKey = "")
+        {
+            try
+            {
+                var repo = VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
+
+                if (string.IsNullOrEmpty(activePrivateKey))
+                {
+                    activePrivateKey = ownerPrivateKey;
+                    activePublicKey = ownerPublicKey;
+                }
+
+                //TODO Encrypt Password Before save
+                var returnObject = repo.Insert(new VakacoinAccount
+                {
+                    Status = Status.StatusActive,
+                    AccountName = accountName,
+                    OwnerPrivateKey = ownerPrivateKey,
+                    OwnerPublicKey = ownerPublicKey,
+                    ActivePrivateKey = activePrivateKey,
+                    ActivePublicKey = activePublicKey,
+                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    Id = CommonHelper.GenerateUuid(),
+                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId
                 });
 
@@ -103,6 +147,28 @@ namespace Vakapay.VakacoinBusiness
             }
             catch (Exception e)
             {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+        
+        public ReturnObject FakePendingTransaction(VakacoinWithdrawTransaction blockchainTransaction)
+        {
+            try
+            {
+                var vakacoinwithdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
+                blockchainTransaction.Id = CommonHelper.GenerateUuid();
+                blockchainTransaction.Status = Status.StatusPending;
+                blockchainTransaction.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
+                blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                return vakacoinwithdrawRepo.Insert(blockchainTransaction);
+            }
+            catch (Exception e)
+            {
+
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
