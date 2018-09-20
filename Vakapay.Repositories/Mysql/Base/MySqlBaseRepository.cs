@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
+using MySql.Data.MySqlClient;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories.Base;
 
@@ -135,6 +136,43 @@ namespace Vakapay.Repositories.Mysql.Base
 			catch (Exception e)
 			{
 				throw;
+			}
+		}
+
+		public ReturnObject ExcuteSQL(string sqlString, object transaction = null)
+		{
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+
+				var result = 0;
+				if (transaction != null)
+				{
+					MySqlTransaction _transaction = (MySqlTransaction)transaction;
+					result = Connection.Execute(sqlString, null, _transaction);
+				}
+				else
+				{
+					result = Connection.Execute(sqlString);
+				}
+
+				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+				Console.WriteLine("Excute thing " + result);
+				return new ReturnObject
+				{
+					Status = status,
+					Message = status == Status.StatusError ? "Cannot Excute" : "Excute Success"
+				};
+			}
+			catch (Exception e)
+			{
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
 			}
 		}
 	}

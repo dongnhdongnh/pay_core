@@ -192,16 +192,19 @@ namespace Vakapay.BlockchainBusiness.Base
 			}
 		}
 
-		public virtual async Task<ReturnObject> ScanBlockAsyn<TBlockchainTransaction, TBlockInfor, TTransactionInfor>(string networkName,
+		public virtual async Task<ReturnObject> ScanBlockAsyn<TWithDraw, TDeposit, TBlockInfor, TTransactionInfor>(string networkName,
 				 WalletBusiness.WalletBusiness wallet,
-				 IRepositoryBlockchainTransaction<TBlockchainTransaction> withdrawRepoQuery,
+				 IRepositoryBlockchainTransaction<TWithDraw> withdrawRepoQuery,
+				 IRepositoryBlockchainTransaction<TDeposit> depositRepoQuery,
 				 IBlockchainRPC rpcClass)
-			where TBlockchainTransaction : BlockchainTransaction
+			where TWithDraw : BlockchainTransaction
+			where TDeposit : BlockchainTransaction
 			where TTransactionInfor : ITransactionInfor
 			where TBlockInfor : IBlockInfor<TTransactionInfor>
 		{
 			try
 			{
+
 				int lastBlock = -1;
 				int blockNumber = -1;
 				//Get lastBlock from last time
@@ -247,7 +250,6 @@ namespace Vakapay.BlockchainBusiness.Base
 						blocks.Add(_block);
 					}
 				}
-				//CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, blockNumber.ToString());
 				CacheHelper.SetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName), blockNumber.ToString());
 				if (blocks.Count <= 0)
 				{
@@ -279,7 +281,7 @@ namespace Vakapay.BlockchainBusiness.Base
 							_currentPending.InProcess = 0;
 							Console.WriteLine("CaLL UPDATE");
 
-							withdrawRepoQuery.Update((TBlockchainTransaction)_currentPending);
+							withdrawRepoQuery.Update((TWithDraw)_currentPending);
 							withdrawPendingTransactions.RemoveAt(i);
 						}
 
@@ -293,6 +295,7 @@ namespace Vakapay.BlockchainBusiness.Base
 					foreach (ITransactionInfor _trans in _block.transactions)
 					{
 						string _toAddress = _trans.to;
+						string _fromAddress = _trans.from;
 						if (!wallet.CheckExistedAddress(_toAddress))
 						{
 							//logger.Info(to + " is not exist in Wallet!!!");

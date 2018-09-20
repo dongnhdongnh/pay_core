@@ -106,14 +106,41 @@ namespace Vakapay.EthereumBusiness
 		/// <returns></returns>
 		public ReturnObject SendTransactionWithPassphrase(string From, string ToAddress, decimal amount, string passphrase)
 		{
-			EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
+			try
 			{
-				from = From,
-				to = ToAddress,
-				value = ((int)amount).IntToHex()
-			};
-			//var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
-			return EthereumSendRPC(EthereumRPCList.RPCName.personal_sendTransaction, new Object[] { _sender, passphrase });
+
+				EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
+				{
+					from = From,
+					to = ToAddress,
+					value = ((int)amount).IntToHex()
+				};
+
+				//var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
+				var _result = EthereumSendRPC(EthereumRPCList.RPCName.personal_sendTransaction, new Object[] { _sender, passphrase });
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+				return new ReturnObject
+				{
+					Status = Status.StatusCompleted,
+					Data = _getter.result.ToString()
+				};
+
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+
 		}
 		/// <summary>
 		/// This function send transaction
