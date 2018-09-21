@@ -12,6 +12,7 @@ namespace Vakapay.Models.Domains
 		public string hash;
 		public string blockHash;
 		public string blockNumber;
+		public string fee;
 		public string transactionIndex;
 		public string gas;
 		public string gasPrice;

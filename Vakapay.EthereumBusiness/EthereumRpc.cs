@@ -256,7 +256,7 @@ namespace Vakapay.EthereumBusiness
 			try
 			{
 				ReturnObject _result = EthereumSendRPC(EthereumRPCList.RPCName.eth_getBlockByNumber, new Object[] { blockNumber.IntToHex(), true });
-				Console.WriteLine(_result);
+				//Console.WriteLine(_result);
 				if (_result.Status == Status.StatusError)
 				{
 
