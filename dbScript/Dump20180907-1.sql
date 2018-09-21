@@ -197,3 +197,18 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES = @OLD_SQL_NOTES */;
 
 -- Dump completed on 2018-09-07  3:44:01
+
+
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `user` (
+  `Id` varchar(45) NOT NULL,
+  `Email` varchar(45) DEFAULT NULL,
+  `SecondPassword` varchar(45) DEFAULT NULL,
+  `IpWhiteList` varchar(45) DEFAULT NULL,
+  `Status` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
