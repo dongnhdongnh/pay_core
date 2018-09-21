@@ -25,10 +25,11 @@ namespace Vakapay.SendVakacoin
                 {
                     ConnectionString = connectionString
                 };
-                
-                for(var i = 0; i< 10; i++)
+
+                var nodeUrl = configuration.GetSection("Node")?["Url"];
+                for(var i = 0; i < 10; i++)
                 {
-                    var ts = new Thread(()=>RunSend(repositoryConfig));
+                    var ts = new Thread(()=>RunSend(repositoryConfig, nodeUrl));
                     ts.Start();
                 }
             }
@@ -38,7 +39,7 @@ namespace Vakapay.SendVakacoin
             }
         }
 
-        private static void RunSend(RepositoryConfiguration repositoryConfig)
+        private static void RunSend(RepositoryConfiguration repositoryConfig, string nodeUrl)
         {
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
@@ -48,18 +49,23 @@ namespace Vakapay.SendVakacoin
             {
                 while (true)
                 {
-                    Console.WriteLine("Start Send Vakacoin...");
-                        
-                    var rpc = new VakacoinRPC("http://127.0.0.1:8000");
+                    try
+                    {
+                        var rpc = new VakacoinRPC(nodeUrl);
                     
-                    business.SetAccountRepositoryForRpc(rpc);
+                        business.SetAccountRepositoryForRpc(rpc);
 
-                    var repo = repoFactory.GetVakacoinWithdrawTransactionRepository(connection);
-                    var resultSend = business.SendTransactionAsync(repo, rpc, "");
-                    Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
-                    
-                    Console.WriteLine("Send Vakacoin End...");
-                    Thread.Sleep(1000);
+                        Console.WriteLine("Start Send Vakacoin...");
+                        var repo = repoFactory.GetVakacoinWithdrawTransactionRepository(connection);
+                        var resultSend = business.SendTransactionAsync(repo, rpc, "");
+                        Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
+                        
+                        Console.WriteLine("Send Vakacoin End...");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
             }
             catch (Exception e)
