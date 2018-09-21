@@ -65,7 +65,7 @@ namespace Vakapay.UnitTest
 			string walletID = CommonHelper.RandomString(15);
 			string pass = CommonHelper.RandomString(15);
 			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, RPCClass, walletID, pass);
-			//			Console.WriteLine(JsonHelper.SerializeObject(outPut));
+			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}
 		[Test]
@@ -96,6 +96,8 @@ namespace Vakapay.UnitTest
 				Id = CommonHelper.GenerateUuid()
 			};
 			var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
+			Console.WriteLine(JsonHelper.SerializeObject(result));
+			Assert.IsNotNull(result);
 		}
 
 		[TestCase(10)]
