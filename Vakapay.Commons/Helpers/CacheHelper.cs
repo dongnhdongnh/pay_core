@@ -35,8 +35,13 @@ namespace Vakapay.Commons.Helpers
 
 		public static void SetCacheString(String key, String value)
 		{
+
 			CacheDatabase.StringSet(key, value);
 
+		}
+		public static bool HaveKey(RedisKey key)
+		{
+			return CacheDatabase.KeyExists(key);
 		}
 		public static String GetCacheString(String key)
 		{

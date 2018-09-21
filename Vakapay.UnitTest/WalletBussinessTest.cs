@@ -63,7 +63,7 @@ namespace Vakapay.UnitTest
 			var repositoryConfig = new RepositoryConfiguration
 			{
 				ConnectionString = WalletBussinessTest.ConnectionString
-			};
+			}; 
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory, true);
