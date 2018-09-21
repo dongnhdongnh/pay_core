@@ -39,12 +39,25 @@ namespace Vakapay.Repositories.Mysql
 //        {
 //            throw new NotImplementedException();
 //        }
-//
-//        public User FindById(string id)
-//        {
-//            return new User();
-//        }
-//
+
+        public User FindById(string id)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                string query = "SELECT * FROM user WHERE Id = @ID";
+                var result = Connection.QuerySingle<User>(query, new {ID = id});
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
 //        public List<User> FindBySql(string sqlString)
 //        {
 //            throw new NotImplementedException();

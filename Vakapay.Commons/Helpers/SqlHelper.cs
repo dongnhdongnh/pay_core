@@ -24,7 +24,7 @@ namespace Vakapay.Commons.Helpers
 			}
 
 			string output = string.Format("SELECT * FROM {0} WHERE {1}", TableName, whereStr);
-			Console.WriteLine(output);
+			//Console.WriteLine(output);
 			return output;
 		}
 
@@ -58,7 +58,7 @@ namespace Vakapay.Commons.Helpers
 				}
 			}
 			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
-			Console.WriteLine(output);
+			//Console.WriteLine(output);
 			return output;
 		}
 
@@ -92,7 +92,7 @@ namespace Vakapay.Commons.Helpers
 				}
 			}
 			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
-			Console.WriteLine(output);
+			//	Console.WriteLine(output);
 			return output;
 		}
 

@@ -2,6 +2,7 @@ using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -21,61 +22,74 @@ namespace Vakapay.Repositories.Mysql
 		{
 		}
 
-		public EthereumAddress FindByAddress(string address)
+//		public ReturnObject Update(EthereumAddress objectUpdate)
+//		{
+//			throw new System.NotImplementedException();
+//		}
+//
+//		public ReturnObject Delete(string Id)
+//		{
+//			throw new System.NotImplementedException();
+//		}
+
+		public ReturnObject Insert(EthereumAddress objectInsert)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.InsertTask<string, EthereumAddress>(objectInsert);
+				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+				return new ReturnObject
+				{
+					Status = status,
+					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+				};
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
 		}
 
-		//		public ReturnObject Update(EthereumAddress objectUpdate)
-		//		{
-		//			throw new System.NotImplementedException();
-		//		}
-		//
-		//		public ReturnObject Delete(string Id)
-		//		{
-		//			throw new System.NotImplementedException();
-		//		}
-		//
-		//public ReturnObject Insert1Async(EthereumAddress objectInsert)
-		//{
-		//	try
-		//	{
-		//		if (Connection.State != ConnectionState.Open)
-		//			Connection.Open();
-		//		var result = Connection.InsertTask<string, EthereumAddress>(objectInsert);
-		//		var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-		//		return new ReturnObject
-		//		{
-		//			Status = status,
-		//			Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-		//		};
-		//	}
-		//	catch (Exception e)
-		//	{
-		//		Console.WriteLine("FAIL" + e.ToString());
-		//		return new ReturnObject
-		//		{
-		//			Status = Status.StatusError,
-		//			Message = e.ToString()
-		//		};
-		//	}
-		//}
-		//
-		//		public EthereumAddress FindById(string Id)
-		//		{
-		//			throw new System.NotImplementedException();
-		//		}
-		//
-		//		public List<EthereumAddress> FindBySql(string sqlString)
-		//		{
-		//			throw new System.NotImplementedException();
-		//		}
+		public EthereumAddress FindById(string Id)
+		{
+			throw new System.NotImplementedException();
+		}
 
-		//	public EthereumAddress FindByAddress(string address)
-		//{
-		//	throw new NotImplementedException();
-		//}
+		public List<EthereumAddress> FindBySql(string sqlString)
+		{
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.Query<EthereumAddress>(sqlString);
+				return result.ToList();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
+		}
 
+	    public EthereumAddress FindByAddress(string address)
+	    {
+		    try
+		    {
+			    string query = $"SELECT * FROM EthereumAddress WHERE Address = '{address}'";
+			    List<EthereumAddress> etherAddress = FindBySql(query);
+			    if (etherAddress == null || etherAddress.Count == 0)
+				    return null;
+			    return etherAddress.First();
+		    }
+		    catch (Exception e)
+		    {
+			    Console.WriteLine(e);
+			    return null;
+		    }
+	    }
+	    
 		public Task<ReturnObject> InsertAddress(string address, string walletId, string other)
 		{
 			EthereumAddress insertObject = new EthereumAddress()
@@ -93,5 +107,5 @@ namespace Vakapay.Repositories.Mysql
 			//return new Task() { };
 			//throw new NotImplementedException();
 		}
-	}
+    }
 }

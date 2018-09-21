@@ -92,7 +92,7 @@ namespace Vakapay.Repositories.Mysql.Base
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine(e.Message);
+				//Console.WriteLine(e.Message);
 				Logger.Error(GetClassName() + " =>> insert fail: " + e.Message);
 				return new ReturnObject
 				{
@@ -159,7 +159,7 @@ namespace Vakapay.Repositories.Mysql.Base
 				}
 
 				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
-				Console.WriteLine("Excute thing " + result);
+				//	Console.WriteLine("Excute thing " + result);
 				return new ReturnObject
 				{
 					Status = status,
