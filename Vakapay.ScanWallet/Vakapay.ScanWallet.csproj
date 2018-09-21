@@ -5,4 +5,10 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+    <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
+    <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -191,6 +191,7 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
+
                 //Make new transaction withdraw pending by
                 //insert into ethereumwithdrawtransaction database
                 var etherWithdraw = new EthereumWithdrawTransaction()

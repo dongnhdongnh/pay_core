@@ -32,7 +32,7 @@ namespace Vakapay.BlockchainBusiness.Base
 		/// <param name="privateKey"></param>
 		/// <typeparam name="TBlockchainTransaction"></typeparam>
 		/// <returns></returns>
-		public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(long startTime,
+		public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
 			IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
 			string privateKey = "")
 		{
@@ -47,16 +47,16 @@ namespace Vakapay.BlockchainBusiness.Base
 			var pendingTransaction = repoQuery.FindTransactionPending();
 			if (pendingTransaction?.Id == null)
 			{
-				if (!CacheHelper.HaveKey("cache"))
-				{
-					long numberOfTicks = (DateTime.Now.Ticks - startTime);
+				//if (!CacheHelper.HaveKey("cache"))
+				//{
+				//	long numberOfTicks = (DateTime.Now.Ticks - startTime);
 
-					TimeSpan ts = TimeSpan.FromTicks(numberOfTicks);
-					double minutesFromTs = ts.TotalMinutes;
-					CacheHelper.SetCacheString("cache", minutesFromTs.ToString());
+				//	TimeSpan ts = TimeSpan.FromTicks(numberOfTicks);
+				//	double minutesFromTs = ts.TotalMinutes;
+				//	CacheHelper.SetCacheString("cache", minutesFromTs.ToString());
 
-				}
-				Console.WriteLine("END TIME " + CacheHelper.GetCacheString("cache"));
+				//}
+				//Console.WriteLine("END TIME " + CacheHelper.GetCacheString("cache"));
 				return new ReturnObject
 				{
 					Status = Status.StatusSuccess,
