@@ -32,7 +32,7 @@ namespace Vakapay.BlockchainBusiness.Base
 		/// <param name="privateKey"></param>
 		/// <typeparam name="TBlockchainTransaction"></typeparam>
 		/// <returns></returns>
-		public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
+		public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(long startTime,
 			IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
 			string privateKey = "")
 		{
@@ -46,11 +46,23 @@ namespace Vakapay.BlockchainBusiness.Base
 			// find transaction pending
 			var pendingTransaction = repoQuery.FindTransactionPending();
 			if (pendingTransaction?.Id == null)
+			{
+				if (!CacheHelper.HaveKey("cache"))
+				{
+					long numberOfTicks = (DateTime.Now.Ticks - startTime);
+
+					TimeSpan ts = TimeSpan.FromTicks(numberOfTicks);
+					double minutesFromTs = ts.TotalMinutes;
+					CacheHelper.SetCacheString("cache", minutesFromTs.ToString());
+
+				}
+				Console.WriteLine("END TIME " + CacheHelper.GetCacheString("cache"));
 				return new ReturnObject
 				{
 					Status = Status.StatusSuccess,
 					Message = "Not found Transaction"
 				};
+			}
 			if (DbConnection.State != ConnectionState.Open)
 			{
 				//Console.WriteLine(DbConnection.State);
@@ -191,21 +203,21 @@ namespace Vakapay.BlockchainBusiness.Base
 				}
 
 				//get all address = null with same networkName of walletId
-				var wallets =
-					walletRepository.FindByAddressAndNetworkName(null,
-						walletCheck.NetworkName);
-				if (wallets == null || wallets.Count <= 0)
-				{
-					return new ReturnObject
-					{
-						Status = Status.StatusCompleted,
-						Message = "Finish Update"
-					};
-				}
+				//var wallets =
+				//	walletRepository.FindByAddressAndNetworkName(null,
+				//		walletCheck.NetworkName);
+				//if (wallets == null || wallets.Count <= 0)
+				//{
+				//	return new ReturnObject
+				//	{
+				//		Status = Status.StatusCompleted,
+				//		Message = "Finish Update"
+				//	};
+				//}
 
-				var pass = CommonHelper.RandomString(15);
-				await CreateAddressAsyn<TBlockchainAddress>(repoQuery, rpcClass,
-					wallets[0].Id, pass);
+				//var pass = CommonHelper.RandomString(15);
+				//await CreateAddressAsyn<TBlockchainAddress>(repoQuery, rpcClass,
+				//	wallets[0].Id, pass);
 
 				
 				return new ReturnObject

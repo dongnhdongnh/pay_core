@@ -100,7 +100,7 @@ namespace Vakapay.UnitTest
 			Assert.IsNotNull(result);
 		}
 
-		[TestCase(10)]
+		[TestCase(100)]
 		public void FakePeningTransaction(int numOfTrans)
 		{
 			var repositoryConfig = new RepositoryConfiguration

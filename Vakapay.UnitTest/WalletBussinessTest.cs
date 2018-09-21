@@ -13,7 +13,7 @@ namespace Vakapay.UnitTest
 	class WalletBussinessTest
 	{
 		const String RPCEndpoint = "http://localhost:9900";
-		const String ConnectionString = "server=localhost;userid=root;password=123;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
+		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 		Vakapay.WalletBusiness.WalletBusiness _walletBusiness;
 		Vakapay.EthereumBusiness.EthereumBusiness _ethBus;
 		EthereumRpc _rpcClass;
@@ -42,15 +42,15 @@ namespace Vakapay.UnitTest
 			var blockChain = new BlockchainNetwork();
 			user.Id = "8377a95b-79b4-4dfb-8e1e-b4833443c306";
 
-			blockChain.Name = "Ethereum";
+			blockChain.Name = NetworkName.ETH;
 			var resultTest = _walletBusiness.CreateNewWallet(user, blockChain);
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
-			blockChain.Name = "BTC";
+			blockChain.Name = NetworkName.BTC;
 			_walletBusiness.CreateNewWallet(user, blockChain);
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
-			blockChain.Name = "VAKA";
+			blockChain.Name = NetworkName.VAKA;
 			_walletBusiness.CreateNewWallet(user, blockChain);
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
@@ -63,17 +63,18 @@ namespace Vakapay.UnitTest
 			var repositoryConfig = new RepositoryConfiguration
 			{
 				ConnectionString = WalletBussinessTest.ConnectionString
-			}; 
+			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory, true);
 			var connection = PersistenceFactory.GetDbConnection();
 			var ethAddressRepos = PersistenceFactory.GetEthereumAddressRepository(connection);
 			var wallet = new Wallet();
-			wallet.Id = "c8da3877-7e35-4872-ace8-db2fadfea2c1";
+			wallet.Id = "29bb8133-d8d2-4b60-9882-60f0c1bd5f68";
+
 			string pass = CommonHelper.RandomString(15);
 			//	var resultTest = _ethBus.CreateNewAddAddress(wallet);
-			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, RPCClass, "c8da3877-7e35-4872-ace8-db2fadfea2c1", pass);
+			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, RPCClass, wallet.Id, pass);
 			Assert.IsNotNull(outPut);
 		}
 
@@ -90,10 +91,11 @@ namespace Vakapay.UnitTest
 				new Vakapay.WalletBusiness.WalletBusiness(persistence);
 
 			var wallet = new Wallet();
-			wallet.Id = "220f8c33-053d-472f-b85a-ca94464b5176";
-			var toAddr = "0xe2605fe203781dd11a6c44c07c2535eabc0aed23";
+			wallet.Id = "64308d79-5523-4fd7-80a1-bba398b62c9b";
+			var toAddr = "0x18cbb2afa209e5735122708a39e4715139f125d2";
 
 			var resultTest = _walletBusiness.Withdraw(wallet, toAddr, 5);
+			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 		}
 

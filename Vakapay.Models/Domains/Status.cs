@@ -13,5 +13,7 @@ namespace Vakapay.Models.Domains
 	{
 
 		public const string ETH = "Ethereum";
+		public const string VAKA = "VAKA";
+		public const string BTC = "BTC";
 	}
 }

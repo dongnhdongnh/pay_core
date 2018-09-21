@@ -2,30 +2,34 @@
 using System.IO;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
+using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.SendEthereum
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            try
-            {
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("setting.json");
-                IConfiguration Configuration = builder.Build();
+	class Program
+	{
 
-                var connectionString = Configuration.GetConnectionString("DefaultConnection");
-                var repositoryConfig = new RepositoryConfiguration
-                {
-                    ConnectionString = connectionString
-                };
-                
-                /*var connection = repoFactory.GetDbConnection();
+		static void Main(string[] args)
+		{
+			try
+			{
+				long startTime = DateTime.Now.Ticks;
+				CacheHelper.DeleteCacheString("cache");
+				var builder = new ConfigurationBuilder()
+					.SetBasePath(Directory.GetCurrentDirectory())
+					.AddJsonFile("setting.json");
+				IConfiguration Configuration = builder.Build();
+
+				var connectionString = Configuration.GetConnectionString("DefaultConnection");
+				var repositoryConfig = new RepositoryConfiguration
+				{
+					ConnectionString = connectionString
+				};
+
+				/*var connection = repoFactory.GetDbConnection();
                 ///One thread
                 while (true)
                 {
@@ -42,52 +46,52 @@ namespace Vakapay.SendEthereum
                     Console.WriteLine("Send Ethereum...");
                     Thread.Sleep(1000);
                 }*/
-               // for(var i = 0; i< 10; i++)
-                {
-                    Thread ts = new Thread(()=>runSend(repositoryConfig));
-                    ts.Start();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            
-            
+				for (var i = 0; i < 10; i++)
+				{
+					Thread ts = new Thread(() => runSend(repositoryConfig, startTime));
+					ts.Start();
+				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.ToString());
+			}
 
 
 
-        }
 
-        static void runSend(RepositoryConfiguration repositoryConfig)
-        {
-            var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            var ethereumBusiness = new EthereumBusiness.EthereumBusiness(repoFactory);
-            var connection = repoFactory.GetDbConnection();
-            try
-            {
-                while (true)
-                {
-                    Console.WriteLine("Start Send Ethereum....");
-                        
-                    var rpc = new EthereumRpc("http://localhost:9900");
+		}
 
-                    var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
-                    var resultSend = ethereumBusiness.SendTransactionAsync(ethereumRepo, rpc, "");
-                    Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
-                
-                    
-                    Console.WriteLine("Send Ethereum End...");
-                    Thread.Sleep(1000);
-                }
-            }
-            catch (Exception e)
-            {
-                connection.Close();
-                Console.WriteLine(e.ToString());
-            }
-            
-        }
-    }
+		static void runSend(RepositoryConfiguration repositoryConfig, long startTime)
+		{
+			var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+
+			var ethereumBusiness = new EthereumBusiness.EthereumBusiness(repoFactory);
+			var connection = repoFactory.GetDbConnection();
+			try
+			{
+				while (true)
+				{
+					//Console.WriteLine("Start Send Ethereum....");
+
+					var rpc = new EthereumRpc("http://localhost:9900");
+
+					var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
+					var resultSend = ethereumBusiness.SendTransactionAsync(startTime, ethereumRepo, rpc, "");
+					//Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
+
+
+					//Console.WriteLine("Send Ethereum End...");
+					Thread.Sleep(1000);
+				}
+			}
+			catch (Exception e)
+			{
+				connection.Close();
+				Console.WriteLine(e.ToString());
+			}
+
+		}
+	}
 }
