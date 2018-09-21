@@ -225,37 +225,23 @@ namespace Vakapay.WalletBusiness
             }
         }
         
-        public ReturnObject UpdateAddressForWallet(string address)
+        public ReturnObject UpdateAddressForWallet(string walletId, string address)
         {
             try
             {
-                //search in DB all wallets have:
-                //network = "Ethereum"
-                //and address = null
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var wallets = walletRepository.FindByAddressAndNetworkName(null, NetworkName.ETH);
-                if (wallets == null || wallets.Count <= 0)
-                {
+                var whereUpdateAddr = walletRepository.FindById(walletId);
+
+                //update address for walletId
+                whereUpdateAddr.Address = address;
+                whereUpdateAddr.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                var walletUpdate = walletRepository.Update(whereUpdateAddr);
+                if (walletUpdate.Status == Status.StatusError)
                     return new ReturnObject
                     {
                         Status = Status.StatusError,
-                        Message = "Wallet Not Found"
+                        Message = "Update wallet address fail"
                     };
-                }
-
-                //update address
-                foreach (var wallet in wallets)
-                {
-                    wallet.Address = address;
-                    wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
-                    var walletUpdate = walletRepository.Update(wallet);
-                    if (walletUpdate.Status == Status.StatusError)
-                        return new ReturnObject
-                        {
-                            Status = Status.StatusError,
-                            Message = "Update wallet address fail"
-                        };
-                }
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,

@@ -169,7 +169,7 @@ namespace Vakapay.Repositories.Mysql
                     query = $"SELECT * FROM wallet WHERE Address = '{address}' AND NetworkName = '{networkName}'";
                 }
                 List<Wallet> wallets = FindBySql(query);
-                if (wallets == null || wallets.Count == 0)
+                if (wallets == null || wallets.Count <= 0)
                     return null;
                 return wallets;
             }

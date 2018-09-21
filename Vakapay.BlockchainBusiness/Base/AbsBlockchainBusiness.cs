@@ -175,7 +175,39 @@ namespace Vakapay.BlockchainBusiness.Base
 				//		Message = "Cannot Insert Address"
 				//	};
 				//}
+				
+				//update address into wallet db
+				var walletBusiness =
+					new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
+				var updateWallet =
+					walletBusiness.UpdateAddressForWallet(walletId, address);
+				if (updateWallet.Status == Status.StatusError)
+				{
+					return new ReturnObject
+					{
+						Status = Status.StatusError,
+						Message = "Update address fail to WalletDB"
+					};
+				}
 
+				//get all address = null with same networkName of walletId
+				var wallets =
+					walletRepository.FindByAddressAndNetworkName(null,
+						walletCheck.NetworkName);
+				if (wallets == null || wallets.Count <= 0)
+				{
+					return new ReturnObject
+					{
+						Status = Status.StatusCompleted,
+						Message = "Finish Update"
+					};
+				}
+
+				var pass = CommonHelper.RandomString(15);
+				await CreateAddressAsyn<TBlockchainAddress>(repoQuery, rpcClass,
+					wallets[0].Id, pass);
+
+				
 				return new ReturnObject
 				{
 					Status = result.Status,
