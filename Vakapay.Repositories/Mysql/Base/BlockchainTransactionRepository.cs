@@ -34,7 +34,7 @@ namespace Vakapay.Repositories.Mysql
 			}
 			catch (Exception e)
 			{
-				throw;
+				throw e;
 			}
 		}
 
@@ -46,7 +46,7 @@ namespace Vakapay.Repositories.Mysql
 			}
 			catch (Exception e)
 			{
-				throw;
+				throw e;
 			}
 		}
 
@@ -63,7 +63,7 @@ namespace Vakapay.Repositories.Mysql
 			}
 			catch (Exception e)
 			{
-				throw;
+				throw e;
 			}
 		}
 
@@ -75,7 +75,7 @@ namespace Vakapay.Repositories.Mysql
 			}
 			catch (Exception e)
 			{
-				throw;
+				throw e;
 			}
 		}
 
@@ -85,7 +85,7 @@ namespace Vakapay.Repositories.Mysql
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				Console.WriteLine("FIND TRANSACTION BY STATUS");
+
 				var sqlString = $"Select * from {TableName} where Status = @status and InProcess = 0";
 				var result =
 					Connection.QueryFirstOrDefault<TTransaction>(sqlString, new { status = status });
@@ -104,7 +104,7 @@ namespace Vakapay.Repositories.Mysql
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				Console.WriteLine("FIND TRANSACTION BY STATUS");
+				//Console.WriteLine("FIND TRANSACTION BY STATUS");
 				var sqlString = $"Select * from {TableName} where Status = @status and InProcess = 0";
 				var result = Connection.Query<TTransaction>(sqlString, new { status = status })
 					.ToList<BlockchainTransaction>();
@@ -112,13 +112,13 @@ namespace Vakapay.Repositories.Mysql
 			}
 			catch (Exception e)
 			{
-				throw;
+				throw e;
 			}
 		}
 
 		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
 		{
-			Console.WriteLine("LockForProcess");
+			//	Console.WriteLine("LockForProcess");
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "1");
@@ -159,7 +159,7 @@ namespace Vakapay.Repositories.Mysql
 
 		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
 		{
-			Console.WriteLine("ReleaseLock");
+			//Console.WriteLine("ReleaseLock");
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "0");
@@ -201,7 +201,7 @@ namespace Vakapay.Repositories.Mysql
 
 		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
 		{
-			Console.WriteLine("SafeUpdate");
+			//Console.WriteLine("SafeUpdate");
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "0");
@@ -249,6 +249,24 @@ namespace Vakapay.Repositories.Mysql
 			//{
 			//	throw;
 			//}
+		}
+
+		public List<BlockchainTransaction> FindTransactionsNotCompleteOnNet()
+		{
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				//Console.WriteLine("FIND TRANSACTION BY STATUS");
+				var sqlString = $"Select * from {TableName} where BlockNumber = @BlockNumber and InProcess = 0 and Status=@Status";
+				var result = Connection.Query<TTransaction>(sqlString, new { BlockNumber = 0, Status = Status.StatusCompleted })
+					.ToList<BlockchainTransaction>();
+				return result;
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
 		}
 	}
 }

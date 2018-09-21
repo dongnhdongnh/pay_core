@@ -14,7 +14,6 @@ namespace Vakapay.ScanEthereum
 		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 		static void Main(string[] args)
 		{
-			Console.WriteLine("Hello World!");
 			var repositoryConfig = new RepositoryConfiguration
 			{
 				ConnectionString = ConnectionString
@@ -33,7 +32,7 @@ namespace Vakapay.ScanEthereum
 			var connection = repoFactory.GetDbConnection();
 			try
 			{
-				//while (true)
+				while (true)
 				{
 
 					Console.WriteLine("==========Start Scan Ethereum==========");
@@ -47,7 +46,8 @@ namespace Vakapay.ScanEthereum
 
 
 					Console.WriteLine("==========Scan Ethereum End==========");
-					Thread.Sleep(100000);
+					Console.WriteLine("==========Wait for next scan==========");
+					Thread.Sleep(5000);
 				}
 			}
 			catch (Exception e)

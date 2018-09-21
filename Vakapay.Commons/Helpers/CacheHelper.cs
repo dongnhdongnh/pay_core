@@ -44,6 +44,11 @@ namespace Vakapay.Commons.Helpers
 			return CacheDatabase.StringGet(key);
 		}
 
+		public static bool DeleteCacheString(String key)
+		{
+
+			return CacheDatabase.KeyDelete(key);
+		}
 
 		public class CacheKey
 		{

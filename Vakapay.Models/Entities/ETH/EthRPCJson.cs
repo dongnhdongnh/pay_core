@@ -33,7 +33,6 @@ namespace Vakapay.Models.Entities.ETH
 		{
 			public Getter(string input)
 			{
-				//	Console.WriteLine("==getter " + input);
 				if (input == null)
 					return;
 				Getter thing = JsonHelper.DeserializeObject<Getter>(input);

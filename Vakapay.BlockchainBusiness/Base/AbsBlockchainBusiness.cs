@@ -53,7 +53,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				};
 			if (DbConnection.State != ConnectionState.Open)
 			{
-				Console.WriteLine(DbConnection.State);
+				//Console.WriteLine(DbConnection.State);
 				DbConnection.Open();
 			}
 
@@ -211,7 +211,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				int.TryParse(CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName)), out lastBlock);
 				if (lastBlock < 0)
 					lastBlock = 0;
-				Console.WriteLine(lastBlock);
+
 				//get blockNumber:
 				var _result = rpcClass.GetBlockNumber();
 				if (_result.Status == Status.StatusError)
@@ -222,13 +222,9 @@ namespace Vakapay.BlockchainBusiness.Base
 				{
 					throw new Exception("Cant parse block number");
 				}
-				//Search transactions which need to scan:
-				var withdrawPendingTransactions = withdrawRepoQuery.FindTransactionsInProcess();
-				if (withdrawPendingTransactions.Count <= 0)
-				{
-					throw new Exception("withdrawPendingTransactions.Count <= 0");
-				}
 				//Get list of new block that have transactions
+				if (lastBlock >= blockNumber)
+					lastBlock = blockNumber;
 				Console.WriteLine("SCAN FROM " + lastBlock + "___" + blockNumber);
 				List<TBlockInfor> blocks = new List<TBlockInfor>();
 				for (int i = lastBlock; i <= blockNumber; i++)
@@ -242,9 +238,7 @@ namespace Vakapay.BlockchainBusiness.Base
 					}
 					if (_result.Data == null)
 						continue;
-					//Console.WriteLine(_result.Data.ToString());
 					TBlockInfor _block = JsonHelper.DeserializeObject<TBlockInfor>(_result.Data.ToString());
-					Console.WriteLine("BLock hash:" + _block.hash);
 					if (_block.transactions.Length > 0)
 					{
 						blocks.Add(_block);
@@ -257,37 +251,48 @@ namespace Vakapay.BlockchainBusiness.Base
 				}
 				//Get done,List<> blocks now contains all block that have transaction
 				//check Transaction and update:
-				foreach (TBlockInfor _block in blocks)
+				//Search transactions which need to scan:
+
+				var withdrawPendingTransactions = withdrawRepoQuery.FindTransactionsNotCompleteOnNet();
+				//Scan all block and check Withdraw transaction:
+				Console.WriteLine("Scan withdrawPendingTransactions");
+				if (withdrawPendingTransactions.Count > 0)
 				{
-					if (withdrawPendingTransactions.Count <= 0)
+					foreach (TBlockInfor _block in blocks)
 					{
-						//SCAN DONE:
-						break;
-					}
-					for (int i = withdrawPendingTransactions.Count - 1; i >= 0; i--)
-					{
-						BlockchainTransaction _currentPending = withdrawPendingTransactions[i];
-						ITransactionInfor _trans = _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
-						int _blockNumber = -1;
-
-
-						if (_trans != null)
+						if (withdrawPendingTransactions.Count <= 0)
 						{
-							_trans.blockNumber.HexToInt(out _blockNumber);
-							Console.WriteLine("HELLO " + _currentPending.Hash);
-							_currentPending.BlockNumber = _blockNumber;
-							_currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
-							_currentPending.Status = Status.StatusCompleted;
-							_currentPending.InProcess = 0;
-							Console.WriteLine("CaLL UPDATE");
-
-							withdrawRepoQuery.Update((TWithDraw)_currentPending);
-							withdrawPendingTransactions.RemoveAt(i);
+							//SCAN DONE:
+							break;
 						}
+						for (int i = withdrawPendingTransactions.Count - 1; i >= 0; i--)
+						{
+							BlockchainTransaction _currentPending = withdrawPendingTransactions[i];
+							ITransactionInfor _trans = _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
+							int _blockNumber = -1;
+							int _fee = 0;
 
+							if (_trans != null)
+							{
+								_trans.blockNumber.HexToInt(out _blockNumber);
+								if (_trans.fee != null)
+									_trans.fee.HexToInt(out _fee);
+								Console.WriteLine("HELLO " + _currentPending.Hash);
+								_currentPending.BlockNumber = _blockNumber;
+								_currentPending.Fee = _fee;
+								_currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+								//	_currentPending.Status = Status.StatusCompleted;
+								//	_currentPending.InProcess = 0;
+								Console.WriteLine("CaLL UPDATE");
+
+								withdrawRepoQuery.Update((TWithDraw)_currentPending);
+								withdrawPendingTransactions.RemoveAt(i);
+							}
+
+						}
 					}
 				}
-
+				Console.WriteLine("Scan withdrawPendingTransactions Done");
 				//check wallet balance and update 
 				foreach (TBlockInfor _block in blocks)
 				{
@@ -324,7 +329,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				return new ReturnObject
 				{
 					Status = Status.StatusError,
-					Message = e.ToString()
+					Message = e.Message
 				};
 			}
 		}

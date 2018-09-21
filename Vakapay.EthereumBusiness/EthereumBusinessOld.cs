@@ -23,119 +23,119 @@ namespace Vakapay.EthereumBusiness
 		{
 			ethereumRpc = new EthereumRpc(endPoint);
 		}
-		public ReturnObject RunSendTransaction()
-		{
-			try
-			{
-				var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-				EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
-				{
-					Status = Status.StatusPending
-				};
-				Console.WriteLine("OK");
-				var searchDic = new Dictionary<string, string>();
-				searchDic.Add(nameof(_searchValue.Status), _searchValue.Status);
+		//public ReturnObject RunSendTransaction()
+		//{
+		//	try
+		//	{
+		//		var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+		//		EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
+		//		{
+		//			Status = Status.StatusPending
+		//		};
+		//		Console.WriteLine("OK");
+		//		var searchDic = new Dictionary<string, string>();
+		//		searchDic.Add(nameof(_searchValue.Status), _searchValue.Status);
 
-				List<EthereumWithdrawTransaction> pendings = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(searchDic));
-				Console.WriteLine(pendings.Count);
-				if (pendings.Count <= 0) throw new Exception("NO PENING");
-				else
-				{
-					foreach (EthereumWithdrawTransaction pending in pendings)
-					{
-						SendTransaction(pending);
-					}
-				}
-				return new ReturnObject();
-			}
-			catch (Exception e)
-			{
+		//		List<EthereumWithdrawTransaction> pendings = ethereumwithdrawRepo.FindBySql(SqlHelper.Query_Search(searchDic));
+		//		Console.WriteLine(pendings.Count);
+		//		if (pendings.Count <= 0) throw new Exception("NO PENING");
+		//		else
+		//		{
+		//			foreach (EthereumWithdrawTransaction pending in pendings)
+		//			{
+		//				SendTransaction(pending);
+		//			}
+		//		}
+		//		return new ReturnObject();
+		//	}
+		//	catch (Exception e)
+		//	{
 
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
+		//		return new ReturnObject
+		//		{
+		//			Status = Status.StatusError,
+		//			Message = e.Message
+		//		};
+		//	}
 
-		}
-		public ReturnObject SendTransaction(EthereumWithdrawTransaction blockchainTransaction)
-		{
-			IEthereumWithdrawTransactionRepository ethereumwithdrawRepo = null;
-			object transaction = null;
-			try
-			{
-				ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-				transaction = ethereumwithdrawRepo.GetTransaction();
-			}
-			catch (Exception e)
-			{
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-			try
-			{
-				//UPDATE status to DB:
-				blockchainTransaction.Status = Status.StatusCompleted;
-				blockchainTransaction.InProcess = 1;
-				blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
-				int _currentVersion = blockchainTransaction.Version;
-				blockchainTransaction.Version = _currentVersion + 1;
-				EthereumWithdrawTransaction blockchainTransactionWhere = new EthereumWithdrawTransaction()
-				{
-					Id = blockchainTransaction.Id,
-					Version = _currentVersion,
-					InProcess = 0
-				};
-				Dictionary<string, string> _updateQuery = new Dictionary<string, string>();
-				_updateQuery.Add(nameof(blockchainTransactionWhere.Id), blockchainTransactionWhere.Id);
-				_updateQuery.Add(nameof(blockchainTransactionWhere.Version), blockchainTransactionWhere.Version.ToString());
-				_updateQuery.Add(nameof(blockchainTransactionWhere.InProcess), blockchainTransactionWhere.InProcess.ToString());
-				var _resultExcuteSQL = ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, _updateQuery), transaction);
-				if (_resultExcuteSQL.Status == Status.StatusError)
-				{
-					//  throw new Exception(_resultExcuteSQL.Message);
-					return _resultExcuteSQL;
-				}
+		//}
+		//public ReturnObject SendTransaction(EthereumWithdrawTransaction blockchainTransaction)
+		//{
+		//	IEthereumWithdrawTransactionRepository ethereumwithdrawRepo = null;
+		//	object transaction = null;
+		//	try
+		//	{
+		//		ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+		//		transaction = ethereumwithdrawRepo.GetTransaction();
+		//	}
+		//	catch (Exception e)
+		//	{
+		//		return new ReturnObject
+		//		{
+		//			Status = Status.StatusError,
+		//			Message = e.Message
+		//		};
+		//	}
+		//	try
+		//	{
+		//		//UPDATE status to DB:
+		//		blockchainTransaction.Status = Status.StatusCompleted;
+		//		blockchainTransaction.InProcess = 1;
+		//		blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+		//		int _currentVersion = blockchainTransaction.Version;
+		//		blockchainTransaction.Version = _currentVersion + 1;
+		//		EthereumWithdrawTransaction blockchainTransactionWhere = new EthereumWithdrawTransaction()
+		//		{
+		//			Id = blockchainTransaction.Id,
+		//			Version = _currentVersion,
+		//			InProcess = 0
+		//		};
+		//		Dictionary<string, string> _updateQuery = new Dictionary<string, string>();
+		//		_updateQuery.Add(nameof(blockchainTransactionWhere.Id), blockchainTransactionWhere.Id);
+		//		_updateQuery.Add(nameof(blockchainTransactionWhere.Version), blockchainTransactionWhere.Version.ToString());
+		//		_updateQuery.Add(nameof(blockchainTransactionWhere.InProcess), blockchainTransactionWhere.InProcess.ToString());
+		//		var _resultExcuteSQL = ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, _updateQuery), transaction);
+		//		if (_resultExcuteSQL.Status == Status.StatusError)
+		//		{
+		//			//  throw new Exception(_resultExcuteSQL.Message);
+		//			return _resultExcuteSQL;
+		//		}
 
-				//if UPDATE DB success ,call RPC to send transaction:
-				var _rpcResult = ethereumRpc.SendTransactionWithPassphrase(blockchainTransaction.FromAddress, blockchainTransaction.ToAddress, blockchainTransaction.Amount, "password");
-				if (_rpcResult.Status == Status.StatusError)
-				{
-					Console.WriteLine("RPC ERROR");
-					throw new Exception("RPC ERROR");
-					//return _rpcResult;
-				}
-				Console.WriteLine("SendTransaction==>rpc result");
-				//After call RPC,update transaction Hash to DB 
-				EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
-				blockchainTransaction.Hash = _getter.result.ToString();
-				blockchainTransactionWhere = new EthereumWithdrawTransaction()
-				{
-					Id = blockchainTransaction.Id,
+		//		//if UPDATE DB success ,call RPC to send transaction:
+		//		var _rpcResult = ethereumRpc.SendTransactionWithPassphrase(blockchainTransaction.FromAddress, blockchainTransaction.ToAddress, blockchainTransaction.Amount, "password");
+		//		if (_rpcResult.Status == Status.StatusError)
+		//		{
+		//			Console.WriteLine("RPC ERROR");
+		//			throw new Exception("RPC ERROR");
+		//			//return _rpcResult;
+		//		}
+		//		Console.WriteLine("SendTransaction==>rpc result");
+		//		//After call RPC,update transaction Hash to DB 
+		//		EthRPCJson.Getter _getter = new EthRPCJson.Getter(_rpcResult.Data);
+		//		blockchainTransaction.Hash = _getter.result.ToString();
+		//		blockchainTransactionWhere = new EthereumWithdrawTransaction()
+		//		{
+		//			Id = blockchainTransaction.Id,
 
-				};
-				_updateQuery = new Dictionary<string, string>();
-				_updateQuery.Add(nameof(blockchainTransactionWhere.Id), blockchainTransactionWhere.Id);
-				_resultExcuteSQL = ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, _updateQuery), transaction);
-				ethereumwithdrawRepo.TransactionCommit(transaction);
-				return _resultExcuteSQL;
+		//		};
+		//		_updateQuery = new Dictionary<string, string>();
+		//		_updateQuery.Add(nameof(blockchainTransactionWhere.Id), blockchainTransactionWhere.Id);
+		//		_resultExcuteSQL = ethereumwithdrawRepo.ExcuteSQL(ethereumwithdrawRepo.Query_Update(blockchainTransaction, _updateQuery), transaction);
+		//		ethereumwithdrawRepo.TransactionCommit(transaction);
+		//		return _resultExcuteSQL;
 
 
-			}
-			catch (Exception e)
-			{
-				ethereumwithdrawRepo.TransactionRollback(transaction);
-				return new ReturnObject
-				{
-					Status = Status.StatusError,
-					Message = e.Message
-				};
-			}
-		}
+		//	}
+		//	catch (Exception e)
+		//	{
+		//		ethereumwithdrawRepo.TransactionRollback(transaction);
+		//		return new ReturnObject
+		//		{
+		//			Status = Status.StatusError,
+		//			Message = e.Message
+		//		};
+		//	}
+		//}
 
 		public ReturnObject FakePendingTransaction(EthereumWithdrawTransaction blockchainTransaction)
 		{
@@ -207,160 +207,161 @@ namespace Vakapay.EthereumBusiness
 
 		}
 
-		bool isScanning = false;
-		public void AutoScanBlock(WalletBusiness wallet)
-		{
-			Thread scanThread = new Thread(() => DoAutoScanBlock(wallet));
-			scanThread.Start();
+		//bool isScanning = false;
+		//public void AutoScanBlock(WalletBusiness wallet)
+		//{
+		//	Thread scanThread = new Thread(() => DoAutoScanBlock(wallet));
+		//	scanThread.Start();
 
 
-		}
-		void DoAutoScanBlock(WalletBusiness wallet)
-		{
-			while (true)
+		//}
+		//void DoAutoScanBlock(WalletBusiness wallet)
+		//{
+		//	while (true)
 
-			{
+		//	{
 
-				Console.WriteLine("is scan=" + isScanning);
-				if (!isScanning)
-					ScanBlock(wallet);
-				Thread.Sleep(5000);
+		//		Console.WriteLine("is scan=" + isScanning);
+		//		if (!isScanning)
+		//			ScanBlock(wallet);
+		//		Thread.Sleep(5000);
 
-			}
-		}
+		//	}
+		//}
 
 		/// <summary>
 		/// Scan all blocks and checkBalance or check transaction inprocess
 		/// </summary>
 		/// <returns></returns>
-		public int ScanBlock(WalletBusiness wallet)
-		{
+		//	public int ScanBlock(WalletBusiness wallet)
+		//	{
 
 
-			Console.WriteLine("START NEW SCAN");
-			isScanning = true;
-			long _time = CommonHelper.GetUnixTimestamp();
-			//Get lastBlock from last time
-			int LastBlock = -1;
-			int.TryParse(CacheHelper.GetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK), out LastBlock);
-			if (LastBlock < 0)
-				LastBlock = 0;
-			//Get number of block
-			int blockNumber = 0;
-			var _result = ethereumRpc.GetBlockNumber();
-			if (_result.Status == Status.StatusError)
-			{
-				isScanning = false;
-				return 0;
-			}
-			EthRPCJson.Getter _getter = new EthRPCJson.Getter(_result.Data);
-			if (!_getter.result.ToString().HexToInt(out blockNumber))
-			{
-				isScanning = false;
-				return 0;
-			}
-			Console.WriteLine("block number " + blockNumber);
+		//		Console.WriteLine("START NEW SCAN");
+		//		isScanning = true;
+		//		long _time = CommonHelper.GetUnixTimestamp();
+		//		//Get lastBlock from last time
+		//		int LastBlock = -1;
+		//		int.TryParse(CacheHelper.GetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK), out LastBlock);
+		//		if (LastBlock < 0)
+		//			LastBlock = 0;
+		//		//Get number of block
+		//		int blockNumber = 0;
+		//		var _result = ethereumRpc.GetBlockNumber();
+		//		if (_result.Status == Status.StatusError)
+		//		{
+		//			isScanning = false;
+		//			return 0;
+		//		}
+		//		EthRPCJson.Getter _getter = new EthRPCJson.Getter(_result.Data);
+		//		if (!_getter.result.ToString().HexToInt(out blockNumber))
+		//		{
+		//			isScanning = false;
+		//			return 0;
+		//		}
+		//		Console.WriteLine("block number " + blockNumber);
 
-			//Search transactions which need to scan:( inprocess)
-			var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-			EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
-			{
-				InProcess = 1
-			};
-			var searchDic = new Dictionary<string, string>();
-			searchDic.Add(nameof(_searchValue.InProcess), _searchValue.InProcess.ToString());
-			List<EthereumWithdrawTransaction> _transactionInProcess = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(searchDic));
-			if (_transactionInProcess.Count <= 0)
-			{
-				Console.WriteLine("No _transactionInProcess");
-				isScanning = false;
-				return 0;
-			}
+		//		//Search transactions which need to scan:( inprocess)
+		//		var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+		//		EthereumWithdrawTransaction _searchValue = new EthereumWithdrawTransaction()
+		//		{
+		//			InProcess = 1
+		//		};
+		//		var searchDic = new Dictionary<string, string>();
+		//		searchDic.Add(nameof(_searchValue.InProcess), _searchValue.InProcess.ToString());
+		//		List<EthereumWithdrawTransaction> _transactionInProcess = ethereumwithdrawRepo.FindBySql(ethereumwithdrawRepo.Query_Search(searchDic));
+		//		if (_transactionInProcess.Count <= 0)
+		//		{
+		//			Console.WriteLine("No _transactionInProcess");
+		//			isScanning = false;
+		//			return 0;
+		//		}
 
-			//Get list of new block that have transactions
-			List<EthRPCJson.BlockInfor> blocks = new List<EthRPCJson.BlockInfor>();
-			Console.WriteLine("SCAN FROM " + LastBlock + "___" + blockNumber);
-			for (int i = LastBlock; i <= blockNumber; i++)
-			{
-				if (i < 0) continue;
-				_result = ethereumRpc.FindBlockByNumber(i);
-				if (_result.Status == Status.StatusError)
-				{
-					isScanning = false;
-					return 0;
-				}
-				if (_result.Data == null)
-					continue;
-				_getter = new EthRPCJson.Getter(_result.Data);
-				EthRPCJson.BlockInfor _block = JsonHelper.DeserializeObject<EthRPCJson.BlockInfor>(_getter.result.ToString());
-				if (_block.transactions.Length > 0)
-				{
-					blocks.Add(_block);
-				}
-			}
-			CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, blockNumber.ToString());
-			if (blocks.Count <= 0)
-			{
-				Console.WriteLine("NO BLOCK");
-				isScanning = false;
-				return 0;
-			}
-			//Get done,List<> blocks now contains all block that have transaction
+		//		//Get list of new block that have transactions
+		//		List<EthRPCJson.BlockInfor> blocks = new List<EthRPCJson.BlockInfor>();
+		//		Console.WriteLine("SCAN FROM " + LastBlock + "___" + blockNumber);
+		//		for (int i = LastBlock; i <= blockNumber; i++)
+		//		{
+		//			if (i < 0) continue;
+		//			_result = ethereumRpc.FindBlockByNumber(i);
+		//			if (_result.Status == Status.StatusError)
+		//			{
+		//				isScanning = false;
+		//				return 0;
+		//			}
+		//			if (_result.Data == null)
+		//				continue;
+		//			_getter = new EthRPCJson.Getter(_result.Data);
+		//			EthRPCJson.BlockInfor _block = JsonHelper.DeserializeObject<EthRPCJson.BlockInfor>(_getter.result.ToString());
+		//			if (_block.transactions.Length > 0)
+		//			{
+		//				blocks.Add(_block);
+		//			}
+		//		}
+		//		CacheHelper.SetCacheString(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, blockNumber.ToString());
+		//		if (blocks.Count <= 0)
+		//		{
+		//			Console.WriteLine("NO BLOCK");
+		//			isScanning = false;
+		//			return 0;
+		//		}
+		//		//Get done,List<> blocks now contains all block that have transaction
 
 
-			//check Transaction and update:
-			var ethereumWithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-			foreach (EthRPCJson.BlockInfor _block in blocks)
-			{
-				if (_transactionInProcess.Count <= 0)
-				{
-					//SCAN DONE:
-					isScanning = false;
-					return 0;
-				}
-				for (int i = _transactionInProcess.Count - 1; i >= 0; i--)
-				{
-					EthereumWithdrawTransaction _currentPending = _transactionInProcess[i];
-					EthRPCJson.TransactionInfor _trans = _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
-					if (_trans != null)
-					{
-						Console.WriteLine("HELLO " + _currentPending.Hash);
-						_currentPending.BlockNumber = _trans.blockNumber;
-						_currentPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
-						_currentPending.Status = Status.StatusCompleted;
-						ethereumWithdrawRepo.Update(_currentPending);
-						_transactionInProcess.RemoveAt(i);
-					}
+		//		//check Transaction and update:
+		//		var ethereumWithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+		//		foreach (EthRPCJson.BlockInfor _block in blocks)
+		//		{
+		//			if (_transactionInProcess.Count <= 0)
+		//			{
+		//				//SCAN DONE:
+		//				isScanning = false;
+		//				return 0;
+		//			}
+		//			for (int i = _transactionInProcess.Count - 1; i >= 0; i--)
+		//			{
+		//				EthereumWithdrawTransaction _currentPending = _transactionInProcess[i];
+		//				EthRPCJson.TransactionInfor _trans = _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
+		//				if (_trans != null)
+		//				{
+		//					Console.WriteLine("HELLO " + _currentPending.Hash);
+		//					_currentPending.BlockNumber = _trans.blockNumber;
+		//					_currentPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+		//					_currentPending.Status = Status.StatusCompleted;
+		//					ethereumWithdrawRepo.Update(_currentPending);
+		//					_transactionInProcess.RemoveAt(i);
+		//				}
 
-				}
-			}
-			//check wallet balance and update 
-			foreach (EthRPCJson.BlockInfor _block in blocks)
-			{
+		//			}
+		//		}
+		//		//check wallet balance and update 
+		//		foreach (EthRPCJson.BlockInfor _block in blocks)
+		//		{
 
-				foreach (EthRPCJson.TransactionInfor _trans in _block.transactions)
-				{
-					string _toAddress = _trans.to;
-					if (!wallet.CheckExistedAddress(_toAddress))
-					{
-						//logger.Info(to + " is not exist in Wallet!!!");
-						continue;
-					}
-					else
-					{
-						//Console.WriteLine("value" + _trans.value);
-						int _transaValue = 0;
-						if (_trans.value.HexToInt(out _transaValue))
-							wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, NetworkName.ETH);
-					}
-				}
-			}
-			//Update Done
-			_time = CommonHelper.GetUnixTimestamp() - _time;
-			Console.WriteLine(blocks.Count + ",Time=" + _time);
-			isScanning = false;
-			return blocks.Count;
+		//			foreach (EthRPCJson.TransactionInfor _trans in _block.transactions)
+		//			{
+		//				string _toAddress = _trans.to;
+		//				if (!wallet.CheckExistedAddress(_toAddress))
+		//				{
+		//					//logger.Info(to + " is not exist in Wallet!!!");
+		//					continue;
+		//				}
+		//				else
+		//				{
+		//					//Console.WriteLine("value" + _trans.value);
+		//					int _transaValue = 0;
+		//					if (_trans.value.HexToInt(out _transaValue))
+		//						wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, NetworkName.ETH);
+		//				}
+		//			}
+		//		}
+		//		//Update Done
+		//		_time = CommonHelper.GetUnixTimestamp() - _time;
+		//		Console.WriteLine(blocks.Count + ",Time=" + _time);
+		//		isScanning = false;
+		//		return blocks.Count;
 
-		}
+		//	}
+		//}
 	}
 }

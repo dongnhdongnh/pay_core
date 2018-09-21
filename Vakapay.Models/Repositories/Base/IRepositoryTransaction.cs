@@ -9,6 +9,7 @@ namespace Vakapay.Models.Repositories.Base
         BlockchainTransaction FindTransactionPending();
 		List<BlockchainTransaction> FindTransactionsPending();
 		List<BlockchainTransaction> FindTransactionsInProcess();
+		List<BlockchainTransaction> FindTransactionsNotCompleteOnNet();
 		BlockchainTransaction FindTransactionError();
         BlockchainTransaction FindTransactionByStatus(string status);
 		List<BlockchainTransaction> FindTransactionsByStatus(string status);
