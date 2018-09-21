@@ -77,9 +77,9 @@ namespace Vakapay.WalletBusiness
                     Address = null,
                     Balance = 0,
                     Version = 0,
-                    CreatedAt = 0,
+                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     NetworkName = blockchainNetwork.Name,
-                    UpdatedAt = 0,
+                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     UserId = user.Id
                 };
 
@@ -92,11 +92,9 @@ namespace Vakapay.WalletBusiness
             {
                 throw e;
             }
-
-
             //return null;
         }
-
+        
         /// <summary>
         /// Find all wallet of user
         /// </summary>
@@ -132,17 +130,189 @@ namespace Vakapay.WalletBusiness
              *
              * 
              */
-            return null;
-        }
+            
+            try
+            {
+                if (ConnectionDb.State != ConnectionState.Open)
+                {
+                    ConnectionDb.Open();
+                }
+                
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var userRepository =
+                    vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var etherWithdrawTransaction =
+                    vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
 
+                //Validate User status
+                //and validate Network status
+                var walletById = walletRepository.FindById(wallet.Id);
+                var walletByAddress = walletRepository.FindByAddress(toAddress);
+
+                if (walletByAddress == null || walletById == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Address not exists"
+                    };
+                }
+                
+                var userCheck = userRepository.FindById(walletById.UserId);
+                if (userCheck == null || 
+                    userCheck.Status != Status.StatusActive || 
+                    !walletById.NetworkName.Equals(walletByAddress.NetworkName))
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "User Not Found || Not Active || Not same Network"
+                    };
+                
+                // Validate amount
+                if (walletById.Balance < amount)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.StatusError,
+                        Message = "Can't transfer bigger than wallet balance"
+                    };
+                }
+
+                //Update Wallet Balance
+                walletById.Balance -= amount;
+                walletById.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                var updateWallet = walletRepository.Update(walletById);
+                if (updateWallet == null || updateWallet.Status == Status.StatusError)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.StatusError,
+                        Message = "Fail update balance in walletDB"
+                    };
+                }
+
+                //Make new transaction withdraw pending by
+                //insert into ethereumwithdrawtransaction database
+                var etherWithdraw = new EthereumWithdrawTransaction()
+                {
+                    Id = CommonHelper.GenerateUuid(),
+                    Status = Status.StatusPending,
+                    FromAddress = walletById.Address,
+                    ToAddress = toAddress,
+                    Amount = amount,
+                    CreatedAt = CommonHelper.GetUnixTimestamp(),
+                    NetworkName = NetworkName.ETH,
+                    InProcess = 0,
+                    Version = 0
+                };
+                var insertWithdraw = etherWithdrawTransaction.Insert(etherWithdraw);
+                if (insertWithdraw == null ||
+                    insertWithdraw.Status == Status.StatusError)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.StatusError,
+                        Message = "Fail insert to ethereumwithdrawtransaction"
+                    };
+                }
+
+                return insertWithdraw;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+        
+        public ReturnObject UpdateAddressForWallet(string address)
+        {
+            try
+            {
+                //search in DB all wallets have:
+                //network = "Ethereum"
+                //and address = null
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var wallets = walletRepository.FindByAddressAndNetworkName(null, NetworkName.ETH);
+                if (wallets == null || wallets.Count <= 0)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Wallet Not Found"
+                    };
+                }
+
+                //update address
+                foreach (var wallet in wallets)
+                {
+                    wallet.Address = address;
+                    wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    var walletUpdate = walletRepository.Update(wallet);
+                    if (walletUpdate.Status == Status.StatusError)
+                        return new ReturnObject
+                        {
+                            Status = Status.StatusError,
+                            Message = "Update wallet address fail"
+                        };
+                }
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Message = "Add address to wallet complete"
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+        
         public ReturnObject UpdateBalance(string toAddress, decimal addedBlance, string networkName)
         {
-            Console.WriteLine("update blance for " + toAddress + ": " + addedBlance);
-            return new ReturnObject
+            try
             {
-                Status = "Success",
-                Message = ""
-            };
+                if (ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var wallet = walletRepository.FindByAddress(toAddress);
+                if (wallet == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Update fail, Address not exists"
+                    };
+                }
+
+                if (!wallet.NetworkName.Equals(networkName))
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Not same network"
+                    };
+                }
+
+                wallet.Balance += addedBlance;
+                wallet.Version += 1;
+                wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                var result = walletRepository.Update(wallet);
+                return result;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+            
         }
 
         public List<Wallet> GetAllWallet()
@@ -167,7 +337,10 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                var wallet = FindByAddress(addr);
+                if (ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var wallet = walletRepository.FindByAddress(addr);
                 if (wallet != null)
                     return true;
 
@@ -180,35 +353,15 @@ namespace Vakapay.WalletBusiness
             }
         }
 
-        public Wallet FindByAddress(string addr)
+        // check wallet exists or not. Then update balance for this
+        public bool CheckExistedAndUpdateByAddress(string addr, decimal amount, string networkName)
         {
             try
             {
                 if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var result = walletRepository.FindBySql($"SELECT * FROM wallet WHERE Address = '{addr}'");
-
-                if (result.Count > 0 && result.Any())
-                {
-                    return result[0];
-                }
-
-                return null;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
-            }
-        }
-
-        // check wallet exists or not. Then update balance for this
-        public bool CheckExistedAndUpdateByAddress(string addr, decimal amount, string networkName)
-        {
-            try
-            {
-                var wallet = FindByAddressAndNetworkName(addr, networkName);
+                var wallet = walletRepository.FindByAddressAndNetworkName(addr, networkName).SingleOrDefault();
 
                 //check existed
                 if (wallet == null)
@@ -229,24 +382,6 @@ namespace Vakapay.WalletBusiness
             {
                 Console.WriteLine(e);
                 return false;
-            }
-        }
-
-        private Wallet FindByAddressAndNetworkName(string addr, string networkName)
-        {
-            try
-            {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var result = walletRepository.FindByAddress(addr, networkName);
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
             }
         }
 

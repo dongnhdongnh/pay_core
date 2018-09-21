@@ -13,6 +13,6 @@ namespace Vakapay.Models.Entities
         public string Email { get; set; }
         public string SecondPassword { get; set; }
         public string IpWhiteList { get; set; }
-        public int Status { get; set; }
+        public string Status { get; set; }
     }
 }

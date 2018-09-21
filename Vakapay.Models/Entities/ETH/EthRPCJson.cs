@@ -53,7 +53,7 @@ namespace Vakapay.Models.Entities.ETH
 			public string value;
 			public string hash;
 			public string blockHash;
-			public int blockNumber;
+			public string blockNumber;
 			public string transactionIndex;
 			public string gas;
 			public string gasPrice;
@@ -63,7 +63,7 @@ namespace Vakapay.Models.Entities.ETH
 
 		public class BlockInfor
 		{
-			public int number;
+			public string number;
 			public string hash;
 			public TransactionInfor[] transactions;
 			public string transactionsRoot;
