@@ -65,12 +65,25 @@ namespace Vakapay.WalletBusiness
                         Message = "User Not Found"
                     };
                 }
-                    
+                
+                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var existUserNetwork =
+                    walletRepo.FindByUserAndNetwork(user.Id,
+                        blockchainNetwork.Name);
+                if (existUserNetwork != null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "User with NetworkName have already existed"
+                    };
+                }   
                 /*//var ethereum = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory);
                 /*var resultMakeaddress = ethereum.CreateNewAddAddress();
                 if (resultMakeaddress.Status == Status.StatusError)
                     return resultMakeaddress;#1#
                 var address = resultMakeaddress.Data;*/
+                
                 var wallet = new Wallet
                 {
                     Id = CommonHelper.GenerateUuid(),
@@ -82,10 +95,7 @@ namespace Vakapay.WalletBusiness
                     UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     UserId = user.Id
                 };
-
-                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
                 var resultMakeWallet = walletRepo.Insert(wallet);
-
                 return resultMakeWallet;
             }
             catch (Exception e)
@@ -143,6 +153,11 @@ namespace Vakapay.WalletBusiness
                     vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var etherWithdrawTransaction =
                     vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
+                var btcWithdrawTransaction =
+                    vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(ConnectionDb);
+                var vakaWithdrawTransaction =
+                    vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
+                
 
                 //Validate User status
                 //and validate Network status
@@ -194,30 +209,88 @@ namespace Vakapay.WalletBusiness
 
                 //Make new transaction withdraw pending by
                 //insert into ethereumwithdrawtransaction database
-                var etherWithdraw = new EthereumWithdrawTransaction()
+                if (walletById.NetworkName.Equals(NetworkName.ETH))
                 {
-                    Id = CommonHelper.GenerateUuid(),
-                    Status = Status.StatusPending,
-                    FromAddress = walletById.Address,
-                    ToAddress = toAddress,
-                    Amount = amount,
-                    CreatedAt = CommonHelper.GetUnixTimestamp(),
-                    NetworkName = NetworkName.ETH,
-                    InProcess = 0,
-                    Version = 0
-                };
-                var insertWithdraw = etherWithdrawTransaction.Insert(etherWithdraw);
-                if (insertWithdraw == null ||
-                    insertWithdraw.Status == Status.StatusError)
-                {
-                    return new ReturnObject()
+                    var etherWithdraw = new EthereumWithdrawTransaction()
                     {
-                        Status = Status.StatusError,
-                        Message = "Fail insert to ethereumwithdrawtransaction"
+                        Id = CommonHelper.GenerateUuid(),
+                        Status = Status.StatusPending,
+                        FromAddress = walletById.Address,
+                        ToAddress = toAddress,
+                        Amount = amount,
+                        CreatedAt = CommonHelper.GetUnixTimestamp(),
+                        UpdatedAt = CommonHelper.GetUnixTimestamp(),
+                        NetworkName = NetworkName.ETH,
+                        InProcess = 0,
+                        Version = 0
                     };
+                    var insertWithdraw = etherWithdrawTransaction.Insert(etherWithdraw);
+                    if (insertWithdraw == null ||
+                        insertWithdraw.Status == Status.StatusError)
+                    {
+                        return new ReturnObject()
+                        {
+                            Status = Status.StatusError,
+                            Message = "Fail insert to ethereumwithdrawtransaction"
+                        };
+                    }
+                }
+                
+                if (walletById.NetworkName.Equals(NetworkName.BTC))
+                {
+                    var btcWithdraw = new BitcoinWithdrawTransaction()
+                    {
+                        Id = CommonHelper.GenerateUuid(),
+                        Status = Status.StatusPending,
+                        FromAddress = walletById.Address,
+                        ToAddress = toAddress,
+                        Amount = amount,
+                        CreatedAt = CommonHelper.GetUnixTimestamp(),
+                        UpdatedAt = CommonHelper.GetUnixTimestamp(),
+                        NetworkName = NetworkName.BTC,
+                        InProcess = 0,
+                        Version = 0
+                    };
+                    var insertWithdraw = btcWithdrawTransaction.Insert(btcWithdraw);
+                    if (insertWithdraw == null ||
+                        insertWithdraw.Status == Status.StatusError)
+                    {
+                        return new ReturnObject()
+                        {
+                            Status = Status.StatusError,
+                            Message = "Fail insert to BitcoinWithdrawTransaction"
+                        };
+                    }
+                }
+                
+                if (walletById.NetworkName.Equals(NetworkName.VAKA))
+                {
+                    var vakaWithdraw = new VakacoinWithdrawTransaction()
+                    {
+                        Id = CommonHelper.GenerateUuid(),
+                        Status = Status.StatusPending,
+                        FromAddress = walletById.Address,
+                        ToAddress = toAddress,
+                        Amount = amount,
+                        CreatedAt = CommonHelper.GetUnixTimestamp(),
+                        UpdatedAt = CommonHelper.GetUnixTimestamp(),
+                        NetworkName = NetworkName.VAKA,
+                        InProcess = 0,
+                        Version = 0
+                    };
+                    var insertWithdraw = vakaWithdrawTransaction.Insert(vakaWithdraw);
+                    if (insertWithdraw == null ||
+                        insertWithdraw.Status == Status.StatusError)
+                    {
+                        return new ReturnObject()
+                        {
+                            Status = Status.StatusError,
+                            Message = "Fail insert to VakaWithdrawTransaction"
+                        };
+                    }
                 }
 
-                return insertWithdraw;
+                return null;
             }
             catch (Exception e)
             {
