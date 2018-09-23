@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
@@ -15,6 +16,27 @@ namespace Vakapay.UnitTest
 		const String RPCEndpoint = "http://localhost:9900";
 		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 		Vakapay.WalletBusiness.WalletBusiness _walletBusiness;
+		Vakapay.WalletBusiness.WalletBusiness WalletBusiness
+		{
+			get
+			{
+				if (_walletBusiness == null)
+				{
+					var repositoryConfig = new RepositoryConfiguration()
+					{
+						ConnectionString = WalletBussinessTest.ConnectionString
+					};
+
+					var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+					_walletBusiness =
+							new Vakapay.WalletBusiness.WalletBusiness(persistence);
+				}
+
+				return _walletBusiness;
+
+			}
+		}
+
 		Vakapay.EthereumBusiness.EthereumBusiness _ethBus;
 		EthereumRpc _rpcClass;
 		EthereumRpc RPCClass
@@ -97,6 +119,24 @@ namespace Vakapay.UnitTest
 			var resultTest = _walletBusiness.Withdraw(wallet, toAddr, 5);
 			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
+		}
+
+		[TestCase(NetworkName.ETH)]
+		public void GetHistory(string networkName)
+		{
+			var repositoryConfig = new RepositoryConfiguration
+			{
+				ConnectionString = WalletBussinessTest.ConnectionString
+			};
+
+			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory, true);
+			var connection = PersistenceFactory.GetDbConnection();
+
+			var _ethWD = PersistenceFactory.GetEthereumWithdrawTransactionRepository(connection);
+			List<BlockchainTransaction> _trans = _ethBus.GetHistory<EthereumWithdrawTransaction>(_ethWD);
+			Console.WriteLine(_trans.Count);
+			Assert.IsNotNull(_trans);
 		}
 
 		//[Test]

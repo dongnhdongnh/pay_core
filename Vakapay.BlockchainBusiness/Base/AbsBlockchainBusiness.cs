@@ -187,7 +187,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				//		Message = "Cannot Insert Address"
 				//	};
 				//}
-				
+
 				//update address into wallet db
 				var walletBusiness =
 					new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
@@ -219,7 +219,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				//await CreateAddressAsyn<TBlockchainAddress>(repoQuery, rpcClass,
 				//	wallets[0].Id, pass);
 
-				
+
 				return new ReturnObject
 				{
 					Status = result.Status,
@@ -376,6 +376,20 @@ namespace Vakapay.BlockchainBusiness.Base
 					Message = e.Message
 				};
 			}
+		}
+
+		public virtual List<BlockchainTransaction> GetHistory<TBlockchainTransaction>(IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery)
+		{
+			try
+			{
+				return repoQuery.FindTransactionsByStatus(Status.StatusCompleted);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.Message);
+				throw e;
+			}
+
 		}
 	}
 }
