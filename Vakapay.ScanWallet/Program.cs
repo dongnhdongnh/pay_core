@@ -41,7 +41,7 @@ namespace Vakapay.ScanWallet
 				var vakaAddressRepos = repoFactory.GetVakacoinAccountRepository(connection);
 
 				var ethereumBusiness = new EthereumBusiness.EthereumBusiness(repoFactory);
-				var bitcoinBusiness = new BitcoinBusiness.BitcoinBusinessNew(repoFactory);
+				var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(repoFactory);
 				var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(repoFactory);
 
 				//	get all address = null with same networkName of walletId

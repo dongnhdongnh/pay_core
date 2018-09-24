@@ -34,8 +34,8 @@ namespace Vakapay.BitcoinNotifi
                     Password = "wqfgewgewi"
                 };
 
-                // var btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory, bitcoinConnect);
-                var btcBusiness = new BitcoinBusinessNew(persistenceFactory);
+                
+                var btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory);
                 var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
 
                 var transaction = rpc.FindTransactionByHash(args[0]);
@@ -106,7 +106,7 @@ namespace Vakapay.BitcoinNotifi
         /// <param name="transactionModelDetail"></param>
         /// <param name="btcBusiness"></param>
         private static void HandleNotifyDataReceiver(BtcTransactionModel transactionModel,
-            BtcTransactionDetailModel transactionModelDetail, BitcoinBusinessNew btcBusiness)
+            BtcTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBusiness)
         {
             try
             {
@@ -173,7 +173,7 @@ namespace Vakapay.BitcoinNotifi
         /// <param name="btcBusiness"></param>
         /// <param name="currentTime"></param>
         /// <param name="transactionModelDetail"></param>
-        private static void CreateDataEmail(BitcoinBusinessNew btcBusiness, long currentTime,
+        private static void CreateDataEmail(BitcoinBusiness.BitcoinBusiness btcBusiness, long currentTime,
             BtcTransactionDetailModel transactionModelDetail)
         {
             try
@@ -280,7 +280,7 @@ namespace Vakapay.BitcoinNotifi
         /// <param name="transactionModelDetail"></param>
         /// <param name="btcBusiness"></param>
         private static void HandleNotifyDataSend(BtcTransactionModel transactionModel,
-            BtcTransactionDetailModel transactionModelDetail, BitcoinBusinessNew btcBusiness)
+            BtcTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBusiness)
         {
             try
             {
