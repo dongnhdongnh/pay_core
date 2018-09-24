@@ -16,7 +16,7 @@ namespace Vakapay.ScanVakaCoin
     {
         private VakacoinRPC _rpcClient;
         private VakacoinBusiness.VakacoinBusiness _vakacoinBusiness;
-        private WalletBusiness.WalletBusiness _walletBusiness;
+        private IWalletBusiness _walletBusiness;
         private int _blockInterval;
 
         public const String TRANSACTION_STATUS_EXECUTED = "executed";
@@ -30,7 +30,7 @@ namespace Vakapay.ScanVakaCoin
         }
 
         public VakacoinChainHelper(int blockInterval, VakacoinRPC rpcClient,
-            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, WalletBusiness.WalletBusiness walletBusiness)
+            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, IWalletBusiness walletBusiness)
         {
             _blockInterval = blockInterval;
             _rpcClient = rpcClient;

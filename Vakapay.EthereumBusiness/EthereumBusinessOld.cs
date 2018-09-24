@@ -12,7 +12,7 @@ using Vakapay.Models.Entities.ETH;
 namespace Vakapay.EthereumBusiness
 {
 	using BlockchainBusiness;
-	using Vakapay.WalletBusiness;
+	//using Vakapay.WalletBusiness;
 
 	public class EthereumBusinessOld : BlockchainBusiness
 	{

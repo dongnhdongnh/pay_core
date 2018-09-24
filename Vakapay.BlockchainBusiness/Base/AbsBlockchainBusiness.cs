@@ -8,10 +8,13 @@ using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
 
+
 namespace Vakapay.BlockchainBusiness.Base
 {
 	public abstract class AbsBlockchainBusiness
 	{
+
+
 		public IVakapayRepositoryFactory VakapayRepositoryFactory { get; }
 		public IDbConnection DbConnection { get; }
 
@@ -152,7 +155,7 @@ namespace Vakapay.BlockchainBusiness.Base
 		/// <param name="other"></param>
 		/// <typeparam name="TBlockchainTransaction"></typeparam>
 		/// <returns></returns>
-		public virtual async Task<ReturnObject> CreateAddressAsyn<TBlockchainAddress>(
+		public virtual async Task<ReturnObject> CreateAddressAsyn<TBlockchainAddress>(IWalletBusiness wallet,
 			IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
 			string other = "") where TBlockchainAddress : BlockchainAddress
 		{
@@ -190,10 +193,9 @@ namespace Vakapay.BlockchainBusiness.Base
 				//}
 
 				//update address into wallet db
-				var walletBusiness =
-					new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
+				//wallet.WalletBusiness(VakapayRepositoryFactory);
 				var updateWallet =
-					walletBusiness.UpdateAddressForWallet(walletId, address);
+					wallet.UpdateAddressForWallet(walletId, address);
 				if (updateWallet.Status == Status.StatusError)
 				{
 					return new ReturnObject
@@ -238,7 +240,7 @@ namespace Vakapay.BlockchainBusiness.Base
 		}
 
 		public virtual async Task<ReturnObject> ScanBlockAsyn<TWithDraw, TDeposit, TBlockInfor, TTransactionInfor>(string networkName,
-				 WalletBusiness.WalletBusiness wallet,
+				 IWalletBusiness wallet,
 				 IRepositoryBlockchainTransaction<TWithDraw> withdrawRepoQuery,
 				 IRepositoryBlockchainTransaction<TDeposit> depositRepoQuery,
 				 IBlockchainRPC rpcClass)

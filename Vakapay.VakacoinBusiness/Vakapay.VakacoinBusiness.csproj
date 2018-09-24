@@ -10,6 +10,5 @@
     <ProjectReference Include="..\Vakapay.Cryptography\Vakapay.Cryptography.csproj" />
     <ProjectReference Include="..\VakacoinCore\VakaSharp\VakaSharp.csproj" />
     <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
-    <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
   </ItemGroup>
 </Project>

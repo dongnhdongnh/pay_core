@@ -61,10 +61,11 @@ namespace Vakapay.UnitTest
 			PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 			var connection = PersistenceFactory.GetDbConnection();
 			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
+			var _walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
 			var ethAddressRepos = PersistenceFactory.GetEthereumAddressRepository(connection);
 			string walletID = CommonHelper.RandomString(15);
 			string pass = CommonHelper.RandomString(15);
-			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, RPCClass, walletID, pass);
+			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(_walletBusiness, ethAddressRepos, RPCClass, walletID, pass);
 			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}

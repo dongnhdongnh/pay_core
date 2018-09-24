@@ -63,15 +63,15 @@ namespace Vakapay.ScanWallet
 							{
 								case NetworkName.ETH:
 
-									ethereumBusiness.CreateAddressAsyn<EthereumAddress>(ethAddressRepos, new EthereumRpc(RPCEndpoint), wallet.Id, pass);
+									ethereumBusiness.CreateAddressAsyn<EthereumAddress>(_walletBusiness, ethAddressRepos, new EthereumRpc(RPCEndpoint), wallet.Id, pass);
 									break;
 								case NetworkName.BTC:
 
-									bitcoinBusiness.CreateAddressAsyn<BitcoinAddress>(btcAddressRepos, new BitcoinRpc(RPCEndpoint), wallet.Id, pass);
+									bitcoinBusiness.CreateAddressAsyn<BitcoinAddress>(_walletBusiness, btcAddressRepos, new BitcoinRpc(RPCEndpoint), wallet.Id, pass);
 									break;
 								case NetworkName.VAKA:
 
-									vakaBusiness.CreateAddressAsyn<VakacoinAccount>(vakaAddressRepos, new VakacoinRPC(RPCEndpoint), wallet.Id, pass);
+									vakaBusiness.CreateAddressAsyn<VakacoinAccount>(_walletBusiness, vakaAddressRepos, new VakacoinRPC(RPCEndpoint), wallet.Id, pass);
 									break;
 								default:
 									break;
