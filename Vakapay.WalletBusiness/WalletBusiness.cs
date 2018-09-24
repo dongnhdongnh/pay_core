@@ -474,5 +474,19 @@ namespace Vakapay.WalletBusiness
 				return null;
 			}
 		}
+
+		public void GetHistory(Wallet wallet)
+		{
+
+			switch (wallet.NetworkName)
+			{
+				case NetworkName.ETH:
+					//ethereumBussiness.GetHistory<EthereumWithdrawTransaction>();
+					break;
+				default:
+					break;
+			}
+
+		}
 	}
 }

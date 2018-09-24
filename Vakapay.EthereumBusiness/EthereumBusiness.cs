@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vakapay.BlockchainBusiness;
 using Vakapay.BlockchainBusiness.Base;
@@ -36,5 +37,25 @@ namespace Vakapay.EthereumBusiness
 				};
 			}
 		}
+
+		public override List<BlockchainTransaction> GetWithdrawHistory()
+		{
+			var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+			return GetHistory<EthereumWithdrawTransaction>(ethereumwithdrawRepo);
+		}
+
+		public override List<BlockchainTransaction> GetDepositHistory()
+		{
+			var ethereumDepositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
+			return GetHistory<EthereumDepositTransaction>(ethereumDepositRepo);
+		}
+
+
+
+		//public override List<BlockchainTransaction> GetWithdrawHistory()
+		//{
+		//	var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+		//	return GetHistory<EthereumWithdrawTransaction>(ethereumwithdrawRepo);
+		//}
 	}
 }

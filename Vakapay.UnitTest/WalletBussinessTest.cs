@@ -50,7 +50,7 @@ namespace Vakapay.UnitTest
 			}
 		}
 
-		[Test]
+		[Test]	
 		public void CreateNewWallet()
 		{
 			var repositoryConfig = new RepositoryConfiguration()

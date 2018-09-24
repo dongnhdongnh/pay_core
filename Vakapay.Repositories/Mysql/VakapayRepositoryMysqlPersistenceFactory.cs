@@ -88,5 +88,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			return new EmailRepository(dbConnection);
 		}
+
+		
 	}
 }

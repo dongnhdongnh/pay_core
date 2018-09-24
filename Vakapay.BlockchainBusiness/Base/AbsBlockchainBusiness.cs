@@ -181,7 +181,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				//	TBlockchainAddress _newAddress = new TBlockchainAddress();
 
 				var resultDB = await repoQuery.InsertAddress(address, walletId, other);
-				
+
 				//
 				//if (result.Status == Status.StatusError)
 				//{
@@ -393,6 +393,15 @@ namespace Vakapay.BlockchainBusiness.Base
 				throw e;
 			}
 
+		}
+
+		public virtual List<BlockchainTransaction> GetWithdrawHistory()
+		{
+			return null;
+		}
+		public virtual List<BlockchainTransaction> GetDepositHistory()
+		{
+			return null;
 		}
 	}
 }
