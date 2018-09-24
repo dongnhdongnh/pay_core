@@ -169,15 +169,16 @@ namespace Vakapay.BlockchainBusiness.Base
 						Message = "Wallet Not Found"
 					};
 
-				var results = rpcClass.CreateNewAddress(other);
-				if (results.Status == Status.StatusError)
-					return results;
+				var resultsRPC = rpcClass.CreateNewAddress(other);
+				if (resultsRPC.Status == Status.StatusError)
+					return resultsRPC;
 
-				var address = results.Data;
+				var address = resultsRPC.Data;
 
 				//	TBlockchainAddress _newAddress = new TBlockchainAddress();
 
-				var result = await repoQuery.InsertAddress(address, walletId, other);
+				var resultDB = await repoQuery.InsertAddress(address, walletId, other);
+				
 				//
 				//if (result.Status == Status.StatusError)
 				//{
@@ -222,8 +223,8 @@ namespace Vakapay.BlockchainBusiness.Base
 
 				return new ReturnObject
 				{
-					Status = result.Status,
-					Message = result.Message
+					Status = resultDB.Status,
+					Message = resultDB.Message
 				};
 			}
 			catch (Exception e)
