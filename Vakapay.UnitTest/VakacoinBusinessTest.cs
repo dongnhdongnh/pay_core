@@ -1126,15 +1126,14 @@ namespace Vakapay.UnitTest
 
             Console.WriteLine(JsonHelper.SerializeObject(outPut));
         }
-        
-        [TestCase(1024)]
-        public void FakePeningTransaction1024MuiltiAddress(int numOfTrans)
+
+        [TestCase(51200)]
+        public void Fake51200PeningTransaction1024MuiltiAddress(int numOfTrans)
         {
             ReturnObject outPut = null;
-            string last = "useraaaaadpp";
-            for (int i = 0; i < 51200; i++)
+            for (int i = 0; i < numOfTrans; i++)
             {
-                var x1 =(char) ('a' + i % 16);
+                var x1 = (char) ('a' + i % 16);
                 var x2 = (char) ('a' + (i / 16) % 16);
                 var x3 = (char) ('a' + (i / 16 / 16) % 4);
                 var from = new string("useraaaaa") + x3 + x2 + x1;
@@ -1142,20 +1141,32 @@ namespace Vakapay.UnitTest
                 _vb.FakePendingTransaction(new VakacoinWithdrawTransaction()
                 {
                     FromAddress = from,
-                    //ToAddress   = last,
-                    ToAddress   = "useraaaaaeel",
+                    ToAddress = "useraaaaaeel",
                     Amount = (decimal) 0.0001
                 });
-                last = from;
-//                if (i == 1023)
-//                {
-//                    i = -1;
-//                }
+            }
+        }
+
+        [TestCase(1024)]
+        public void CheckResultSendingFake51200PeningTransaction1024MuiltiAddress(int numOfTrans)
+        {
+            ReturnObject outPut = null;
+            string last = "useraaaaadpp";
+            var rpc = new VakacoinRPC("http://127.0.0.1:8000");
+            for (int i = 0; i < 1024; i++)
+            {
+                var x1 = (char) ('a' + i % 16);
+                var x2 = (char) ('a' + (i / 16) % 16);
+                var x3 = (char) ('a' + (i / 16 / 16) % 4);
+                var from = new string("useraaaaa") + x3 + x2 + x1;
+
+                var res = rpc.GetBalance(from);
+                Assert.AreEqual("99.9950 VAKA", res.Data);
             }
 
             Console.WriteLine(JsonHelper.SerializeObject(outPut));
         }
-        
+
         [TestCase(1000)]
         public void FakePeningTransactionOneway(int numOfTrans)
         {
