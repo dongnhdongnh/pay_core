@@ -179,7 +179,7 @@ namespace Vakapay.BitcoinNotifi
             try
             {
                 var emailRepository =
-                    btcBusiness.VakapayRepositoryFactory.GetEmailRepository(btcBusiness.DbConnection);
+                    btcBusiness.VakapayRepositoryFactory.GetSendEmailRepository(btcBusiness.DbConnection);
                 var userRepository = btcBusiness.VakapayRepositoryFactory.GetUserRepository(btcBusiness.DbConnection);
                 var email = userRepository.FindEmailByBitcoinAddress(transactionModelDetail.Address);
                 if (email != null)
