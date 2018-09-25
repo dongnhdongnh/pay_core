@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-	public class VakacoinWithdrawTransaction : IBlockchainTransaction
+	[Table("vakacoinwithdrawtransaction")]
+	public class VakacoinWithdrawTransaction : VakacoinTransaction
 	{
 		//public string Id { get ; set ; }
 		//public string Hash { get ; set ; }

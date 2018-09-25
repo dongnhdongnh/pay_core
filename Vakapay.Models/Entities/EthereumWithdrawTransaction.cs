@@ -5,7 +5,7 @@ using Vakapay.Models.Domains;
 namespace Vakapay.Models.Entities
 {
 	[Table("ethereumwithdrawtransaction")]
-	public class EthereumWithdrawTransaction : IBlockchainTransaction
+	public class EthereumWithdrawTransaction : BlockchainTransaction
 	{
 	}
 }

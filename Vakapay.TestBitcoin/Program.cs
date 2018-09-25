@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -28,59 +29,17 @@ namespace Vakapay.TestBitcoin
                 {
                     Host = "http://127.0.0.1:18443",
                     UserName = "bitcoinrpc",
-                    Password = "wqfgewgewi"
+                    Password = "7bLjxV1CKhNJmdxTUMxTpF4vEemWCp49kMX9CwvZabYi"
                 };
-                var bitcoinRpc = new BitcoinBusiness(PersistenceFactory, bitcoinConnect);
-//                 bitcoinRpc.test("a");
-//                //bitcoinRpc.test("18382a96c79dc20a8b345c4e88708661a887cdfad22f27770638483805359d14");
+               
+                var bitcoinRpc = new BitcoinBusiness(PersistenceFactory);
+                var connection = PersistenceFactory.GetDbConnection();
+                var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
+                var bitcoinRepo = PersistenceFactory.GetBitcoinAddressRepository(connection);
+                var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+                var result = bitcoinRpc.CreateAddressAsyn( walletBusiness, bitcoinRepo, rpc, "0c0f59ef-f14c-4b1f-b18d-ca28055162d5");
+                Console.WriteLine(JsonConvert.SerializeObject(result));
 
-                //address
-//                var address = bitcoinRpc.CreateNewAddAddress("815f09b4-e329-498d-bd0c-c389d0f6fb32");
-//                Console.WriteLine(JsonHelper.SerializeObject(address).ToString());
-                //bitcoinRpc.test("18382a96c79dc20a8b345c4e88708661a887cdfad22f27770638483805359d14");
-
-                //send many
-//                var mutil = new JObject();
-//                mutil.Add("2Mv5zhXas6Erc5bVRoSPXYGvqqoybyrghSS", 1);
-//                mutil.Add("2MskqLDPuAQ4bjmYhWWDNFegys3LCcQDcp9", 2);
-//
-//                var send = bitcoinRpc.Sendmany("", mutil);
-//                Console.WriteLine(JsonHelper.SerializeObject(send));
-                // return;
-//                var tran = bitcoinRpc.TransactionByTxidBlockchain(
-//                    "7ae65806e278251462fae15117fc3193de74918b9e0aedc0b4166a475b3af683");
-
-                //sendfrom 
-//                var sendfrom = bitcoinRpc.SendFrom("", "n1noYY4HBM38MxHN7cxir1fxtq2XjAprWi", 1);
-//                Console.WriteLine(JsonHelper.SerializeObject(sendfrom));
-
-                //sendtoaddress
-                var bitcoinraw = new BitcoinWithdrawTransaction
-                {
-                    Id = CommonHelper.GenerateUuid(),
-                    Hash = "",
-                    BlockNumber = 0,
-                    BlockHash = "",
-                    NetworkName = "Bitcoin",
-                    Amount = 1,
-                    FromAddress = "",
-                    ToAddress = "n1noYY4HBM38MxHN7cxir1fxtq2XjAprWi",
-                    Fee = 0,
-                    CreatedAt = CommonHelper.GetUnixTimestamp(),
-                    UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                    Status = Status.StatusPending,
-                };
-
-                var bitcoinRawTransactionRepo =
-                    bitcoinRpc.Factory.GeBitcoinRawTransactionRepository(bitcoinRpc.Dbconnect);
-                bitcoinRawTransactionRepo.Insert(bitcoinraw);
-                //var send1 = bitcoinRpc.SendTransaction(bitcoinraw);
-                bitcoinRpc.RunSendTransaction();
-//                Console.WriteLine(JsonHelper.SerializeObject(send1).ToString());
-
-
-                //var list = bitcoinRpc.GetlistWallets();
-                // Console.WriteLine(list);
             }
             catch (Exception e)
             {

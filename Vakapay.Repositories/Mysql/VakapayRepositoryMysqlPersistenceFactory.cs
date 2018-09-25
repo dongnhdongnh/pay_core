@@ -50,28 +50,45 @@ namespace Vakapay.Repositories.Mysql
 			return new BitcoinAddressRepository(dbConnection);
 		}
 
-		public IBitcoinRawTransactionRepository GeBitcoinRawTransactionRepository(IDbConnection dbConnection)
+		public IBitcoinRawTransactionRepository GetBitcoinRawTransactionRepository(IDbConnection dbConnection)
 		{
 			return new BitcoinRawTransactionRepository(dbConnection);
+		}
+
+		public IVakacoinAccountRepository GetVakacoinAccountRepository(IDbConnection dbConnection)
+		{
+			return new VakacoinAccountRepository(dbConnection);
 		}
 
 		public IEthereumWithdrawTransactionRepository GetEthereumWithdrawTransactionRepository(IDbConnection dbConnection)
 		{
 			return new EthereumWithdrawnTransactionRepository(dbConnection);
 		}
-
-		public IVakacoinTransactionHistoryRepository GetVakacoinTransactionHistoryRepository(IDbConnection dbConnection)
+		public IEthereumDepositTransactionRepository GetEthereumDepositeTransactionRepository(IDbConnection dbConnection)
 		{
-			return new VakacoinTransactionHistoryRepository(dbConnection);
+			return new EthereumDepositTransactionRepository(dbConnection);
+		}
+
+
+		public IVakacoinWithdrawTransactionRepository GetVakacoinWithdrawTransactionRepository(IDbConnection dbConnection)
+		{
+			return new VakacoinWithdrawTransactionRepository(dbConnection);
+		}
+		
+		public IVakacoinDepositTransactionRepository GetVakacoinDepositTransactionRepository(IDbConnection dbConnection)
+		{
+			return new VakacoinDepositTransactionRepository(dbConnection);
 		}
 		public IBitcoinDepositTransactionRepository GetBitcoinDepositTransactionRepository(IDbConnection dbConnection)
 		{
 			return new BitcoinDepositTransactionRepository(dbConnection);
 		}
 
-		public IPendingVakacoinTransactionRepository GetPendingVakacoinTransactionRepository(IDbConnection dbConnection)
+		public IEmailRepository GetEmailRepository(IDbConnection dbConnection)
 		{
-			return new PendingVakacoinTransactionRepository(dbConnection);
+			return new EmailRepository(dbConnection);
 		}
+
+		
 	}
 }

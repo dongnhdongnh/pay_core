@@ -26,7 +26,7 @@ namespace Vakapay.ApiService.Controllers
 		[HttpGet("Test/{pass}")]
 		public ActionResult<string> Test(string pass)
 		{
-			var oputput = _etheRpc.CreateAddress(pass);
+			var oputput = _etheRpc.CreateNewAddress(pass);
 			return JsonHelper.SerializeObject(oputput);
 		}
 	}

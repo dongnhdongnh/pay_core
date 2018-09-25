@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json.Linq;
-using NLog;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.VakacoinBusiness;
@@ -15,7 +10,7 @@ namespace Vakapay.ScanVakaCoin
 {
     class Program
     {
-        public static void Main(string[] args)
+        public static IConfiguration InitConfiguration()
         {
             string environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
 
@@ -26,18 +21,23 @@ namespace Vakapay.ScanVakaCoin
                 .AddJsonFile("appsettings.json", optional: true)
                 .AddJsonFile($"appsettings.{environment}.json", optional: false);
             
-            IConfiguration configuration = builder.Build();
+            return builder.Build();
+        }
+        public static void Main(string[] args)
+        {
+            IConfiguration configuration = InitConfiguration();
             var repositoryConfig = new RepositoryConfiguration
             {
                 ConnectionString = configuration["ConnectionStrings"],
             };
             VakapayRepositoryMysqlPersistenceFactory persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            VakacoinBusiness.VakacoinBusiness vakacoinBusiness = new VakacoinBusiness.VakacoinBusiness(persistenceFactory);
-            WalletBusiness.WalletBusiness walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
-
-            VakacoinChainHelper helper = new VakacoinChainHelper(Int32.Parse(configuration["Chain:BlockInterval"]));
-            helper.RpcClient = new VakacoinRPC(configuration["Chain:URL"]);
+            VakacoinChainHelper helper = new VakacoinChainHelper(
+                Int32.Parse(configuration["Chain:BlockInterval"]),
+                new VakacoinRPC(configuration["Chain:URL"]),
+                new VakacoinBusiness.VakacoinBusiness(persistenceFactory),
+                new WalletBusiness.WalletBusiness(persistenceFactory)
+            );
             foreach (GetBlockResponse block in helper.StreamBlock())
             {
                 helper.ParseTransaction(block);

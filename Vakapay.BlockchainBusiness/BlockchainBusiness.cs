@@ -17,7 +17,7 @@ namespace Vakapay.BlockchainBusiness
                 : VakapayRepositoryFactory.GetOldConnection();
         }
         
-        public ReturnObject SendTransaction(IBlockchainTransaction blockchainTransaction)
+        public ReturnObject SendTransaction(BlockchainTransaction blockchainTransaction)
         {
             return null;
         }

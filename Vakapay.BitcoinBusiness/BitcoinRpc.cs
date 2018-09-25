@@ -2,17 +2,19 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.BlockchainBusiness;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.BitcoinBusiness
 {
-    public class BitcoinRpc
+    public class BitcoinRpc : IBlockchainRPC
     {
-        public BitcoinRpc()
-        {
-        }
+        private readonly Uri Url;
+
+        private readonly ICredentials Credentials;
 
         public BitcoinRpc(string aSUri, string userName, string password)
         {
@@ -20,11 +22,15 @@ namespace Vakapay.BitcoinBusiness
             Credentials = new NetworkCredential(userName, password);
         }
 
-        public readonly Uri Url;
+		public BitcoinRpc(string rPCEndpoint)
+		{
+			this.rPCEndpoint = rPCEndpoint;
+		}
 
-        public readonly ICredentials Credentials;
+		private IBlockchainRPC _blockchainRpcImplementation;
+		private string rPCEndpoint;
 
-        public ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
+		private ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
         {
             try
             {
@@ -205,6 +211,11 @@ namespace Vakapay.BitcoinBusiness
             {
                 return returnError(e);
             }
+        }
+
+        public ReturnObject GetBlockHaveTransactionByNumber(int i)
+        {
+            throw new NotImplementedException();
         }
 
         public ReturnObject GetConnectionCount()
@@ -649,20 +660,6 @@ namespace Vakapay.BitcoinBusiness
             }
         }
 
-        /**
-         * The getblockhash RPC returns the header hash of a block at the given height in the local best block chain.
-         */
-        public ReturnObject GetBlockHash(int height)
-        {
-            try
-            {
-                return InvokeMethod("getblockhash", height);
-            }
-            catch (Exception e)
-            {
-                return returnError(e);
-            }
-        }
 
         /**
          * The getblockheader RPC gets a block header with a particular header hash from the local block database either as a JSON object or as a serialized block header.
@@ -713,6 +710,86 @@ namespace Vakapay.BitcoinBusiness
                 Status = Status.StatusError,
                 Message = e.Message
             };
+        }
+
+        public string EndPointURL { get; set; }
+
+        public ReturnObject CreateNewAddress(string account)
+        {
+            try
+            {
+                var result = GetNewAddress(account);
+                return result;
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        public ReturnObject CreateNewAddress()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject CreateNewAddress(string privateKey, string publicKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SendRawTransaction(string data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject GetBalance(string address)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ReturnObject SignTransaction(string privateKey, object[] transactionData)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
+        {
+            try
+            {
+                var resultSend = SendToAddress(blockchainTransaction.ToAddress, blockchainTransaction.Amount);
+                return resultSend;
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        /**
+         * The getblockhash RPC returns the header hash of a block at the given height in the local best block chain.
+         */
+        public ReturnObject GetBlockByNumber(int blockNumber)
+        {
+            try
+            {
+                return InvokeMethod("getblockhash", blockNumber);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
+
+        public ReturnObject FindTransactionByHash(string hash)
+        {
+            try
+            {
+                return InvokeMethod("gettransaction", hash);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
         }
     }
 }

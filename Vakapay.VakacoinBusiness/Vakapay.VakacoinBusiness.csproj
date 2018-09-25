@@ -1,16 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="Cryptography.ECDSA.Secp256K1" Version="1.1.2" />
-      <PackageReference Include="NLog" Version="4.5.9" />
-      <PackageReference Include="NLog.Config" Version="4.5.9" />
-      <ProjectReference Include="..\Vakapay.BlockchainBusiness\Vakapay.BlockchainBusiness.csproj" />
-      <ProjectReference Include="..\Vakapay.Cryptography\Vakapay.Cryptography.csproj" />
-      <ProjectReference Include="..\VakacoinCore\VakaSharp\VakaSharp.csproj" />
-    </ItemGroup>
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Cryptography.ECDSA.Secp256K1" Version="1.1.2" />
+    <PackageReference Include="NLog" Version="4.5.9" />
+    <PackageReference Include="NLog.Config" Version="4.5.9" />
+    <ProjectReference Include="..\Vakapay.BlockchainBusiness\Vakapay.BlockchainBusiness.csproj" />
+    <ProjectReference Include="..\Vakapay.Cryptography\Vakapay.Cryptography.csproj" />
+    <ProjectReference Include="..\VakacoinCore\VakaSharp\VakaSharp.csproj" />
+    <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
+  </ItemGroup>
 </Project>

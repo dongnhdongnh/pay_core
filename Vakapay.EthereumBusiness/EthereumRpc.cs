@@ -17,13 +17,14 @@ namespace Vakapay.EthereumBusiness
 	public class EthereumRpc : IBlockchainRPC
 	{
 
+		public string EndPointURL { get; set; }
 		private static string rootAddress = "0x12890d2cce102216644c59dae5baed380d84830c";
 		private static string rootPassword = "password";
-		public string endpointRpc { get; set; }
+
 
 		public EthereumRpc(string url)
 		{
-			endpointRpc = url;
+			EndPointURL = url;
 		}
 
 		/// <summary>
@@ -40,7 +41,7 @@ namespace Vakapay.EthereumBusiness
 				// Set a default policy level for the "http:" and "https" schemes.
 				HttpRequestCachePolicy policy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
 				HttpWebRequest.DefaultCachePolicy = policy;
-				var httpWebRequest = (HttpWebRequest)WebRequest.Create(endpointRpc);
+				var httpWebRequest = (HttpWebRequest)WebRequest.Create(EndPointURL);
 				// Define a cache policy for this request only. 
 				HttpRequestCachePolicy noCachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
 				httpWebRequest.CachePolicy = noCachePolicy;
@@ -105,14 +106,41 @@ namespace Vakapay.EthereumBusiness
 		/// <returns></returns>
 		public ReturnObject SendTransactionWithPassphrase(string From, string ToAddress, decimal amount, string passphrase)
 		{
-			EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
+			try
 			{
-				from = From,
-				to = ToAddress,
-				value = ((int)amount).IntToHex()
-			};
-			//var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
-			return EthereumSendRPC(EthereumRPCList.RPCName.personal_sendTransaction, new Object[] { _sender, passphrase });
+
+				EthRPCJson.TransactionInfor _sender = new EthRPCJson.TransactionInfor()
+				{
+					from = From,
+					to = ToAddress,
+					value = ((int)amount).IntToHex()
+				};
+
+				//var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
+				var _result = EthereumSendRPC(EthereumRPCList.RPCName.personal_sendTransaction, new Object[] { _sender, passphrase });
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+				return new ReturnObject
+				{
+					Status = Status.StatusCompleted,
+					Data = _getter.result.ToString()
+				};
+
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+
 		}
 		/// <summary>
 		/// This function send transaction
@@ -131,16 +159,7 @@ namespace Vakapay.EthereumBusiness
 			};
 			return EthereumSendRPC(EthereumRPCList.RPCName.eth_sendTransaction, new Object[] { _sender });
 		}
-		/// <summary>
-		/// This function will be create ethereum address with password
-		/// return Return Object with data property is address generated
-		/// </summary>
-		/// <param name="password"></param>
-		/// <returns></returns>
-		public ReturnObject CreateAddress(string password)
-		{
-			return EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
-		}
+
 
 		public ReturnObject FindTransactionByBlockNumberAndIndex(int blockNumber, int transactionIndex)
 		{
@@ -148,11 +167,40 @@ namespace Vakapay.EthereumBusiness
 		}
 
 
-		public string EndPointURL { get; set; }
+
 
 		public ReturnObject CreateNewAddress(string password)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				ReturnObject _result = EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
+				Console.WriteLine(_result);
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				else
+				{
+					//	Console.WriteLine();
+					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+					return new ReturnObject
+					{
+						Status = Status.StatusCompleted,
+						Data = _getter.result.ToString()
+					};
+				}
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+
 		}
 
 		public ReturnObject CreateNewAddress()
@@ -185,7 +233,7 @@ namespace Vakapay.EthereumBusiness
 		/// </summary>
 		/// <param name="blockchainTransaction"></param>
 		/// <returns></returns>
-		public async Task<ReturnObject> SendTransactionAsync(IBlockchainTransaction blockchainTransaction)
+		public async Task<ReturnObject> SendTransactionAsync(BlockchainTransaction blockchainTransaction)
 		{
 			try
 			{
@@ -205,13 +253,45 @@ namespace Vakapay.EthereumBusiness
 
 		public ReturnObject GetBlockByNumber(int blockNumber)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				ReturnObject _result = EthereumSendRPC(EthereumRPCList.RPCName.eth_getBlockByNumber, new Object[] { blockNumber.IntToHex(), true });
+				//Console.WriteLine(_result);
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				else
+				{
+					//	Console.WriteLine();
+					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+					return new ReturnObject
+					{
+						Status = Status.StatusCompleted,
+						Data = JsonHelper.SerializeObject(_getter.result)
+					};
+				}
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+
+
 		}
 
 		public async Task<ReturnObject> GetBlockByNumberAsyn(int blockNumber)
 		{
 			throw new NotImplementedException();
 		}
+
+
 
 		public ReturnObject FindTransactionByHash(string hash)
 		{
@@ -240,7 +320,40 @@ namespace Vakapay.EthereumBusiness
 		}
 		public ReturnObject GetBlockNumber()
 		{
-			return EthereumSendRPC(EthereumRPCList.RPCName.eth_blockNumber);
+
+			try
+			{
+				var _result = EthereumSendRPC(EthereumRPCList.RPCName.eth_blockNumber);
+				if (_result.Status == Status.StatusError)
+				{
+
+					return _result;
+				}
+				else
+				{
+					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
+					int _blockNumber = -1;
+					if (!_getter.result.ToString().HexToInt(out _blockNumber))
+					{
+						throw new Exception("cant get int from hex");
+					}
+					return new ReturnObject
+					{
+						Status = Status.StatusCompleted,
+						Data = _blockNumber.ToString()
+					};
+				}
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+			//return 
 		}
 
 	}

@@ -35,8 +35,13 @@ namespace Vakapay.Commons.Helpers
 
 		public static void SetCacheString(String key, String value)
 		{
+
 			CacheDatabase.StringSet(key, value);
 
+		}
+		public static bool HaveKey(RedisKey key)
+		{
+			return CacheDatabase.KeyExists(key);
 		}
 		public static String GetCacheString(String key)
 		{
@@ -44,10 +49,15 @@ namespace Vakapay.Commons.Helpers
 			return CacheDatabase.StringGet(key);
 		}
 
+		public static bool DeleteCacheString(String key)
+		{
+
+			return CacheDatabase.KeyDelete(key);
+		}
 
 		public class CacheKey
 		{
-			public const String KEY_ETH_LASTSCANBLOCK = "KEY_ETH_LASTSCANBLOCK";
+			public const String KEY_SCANBLOCK_LASTSCANBLOCK = "KEY_{0}_LASTSCANBLOCK";
 		}
 	}
 }

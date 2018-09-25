@@ -11,7 +11,15 @@ namespace Vakapay.Models.Domains
 
 	public class NetworkName
 	{
-
+		public static string[] AllNetwork
+		{
+			get
+			{
+				return new string[] { ETH, VAKA, BTC };
+			}
+		}
 		public const string ETH = "Ethereum";
+		public const string VAKA = "VAKA";
+		public const string BTC = "BTC";
 	}
 }

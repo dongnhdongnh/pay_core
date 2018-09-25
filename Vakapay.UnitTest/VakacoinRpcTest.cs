@@ -17,7 +17,7 @@ namespace Vakapay.UnitTest
         
         [TestCase("vaka", true)]
         [TestCase("vaka.n.exist", false)]
-        [TestCase("vaka.n.exist.AccountNameTooLong", false)]
+        [TestCase("ERROR", false)]
         [TestCase("vaka.no.exist.account.name.too.long", false)]
         [TestCase("@@@", false)]
         public void CheckAccountExist(string xyz, bool result)
@@ -40,18 +40,19 @@ namespace Vakapay.UnitTest
                 memo, privatekey).Status);
         }
 
-        [TestCase( Status.StatusError , "useraaaaaaaa")]
-        [TestCase( Status.StatusError , "useraaaaaaa9")]
-        [TestCase( Status.StatusError , "userx")]
-        public void CreateAccount(string status, string username)
+        [TestCase( Status.StatusError , "useraaaaaaaa", "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D")]
+        [TestCase( Status.StatusError , "useraaaaaaa9", "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D")]
+        [TestCase( Status.StatusError , "userx", "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D")]
+        public void CreateAccount(string status, string username, string publicKey)
         {
-            Assert.AreEqual( status, _rpc.CreateAccount(username).Status);
+            Assert.AreEqual( status, _rpc.CreateAccount(username, publicKey).Status);
         }
 
-        [Test]
-        public void CreateRandomAccount()
+        [TestCase( Status.StatusSuccess, "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D")]
+        [TestCase( Status.StatusError, "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4E")]
+        public void CreateRandomAccount(string status, string publicKey)
         {
-            Assert.AreEqual( Status.StatusSuccess, _rpc.CreateRandomAccount().Status);
+            Assert.AreEqual( status, _rpc.CreateRandomAccount(publicKey).Status);
         }
         
         [TestCase( Status.StatusSuccess , "producer111a", "10.0000 VAKA", true)]

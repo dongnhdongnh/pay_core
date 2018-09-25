@@ -1,28 +1,39 @@
 using System;
 using System.Data;
 using MySql.Data.MySqlClient;
+using NLog;
 
 namespace Vakapay.Repositories.Mysql.Base
 {
-    public class MysqlBaseConnection : IDisposable
-    {
-        public MySqlConnection Connection { get; }
+	public class MysqlBaseConnection : IDisposable
+	{
+		public static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+		public string TableName { get; set; }
 
-        public MysqlBaseConnection(string connectionString)
-        {
-            Connection = new MySqlConnection(connectionString);
-        }
+		public MySqlConnection Connection { get; }
 
-        public MysqlBaseConnection(IDbConnection dbConnection)
-        {
-            Connection = dbConnection as MySqlConnection;
-        }
-        
-        public void Dispose()
-        {
-            if (Connection.State == ConnectionState.Open)
-                Connection.Close();
-            this.Connection?.Dispose();
-        }
-    }
+		public MysqlBaseConnection(string connectionString, string tableName)
+		{
+			TableName = tableName;
+			Connection = new MySqlConnection(connectionString);
+		}
+
+		public MysqlBaseConnection(IDbConnection dbConnection, string tableName)
+		{
+			TableName = tableName;
+			Connection = dbConnection as MySqlConnection;
+		}
+
+		protected string GetClassName()
+		{
+			return this.GetType().Name;
+		}
+
+		public void Dispose()
+		{
+			if (Connection.State == ConnectionState.Open)
+				Connection.Close();
+			this.Connection?.Dispose();
+		}
+	}
 }

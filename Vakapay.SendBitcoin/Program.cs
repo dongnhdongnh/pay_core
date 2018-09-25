@@ -1,21 +1,19 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Timers;
 using Microsoft.Extensions.Configuration;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using NLog;
+using Vakapay.BitcoinBusiness;
 
 namespace Vakapay.SendBitcoin
 {
     class Program
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
-        private static Timer _timer;
-        private static BitcoinBusiness.BitcoinBusiness _btcBusiness;
-        private const int TimeInterval = 1000;
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         static void Main()
         {
@@ -23,52 +21,60 @@ namespace Vakapay.SendBitcoin
             {
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("Configs.json");
-                IConfiguration configuration = builder.Build();
+                    .AddJsonFile("setting.json");
+                IConfiguration Configuration = builder.Build();
 
+                var connectionString = Configuration.GetConnectionString("DefaultConnection");
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString =
-                        configuration.GetSection("ConnectionStrings").Value
+                    ConnectionString = connectionString
                 };
-
-                var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
                 var bitcoinConnect = new BitcoinRPCConnect
                 {
-                    Host = configuration.GetSection("EndpointUrl").Value,
-                    UserName = configuration.GetSection("User").Value,
-                    Password = configuration.GetSection("Password").Value
+                    Host = Configuration.GetSection("EndpointUrl").Value,
+                    UserName = Configuration.GetSection("User").Value,
+                    Password = Configuration.GetSection("Password").Value
                 };
-                _btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory, bitcoinConnect);
 
-                SetTimer();
-                Console.ReadLine();
+                for (var i = 0; i < 10; i++)
+                {
+                    Thread ts = new Thread(() => runSend(repositoryConfig, bitcoinConnect));
+                    ts.Start();
+                }
             }
             catch (Exception e)
             {
-                logger.Error(e, "Sendbitcoin exception");
-                throw;
+                Console.WriteLine(e.ToString());
             }
         }
 
-        private static void SetTimer()
+        static void runSend(RepositoryConfiguration repositoryConfig, BitcoinRPCConnect bitcoinConnect)
         {
-            // Create a timer with a two second interval.
-            _timer = new Timer(TimeInterval);
-            // Hook up the Elapsed event for the timer. 
-            _timer.Elapsed += OnTimedEvent;
-            _timer.AutoReset = true;
-            _timer.Enabled = true;
-        }
+            var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-        private static void OnTimedEvent(Object source, ElapsedEventArgs e)
-        {
-            Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-                e.SignalTime);
+            var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(repoFactory);
+            var connection = repoFactory.GetDbConnection();
+            try
+            {
+                while (true)
+                {
+                    Console.WriteLine("Start Send Bitcoin....");
+                    var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
 
-           var result =  _btcBusiness.RunSendTransaction();
-            logger.Debug("RunSendTransaction result : " + JsonHelper.SerializeObject(result));
+                    var bitcoinRepo = repoFactory.GetBitcoinDepositTransactionRepository(connection);
+                    var resultSend = bitcoinBusiness.SendTransactionAsync(bitcoinRepo, rpc, "");
+                    Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
+
+                    Console.WriteLine("Send Bitcoin End...");
+                    Thread.Sleep(1000);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.Error(e, "Send Bitcoin");
+                Console.WriteLine(e.ToString());
+            }
         }
     }
 }
