@@ -66,15 +66,15 @@ namespace Vakapay.UnitTest
 			user.Id = "8377a95b-79b4-4dfb-8e1e-b4833443c306";
 
 			blockChain.Name = NetworkName.ETH;
-			var resultTest = _walletBusiness.CreateNewWallet(user, blockChain);
+			var resultTest = _walletBusiness.CreateNewWallet(user, blockChain.Name);
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
 			blockChain.Name = NetworkName.BTC;
-			_walletBusiness.CreateNewWallet(user, blockChain);
+			_walletBusiness.CreateNewWallet(user, blockChain.Name);
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
 			blockChain.Name = NetworkName.VAKA;
-			_walletBusiness.CreateNewWallet(user, blockChain);
+			_walletBusiness.CreateNewWallet(user, blockChain.Name);
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
 		}
