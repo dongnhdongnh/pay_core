@@ -59,11 +59,11 @@ namespace Vakapay.ScanWallet
 						}
 						else
 						{
-							string pass = CommonHelper.RandomString(15);
 							Task<ReturnObject> task = null;
 							ReturnObject _result = new ReturnObject();
 							foreach (Wallet wallet in _walletNoAddress)
 							{
+								string pass = CommonHelper.RandomString(15);
 								switch (wallet.NetworkName)
 								{
 									case NetworkName.ETH:
