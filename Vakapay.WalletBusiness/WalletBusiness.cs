@@ -112,7 +112,11 @@ namespace Vakapay.WalletBusiness
 			}
 			catch (Exception e)
 			{
-				throw e;
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
 			}
 			//return null;
 		}
@@ -307,7 +311,11 @@ namespace Vakapay.WalletBusiness
 			catch (Exception e)
 			{
 				Console.WriteLine(e);
-				throw;
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
 			}
 		}
 
@@ -386,7 +394,25 @@ namespace Vakapay.WalletBusiness
 			}
 
 		}
+		public Wallet GetWalletByID(String id)
+		{
+			try
+			{
+				if (ConnectionDb.State != ConnectionState.Open)
+					ConnectionDb.Open();
+				var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+				var wallet = walletRepository.FindById(id);
+				if (wallet != null)
+					return wallet;
 
+				return null;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
+		}
 		public List<Wallet> GetAllWallet()
 		{
 			try
@@ -404,6 +430,9 @@ namespace Vakapay.WalletBusiness
 				throw e;
 			}
 		}
+
+		//public List<Wallet> GetWalletByID()
+		//{ }
 
 		public bool CheckExistedAddress(String addr)
 		{
@@ -471,21 +500,40 @@ namespace Vakapay.WalletBusiness
 			catch (Exception e)
 			{
 				Console.WriteLine(e);
-				return null;
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
 			}
 		}
 
-		public void GetHistory(Wallet wallet)
+		/// <summary>
+		/// Get history of wallet
+		/// </summary>
+		/// <param name="wallet">Get from DB</param>
+		/// <param name="offet">-1 for not config</param>
+		/// <param name="limit">-1 for not config</param>
+		/// <param name="orderBy">null for not config</param>
+		public void GetHistory(Wallet wallet, int offet = -1, int limit = -1, string[] orderBy = null)
 		{
-
+			List<BlockchainTransaction> output = new List<BlockchainTransaction>();
 			switch (wallet.NetworkName)
 			{
 				case NetworkName.ETH:
-					//ethereumBussiness.GetHistory<EthereumWithdrawTransaction>();
+					output = ethereumBussiness.GetWithdrawHistory(offet, limit, orderBy);
+					break;
+				case NetworkName.VAKA:
+					output = vakacoinBussiness.GetWithdrawHistory(offet, limit, orderBy);
+					break;
+				case NetworkName.BTC:
+					output = bitcoinBussiness.GetWithdrawHistory(offet, limit, orderBy);
 					break;
 				default:
 					break;
 			}
+
+			Console.WriteLine("get history " + wallet.NetworkName + "_count=_" + output.Count);
 
 		}
 	}

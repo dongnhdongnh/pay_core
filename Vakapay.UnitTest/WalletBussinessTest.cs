@@ -50,7 +50,7 @@ namespace Vakapay.UnitTest
 			}
 		}
 
-		[Test]	
+		[Test]
 		public void CreateNewWallet()
 		{
 			var repositoryConfig = new RepositoryConfiguration()
@@ -98,7 +98,7 @@ namespace Vakapay.UnitTest
 
 			string pass = CommonHelper.RandomString(15);
 			//	var resultTest = _ethBus.CreateNewAddAddress(wallet);
-			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(_walletBusiness,ethAddressRepos, RPCClass, wallet.Id, pass);
+			var outPut = await _ethBus.CreateAddressAsyn<EthereumAddress>(_walletBusiness, ethAddressRepos, RPCClass, wallet.Id, pass);
 			Assert.IsNotNull(outPut);
 		}
 
@@ -123,8 +123,8 @@ namespace Vakapay.UnitTest
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 		}
 
-		[TestCase(NetworkName.ETH)]
-		public void GetHistory(string networkName)
+		[TestCase("64308d79-5523-4fd7-80a1-bba398b62c9b")]
+		public void GetHistory(string walletID)
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
@@ -132,13 +132,16 @@ namespace Vakapay.UnitTest
 			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory, true);
-			var connection = PersistenceFactory.GetDbConnection();
+			_walletBusiness =
+					new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
 
-			var _ethWD = PersistenceFactory.GetEthereumWithdrawTransactionRepository(connection);
-			List<BlockchainTransaction> _trans = _ethBus.GetHistory<EthereumWithdrawTransaction>(_ethWD);
-			Console.WriteLine(_trans.Count);
-			Assert.IsNotNull(_trans);
+			var wallet = _walletBusiness.GetWalletByID(walletID);
+			if (wallet == null)
+			{
+				Console.WriteLine("wallet null");
+			}
+			else
+				_walletBusiness.GetHistory(wallet, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
 		}
 
 		//[Test]

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Security;
 using System.Text;
 using Dapper;
+using MySql.Data.MySqlClient;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -15,12 +16,15 @@ namespace Vakapay.Repositories.Mysql
 {
 	public class WalletRepository : MySqlBaseRepository<Wallet>, IWalletRepository
 	{
+		const string TABLENAME = "wallet";
 		public WalletRepository(string connectionString) : base(connectionString)
 		{
+			this.TableName = TABLENAME;
 		}
 
 		public WalletRepository(IDbConnection dbConnection) : base(dbConnection)
 		{
+			this.TableName = TABLENAME;
 		}
 
 		public ReturnObject Update(Wallet objectUpdate)
@@ -138,100 +142,102 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-        public Wallet FindByAddress(string address)
-        {
-            try
-            {
-                string query = $"SELECT * FROM wallet WHERE Address = '{address}'";
-                List<Wallet> wallets = FindBySql(query);
-                if (wallets == null || wallets.Count == 0)
-                    return null;
-                return wallets[0];
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
-            }
-        }
-        
-        public Wallet FindByUserAndNetwork(string userId, string networkName)
-        {
-            try
-            {
-                string query = $"SELECT * FROM wallet WHERE UserId = '{userId}' AND NetworkName = '{networkName}'";
-                List<Wallet> wallets = FindBySql(query);
-                if (wallets == null || wallets.Count == 0)
-                    return null;
-                return wallets.SingleOrDefault();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
-            }
-        }
-        
-        public List<Wallet> FindByAddressAndNetworkName(string address, string networkName)
-        {
-            try
-            {
-                string query;
-                if (address == null)
-                {
-                    query = $"SELECT * FROM wallet WHERE ISNULL(Address) AND NetworkName = '{networkName}'";
-                }
-                else
-                {
-                    query = $"SELECT * FROM wallet WHERE Address = '{address}' AND NetworkName = '{networkName}'";
-                }
-                List<Wallet> wallets = FindBySql(query);
-                if (wallets == null || wallets.Count <= 0)
-                    return null;
-                return wallets;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return null;
-            }
-        }
-
-		public List<Wallet> queryResult(Dictionary<string, string> whereValue, string tableName)
+		public Wallet FindByAddress(string address)
 		{
 			try
 			{
-				StringBuilder whereStr = new StringBuilder("");
-				int count = 0;
-				foreach (var prop in whereValue)
+				string query = $"SELECT * FROM wallet WHERE Address = '{address}'";
+				List<Wallet> wallets = FindBySql(query);
+				if (wallets == null || wallets.Count == 0)
+					return null;
+				return wallets[0];
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
+		}
+
+		public Wallet FindByUserAndNetwork(string userId, string networkName)
+		{
+			try
+			{
+				string query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND NetworkName = '{networkName}'";
+				List<Wallet> wallets = FindBySql(query);
+				if (wallets == null || wallets.Count == 0)
+					return null;
+				return wallets.SingleOrDefault();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
+		}
+
+
+		/// <summary>
+		/// Search wallet by address and nwName
+		/// </summary>
+		/// <param name="address">Null for null address</param>
+		/// <param name="networkName">Null for all networkName</param>
+		/// <returns></returns>
+		public List<Wallet> FindByAddressAndNetworkName(string address, string networkName)
+		{
+			try
+			{
+				string query;
+				if (networkName != null)
 				{
-					if (prop.Value != null)
+					if (address == null)
 					{
-						if (count > 0)
-							whereStr.Append(" AND ");
-						whereStr.AppendFormat(" {0}='{1}'", prop.Key, prop.Value);
-						count++;
+						query = $"SELECT * FROM {TableName} WHERE ISNULL(Address) AND NetworkName = '{networkName}'";
+					}
+					else
+					{
+						query = $"SELECT * FROM {TableName} WHERE Address = '{address}' AND NetworkName = '{networkName}'";
 					}
 				}
-
-				string output = string.Format("SELECT * FROM {0} WHERE {1}", tableName, whereStr);
-
-				List<Wallet> wallets = FindBySql(output);
-				if (wallets == null || wallets.Count == 0)
+				else
+				{
+					query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
+				}
+				List<Wallet> wallets = FindBySql(query);
+				if (wallets == null || wallets.Count <= 0)
 					return null;
 				return wallets;
 			}
 			catch (Exception e)
 			{
+				Console.WriteLine(e);
 				return null;
 			}
 		}
+
 
 		public List<Wallet> FindNullAddress()
 		{
 			try
 			{
 				string query = $"SELECT * FROM wallet WHERE ISNULL(Address)";
+				List<Wallet> wallets = FindBySql(query);
+				if (wallets == null || wallets.Count <= 0)
+					return null;
+				return wallets;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
+		}
+
+		public List<Wallet> FindAllWalletByUser(User user)
+		{
+			try
+			{
+				string query = $"SELECT * FROM wallet WHERE UserId = '{user.Id}'";
 				List<Wallet> wallets = FindBySql(query);
 				if (wallets == null || wallets.Count <= 0)
 					return null;
