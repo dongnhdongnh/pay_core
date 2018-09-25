@@ -55,8 +55,8 @@ namespace Vakapay.UnitTest
             Assert.AreEqual( status, _rpc.CreateRandomAccount(publicKey).Status);
         }
         
-        [TestCase( Status.StatusSuccess , "producer111a", "10.0000 VAKA", true)]
-        [TestCase( Status.StatusSuccess , "producer111a", "1.0000 VAKA", false)]
+        [TestCase( Status.StatusSuccess , "useraaaaaeek", "100.0000 VAKA", true)]
+        [TestCase( Status.StatusSuccess , "useraaaaaeek", "1.0000 VAKA", false)]
         [TestCase( Status.StatusError , "vaka.n.exist", "10.0000 VAKA", false)]
         public void GetCurrencyBalance(string status, string username, string amount, bool equal)
         {

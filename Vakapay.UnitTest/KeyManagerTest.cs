@@ -14,8 +14,12 @@ namespace Vakapay
         [Test]
         public void GetVakaPublicKey()
         {
-            const string privateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr";
-            const string publicKey = "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D";
+            string privateKey = "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr";
+            string publicKey = "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D";
+            Assert.AreEqual(KeyManager.GetVakaPublicKey(privateKey), publicKey);
+
+            privateKey = "5KgsBi4ZomsE48s9ZZxntUvFkQyX5v2QooZrApKu3KezVoJQ7Fv";
+            publicKey = "VAKA8RGpND31im9KpWJxm64kAbvVtjZQB6w5BujcvBDY58bvjT6RgH";
             Assert.AreEqual(KeyManager.GetVakaPublicKey(privateKey), publicKey);
         }
     }

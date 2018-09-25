@@ -44,7 +44,7 @@ namespace Vakapay.SendVakacoin
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
             var business = new VakacoinBusiness.VakacoinBusiness(repoFactory);
-            var connection = repoFactory.GetDbConnection();
+            var connection = repoFactory.GetOldConnection() ?? repoFactory.GetDbConnection();
             try
             {
                 while (true)
@@ -61,6 +61,7 @@ namespace Vakapay.SendVakacoin
                         Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
                         
                         Console.WriteLine("Send Vakacoin End...");
+                        Thread.Sleep(100);
                     }
                     catch (Exception e)
                     {
