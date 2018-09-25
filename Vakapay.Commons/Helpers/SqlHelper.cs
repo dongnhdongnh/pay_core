@@ -8,9 +8,10 @@ namespace Vakapay.Commons.Helpers
 	public class SqlHelper
 	{
 
-		public static string Query_Search(string TableName, Dictionary<string, string> whereValue)
+		public static string Query_Search(string TableName, Dictionary<string, string> whereValue, int limit = -1, int offset = -1, string[] orderByValue = null)
 		{
 			StringBuilder whereStr = new StringBuilder("");
+			StringBuilder orderStr = new StringBuilder("");
 			int count = 0;
 			foreach (var prop in whereValue)
 			{
@@ -24,7 +25,32 @@ namespace Vakapay.Commons.Helpers
 			}
 
 			string output = string.Format("SELECT * FROM {0} WHERE {1}", TableName, whereStr);
-			//Console.WriteLine(output);
+			if (orderByValue != null)
+			{
+				count = 0;
+				foreach (var prop in orderByValue)
+				{
+					//if (prop.Value != null)
+					{
+						if (count > 0)
+							orderStr.Append(",");
+						orderStr.AppendFormat(" {0}", prop);
+						count++;
+					}
+				}
+				output += " ORDER BY " + orderStr.ToString();
+			}
+			if (limit > 0)
+			{
+				output += " LIMIT " + limit;
+			}
+			if (offset > 0)
+			{
+				output += " OFFSET " + limit;
+			}
+
+
+			Console.WriteLine(output);
 			return output;
 		}
 
@@ -66,7 +92,7 @@ namespace Vakapay.Commons.Helpers
 		{
 			StringBuilder updateStr = new StringBuilder("");
 			StringBuilder whereStr = new StringBuilder("");
-
+			//StringBuilder orderStr = new StringBuilder("");
 			int count = 0;
 			foreach (var prop in updateValue)
 			{
@@ -91,7 +117,9 @@ namespace Vakapay.Commons.Helpers
 					count++;
 				}
 			}
+
 			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
+
 			//	Console.WriteLine(output);
 			return output;
 		}

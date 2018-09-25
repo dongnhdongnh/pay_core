@@ -381,11 +381,11 @@ namespace Vakapay.BlockchainBusiness.Base
 			}
 		}
 
-		public virtual List<BlockchainTransaction> GetHistory<TBlockchainTransaction>(IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery)
+		public virtual List<BlockchainTransaction> GetHistory<TBlockchainTransaction>(IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, int offset = -1, int limit = -1, string[] orderBy = null)
 		{
 			try
 			{
-				return repoQuery.FindTransactionsByStatus(Status.StatusCompleted);
+				return repoQuery.FindTransactionHistory(offset, limit, orderBy);
 			}
 			catch (Exception e)
 			{
@@ -395,12 +395,14 @@ namespace Vakapay.BlockchainBusiness.Base
 
 		}
 
-		public virtual List<BlockchainTransaction> GetWithdrawHistory()
+		public virtual List<BlockchainTransaction> GetWithdrawHistory(int offset = -1, int limit = -1, string[] orderBy = null)
 		{
+			Console.WriteLine("Not override");
 			return null;
 		}
-		public virtual List<BlockchainTransaction> GetDepositHistory()
+		public virtual List<BlockchainTransaction> GetDepositHistory(int offset = -1, int limit = -1, string[] orderBy = null)
 		{
+			Console.WriteLine("Not override");
 			return null;
 		}
 	}
