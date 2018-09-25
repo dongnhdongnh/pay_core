@@ -96,7 +96,7 @@ namespace Vakapay.UnitTest
 				Sysbol = "ETH",
 				Id = CommonHelper.GenerateUuid()
 			};
-			var result = WalletBusiness.CreateNewWallet(user, blockChainNetwork);
+			var result = WalletBusiness.CreateNewWallet(user, NetworkName.ETH);
 			Console.WriteLine(JsonHelper.SerializeObject(result));
 			Assert.IsNotNull(result);
 		}

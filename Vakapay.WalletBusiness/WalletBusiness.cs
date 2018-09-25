@@ -55,7 +55,7 @@ namespace Vakapay.WalletBusiness
 		/// <param name="user"></param>
 		/// <param name="blockchainNetwork"></param>
 		/// <returns></returns>
-		public ReturnObject CreateNewWallet(User user, BlockchainNetwork blockchainNetwork)
+		public ReturnObject CreateNewWallet(User user, string blockchainNetwork)
 		{
 			//validate user already have wallet or not
 			//Call Blockchain bussiness for create new address
@@ -81,7 +81,7 @@ namespace Vakapay.WalletBusiness
 				var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
 				var existUserNetwork =
 					walletRepo.FindByUserAndNetwork(user.Id,
-						blockchainNetwork.Name);
+						blockchainNetwork);
 				if (existUserNetwork != null)
 				{
 					return new ReturnObject
@@ -103,7 +103,7 @@ namespace Vakapay.WalletBusiness
 					Balance = 0,
 					Version = 0,
 					CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
-					NetworkName = blockchainNetwork.Name,
+					NetworkName = blockchainNetwork,
 					UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
 					UserId = user.Id
 				};

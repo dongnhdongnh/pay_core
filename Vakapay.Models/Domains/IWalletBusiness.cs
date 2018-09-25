@@ -8,7 +8,7 @@ namespace Vakapay.Models.Domains
 	public interface IWalletBusiness
 	{
 
-		ReturnObject CreateNewWallet(User user, BlockchainNetwork blockchainNetwork);
+		ReturnObject CreateNewWallet(User user, string blockchainNetwork);
 		ReturnObject UpdateAddressForWallet(string walletId, string address);
 		bool CheckExistedAddress(string toAddress);
 		ReturnObject UpdateBalance(string toAddress, decimal transaValue, string eTH);
