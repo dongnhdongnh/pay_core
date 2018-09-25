@@ -50,8 +50,9 @@ namespace Vakapay.UnitTest
 			}
 		}
 
-		[Test]
-		public void CreateNewWallet()
+		[TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c306")]
+		[TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c307")]
+		public void CreateAllWalletForUser(string userID)
 		{
 			var repositoryConfig = new RepositoryConfiguration()
 			{
@@ -63,18 +64,20 @@ namespace Vakapay.UnitTest
 				new Vakapay.WalletBusiness.WalletBusiness(persistence);
 			var user = new User();
 			var blockChain = new BlockchainNetwork();
-			user.Id = "8377a95b-79b4-4dfb-8e1e-b4833443c306";
+			user.Id = userID;
 
-			blockChain.Name = NetworkName.ETH;
-			var resultTest = _walletBusiness.CreateNewWallet(user, blockChain.Name);
-			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
+			//blockChain.Name = NetworkName.ETH;
+			//var resultTest = _walletBusiness.CreateNewWallet(user, blockChain.Name);
+			//Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
-			blockChain.Name = NetworkName.BTC;
-			_walletBusiness.CreateNewWallet(user, blockChain.Name);
-			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
+			//blockChain.Name = NetworkName.BTC;
+			//_walletBusiness.CreateNewWallet(user, blockChain.Name);
+			//Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
-			blockChain.Name = NetworkName.VAKA;
-			_walletBusiness.CreateNewWallet(user, blockChain.Name);
+			//blockChain.Name = NetworkName.VAKA;
+			//_walletBusiness.CreateNewWallet(user, blockChain.Name);
+			var resultTest = _walletBusiness.MakeAllWalletForNewUser(user);
+			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 
 		}

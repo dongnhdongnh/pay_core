@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Dapper;
 using NLog;
 using Vakapay.Models.Domains;
@@ -12,8 +13,6 @@ namespace Vakapay.Repositories.Mysql
 {
     public class UserRepository : MySqlBaseRepository<User>, IUserRepository
     {
-//        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-//        private const string TableName = "user";
         private const string TableNameWallet = "wallet";
         private const string TableNameBitcoinAddress = "bitcoinaddress";
 
@@ -25,20 +24,6 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-//        public ReturnObject Update(User objectUpdate)
-//        {
-//            throw new NotImplementedException();
-//        }
-//
-//        public ReturnObject Delete(string id)
-//        {
-//            throw new NotImplementedException();
-//        }
-//
-//        public ReturnObject Insert(User objectInsert)
-//        {
-//            throw new NotImplementedException();
-//        }
 
         public User FindById(string id)
         {
@@ -58,11 +43,55 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-//        public List<User> FindBySql(string sqlString)
-//        {
-//            throw new NotImplementedException();
-//        }
+        public string QuerySearch(Dictionary<string, string> models)
+        {
+            var sQuery = "SELECT * FROM user WHERE 1 = 1";
+            foreach (var model in models)
+            {
+                sQuery += string.Format(" AND {0}='{1}'", model.Key, model.Value);
+            }
 
+            return sQuery;
+        }
+
+        public User FindWhere(string sql)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var result = Connection.QuerySingle<User>(sql);
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("UserRepository =>> FindWhere fail: " + e.Message);
+                return null;
+            }
+        }
+
+        public ReturnObject Insert(User objectInsert)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                var result = Connection.InsertTask<string, User>(objectInsert);
+                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+                return new ReturnObject
+                {
+                    Status = status,
+                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+                };
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        
         public string FindEmailByBitcoinAddress(string bitcoinAddress)
         {
             try

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vakapay.Models.Entities
 {
-    [Table("emailqueue")]
+    [Table("EmailQueue")]
     public class EmailQueue
     {
         public string Id { get; set; }
@@ -13,5 +13,6 @@ namespace Vakapay.Models.Entities
         public string Status { get; set; }
         public long CreatedAt { get; set; }
         public long UpdatedAt { get; set; }
+        public int Version { get; set; }
     }
 }

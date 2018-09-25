@@ -46,7 +46,33 @@ namespace Vakapay.WalletBusiness
 		/// <returns></returns>
 		public ReturnObject MakeAllWalletForNewUser(User user)
 		{
-			return null;
+			try
+			{
+				foreach (string blockchainName in NetworkName.AllNetwork)
+				{
+					ReturnObject _result = CreateNewWallet(user, blockchainName);
+					if (_result.Status == Status.StatusError)
+					{
+						return _result;
+					}
+				}
+				return new ReturnObject
+				{
+					Status = Status.StatusSuccess,
+					Message = "Create all wallet done"
+				};
+
+			}
+			catch (Exception e)
+			{
+
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+
 		}
 
 		/// <summary>
@@ -87,7 +113,7 @@ namespace Vakapay.WalletBusiness
 					return new ReturnObject
 					{
 						Status = Status.StatusError,
-						Message = "User with NetworkName have already existed"
+						Message = "User with NetworkName have already existed:" + JsonHelper.SerializeObject(existUserNetwork)
 					};
 				}
 				/*//var ethereum = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory);
@@ -126,10 +152,25 @@ namespace Vakapay.WalletBusiness
 		/// </summary>
 		/// <param name="user"></param>
 		/// <returns></returns>
-		public ReturnObject LoadAllWalletByUser(User user)
+		public List<Wallet> LoadAllWalletByUser(User user)
 		{
 			//find wallet by usser
-			return null;
+			try
+			{
+				if (ConnectionDb.State != ConnectionState.Open)
+					ConnectionDb.Open();
+				var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+				var wallet = walletRepository.FindAllWalletByUser(user);
+				if (wallet != null)
+					return wallet;
+
+				return null;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
 		}
 
 		public List<T> FindTransactionWallet<T>(User user, string networkName, int limit, int page, string orderBy)
@@ -170,7 +211,7 @@ namespace Vakapay.WalletBusiness
 				var etherWithdrawTransaction =
 					vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
 				var btcWithdrawTransaction =
-					vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(ConnectionDb);
+					vakapayRepositoryFactory.GetBitcoinRawTransactionRepository(ConnectionDb);
 				var vakaWithdrawTransaction =
 					vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
 

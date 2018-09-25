@@ -50,7 +50,7 @@ namespace Vakapay.Repositories.Mysql
 			return new BitcoinAddressRepository(dbConnection);
 		}
 
-		public IBitcoinRawTransactionRepository GeBitcoinRawTransactionRepository(IDbConnection dbConnection)
+		public IBitcoinRawTransactionRepository GetBitcoinRawTransactionRepository(IDbConnection dbConnection)
 		{
 			return new BitcoinRawTransactionRepository(dbConnection);
 		}
@@ -84,9 +84,9 @@ namespace Vakapay.Repositories.Mysql
 			return new BitcoinDepositTransactionRepository(dbConnection);
 		}
 
-		public IEmailRepository GetEmailRepository(IDbConnection dbConnection)
+		public ISendEmailRepository GetSendEmailRepository(IDbConnection dbConnection)
 		{
-			return new EmailRepository(dbConnection);
+			return new SendEmailRepository(dbConnection);
 		}
 
 		

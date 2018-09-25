@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
@@ -47,39 +48,57 @@ namespace Vakapay.ScanWallet
 				//	get all address = null with same networkName of walletId
 				while (true)
 				{
-					Console.WriteLine("Scan wallet :START");
-					List<Wallet> _walletNoAddress = _walletRepo.FindNullAddress();
-					Console.WriteLine("Scan wallet :START with " + _walletNoAddress.Count);
-					if (_walletNoAddress == null || _walletNoAddress.Count <= 0)
+					try
 					{
-
-					}
-					else
-					{
-						string pass = CommonHelper.RandomString(15);
-						foreach (Wallet wallet in _walletNoAddress)
+						Console.WriteLine("Scan wallet :START");
+						List<Wallet> _walletNoAddress = _walletRepo.FindNullAddress();
+						Console.WriteLine("Scan wallet :START with " + _walletNoAddress.Count);
+						if (_walletNoAddress == null || _walletNoAddress.Count <= 0)
 						{
-							switch (wallet.NetworkName)
+
+						}
+						else
+						{
+							Task<ReturnObject> task = null;
+							ReturnObject _result = new ReturnObject();
+							foreach (Wallet wallet in _walletNoAddress)
 							{
-								case NetworkName.ETH:
-
-									ethereumBusiness.CreateAddressAsyn<EthereumAddress>(_walletBusiness, ethAddressRepos, new EthereumRpc(RPCEndpoint), wallet.Id, pass);
-									break;
-								case NetworkName.BTC:
-
-									bitcoinBusiness.CreateAddressAsyn<BitcoinAddress>(_walletBusiness, btcAddressRepos, new BitcoinRpc(RPCEndpoint), wallet.Id, pass);
-									break;
-								case NetworkName.VAKA:
-
-									vakaBusiness.CreateAddressAsyn<VakacoinAccount>(_walletBusiness, vakaAddressRepos, new VakacoinRPC(RPCEndpoint), wallet.Id, pass);
-									break;
-								default:
-									break;
+								string pass = CommonHelper.RandomString(15);
+								switch (wallet.NetworkName)
+								{
+									case NetworkName.ETH:
+										Console.WriteLine("make eth");
+										task = ethereumBusiness.CreateAddressAsyn<EthereumAddress>(_walletBusiness, ethAddressRepos, new EthereumRpc(RPCEndpoint), wallet.Id, pass);
+										break;
+									case NetworkName.BTC:
+										Console.WriteLine("make btc");
+										task = bitcoinBusiness.CreateAddressAsyn<BitcoinAddress>(_walletBusiness, btcAddressRepos, new BitcoinRpc(RPCEndpoint), wallet.Id, pass);
+										break;
+									case NetworkName.VAKA:
+										Console.WriteLine("make vaka");
+										task = vakaBusiness.CreateAddressAsyn<VakacoinAccount>(_walletBusiness, vakaAddressRepos, new VakacoinRPC(RPCEndpoint), wallet.Id, pass);
+										break;
+									default:
+										break;
+								}
+							}
+							if (task != null)
+							{
+								task.Wait();
+								_result = task.Result;
+								Console.WriteLine(JsonHelper.SerializeObject(_result));
 							}
 						}
+						Console.WriteLine("Scan wallet :END");
+						//Task.
+						Thread.Sleep(1000);
 					}
-					Console.WriteLine("Scan wallet :END");
-					Thread.Sleep(1000);
+					catch (Exception e)
+					{
+						Console.WriteLine(e.ToString());
+						throw;
+					}
+
 
 				}
 			}

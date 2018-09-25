@@ -179,7 +179,7 @@ namespace Vakapay.BitcoinNotifi
             try
             {
                 var emailRepository =
-                    btcBusiness.VakapayRepositoryFactory.GetEmailRepository(btcBusiness.DbConnection);
+                    btcBusiness.VakapayRepositoryFactory.GetSendEmailRepository(btcBusiness.DbConnection);
                 var userRepository = btcBusiness.VakapayRepositoryFactory.GetUserRepository(btcBusiness.DbConnection);
                 var email = userRepository.FindEmailByBitcoinAddress(transactionModelDetail.Address);
                 if (email != null)
@@ -288,7 +288,7 @@ namespace Vakapay.BitcoinNotifi
                 if (transactionModel.Confirmations > 0)
                 {
                     var bitcoinRawTransactionRepository = btcBusiness
-                        .VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(btcBusiness.DbConnection);
+                        .VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(btcBusiness.DbConnection);
 
                     var currentBtcWithdrawTransaction =
                         GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
