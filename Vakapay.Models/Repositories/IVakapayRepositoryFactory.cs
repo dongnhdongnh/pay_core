@@ -18,6 +18,6 @@ namespace Vakapay.Models.Repositories
 		IVakacoinDepositTransactionRepository GetVakacoinDepositTransactionRepository(IDbConnection dbConnection);
 		IVakacoinWithdrawTransactionRepository GetVakacoinWithdrawTransactionRepository(IDbConnection dbConnection);
 		IBitcoinDepositTransactionRepository GetBitcoinDepositTransactionRepository(IDbConnection dbConnection);
-		IEmailRepository GetEmailRepository(IDbConnection dbConnection);
+		ISendEmailRepository GetSendEmailRepository(IDbConnection dbConnection);
 	}
 }
