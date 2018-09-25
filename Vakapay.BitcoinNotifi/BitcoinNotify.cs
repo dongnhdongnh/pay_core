@@ -288,7 +288,7 @@ namespace Vakapay.BitcoinNotifi
                 if (transactionModel.Confirmations > 0)
                 {
                     var bitcoinRawTransactionRepository = btcBusiness
-                        .VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(btcBusiness.DbConnection);
+                        .VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(btcBusiness.DbConnection);
 
                     var currentBtcWithdrawTransaction =
                         GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,

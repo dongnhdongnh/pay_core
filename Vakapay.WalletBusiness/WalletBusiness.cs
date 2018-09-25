@@ -152,10 +152,25 @@ namespace Vakapay.WalletBusiness
 		/// </summary>
 		/// <param name="user"></param>
 		/// <returns></returns>
-		public ReturnObject LoadAllWalletByUser(User user)
+		public List<Wallet> LoadAllWalletByUser(User user)
 		{
 			//find wallet by usser
-			return null;
+			try
+			{
+				if (ConnectionDb.State != ConnectionState.Open)
+					ConnectionDb.Open();
+				var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+				var wallet = walletRepository.FindAllWalletByUser(user);
+				if (wallet != null)
+					return wallet;
+
+				return null;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
 		}
 
 		public List<T> FindTransactionWallet<T>(User user, string networkName, int limit, int page, string orderBy)
@@ -196,7 +211,7 @@ namespace Vakapay.WalletBusiness
 				var etherWithdrawTransaction =
 					vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
 				var btcWithdrawTransaction =
-					vakapayRepositoryFactory.GeBitcoinRawTransactionRepository(ConnectionDb);
+					vakapayRepositoryFactory.GetBitcoinRawTransactionRepository(ConnectionDb);
 				var vakaWithdrawTransaction =
 					vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
 

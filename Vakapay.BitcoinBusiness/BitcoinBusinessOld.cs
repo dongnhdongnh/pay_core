@@ -94,7 +94,7 @@ namespace Vakapay.BitcoinBusiness
             try
             {
                 var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(DbConnection);
 
                 var search =
                     new Dictionary<string, string>
@@ -141,7 +141,7 @@ namespace Vakapay.BitcoinBusiness
             {
                 //check withraw database
                 var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(DbConnection);
 
                 var raw = bitcoinRawTransactionRepo.FindById(blockchainTransaction.Id);
                 if (raw == null)
@@ -236,7 +236,7 @@ namespace Vakapay.BitcoinBusiness
             try
             {
                 var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(DbConnection);
 
                 blockchainTransaction.Version = 0;
                 blockchainTransaction.InProcess = 0;
@@ -287,7 +287,7 @@ namespace Vakapay.BitcoinBusiness
 
 
                 var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(DbConnection);
                 var details = transactionInfo["details"];
 
                 var data = new JArray();
@@ -383,7 +383,7 @@ namespace Vakapay.BitcoinBusiness
 
                 //add database vakaxa
                 var bitcoinRawTransactionRepo =
-                    VakapayRepositoryFactory.GeBitcoinRawTransactionRepository(DbConnection);
+                    VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(DbConnection);
 
                 var time = CommonHelper.GetUnixTimestamp();
                 var rawTransaction = new BitcoinWithdrawTransaction
