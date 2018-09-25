@@ -51,6 +51,7 @@ namespace Vakapay.UnitTest
 		}
 
 		[TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c306")]
+		[TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c307")]
 		public void CreateAllWalletForUser(string userID)
 		{
 			var repositoryConfig = new RepositoryConfiguration()
