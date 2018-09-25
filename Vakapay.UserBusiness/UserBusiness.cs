@@ -56,6 +56,7 @@ namespace Vakapay.UserBusiness
                 if (userCheck == null)
                 {
                     //login first
+                    var time = (int) CommonHelper.GetUnixTimestamp();
                     var newUser = new User
                     {
                         Id = CommonHelper.GenerateUuid(),
@@ -63,6 +64,8 @@ namespace Vakapay.UserBusiness
                         Phone = phone,
                         Fullname = fullName,
                         Status = Status.StatusActive,
+                        CreatedAt = time,
+                        UpdatedAt = time
                     };
 
 

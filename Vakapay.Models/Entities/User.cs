@@ -16,5 +16,7 @@ namespace Vakapay.Models.Entities
         public string SecondPassword { get; set; }
         public string IpWhiteList { get; set; }
         public string Status { get; set; }
+        public int CreatedAt { get; set; }
+        public int UpdatedAt { get; set; }
     }
 }

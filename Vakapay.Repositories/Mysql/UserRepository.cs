@@ -72,13 +72,13 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public ReturnObject Insert(Wallet objectInsert)
+        public ReturnObject Insert(User objectInsert)
         {
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-                var result = Connection.InsertTask<string, Wallet>(objectInsert);
+                var result = Connection.InsertTask<string, User>(objectInsert);
                 var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
                 return new ReturnObject
                 {
