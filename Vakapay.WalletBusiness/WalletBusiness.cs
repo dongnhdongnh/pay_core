@@ -41,6 +41,7 @@ namespace Vakapay.WalletBusiness
 			bitcoinBussiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory);
 			vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory);
 			sendMailBusiness = new SendMailBusiness.SendMailBusiness(vakapayRepositoryFactory);
+			userBusiness = new UserBusiness.UserBusiness(vakapayRepositoryFactory);
 		}
 
 		/// <summary>
@@ -434,9 +435,18 @@ namespace Vakapay.WalletBusiness
 				}
 				else
 				{
-					//send mail:
-					EmailQueue _email = new EmailQueue();
-					//sendMailBusiness.CreateEmailQueueAsync();
+					User user = userBusiness.getUserByID(wallet.UserId);
+					if (user != null)
+					{
+						//send mail:
+						EmailQueue _email = new EmailQueue()
+						{
+							ToEmail = user.Email,
+							Subject = "HELLO BABY",
+							Content = networkName + "+" + addedBlance
+						};
+						sendMailBusiness.CreateEmailQueueAsync(_email);
+					}
 				}
 				return result;
 			}
@@ -517,9 +527,9 @@ namespace Vakapay.WalletBusiness
 			{
 				if (ConnectionDb.State != ConnectionState.Open)
 					ConnectionDb.Open();
-				
+
 				var wallet = FindByAddressAndNetworkName(addr, networkName);
-				
+
 				//check existed
 				if (wallet == null)
 					return false;
@@ -600,7 +610,7 @@ namespace Vakapay.WalletBusiness
 
 			if (wallets == null || !wallets.Any())
 				return null;
-			
+
 			return wallets.SingleOrDefault();
 		}
 
@@ -610,10 +620,10 @@ namespace Vakapay.WalletBusiness
 			var wallet = FindByAddressAndNetworkName(addr, networkName);
 
 			var user = userRepository.FindById(wallet.UserId);
-			
+
 			if (user?.Id == null)
 				return null;
-			
+
 			return user.Email;
 		}
 	}
