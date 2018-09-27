@@ -43,6 +43,7 @@ namespace Vakaxa.VakaxaIdAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseMvc();
         }
     }
