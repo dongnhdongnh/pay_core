@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace Vakapay.Models.Entities
 {
@@ -9,6 +10,7 @@ namespace Vakapay.Models.Entities
         public User()
         {
         }
+
         public string Id { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
@@ -18,5 +20,8 @@ namespace Vakapay.Models.Entities
         public string Status { get; set; }
         public int CreatedAt { get; set; }
         public int UpdatedAt { get; set; }
+
+        public static User FromJson(string json) =>
+            JsonConvert.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
     }
 }
