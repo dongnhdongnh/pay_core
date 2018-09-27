@@ -36,7 +36,8 @@ namespace Vakapay.ScanVakaCoin
                 Int32.Parse(configuration["Chain:BlockInterval"]),
                 new VakacoinRPC(configuration["Chain:URL"]),
                 new VakacoinBusiness.VakacoinBusiness(persistenceFactory),
-                new WalletBusiness.WalletBusiness(persistenceFactory)
+                new WalletBusiness.WalletBusiness(persistenceFactory),
+                new SendMailBusiness.SendMailBusiness(persistenceFactory)
             );
             foreach (GetBlockResponse block in helper.StreamBlock())
             {

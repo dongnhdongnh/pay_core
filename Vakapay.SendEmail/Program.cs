@@ -45,7 +45,7 @@ namespace Vakapay.SendEmail
                 try
                 {
                     var result = sendMailBusiness.SendEmailAsync(apikey, from, fromName, apiAddress);
-                    Console.WriteLine(JsonHelper.SerializeObject(result));
+                    Console.WriteLine(JsonHelper.SerializeObject(result.Result));
                 }
                 catch (Exception e)
                 {

@@ -502,9 +502,9 @@ namespace Vakapay.WalletBusiness
 			{
 				if (ConnectionDb.State != ConnectionState.Open)
 					ConnectionDb.Open();
-				var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-				var wallet = walletRepository.FindByAddressAndNetworkName(addr, networkName).SingleOrDefault();
-
+				
+				var wallet = FindByAddressAndNetworkName(addr, networkName);
+				
 				//check existed
 				if (wallet == null)
 					return false;
@@ -576,6 +576,30 @@ namespace Vakapay.WalletBusiness
 
 			Console.WriteLine("get history " + wallet.NetworkName + "_count=_" + output.Count);
 
+		}
+
+		public Wallet FindByAddressAndNetworkName(string addr, string networkName)
+		{
+			var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+			var wallets = walletRepository.FindByAddressAndNetworkName(addr, networkName);
+
+			if (wallets == null || !wallets.Any())
+				return null;
+			
+			return wallets.SingleOrDefault();
+		}
+
+		public string FindEmailByAddressAndNetworkName(string addr, string networkName)
+		{
+			var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+			var wallet = FindByAddressAndNetworkName(addr, networkName);
+
+			var user = userRepository.FindById(wallet.UserId);
+			
+			if (user?.Id == null)
+				return null;
+			
+			return user.Email;
 		}
 	}
 }

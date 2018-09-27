@@ -36,17 +36,7 @@ namespace Vakapay.SendMailBusiness
             try
             {
                 var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb);
-
-                // check duplicate Id
-                while (true)
-                {
-                    EmailQueue email = sendEmailRepository.FindById(emailQueue.Id);
-                    if (email != null)
-                        emailQueue.Id = CommonHelper.GenerateUuid();
-                    else
-                        break;
-                }
-
+                
                 // save to DB
                 sendEmailRepository.Insert(emailQueue);
 
@@ -76,7 +66,7 @@ namespace Vakapay.SendMailBusiness
                 return new ReturnObject
                 {
                     Status = Status.StatusSuccess,
-                    Message = "Not found pending email"
+                    Message = "Pending email not found"
                 };
 
             if (_connectionDb.State != ConnectionState.Open)

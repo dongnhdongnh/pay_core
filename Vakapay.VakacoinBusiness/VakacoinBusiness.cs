@@ -126,7 +126,6 @@ namespace Vakapay.VakacoinBusiness
 			{
 				if (DbConnection.State != ConnectionState.Open)
 					DbConnection.Open();
-				int currentTimestamp = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
 				var transaction = new VakacoinDepositTransaction
 				{
 					Id = CommonHelper.GenerateUuid(),
@@ -138,8 +137,8 @@ namespace Vakapay.VakacoinBusiness
 					ToAddress = toAddress,
 					Fee = fee,
 					Status = status,
-					CreatedAt = currentTimestamp,
-					UpdatedAt = currentTimestamp,
+					CreatedAt = CommonHelper.GetUnixTimestamp(),
+					UpdatedAt = CommonHelper.GetUnixTimestamp(),
 					InProcess = 0,
 					Version = 0
 				};

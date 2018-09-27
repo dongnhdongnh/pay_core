@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Vakapay.Models.Entities
 {
-    [Table("user")]
+    [Table("User")]
     public class User
     {
         public User()

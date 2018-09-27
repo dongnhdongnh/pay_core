@@ -3,7 +3,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-    [Table("vakacoindeposittransaction")]
+    [Table("VakacoinDepositTransaction")]
     public class VakacoinDepositTransaction : BlockchainTransaction
     {
         public string TrxId { get; set; }

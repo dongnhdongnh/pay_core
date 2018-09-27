@@ -4,7 +4,9 @@ using System.Linq;
 using Newtonsoft.Json;
 using NLog;
 using Vakapay.BlockchainBusiness;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.VakacoinBusiness;
 using VakaSharp.Api.v1;
 using VakaSharp.CustomTypes;
@@ -18,6 +20,7 @@ namespace Vakapay.ScanVakaCoin
         private VakacoinBusiness.VakacoinBusiness _vakacoinBusiness;
         private IWalletBusiness _walletBusiness;
         private int _blockInterval;
+        private SendMailBusiness.SendMailBusiness _sendMailBusiness;
 
         public const String TRANSACTION_STATUS_EXECUTED = "executed";
         public const String TRANSACTION_ACTION_TRANSFER = "transfer";
@@ -30,12 +33,13 @@ namespace Vakapay.ScanVakaCoin
         }
 
         public VakacoinChainHelper(int blockInterval, VakacoinRPC rpcClient,
-            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, IWalletBusiness walletBusiness)
+            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, IWalletBusiness walletBusiness, SendMailBusiness.SendMailBusiness sendMailBusiness)
         {
             _blockInterval = blockInterval;
             _rpcClient = rpcClient;
             _vakacoinBusiness = vakacoinBusiness;
             _walletBusiness = walletBusiness;
+            _sendMailBusiness = sendMailBusiness;
         }
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
@@ -90,6 +94,13 @@ namespace Vakapay.ScanVakaCoin
                 _vakacoinBusiness.CreateDepositTransaction(packedTransaction.Id, (int) blockResponse.BlockNum,
                     transferData.Symbol(), transferData.Amount(), transferData.From, transferData.To, 0,
                     Status.StatusSuccess);
+                
+                //create pending email
+                var createEmailResult = CreatePendingEmail(transferData);
+                if (createEmailResult.Status == Status.StatusSuccess)
+                    logger.Info("Create pending email success");
+                else
+                    logger.Error("Create Pending email error!!!");
 
                 logger.Info(String.Format("{0} was received {1}", transferData.To, transferData.Quantity));
             }
@@ -97,7 +108,7 @@ namespace Vakapay.ScanVakaCoin
 
         public IEnumerable<(Action, PackedTransaction)> GetListAction(GetBlockResponse block)
         {
-            logger.Info(String.Format("Blog number {0} produced on {1}", block.BlockNum, block.Timestamp));
+            logger.Info(String.Format("Block number {0} produced on {1}", block.BlockNum, block.Timestamp));
             foreach (TransactionReceipt transactionReceipt in block.Transactions)
             {
                 if (transactionReceipt.Status != TRANSACTION_STATUS_EXECUTED || transactionReceipt.Trx is String)
@@ -108,6 +119,36 @@ namespace Vakapay.ScanVakaCoin
                 foreach (Action action in packedTransaction.Transaction.Actions)
                     yield return (action, packedTransaction);
             }
+        }
+
+        public ReturnObject CreatePendingEmail(TransferData transferData)
+        {
+            logger.Info("Send email");
+            string address = transferData.To;
+            string toEmail = _walletBusiness.FindEmailByAddressAndNetworkName(address, transferData.Symbol());
+            
+            if (toEmail == null)
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = "Cannot find email address of user!!"
+                };
+            
+            var email = new EmailQueue
+            {
+                Id = CommonHelper.GenerateUuid(),
+                ToEmail = toEmail,
+                Content = "You have received " + transferData.Amount(),
+                Subject = "Balance notification!",
+                Status = Status.StatusPending,
+                CreatedAt = CommonHelper.GetUnixTimestamp(),
+                UpdatedAt = CommonHelper.GetUnixTimestamp(),
+                InProcess = 0,
+                Version = 0
+            };
+
+            var result = _sendMailBusiness.CreateEmailQueueAsync(email);
+            return result.Result;
         }
     }
 }

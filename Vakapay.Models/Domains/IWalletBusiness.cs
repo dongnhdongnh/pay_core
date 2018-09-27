@@ -13,5 +13,6 @@ namespace Vakapay.Models.Domains
 		bool CheckExistedAddress(string toAddress);
 		ReturnObject UpdateBalance(string toAddress, decimal transaValue, string eTH);
 		bool CheckExistedAndUpdateByAddress(string to, decimal v1, string v2);
+		string FindEmailByAddressAndNetworkName(string addr, string networkName);
 	}
 }

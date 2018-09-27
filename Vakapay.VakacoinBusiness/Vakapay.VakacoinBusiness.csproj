@@ -10,5 +10,6 @@
     <ProjectReference Include="..\Vakapay.Cryptography\Vakapay.Cryptography.csproj" />
     <ProjectReference Include="..\VakacoinCore\VakaSharp\VakaSharp.csproj" />
     <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
+    <ProjectReference Include="..\Vakapay.SendMailBusiness\Vakapay.SendMailBusiness.csproj" />
   </ItemGroup>
 </Project>
