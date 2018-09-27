@@ -100,7 +100,7 @@ namespace Vakapay.ScanVakaCoin
                 if (createEmailResult.Status == Status.StatusSuccess)
                     logger.Info("Create pending email success");
                 else
-                    logger.Error("Create Pending email error!!!");
+                    logger.Error("Create Pending email error!!!" + createEmailResult.Message);
 
                 logger.Info(String.Format("{0} was received {1}", transferData.To, transferData.Quantity));
             }
@@ -123,7 +123,7 @@ namespace Vakapay.ScanVakaCoin
 
         public ReturnObject CreatePendingEmail(TransferData transferData)
         {
-            logger.Info("Send email");
+            logger.Info("Create pending email");
             string address = transferData.To;
             string toEmail = _walletBusiness.FindEmailByAddressAndNetworkName(address, transferData.Symbol());
             

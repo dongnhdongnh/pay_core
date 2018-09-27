@@ -32,20 +32,21 @@ namespace Vakapay.Repositories.Mysql
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                string query = "SELECT * FROM user WHERE Id = @ID";
+                string query = "SELECT * FROM User WHERE Id = @ID";
                 var result = Connection.QuerySingle<User>(query, new {ID = id});
 
                 return result;
             }
             catch (Exception e)
             {
+                Console.WriteLine("Exception when find by id " + e);
                 return null;
             }
         }
 
         public string QuerySearch(Dictionary<string, string> models)
         {
-            var sQuery = "SELECT * FROM user WHERE 1 = 1";
+            var sQuery = "SELECT * FROM User WHERE 1 = 1";
             foreach (var model in models)
             {
                 sQuery += string.Format(" AND {0}='{1}'", model.Key, model.Value);
