@@ -10,6 +10,9 @@ using Vakapay.Models.Repositories;
 using Vakapay.EthereumBussiness;
 using Vakapay.BitcoinBusiness;
 using Vakapay.VakacoinBusiness;
+using Vakapay.SendMailBusiness;
+using Vakapay.UserBusiness;
+
 namespace Vakapay.WalletBusiness
 {
 	public class WalletBusiness : IWalletBusiness
@@ -19,7 +22,8 @@ namespace Vakapay.WalletBusiness
 		EthereumBusiness.EthereumBusiness ethereumBussiness;
 		BitcoinBusiness.BitcoinBusiness bitcoinBussiness;
 		VakacoinBusiness.VakacoinBusiness vakacoinBussiness;
-
+		SendMailBusiness.SendMailBusiness sendMailBusiness;
+		UserBusiness.UserBusiness userBusiness;
 		private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
 
 		private readonly IDbConnection ConnectionDb;
@@ -36,6 +40,7 @@ namespace Vakapay.WalletBusiness
 			ethereumBussiness = new EthereumBusiness.EthereumBusiness(_vakapayRepositoryFactory);
 			bitcoinBussiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory);
 			vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory);
+			sendMailBusiness = new SendMailBusiness.SendMailBusiness(vakapayRepositoryFactory);
 		}
 
 		/// <summary>
@@ -423,6 +428,16 @@ namespace Vakapay.WalletBusiness
 				wallet.Version += 1;
 				wallet.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 				var result = walletRepository.Update(wallet);
+				if (result.Status == Status.StatusError)
+				{
+					return result;
+				}
+				else
+				{
+					//send mail:
+					EmailQueue _email = new EmailQueue();
+					//sendMailBusiness.CreateEmailQueueAsync();
+				}
 				return result;
 			}
 			catch (Exception e)

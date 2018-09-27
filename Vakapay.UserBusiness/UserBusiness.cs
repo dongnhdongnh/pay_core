@@ -11,105 +11,129 @@ using Vakapay.Models.Repositories;
 
 namespace Vakapay.UserBusiness
 {
-    public class UserBusiness
-    {
-        private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
+	public class UserBusiness
+	{
+		private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
 
-        private readonly IDbConnection ConnectionDb;
+		private readonly IDbConnection ConnectionDb;
 
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+		private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        private WalletBusiness.WalletBusiness _walletBusiness;
+		//private WalletBusiness.WalletBusiness _walletBusiness;
 
-        public UserBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
-        {
-            vakapayRepositoryFactory = _vakapayRepositoryFactory;
+		public UserBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
+		{
+			vakapayRepositoryFactory = _vakapayRepositoryFactory;
 
-            _walletBusiness = new WalletBusiness.WalletBusiness(vakapayRepositoryFactory);
-            ConnectionDb = isNewConnection
-                ? vakapayRepositoryFactory.GetDbConnection()
-                : vakapayRepositoryFactory.GetOldConnection();
-        }
-
-
-        /// <summary>
-        /// created User and wallet when login first
-        /// </summary>
-        /// <param name="email"></param>
-        /// <param name="phone"></param>
-        /// <param name="fullName"></param>
-        /// <returns></returns>
-        public ReturnObject Login(string email, string phone, string fullName = "")
-        {
-            try
-            {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"Email", email}
-                    };
-
-                var userCheck = userRepository.FindWhere(userRepository.QuerySearch(search));
-
-                if (userCheck == null)
-                {
-                    //login first
-                    var time = (int) CommonHelper.GetUnixTimestamp();
-                    var newUser = new User
-                    {
-                        Id = CommonHelper.GenerateUuid(),
-                        Email = email,
-                        Phone = phone,
-                        Fullname = fullName,
-                        Status = Status.StatusActive,
-                        CreatedAt = time,
-                        UpdatedAt = time
-                    };
+			//_walletBusiness = new WalletBusiness.WalletBusiness(vakapayRepositoryFactory);
+			ConnectionDb = isNewConnection
+				? vakapayRepositoryFactory.GetDbConnection()
+				: vakapayRepositoryFactory.GetOldConnection();
+		}
 
 
-                    //created new user
-                    var resultCreatedUser = userRepository.Insert(newUser);
+		/// <summary>
+		/// created User and wallet when login first
+		/// </summary>
+		/// <param name="email"></param>
+		/// <param name="phone"></param>
+		/// <param name="fullName"></param>
+		/// <returns></returns>
+		public ReturnObject Login(IWalletBusiness walletBusiness, string email, string phone, string fullName = "")
+		{
+			try
+			{
+				var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
 
-                    if (resultCreatedUser.Status == Status.StatusError)
-                        return new ReturnObject
-                        {
-                            Status = Status.StatusError,
-                            Message = "Fail insert to userRepository"
-                        };
+				var search =
+					new Dictionary<string, string>
+					{
+						{"Email", email}
+					};
 
-                    // created wallet
-                    var resultCreatWallet = _walletBusiness.MakeAllWalletForNewUser(newUser);
+				var userCheck = userRepository.FindWhere(userRepository.QuerySearch(search));
 
-                    if (resultCreatWallet.Status == Status.StatusError)
-                        return new ReturnObject
-                        {
-                            Status = Status.StatusError,
-                            Message = "Fail insert wallet"
-                        };
+				if (userCheck == null)
+				{
+					//login first
+					var time = (int)CommonHelper.GetUnixTimestamp();
+					var newUser = new User
+					{
+						Id = CommonHelper.GenerateUuid(),
+						Email = email,
+						Phone = phone,
+						Fullname = fullName,
+						Status = Status.StatusActive,
+						CreatedAt = time,
+						UpdatedAt = time
+					};
 
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusSuccess,
-                        Data = JsonConvert.SerializeObject(newUser)
-                    };
-                }
 
-                return new ReturnObject
-                {
-                    Status = Status.StatusSuccess,
-                    Data = JsonConvert.SerializeObject(userCheck)
-                };
-            }
-            catch (Exception e)
-            {
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = e.Message
-                };
-            }
-        }
-    }
+					//created new user
+					var resultCreatedUser = userRepository.Insert(newUser);
+
+					if (resultCreatedUser.Status == Status.StatusError)
+						return new ReturnObject
+						{
+							Status = Status.StatusError,
+							Message = "Fail insert to userRepository"
+						};
+
+					// created wallet
+					var resultCreatWallet = walletBusiness.MakeAllWalletForNewUser(newUser);
+
+					if (resultCreatWallet.Status == Status.StatusError)
+						return new ReturnObject
+						{
+							Status = Status.StatusError,
+							Message = "Fail insert wallet"
+						};
+
+					return new ReturnObject
+					{
+						Status = Status.StatusSuccess,
+						Data = JsonConvert.SerializeObject(newUser)
+					};
+				}
+
+				return new ReturnObject
+				{
+					Status = Status.StatusSuccess,
+					Data = JsonConvert.SerializeObject(userCheck)
+				};
+			}
+			catch (Exception e)
+			{
+				return new ReturnObject
+				{
+					Status = Status.StatusError,
+					Message = e.Message
+				};
+			}
+		}
+
+		public User getUserByID(string ID)
+		{
+			try
+			{
+				var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+
+				var search =
+					new Dictionary<string, string>
+					{
+						{"Id", ID}
+					};
+
+				var user = userRepository.FindWhere(userRepository.QuerySearch(search));
+				return user;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.ToString());
+				return null;
+
+			}
+
+		}
+	}
 }

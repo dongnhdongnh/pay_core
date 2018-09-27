@@ -18,12 +18,15 @@ namespace Vakapay.BlockchainBusiness.Base
 		public IVakapayRepositoryFactory VakapayRepositoryFactory { get; }
 		public IDbConnection DbConnection { get; }
 
+
+
 		public AbsBlockchainBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
 		{
 			VakapayRepositoryFactory = vakapayRepositoryFactory;
 			DbConnection = isNewConnection
 				? VakapayRepositoryFactory.GetDbConnection()
 				: VakapayRepositoryFactory.GetOldConnection();
+
 		}
 
 		/// <summary>
@@ -358,7 +361,9 @@ namespace Vakapay.BlockchainBusiness.Base
 							//Console.WriteLine("value" + _trans.value);
 							int _transaValue = 0;
 							if (_trans.value.HexToInt(out _transaValue))
-								wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, NetworkName.ETH);
+							{
+								wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, networkName);
+							}
 						}
 					}
 				}

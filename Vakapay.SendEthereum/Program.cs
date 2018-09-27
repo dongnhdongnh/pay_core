@@ -46,7 +46,7 @@ namespace Vakapay.SendEthereum
                     Console.WriteLine("Send Ethereum...");
                     Thread.Sleep(1000);
                 }*/
-				for (var i = 0; i < 10; i++)
+				for (var i = 0; i < 100; i++)
 				{
 					Thread ts = new Thread(() => runSend(repositoryConfig, startTime));
 					ts.Start();

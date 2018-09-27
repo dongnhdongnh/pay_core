@@ -6,6 +6,8 @@
     <ProjectReference Include="..\Vakapay.BitcoinBusiness\Vakapay.BitcoinBusiness.csproj" />
     <ProjectReference Include="..\Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj" />
     <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+    <ProjectReference Include="..\Vakapay.SendMailBusiness\Vakapay.SendMailBusiness.csproj" />
+    <ProjectReference Include="..\Vakapay.UserBusiness\Vakapay.UserBusiness.csproj" />
     <ProjectReference Include="..\Vakapay.VakacoinBusiness\Vakapay.VakacoinBusiness.csproj" />
   </ItemGroup>
   <ItemGroup>

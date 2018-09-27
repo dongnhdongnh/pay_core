@@ -119,6 +119,7 @@ namespace Vakapay.Repositories.Mysql
 		public async Task<ReturnObject> LockForProcess(BlockchainTransaction transaction)
 		{
 			//Console.WriteLine("LockForProcess");
+			int cache = transaction.Version;
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "1");
@@ -126,6 +127,10 @@ namespace Vakapay.Repositories.Mysql
 			_updateQuery.Add(nameof(transaction.Id), transaction.Id);
 			_updateQuery.Add(nameof(transaction.Version), transaction.Version.ToString());
 			_updateQuery.Add(nameof(transaction.InProcess), "0");
+			if (cache != transaction.Version)
+			{
+				Console.WriteLine("fucking error");
+			}
 			return ExcuteSQL(SqlHelper.Query_Update(TableName, _setQuery, _updateQuery));
 
 			//try
@@ -160,6 +165,7 @@ namespace Vakapay.Repositories.Mysql
 		public async Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction)
 		{
 			//Console.WriteLine("ReleaseLock");
+			int cache = transaction.Version;
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "0");
@@ -167,6 +173,10 @@ namespace Vakapay.Repositories.Mysql
 			_updateQuery.Add(nameof(transaction.Id), transaction.Id);
 			_updateQuery.Add(nameof(transaction.Version), transaction.Version.ToString());
 			_updateQuery.Add(nameof(transaction.InProcess), "1");
+			if (cache != transaction.Version)
+			{
+				Console.WriteLine("fucking error");
+			}
 			return ExcuteSQL(SqlHelper.Query_Update(TableName, _setQuery, _updateQuery));
 
 
@@ -202,6 +212,7 @@ namespace Vakapay.Repositories.Mysql
 		public async Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction)
 		{
 			//Console.WriteLine("SafeUpdate");
+			int cache = transaction.Version;
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
 			_setQuery.Add(nameof(transaction.InProcess), "0");
@@ -215,6 +226,10 @@ namespace Vakapay.Repositories.Mysql
 			_updateQuery.Add(nameof(transaction.Id), transaction.Id);
 			_updateQuery.Add(nameof(transaction.Version), transaction.Version.ToString());
 			_updateQuery.Add(nameof(transaction.InProcess), "1");
+			if (cache != transaction.Version)
+			{
+				Console.WriteLine("fucking error");
+			}
 			return ExcuteSQL(SqlHelper.Query_Update(TableName, _setQuery, _updateQuery));
 
 			//try
