@@ -67,11 +67,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VakaSharp", "VakacoinCore\V
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.TestCreateTransaction", "Vakapay.TestCreateTransaction\Vakapay.TestCreateTransaction.csproj", "{087B422B-9943-46A5-906D-E601D7CFFCB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ScanWallet", "Vakapay.ScanWallet\Vakapay.ScanWallet.csproj", "{E73A9F03-4A95-47CE-88A5-161C3F7F7B5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.ScanWallet", "Vakapay.ScanWallet\Vakapay.ScanWallet.csproj", "{E73A9F03-4A95-47CE-88A5-161C3F7F7B5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.SendMailBusiness", "Vakapay.SendMailBusiness\Vakapay.SendMailBusiness.csproj", "{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.SendMailBusiness", "Vakapay.SendMailBusiness\Vakapay.SendMailBusiness.csproj", "{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakaxa.VakaxaIdAPI", "Vakaxa.VakaxaIdAPI\Vakaxa.VakaxaIdAPI.csproj", "{8BCB6ED2-34A3-4FEA-BE09-942A6772AB0F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.WalletBusiness2", "Vakapay.WalletBusiness2\Vakapay.WalletBusiness2.csproj", "{BBD9FFC0-9344-40FD-BEED-FDBEE665C187}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestWalletBuisiness", "Vakapay.TestWalletBuisiness\Vakapay.TestWalletBuisiness.csproj", "{C7C059ED-620B-46D8-BEDA-4F3435B502ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestTransactionsWithdraw", "Vakapay.TestTransactionsWithdraw\Vakapay.TestTransactionsWithdraw.csproj", "{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -191,10 +195,18 @@ Global
 		{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8BCB6ED2-34A3-4FEA-BE09-942A6772AB0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BCB6ED2-34A3-4FEA-BE09-942A6772AB0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BCB6ED2-34A3-4FEA-BE09-942A6772AB0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BCB6ED2-34A3-4FEA-BE09-942A6772AB0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBD9FFC0-9344-40FD-BEED-FDBEE665C187}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBD9FFC0-9344-40FD-BEED-FDBEE665C187}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBD9FFC0-9344-40FD-BEED-FDBEE665C187}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBD9FFC0-9344-40FD-BEED-FDBEE665C187}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7C059ED-620B-46D8-BEDA-4F3435B502ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7C059ED-620B-46D8-BEDA-4F3435B502ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7C059ED-620B-46D8-BEDA-4F3435B502ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7C059ED-620B-46D8-BEDA-4F3435B502ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -226,6 +238,9 @@ Global
 		{087B422B-9943-46A5-906D-E601D7CFFCB3} = {6FFCE6C6-04DD-4035-8C54-41EB236E3CBA}
 		{E73A9F03-4A95-47CE-88A5-161C3F7F7B5C} = {4E6A4058-F824-4EA9-B00B-F3F801881F0E}
 		{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD} = {3AD83376-344D-4C86-A1C9-F1324F4C0541}
+		{BBD9FFC0-9344-40FD-BEED-FDBEE665C187} = {3AD83376-344D-4C86-A1C9-F1324F4C0541}
+		{C7C059ED-620B-46D8-BEDA-4F3435B502ED} = {6FFCE6C6-04DD-4035-8C54-41EB236E3CBA}
+		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5} = {6FFCE6C6-04DD-4035-8C54-41EB236E3CBA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E31696F-3D55-4AE6-AEA3-DEA78FBC8971}
