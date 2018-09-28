@@ -98,7 +98,7 @@ namespace Vakapay.BitcoinBusiness
                                         Data = results["result"].ToString()
                                     };
                                 }
-
+    
                                 return new ReturnObject
                                 {
                                     Status = Status.StatusError,

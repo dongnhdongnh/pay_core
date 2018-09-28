@@ -246,7 +246,7 @@ namespace Vakapay.BitcoinNotifi
         /// <param name="transactionId"></param>
         /// <returns></returns>
         private static BitcoinWithdrawTransaction GetBtcWithdrawTransaction(
-            IBitcoinRawTransactionRepository bitcoinRawTransactionRepository, string address, string transactionId)
+            IBitcoinWithdrawTransactionRepository bitcoinRawTransactionRepository, string address, string transactionId)
         {
             try
             {
@@ -281,7 +281,7 @@ namespace Vakapay.BitcoinNotifi
                 if (transactionModel.Confirmations > 0)
                 {
                     var bitcoinRawTransactionRepository = btcBusiness
-                        .VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(btcBusiness.DbConnection);
+                        .VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(btcBusiness.DbConnection);
 
                     var currentBtcWithdrawTransaction =
                         GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,

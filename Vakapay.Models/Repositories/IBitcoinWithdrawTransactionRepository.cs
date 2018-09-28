@@ -6,7 +6,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IBitcoinRawTransactionRepository : IRepositoryBlockchainTransaction<BitcoinWithdrawTransaction>
+    public interface IBitcoinWithdrawTransactionRepository : IRepositoryBlockchainTransaction<BitcoinWithdrawTransaction>
     {
         List<BitcoinWithdrawTransaction> FindWhere(BitcoinWithdrawTransaction objectTransaction);
         string QuerySearch(Dictionary<string, string> models);

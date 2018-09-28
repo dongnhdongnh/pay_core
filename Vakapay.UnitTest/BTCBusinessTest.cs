@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -66,6 +67,28 @@ namespace Vakapay.UnitTest
             var resultCreated = await btcBus.CreateAddressAsyn<BitcoinAddress>(walletBusiness, bitcoinRepo, RPCClass, walletID);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
+        }
+        
+        [TestCase(10000)]
+        public void FakePeningTransaction(int numOfTrans)
+        {
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = BTCBusinessTest.ConnectionString
+            };
+
+            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            btcBus = new  Vakapay.BitcoinBusiness.BitcoinBusiness(PersistenceFactory);
+            var _trans = new BitcoinWithdrawTransaction
+            {
+                ToAddress = "2Mv5zhXas6Erc5bVRoSPXYGvqqoybyrghSS",
+                Amount = (decimal) 0.0001
+            };
+            ReturnObject outPut = null;
+            for (int i = 0; i < numOfTrans; i++)
+                outPut = btcBus.FakePendingTransaction(_trans);
+            Console.WriteLine(JsonHelper.SerializeObject(outPut));
+            Assert.IsNotNull(outPut);
         }
     }
 }

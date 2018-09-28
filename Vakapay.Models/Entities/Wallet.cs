@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vakapay.Models.Entities
 {
-    [Table("wallet")]
+    [Table("Wallet")]
     public class Wallet
     {
        

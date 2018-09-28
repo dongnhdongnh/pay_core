@@ -25,7 +25,7 @@ namespace Vakapay.BitcoinBusiness
 			try
 			{
 				var bitcoinWithDrawRepo =
-					VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(DbConnection);
+					VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection);
 				blockchainTransaction.Id = CommonHelper.GenerateUuid();
 				blockchainTransaction.Status = Status.StatusPending;
 				blockchainTransaction.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
@@ -45,7 +45,7 @@ namespace Vakapay.BitcoinBusiness
 
 		public override List<BlockchainTransaction> GetWithdrawHistory(int offset = -1, int limit = -1, string[] orderBy = null)
 		{
-			var withdrawRepo = VakapayRepositoryFactory.GetBitcoinRawTransactionRepository(DbConnection);
+			var withdrawRepo = VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection);
 			return GetHistory<BitcoinWithdrawTransaction>(withdrawRepo, offset, limit, orderBy);
 		}
 

@@ -217,7 +217,7 @@ namespace Vakapay.WalletBusiness
 				var etherWithdrawTransaction =
 					vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
 				var btcWithdrawTransaction =
-					vakapayRepositoryFactory.GetBitcoinRawTransactionRepository(ConnectionDb);
+					vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(ConnectionDb);
 				var vakaWithdrawTransaction =
 					vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
 
