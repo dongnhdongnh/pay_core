@@ -4,7 +4,9 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
 
@@ -120,6 +122,16 @@ namespace Vakapay.BlockchainBusiness.Base
 				pendingTransaction.InProcess = 0;
 				pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 				pendingTransaction.Hash = sendTransaction.Data;
+				
+				//create database email when send success
+				if (sendTransaction.Status == Status.StatusSuccess)
+				{
+					var email = GetEmailByAddress(pendingTransaction.FromAddress);
+					CreateDataEmail("Notify send " + pendingTransaction.NetworkName, pendingTransaction.ToAddress,
+						email, pendingTransaction.Amount,
+						Constants.TYPE_EMAIL_SEND, pendingTransaction.NetworkName);
+				}
+				
 				var result = await repoQuery.SafeUpdate(pendingTransaction);
 				if (result.Status == Status.StatusError)
 				{
@@ -409,6 +421,76 @@ namespace Vakapay.BlockchainBusiness.Base
 		{
 			Console.WriteLine("Not override");
 			return null;
+		}
+		
+		/// <summary>
+		/// CreateDataEmail
+		/// </summary>
+		/// <param name="subject"></param>
+		/// <param name="address"></param>
+		/// <param name="email"></param>
+		/// <param name="amount"></param>
+		/// <param name="typeEmail"></param>
+		/// <param name="typeCoin"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
+		public ReturnObject CreateDataEmail(string subject, string address, string email, decimal amount, int typeEmail,
+			string typeCoin)
+		{
+			try
+			{
+				var currentTime = CommonHelper.GetUnixTimestamp();
+				var emailRepository = VakapayRepositoryFactory.GetSendEmailRepository(DbConnection);
+				string content;
+				switch (typeEmail)
+				{
+					case Constants.TYPE_EMAIL_SEND:
+						content = "You just send " + amount + " " + typeCoin + " to the address " + address;
+						break;
+					case Constants.TYPE_EMAIL_RECEIVER:
+						content = "You just receiver " + amount + " " + typeCoin + " from the address " + address;
+						break;
+					default:
+						content = null;
+						break;
+				}
+
+
+				if (email == null || content == null) return null;
+				var emailQueue = new EmailQueue{
+					Id = CommonHelper.GenerateUuid(),
+					ToEmail = email,
+					Content = content,
+					Subject = subject,
+					Status = Status.StatusPending,
+					CreatedAt = currentTime,
+					UpdatedAt = currentTime
+				};
+				var result = emailRepository.Insert(emailQueue);
+				return result;
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+		}
+		/// <summary>
+		/// GetEmailByAddress
+		/// </summary>
+		/// <param name="address"></param>
+		/// <returns></returns>
+		private string GetEmailByAddress(string address)
+		{
+			try
+			{
+				var userRepository = VakapayRepositoryFactory.GetUserRepository(DbConnection);
+				var email = userRepository.FindEmailByBitcoinAddress(address);
+				return email;
+			}
+			catch (Exception e)
+			{
+				return null;
+			}
 		}
 	}
 }
