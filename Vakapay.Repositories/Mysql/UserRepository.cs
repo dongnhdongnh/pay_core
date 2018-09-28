@@ -25,24 +25,24 @@ namespace Vakapay.Repositories.Mysql
         }
 
 
-        public User FindById(string id)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                string query = "SELECT * FROM User WHERE Id = @ID";
-                var result = Connection.QuerySingle<User>(query, new {ID = id});
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception when find by id " + e);
-                return null;
-            }
-        }
+//        public User FindById(string id)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//
+//                string query = "SELECT * FROM User WHERE Id = @ID";
+//                var result = Connection.QuerySingle<User>(query, new {ID = id});
+//
+//                return result;
+//            }
+//            catch (Exception e)
+//            {
+//                Console.WriteLine("Exception when find by id " + e);
+//                return null;
+//            }
+//        }
 
         public string QuerySearch(Dictionary<string, string> models)
         {
@@ -73,26 +73,68 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public ReturnObject Insert(User objectInsert)
+        public string FindEmailBySendTransaction(BlockchainTransaction transaction)
         {
             try
             {
+                var tableName = "";
+                if (transaction.GetType() == typeof(BitcoinWithdrawTransaction))
+                {
+                    tableName = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
+                }
+                else if (transaction.GetType() == typeof(EthereumWithdrawTransaction))
+                {
+                    tableName = SimpleCRUD.GetTableName(typeof(EthereumAddress));
+                }
+                else if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
+                {
+                    tableName = SimpleCRUD.GetTableName(typeof(VakacoinAccount));
+                }
+                else
+                {
+                    tableName = "";
+                }
+
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-                var result = Connection.InsertTask<string, User>(objectInsert);
-                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-                };
+
+                var sQuery = "SELECT Email FROM " + TableName +
+                             " t1 INNER JOIN " + TableNameWallet + " t2 ON t1.Id = t2.UserId INNER JOIN " +
+                             tableName + " t3 ON t2.Id = t3.WalletId " +
+                             "WHERE t3.Address = @Address;";
+
+
+                var result = Connection.QueryFirstOrDefault<string>(sQuery, new {Address = transaction.FromAddress});
+                Logger.Error("UserRepository =>> FindEmailByAddressOfWallet result: " + result);
+                return result;
             }
             catch (Exception e)
             {
-                throw e;
+                Logger.Error("UserRepository =>> FindEmailByAddressOfWallet fail: " + e.Message);
+                return null;
             }
         }
-        
+
+//        public ReturnObject Insert(User objectInsert)
+//        {
+//            try
+//            {
+//                if (Connection.State != ConnectionState.Open)
+//                    Connection.Open();
+//                var result = Connection.InsertTask<string, User>(objectInsert);
+//                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//                return new ReturnObject
+//                {
+//                    Status = status,
+//                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+//                };
+//            }
+//            catch (Exception e)
+//            {
+//                throw e;
+//            }
+//        }
+//        
         public string FindEmailByBitcoinAddress(string bitcoinAddress)
         {
             try

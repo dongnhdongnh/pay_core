@@ -27,7 +27,7 @@ namespace Vakapay.SendVakacoin
                 };
 
                 var nodeUrl = configuration.GetSection("Node")?["Url"];
-                for(var i = 0; i < 10; i++)
+                for(var i = 0; i < 20; i++)
                 {
                     var ts = new Thread(()=>RunSend(repositoryConfig, nodeUrl));
                     ts.Start();

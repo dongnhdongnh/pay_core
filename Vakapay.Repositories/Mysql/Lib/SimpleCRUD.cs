@@ -878,7 +878,7 @@ namespace Dapper
         //Gets the table name for this entity
         //For Inserts and updates we have a whole entity so this method is used
         //Uses class name by default and overrides if the class has a Table attribute
-        private static string GetTableName(object entity)
+        public static string GetTableName(object entity)
         {
             var type = entity.GetType();
             return GetTableName(type);

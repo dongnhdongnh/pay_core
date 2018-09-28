@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories.Base;
 
@@ -9,5 +10,6 @@ namespace Vakapay.Models.Repositories
         string FindEmailByBitcoinAddress(string bitcoinAddress);
         string QuerySearch(Dictionary<string, string> models);
         User FindWhere(string sql);
+        string FindEmailBySendTransaction(BlockchainTransaction transaction);
     }
 }

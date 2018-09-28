@@ -48,7 +48,7 @@ namespace Vakapay.BlockchainBusiness.Base
              * 1. Query Transaction Withdraw pending
              * 2. Update Processing = 1, version = version + 1
              * 3. Commit Transaction
-             * 4. Call RPC send transaction
+             * 4. Call RPC send transaction + Send Email
              * 5. Update Transaction Status
              */
 			// find transaction pending
@@ -126,7 +126,7 @@ namespace Vakapay.BlockchainBusiness.Base
 				//create database email when send success
 				if (sendTransaction.Status == Status.StatusSuccess)
 				{
-					var email = GetEmailByAddress(pendingTransaction.FromAddress);
+					var email = GetEmailByAddress(pendingTransaction);
 					CreateDataEmail("Notify send " + pendingTransaction.NetworkName, pendingTransaction.ToAddress,
 						email, pendingTransaction.Amount,
 						Constants.TYPE_EMAIL_SEND, pendingTransaction.NetworkName);
@@ -477,14 +477,29 @@ namespace Vakapay.BlockchainBusiness.Base
 		/// <summary>
 		/// GetEmailByAddress
 		/// </summary>
-		/// <param name="address"></param>
+		/// <param name="transaction"></param>
 		/// <returns></returns>
-		private string GetEmailByAddress(string address)
+		private string GetEmailByAddress(BlockchainTransaction transaction)
 		{
 			try
 			{
 				var userRepository = VakapayRepositoryFactory.GetUserRepository(DbConnection);
-				var email = userRepository.FindEmailByBitcoinAddress(address);
+				
+				var email = userRepository.FindEmailBySendTransaction(transaction);
+				
+//				if (transation.GetType() == typeof(BitcoinWithdrawTransaction))
+//				{
+//					email = userRepository.FindEmailByBitcoinAddress(transation.FromAddress);
+//				} 
+//				else if (transation.GetType() == typeof(EthereumWithdrawTransaction))
+//				{
+//					email = userRepository.FindEmailByEthereumAddress(transation.FromAddress);
+//				}
+//				else if (transation.GetType() == typeof(VakacoinWithdrawTransaction))
+//				{
+//					email = userRepository.FindEmailByVakacoinAddress(transation.FromAddress);
+//				}
+				
 				return email;
 			}
 			catch (Exception e)
