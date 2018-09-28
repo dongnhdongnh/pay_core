@@ -123,7 +123,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 //create database email when send success
                 if (sendTransaction.Status == Status.StatusSuccess)
                 {
-                    var email = GetEmailByAddress(pendingTransaction.FromAddress);
+                    var email = GetEmailByAddress(pendingTransaction);
                     CreateDataEmail("Notify send " + pendingTransaction.NetworkName,
                         email, pendingTransaction.Amount,
                         Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName,Constants.TYPE_SEND);
@@ -474,14 +474,14 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <summary>
         /// GetEmailByAddress
         /// </summary>
-        /// <param name="address"></param>
+        /// <param name="transaction"></param>
         /// <returns></returns>
-        private string GetEmailByAddress(string address)
+        private string GetEmailByAddress(BlockchainTransaction transaction)
         {
             try
             {
                 var userRepository = VakapayRepositoryFactory.GetUserRepository(DbConnection);
-                var email = userRepository.FindEmailByBitcoinAddress(address);
+                var email = userRepository.FindEmailBySendTransaction(transaction);
                 return email;
             }
             catch (Exception e)
