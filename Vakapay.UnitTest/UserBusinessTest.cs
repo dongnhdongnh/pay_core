@@ -32,7 +32,7 @@ namespace Vakapay.UnitTest
 		}
 
 		const String ConnectionString =
-			"server=localhost;userid=root;password=huan@123;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
+			"server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 
 		UserBusiness.UserBusiness userBus;
 
@@ -50,6 +50,10 @@ namespace Vakapay.UnitTest
 			var userBus = new UserBusiness.UserBusiness(PersistenceFactory);
 			var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
 			var resultCreated = userBus.Login(walletBusiness, "ngochuan2212@gmail.com", "+84988478266", "Ngo Ngoc Huan");
+			Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
+			Assert.IsNotNull(resultCreated);
+			
+			resultCreated = userBus.Login(walletBusiness, "tieuthanhliem@gmail.com", "+84965995710", "Tieu Thanh Liem");
 			Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
 			Assert.IsNotNull(resultCreated);
 		}

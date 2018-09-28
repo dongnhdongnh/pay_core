@@ -123,7 +123,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 //create database email when send success
                 if (sendTransaction.Status == Status.StatusSuccess)
                 {
-                    var email = GetEmailByAddress(pendingTransaction);
+                    var email = GetEmailByTransaction(pendingTransaction);
                     CreateDataEmail("Notify send " + pendingTransaction.NetworkName,
                         email, pendingTransaction.Amount,
                         Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName,Constants.TYPE_SEND);
@@ -476,7 +476,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// </summary>
         /// <param name="transaction"></param>
         /// <returns></returns>
-        private string GetEmailByAddress(BlockchainTransaction transaction)
+        private string GetEmailByTransaction(BlockchainTransaction transaction)
         {
             try
             {

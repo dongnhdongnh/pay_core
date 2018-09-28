@@ -30,5 +30,6 @@ namespace Vakapay.Models.Entities
         public long UpdatedAt { get; set; }
         public int InProcess { get; set; }
         public int Version { get; set; }
+        public string Content { get; set; }
     }
 }

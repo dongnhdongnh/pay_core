@@ -13,15 +13,19 @@ namespace Vakapay.Repositories.Mysql
 {
     public class UserRepository : MySqlBaseRepository<User>, IUserRepository
     {
-        private const string TableNameWallet = "wallet";
-        private const string TableNameBitcoinAddress = "bitcoinaddress";
+        private string TableNameWallet { get; }
+        private string TableNameBitcoinAddress { get; }
 
         public UserRepository(string connectionString) : base(connectionString)
         {
+            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
+            TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
         public UserRepository(IDbConnection dbConnection) : base(dbConnection)
         {
+            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
+            TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
 
@@ -46,7 +50,7 @@ namespace Vakapay.Repositories.Mysql
 
         public string QuerySearch(Dictionary<string, string> models)
         {
-            var sQuery = "SELECT * FROM User WHERE 1 = 1";
+            var sQuery = "SELECT * FROM " + TableName + " WHERE 1 = 1";
             foreach (var model in models)
             {
                 sQuery += string.Format(" AND {0}='{1}'", model.Key, model.Value);
@@ -77,22 +81,22 @@ namespace Vakapay.Repositories.Mysql
         {
             try
             {
-                var tableName = "";
+                var blockchainAddressTableName = "";
                 if (transaction.GetType() == typeof(BitcoinWithdrawTransaction))
                 {
-                    tableName = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
+                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
                 }
                 else if (transaction.GetType() == typeof(EthereumWithdrawTransaction))
                 {
-                    tableName = SimpleCRUD.GetTableName(typeof(EthereumAddress));
+                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(EthereumAddress));
                 }
                 else if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
                 {
-                    tableName = SimpleCRUD.GetTableName(typeof(VakacoinAccount));
+                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(VakacoinAccount));
                 }
                 else
                 {
-                    tableName = "";
+                    blockchainAddressTableName = "";
                 }
 
                 if (Connection.State != ConnectionState.Open)
@@ -100,7 +104,7 @@ namespace Vakapay.Repositories.Mysql
 
                 var sQuery = "SELECT Email FROM " + TableName +
                              " t1 INNER JOIN " + TableNameWallet + " t2 ON t1.Id = t2.UserId INNER JOIN " +
-                             tableName + " t3 ON t2.Id = t3.WalletId " +
+                             blockchainAddressTableName + " t3 ON t2.Id = t3.WalletId " +
                              "WHERE t3.Address = @Address;";
 
 
