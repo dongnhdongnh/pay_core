@@ -4,7 +4,7 @@ namespace Vakapay.Models.Entities.BTC
 
     public partial class BtcTransactionModel
     {
-        [JsonProperty("amount")] public long Amount { get; set; }
+        [JsonProperty("amount")] public decimal Amount { get; set; }
 
         [JsonProperty("confirmations")] public long Confirmations { get; set; }
 
@@ -37,7 +37,7 @@ namespace Vakapay.Models.Entities.BTC
 
         [JsonProperty("category")] public string Category { get; set; }
 
-        [JsonProperty("amount")] public long Amount { get; set; }
+        [JsonProperty("amount")] public decimal Amount { get; set; }
 
         [JsonProperty("label")] public string Label { get; set; }
 
