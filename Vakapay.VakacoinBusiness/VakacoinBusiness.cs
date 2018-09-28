@@ -131,7 +131,7 @@ namespace Vakapay.VakacoinBusiness
 					Id = CommonHelper.GenerateUuid(),
 					TrxId = trxId,
 					BlockNumber = blockNumber,
-					NetworkName = networkName,
+//					NetworkName = networkName,
 					Amount = amount,
 					FromAddress = fromAddress,
 					ToAddress = toAddress,

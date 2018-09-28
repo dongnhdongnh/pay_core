@@ -38,13 +38,9 @@ namespace Vakapay.SendMailBusiness
                 var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb);
                 
                 // save to DB
-                sendEmailRepository.Insert(emailQueue);
+                var result = sendEmailRepository.Insert(emailQueue);
 
-                return new ReturnObject
-                {
-                    Status = Status.StatusSuccess,
-                    Message = "Email was inserted to EmailQueue!"
-                };
+                return result;
             }
             catch (Exception e)
             {

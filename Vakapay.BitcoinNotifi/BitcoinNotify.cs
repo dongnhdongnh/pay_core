@@ -219,7 +219,7 @@ namespace Vakapay.BitcoinNotifi
                     Hash = transactionModel.Txid,
                     BlockNumber = 0,
                     BlockHash = transactionModel.BlockHash,
-                    NetworkName = "Bitcoin",
+//                    NetworkName = "Bitcoin",
                     Amount = transactionModel.Amount,
                     FromAddress = "",
                     ToAddress = transactionModelDetail.Address,

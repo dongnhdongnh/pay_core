@@ -126,9 +126,9 @@ namespace Vakapay.BlockchainBusiness.Base
                     var email = GetEmailByTransaction(pendingTransaction);
                     if (email != null)
                     {
-                        CreateDataEmail("Notify send " + pendingTransaction.NetworkName,
+                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
                             email, pendingTransaction.Amount,
-                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName,Constants.TYPE_SEND);
+                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
                     }
                 }
 
@@ -444,7 +444,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="typeCoin"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public void CreateDataEmail(string subject, string email, decimal amount, string template,
+        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
             string networkName, string sendOrReceiver)
         {
             try
@@ -466,7 +466,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     CreatedAt = currentTime,
                     UpdatedAt = currentTime
                 };
-                sendMailBusiness.CreateEmailQueueAsync(emailQueue);
+                await sendMailBusiness.CreateEmailQueueAsync(emailQueue);
             }
             catch (Exception e)
             {

@@ -35,7 +35,7 @@ namespace Vakapay.TestCreateTransaction
                         Hash = null,
                         Id = CommonHelper.GenerateUuid(),
                         InProcess = 0,
-                        NetworkName = "ETH",
+//                        NetworkName = "ETH",
                         Status = Status.StatusPending,
                         Version = 0,
                         UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),

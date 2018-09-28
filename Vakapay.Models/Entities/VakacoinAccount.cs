@@ -4,7 +4,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-    [Table("vakacoinaccount")]
+    [Table("VakacoinAccount")]
     public class VakacoinAccount : BlockchainAddress, IBlockchainAddress
     {
         public string AccountName { get; set; }

@@ -1131,7 +1131,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine(JsonHelper.SerializeObject(outPut));
         }
 
-        [TestCase(1024*1024)]
+        [TestCase(1024)]
         public void Fake51200PeningTransaction1024MuiltiAddress(int numOfTrans)
         {
             ReturnObject outPut = null;

@@ -284,7 +284,7 @@ namespace Vakapay.WalletBusiness
 						Amount = amount,
 						CreatedAt = CommonHelper.GetUnixTimestamp(),
 						UpdatedAt = CommonHelper.GetUnixTimestamp(),
-						NetworkName = NetworkName.ETH,
+//						NetworkName = NetworkName.ETH,
 						InProcess = 0,
 						Version = 0
 					};
@@ -311,7 +311,7 @@ namespace Vakapay.WalletBusiness
 						Amount = amount,
 						CreatedAt = CommonHelper.GetUnixTimestamp(),
 						UpdatedAt = CommonHelper.GetUnixTimestamp(),
-						NetworkName = NetworkName.BTC,
+//						NetworkName = NetworkName.BTC,
 						InProcess = 0,
 						Version = 0
 					};
@@ -338,7 +338,7 @@ namespace Vakapay.WalletBusiness
 						Amount = amount,
 						CreatedAt = CommonHelper.GetUnixTimestamp(),
 						UpdatedAt = CommonHelper.GetUnixTimestamp(),
-						NetworkName = NetworkName.VAKA,
+//						NetworkName = NetworkName.VAKA,
 						InProcess = 0,
 						Version = 0
 					};
