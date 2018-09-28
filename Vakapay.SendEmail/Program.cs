@@ -54,12 +54,6 @@ namespace Vakapay.SendEmail
                 }
                 Thread.Sleep(1000);
             }
-            
-
-            //scan email EmailQueue
-//            var send = new SendEmail();
-//            var model = new EmailQueue();
-//            send.send(model);
         }
     }
 }

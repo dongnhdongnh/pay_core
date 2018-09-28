@@ -9,7 +9,7 @@ namespace Vakapay.Models.Entities
         public string Id { get; set; }
         public string ToEmail { get; set; }
         public string Subject { get; set; }
-        public string Template { get; set; } //value = "new device", "sent", "verify"
+        public string Template { get; set; } //value = "newDevice", "sent", "verify"
         
         //new device template
         public string DeviceLocation { get; set; }
@@ -18,6 +18,7 @@ namespace Vakapay.Models.Entities
         public string DeviceAuthorizeUrl { get; set; }
         
         // Sent/Received template
+        public string SignInUrl { get; set; }
         public decimal Amount { get; set; }
         public string SentOrReceived { get; set; } //value = "sent" or "received"
         public string NetworkName { get; set; }

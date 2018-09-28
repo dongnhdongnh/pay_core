@@ -6,6 +6,12 @@
     <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions">
+      <Version>2.2.0-preview2-35157</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json">
+      <Version>2.2.0-preview2-35157</Version>
+    </PackageReference>
     <PackageReference Include="NLog">
       <Version>4.5.9</Version>
     </PackageReference>
