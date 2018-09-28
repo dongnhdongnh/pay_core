@@ -220,7 +220,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
-				string query = $"SELECT * FROM wallet WHERE ISNULL(Address)";
+				string query = $"SELECT * FROM {TableName} WHERE ISNULL(Address)";
 				List<Wallet> wallets = FindBySql(query);
 				if (wallets == null || wallets.Count <= 0)
 					return null;
@@ -237,7 +237,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
-				string query = $"SELECT * FROM wallet WHERE UserId = '{user.Id}'";
+				string query = $"SELECT * FROM {TableName} WHERE UserId = '{user.Id}'";
 				List<Wallet> wallets = FindBySql(query);
 				if (wallets == null || wallets.Count <= 0)
 					return null;

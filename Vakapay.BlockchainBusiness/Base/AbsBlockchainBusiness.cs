@@ -124,9 +124,12 @@ namespace Vakapay.BlockchainBusiness.Base
                 if (sendTransaction.Status == Status.StatusSuccess)
                 {
                     var email = GetEmailByTransaction(pendingTransaction);
-                    CreateDataEmail("Notify send " + pendingTransaction.NetworkName,
-                        email, pendingTransaction.Amount,
-                        Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName,Constants.TYPE_SEND);
+                    if (email != null)
+                    {
+                        CreateDataEmail("Notify send " + pendingTransaction.NetworkName,
+                            email, pendingTransaction.Amount,
+                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName,Constants.TYPE_SEND);
+                    }
                 }
 
                 var result = await repoQuery.SafeUpdate(pendingTransaction);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Dapper;
 using NLog;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -487,7 +488,7 @@ namespace Vakapay.WalletBusiness
 					ConnectionDb.Open();
 				var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
 
-				var result = walletRepository.FindBySql("SELECT * FROM wallet");
+				var result = walletRepository.FindBySql($"SELECT * FROM {SimpleCRUD.GetTableName(typeof(Wallet))}");
 				return result;
 			}
 			catch (Exception e)
