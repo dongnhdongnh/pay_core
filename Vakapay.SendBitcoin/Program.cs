@@ -54,7 +54,7 @@ namespace Vakapay.SendBitcoin
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
             var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(repoFactory);
-            var connection = repoFactory.GetDbConnection();
+            var connection = repoFactory.GetOldConnection() ?? repoFactory.GetDbConnection();
             try
             {
                 while (true)

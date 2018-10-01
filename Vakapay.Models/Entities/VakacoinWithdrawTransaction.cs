@@ -4,7 +4,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-	[Table("vakacoinwithdrawtransaction")]
+	[Table("VakacoinWithdrawTransaction")]
 	public class VakacoinWithdrawTransaction : VakacoinTransaction
 	{
 		//public string Id { get ; set ; }

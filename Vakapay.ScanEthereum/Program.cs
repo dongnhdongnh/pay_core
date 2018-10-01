@@ -29,7 +29,7 @@ namespace Vakapay.ScanEthereum
 
 			var ethereumBusiness = new EthereumBusiness.EthereumBusiness(repoFactory);
 			var WalletBusiness = new WalletBusiness.WalletBusiness(repoFactory);
-			var connection = repoFactory.GetDbConnection();
+			var connection = repoFactory.GetOldConnection() ?? repoFactory.GetDbConnection();
 			try
 			{
 				while (true)

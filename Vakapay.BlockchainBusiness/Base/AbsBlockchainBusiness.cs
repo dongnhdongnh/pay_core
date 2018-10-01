@@ -455,7 +455,7 @@ namespace Vakapay.BlockchainBusiness.Base
             try
             {
                 var currentTime = CommonHelper.GetUnixTimestamp();
-                var sendMailBusiness = new SendMailBusiness.SendMailBusiness(VakapayRepositoryFactory);
+                var sendMailBusiness = new SendMailBusiness.SendMailBusiness(VakapayRepositoryFactory, false);
 
                 if (email == null) return;
                 var emailQueue = new EmailQueue
