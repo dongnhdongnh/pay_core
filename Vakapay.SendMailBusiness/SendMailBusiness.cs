@@ -1,17 +1,13 @@
 ﻿ using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.IO;
 using System.Net;
-using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
-using NLog.Targets;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -27,29 +23,12 @@ namespace Vakapay.SendMailBusiness
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        private IConfiguration _configuration;
-
         public SendMailBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
         {
             _vakapayRepositoryFactory = vakapayRepositoryFactory;
             _connectionDb = isNewConnection
                 ? vakapayRepositoryFactory.GetDbConnection()
                 : vakapayRepositoryFactory.GetOldConnection();
-            _configuration = InitConfiguration();
-        }
-        
-        public IConfiguration InitConfiguration()
-        {
-            string environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
-
-            if (String.IsNullOrWhiteSpace(environment))
-                environment = "Development";
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("Configs.json", optional: true)
-                .AddJsonFile($"Configs.{environment}.json", optional: false);
-            
-            return builder.Build();
         }
 
         public virtual async Task<ReturnObject> CreateEmailQueueAsync(EmailQueue emailQueue)
@@ -177,7 +156,6 @@ namespace Vakapay.SendMailBusiness
                 {"fromName", fromName},
                 {"to", emailQueue.ToEmail},
                 {"subject", emailQueue.Subject},
-//                {"bodyHtml", emailQueue.Content},
                 {"bodyHtml", emailBody},
                 {"isTransactional", "true"}
             };
@@ -223,11 +201,11 @@ namespace Vakapay.SendMailBusiness
                     body = reader.ReadToEnd();
                 }
 
-                body = body.Replace("{vakapayUrl}", _configuration["vakapayUrl"]);
-                body = body.Replace("{logoImgUrl}", _configuration["logoImgUrl"]);
-                body = body.Replace("{mailImgUrl}", _configuration["mailImgUrl"]);
-                body = body.Replace("{hrImgUrl}", _configuration["hrImgUrl"]);
-                body = body.Replace("{deviceImgUrl}", _configuration["deviceImgUrl"]);
+                body = body.Replace("{vakapayUrl}", EmailConfig.VakapayUrl);
+                body = body.Replace("{logoImgUrl}", EmailConfig.LogoImgUrl);
+                body = body.Replace("{mailImgUrl}", EmailConfig.MailImgUrl);
+                body = body.Replace("{hrImgUrl}", EmailConfig.HrImgUrl);
+                body = body.Replace("{deviceImgUrl}", EmailConfig.DeviceImgUrl);
                 
                 switch (emailQueue.Template)
                 {
