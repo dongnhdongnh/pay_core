@@ -1,4 +1,7 @@
-﻿namespace Vakapay.Models.Domains
+﻿using System.Collections.Generic;
+using Vakapay.Models.Entities;
+
+namespace Vakapay.Models.Domains
 {
     public class EmailConfig
     {
@@ -30,5 +33,32 @@
         public const string Subject_SentOrReceived = "Balance notification!";
         //verify subject
         public const string Subject_Verify = "Verify account";
+
+        public static readonly Dictionary<EmailTemplate, string> TemplateFiles = new Dictionary<EmailTemplate, string>()
+        {
+            {EmailTemplate.NEW_DEVICE, "newDevice.htm"},
+            {EmailTemplate.SENT, "sent.htm"},
+            {EmailTemplate.RECEIVED, "received.htm"},
+            {EmailTemplate.VERIFY, "verify.htm"},
+        };
+
+        public static string GetNumberOfNeededConfirmation(string networkName)
+        {
+            long confirmation = 0;
+            switch (networkName)
+            {
+                case NetworkName.VAKA:
+                    confirmation = EmailConfig.VakaConfirmations;
+                    break;
+                case NetworkName.ETH:
+                    confirmation = EmailConfig.EthConfirmations;
+                    break;
+                case NetworkName.BTC:
+                    confirmation = EmailConfig.BtcConfirmations;
+                    break;
+            }
+
+            return confirmation.ToString();
+        }
     }
 }

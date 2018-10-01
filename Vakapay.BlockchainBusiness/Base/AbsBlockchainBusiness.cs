@@ -126,9 +126,12 @@ namespace Vakapay.BlockchainBusiness.Base
                     var email = GetEmailByTransaction(pendingTransaction);
                     if (email != null)
                     {
+//                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
+//                            email, pendingTransaction.Amount,
+//                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
                         await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
-                            email, pendingTransaction.Amount,
-                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
+                            email, pendingTransaction.Amount, pendingTransaction.Id,
+                            EmailTemplate.SENT, pendingTransaction.NetworkName());
                     }
                 }
 
@@ -437,15 +440,17 @@ namespace Vakapay.BlockchainBusiness.Base
         /// CreateDataEmail
         /// </summary>
         /// <param name="subject"></param>
-        /// <param name="address"></param>
         /// <param name="email"></param>
         /// <param name="amount"></param>
-        /// <param name="typeEmail"></param>
-        /// <param name="typeCoin"></param>
+        /// <param name="transactionId"></param>
+        /// <param name="template"></param>
+        /// <param name="networkName"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
-            string networkName, string sendOrReceiver)
+//        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
+//            string networkName, string sendOrReceiver)
+        public async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
+            EmailTemplate template, string networkName)
         {
             try
             {
@@ -460,9 +465,9 @@ namespace Vakapay.BlockchainBusiness.Base
                     Template = template,
                     Subject = subject,
                     NetworkName = networkName,
-                    SentOrReceived = sendOrReceiver,
+//                    SentOrReceived = sendOrReceiver,
                     Amount = amount,
-//                    TransactionId = transactionId,
+                    TransactionId = transactionId,
                     Status = Status.StatusPending,
                     CreatedAt = currentTime,
                     UpdatedAt = currentTime

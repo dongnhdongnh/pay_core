@@ -1,15 +1,21 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace Vakapay.Models.Entities
 {
+    public enum EmailTemplate
+    {
+        NEW_DEVICE, SENT, RECEIVED, VERIFY
+    }
     [Table("EmailQueue")]
     public class EmailQueue
     {
         public string Id { get; set; }
         public string ToEmail { get; set; }
         public string Subject { get; set; }
-        public string Template { get; set; } //value = "newDevice", "sent", "verify"
+//        public string Template { get; set; } //value = "newDevice", "sent", "verify"
+        public EmailTemplate Template { get; set; }
         
         //new device template
         public string DeviceLocation { get; set; }
@@ -20,9 +26,9 @@ namespace Vakapay.Models.Entities
         // Sent/Received template
         public string SignInUrl { get; set; }
         public decimal Amount { get; set; }
-        public string SentOrReceived { get; set; } //value = "sent" or "received"
+//        public string SentOrReceived { get; set; } //value = "sent" or "received"
         public string NetworkName { get; set; }
-//        public string TransactionId { get; set; }
+        public string TransactionId { get; set; }
         
         //Verify email template
         public string VerifyUrl { get; set; }
@@ -32,5 +38,17 @@ namespace Vakapay.Models.Entities
         public long UpdatedAt { get; set; }
         public int InProcess { get; set; }
         public int Version { get; set; }
+
+        public string GetAmount()
+        {
+            if (NetworkName == Domains.NetworkName.VAKA)
+            {
+                return Amount.ToString("N4") + " " + NetworkName;
+            }
+            else
+            {
+                return Amount + " " + NetworkName;
+            }
+        }
     }
 }

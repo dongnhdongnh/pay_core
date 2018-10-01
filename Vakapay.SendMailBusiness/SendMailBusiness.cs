@@ -189,13 +189,14 @@ namespace Vakapay.SendMailBusiness
                 }
             }
         }
-
+        
         private string CreateEmailBody(EmailQueue emailQueue)
         {
             try
             {
                 string body = string.Empty;
-                string directory = Directory.GetParent(Directory.GetCurrentDirectory()) + "/MailTemplate/"+emailQueue.Template+".htm";
+                string directory = Directory.GetParent(Directory.GetCurrentDirectory()) + "/MailTemplate/" +
+                                   EmailConfig.TemplateFiles[emailQueue.Template];
                 
                 using (StreamReader reader = new StreamReader(directory))
                 {
@@ -211,39 +212,31 @@ namespace Vakapay.SendMailBusiness
 
                 switch (emailQueue.Template)
                 {
-                    case Constants.TEMPLATE_EMAIL_NEW_DEVICE:
+                    case EmailTemplate.NEW_DEVICE:
                         body = body.Replace("{location}", emailQueue.DeviceLocation);
                         body = body.Replace("{ip}", emailQueue.DeviceIP);
                         body = body.Replace("{browser}", emailQueue.DeviceBrowser);
                         body = body.Replace("{authorizeUrl}", emailQueue.DeviceAuthorizeUrl);
                         break;
                         
-                    case Constants.TEMPLATE_EMAIL_SENT:
+                    case EmailTemplate.SENT:
                         body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
                         body = body.Replace("{networkName}", emailQueue.NetworkName);
-                        body = body.Replace("{amount}", emailQueue.Amount + " " + emailQueue.NetworkName);
-                        body = body.Replace("{sentOrReceived}", emailQueue.SentOrReceived);
-                        body = body.Replace("{toOrFrom}", emailQueue.SentOrReceived == "sent" ? "to" : "from");
+                        body = body.Replace("{amount}", emailQueue.GetAmount());
+                        break;
+                    case EmailTemplate.RECEIVED:
+                        body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
+                        body = body.Replace("{networkName}", emailQueue.NetworkName);
+                        body = body.Replace("{amount}", emailQueue.GetAmount());
+                        body = body.Replace("{numberOfConfirmation}",
+                            EmailConfig.GetNumberOfNeededConfirmation(emailQueue.NetworkName));
                         break;
                         
-                    case Constants.TEMPLATE_EMAIL_VERIFY:
+                    case EmailTemplate.VERIFY:
                         body = body.Replace("{verifyEmailUrl}", emailQueue.VerifyUrl);
                         break;
                 }
 
-                switch (emailQueue.NetworkName)
-                {
-                    case NetworkName.VAKA:
-                        body = body.Replace("{numberOfConfirmation}", EmailConfig.VakaConfirmations.ToString());
-                        break;
-                    case NetworkName.ETH:
-                        body = body.Replace("{numberOfConfirmation}", EmailConfig.EthConfirmations.ToString());
-                        break;
-                    case NetworkName.BTC:
-                        body = body.Replace("{numberOfConfirmation}", EmailConfig.BtcConfirmations.ToString());
-                        break;
-                }
-                
                 return body;
             }
             catch (Exception e)
