@@ -273,6 +273,7 @@ namespace Vakapay.WalletBusiness
 
 				//Make new transaction withdraw pending by
 				//insert into ethereumwithdrawtransaction database
+				ReturnObject insertWithdraw = null;
 				if (walletById.NetworkName.Equals(NetworkName.ETH))
 				{
 					var etherWithdraw = new EthereumWithdrawTransaction()
@@ -288,7 +289,7 @@ namespace Vakapay.WalletBusiness
 						InProcess = 0,
 						Version = 0
 					};
-					var insertWithdraw = etherWithdrawTransaction.Insert(etherWithdraw);
+					insertWithdraw = etherWithdrawTransaction.Insert(etherWithdraw);
 					if (insertWithdraw == null ||
 						insertWithdraw.Status == Status.StatusError)
 					{
@@ -315,7 +316,7 @@ namespace Vakapay.WalletBusiness
 						InProcess = 0,
 						Version = 0
 					};
-					var insertWithdraw = btcWithdrawTransaction.Insert(btcWithdraw);
+					insertWithdraw = btcWithdrawTransaction.Insert(btcWithdraw);
 					if (insertWithdraw == null ||
 						insertWithdraw.Status == Status.StatusError)
 					{
@@ -342,7 +343,7 @@ namespace Vakapay.WalletBusiness
 						InProcess = 0,
 						Version = 0
 					};
-					var insertWithdraw = vakaWithdrawTransaction.Insert(vakaWithdraw);
+					insertWithdraw = vakaWithdrawTransaction.Insert(vakaWithdraw);
 					if (insertWithdraw == null ||
 						insertWithdraw.Status == Status.StatusError)
 					{
@@ -354,7 +355,7 @@ namespace Vakapay.WalletBusiness
 					}
 				}
 
-				return null;
+				return insertWithdraw;
 			}
 			catch (Exception e)
 			{

@@ -97,7 +97,7 @@ namespace Vakapay.UnitTest
 			var ethAddressRepos = PersistenceFactory.GetEthereumAddressRepository(connection);
 			var _walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
 			var wallet = new Wallet();
-			wallet.Id = "29bb8133-d8d2-4b60-9882-60f0c1bd5f68";
+			wallet.Id = "46b4594c-a45a-400d-86ce-9a7869d61180";
 
 			string pass = CommonHelper.RandomString(15);
 			//	var resultTest = _ethBus.CreateNewAddAddress(wallet);
@@ -118,10 +118,15 @@ namespace Vakapay.UnitTest
 				new Vakapay.WalletBusiness.WalletBusiness(persistence);
 
 			var wallet = new Wallet();
-			wallet.Id = "64308d79-5523-4fd7-80a1-bba398b62c9b";
-			var toAddr = "0x18cbb2afa209e5735122708a39e4715139f125d2";
+			wallet.Id = "46b4594c-a45a-400d-86ce-9a7869d61180";
+			var toAddr = "0x13f022d72158410433cbd66f5dd8bf6d2d129924";
 
-			var resultTest = _walletBusiness.Withdraw(wallet, toAddr, 5);
+			ReturnObject resultTest = null;
+			for (int i = 0; i < 1000; i++)
+			{
+				 resultTest = _walletBusiness.Withdraw(wallet, toAddr, 5);
+			}
+			
 			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 		}
