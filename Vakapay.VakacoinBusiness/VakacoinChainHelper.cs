@@ -138,8 +138,11 @@ namespace Vakapay.ScanVakaCoin
             {
                 Id = CommonHelper.GenerateUuid(),
                 ToEmail = toEmail,
-                Content = "You have received " + transferData.Amount(),
-                Subject = "Balance notification!",
+                SignInUrl = EmailConfig.SignInUrl,
+                Amount = transferData.Amount(),
+                SentOrReceived = EmailConfig.SentOrReceived_Received,
+                NetworkName = transferData.Symbol(),
+                Subject = EmailConfig.Subject_SentOrReceived,
                 Status = Status.StatusPending,
                 CreatedAt = CommonHelper.GetUnixTimestamp(),
                 UpdatedAt = CommonHelper.GetUnixTimestamp(),
