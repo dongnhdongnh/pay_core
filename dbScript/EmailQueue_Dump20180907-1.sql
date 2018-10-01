@@ -25,11 +25,20 @@ DROP TABLE IF EXISTS `EmailQueue`;
 CREATE TABLE `EmailQueue` (
   `Id` varchar(200) NOT NULL,
   `ToEmail` varchar(50) DEFAULT NULL,
-  `Content` varchar(255) DEFAULT NULL,
   `Subject` varchar(200) DEFAULT NULL,
   `Status` varchar(20) DEFAULT NULL,
   `CreatedAt` int(11) DEFAULT NULL,
   `UpdatedAt` int(11) DEFAULT NULL,
+  `Template` varchar(30) DEFAULT NULL,
+  `DeviceLocation` varchar(50) DEFAULT NULL,
+  `DeviceIP` varchar(20) DEFAULT NULL,
+  `DeviceBrowser` varchar(20) DEFAULT NULL,
+  `DeviceAuthorizeUrl` varchar(100) DEFAULT NULL,
+  `SignInUrl` varchar(100) DEFAULT NULL,
+  `Amount` decimal(16,8) DEFAULT NULL,
+  `SentOrReceived` varchar(10) DEFAULT NULL,
+  `NetworkName` varchar(10) DEFAULT NULL,
+  `VerifyUrl` varchar(100) DEFAULT NULL,
   `InProcess` int(11) DEFAULT '0',
   `Version` int(11) DEFAULT '0',
   PRIMARY KEY (`Id`)
@@ -50,4 +59,4 @@ CREATE TABLE `EmailQueue` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-09-27 16:57:15
+-- Dump completed on 2018-10-01  9:54:12
