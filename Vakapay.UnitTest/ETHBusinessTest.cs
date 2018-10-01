@@ -102,7 +102,7 @@ namespace Vakapay.UnitTest
 		}
 
 		[TestCase(1000)]
-		public void FakePeningTransaction(int numOfTrans)
+		public void FakePendingTransaction(int numOfTrans)
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
