@@ -12,5 +12,23 @@
         public const long BtcConfirmations = 3;
         public const long EthConfirmations = 50;
         public const long VakaConfirmations = 15;
+        
+        // template
+        public const string Template_NewDevice = "newDevice";
+        public const string Template_Verify = "verify";
+        public const string Template_SentOrReceived = "sent";
+        
+        // for sent template
+        public const string SignInUrl = "google.com.vn";
+        public const string SentOrReceived_Sent = "sent";
+        public const string SentOrReceived_Received = "received";
+        
+        //email Subject
+        //new device subject
+        public const string Subject_NewDevice = "New device";
+        //sent subject
+        public const string Subject_SentOrReceived = "Balance notification!";
+        //verify subject
+        public const string Subject_Verify = "Verify account";
     }
 }
