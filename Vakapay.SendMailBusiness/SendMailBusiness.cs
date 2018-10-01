@@ -9,7 +9,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Domains;
+ using Vakapay.Models;
+ using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 
@@ -204,19 +205,20 @@ namespace Vakapay.SendMailBusiness
                 body = body.Replace("{vakapayUrl}", EmailConfig.VakapayUrl);
                 body = body.Replace("{logoImgUrl}", EmailConfig.LogoImgUrl);
                 body = body.Replace("{mailImgUrl}", EmailConfig.MailImgUrl);
+                body = body.Replace("{checkImgUrl}", EmailConfig.CheckImgUrl);
                 body = body.Replace("{hrImgUrl}", EmailConfig.HrImgUrl);
                 body = body.Replace("{deviceImgUrl}", EmailConfig.DeviceImgUrl);
-                
+
                 switch (emailQueue.Template)
                 {
-                    case "newDevice":
+                    case Constants.TEMPLATE_EMAIL_NEW_DEVICE:
                         body = body.Replace("{location}", emailQueue.DeviceLocation);
                         body = body.Replace("{ip}", emailQueue.DeviceIP);
                         body = body.Replace("{browser}", emailQueue.DeviceBrowser);
                         body = body.Replace("{authorizeUrl}", emailQueue.DeviceAuthorizeUrl);
                         break;
                         
-                    case "sent":
+                    case Constants.TEMPLATE_EMAIL_SENT:
                         body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
                         body = body.Replace("{networkName}", emailQueue.NetworkName);
                         body = body.Replace("{amount}", emailQueue.Amount + " " + emailQueue.NetworkName);
@@ -224,8 +226,21 @@ namespace Vakapay.SendMailBusiness
                         body = body.Replace("{toOrFrom}", emailQueue.SentOrReceived == "sent" ? "to" : "from");
                         break;
                         
-                    case "verify":
+                    case Constants.TEMPLATE_EMAIL_VERIFY:
                         body = body.Replace("{verifyEmailUrl}", emailQueue.VerifyUrl);
+                        break;
+                }
+
+                switch (emailQueue.NetworkName)
+                {
+                    case NetworkName.VAKA:
+                        body = body.Replace("{numberOfConfirmation}", EmailConfig.VakaConfirmations.ToString());
+                        break;
+                    case NetworkName.ETH:
+                        body = body.Replace("{numberOfConfirmation}", EmailConfig.EthConfirmations.ToString());
+                        break;
+                    case NetworkName.BTC:
+                        body = body.Replace("{numberOfConfirmation}", EmailConfig.BtcConfirmations.ToString());
                         break;
                 }
                 

@@ -462,6 +462,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     NetworkName = networkName,
                     SentOrReceived = sendOrReceiver,
                     Amount = amount,
+//                    TransactionId = transactionId,
                     Status = Status.StatusPending,
                     CreatedAt = currentTime,
                     UpdatedAt = currentTime

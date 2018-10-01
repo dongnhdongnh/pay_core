@@ -444,7 +444,7 @@ namespace Vakapay.WalletBusiness
 						{
 							ToEmail = user.Email,
 							Subject = "HELLO BABY",
-							Content = networkName + "+" + addedBlance
+//							Content = networkName + "+" + addedBlance
 						};
 						sendMailBusiness.CreateEmailQueueAsync(_email);
 					}

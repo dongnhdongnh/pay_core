@@ -22,6 +22,7 @@ namespace Vakapay.Models.Entities
         public decimal Amount { get; set; }
         public string SentOrReceived { get; set; } //value = "sent" or "received"
         public string NetworkName { get; set; }
+//        public string TransactionId { get; set; }
         
         //Verify email template
         public string VerifyUrl { get; set; }
