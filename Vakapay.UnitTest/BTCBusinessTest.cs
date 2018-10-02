@@ -64,7 +64,7 @@ namespace Vakapay.UnitTest
             var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
             var bitcoinRepo = PersistenceFactory.GetBitcoinAddressRepository(connection);
             string walletID = CommonHelper.RandomString(15);
-            var resultCreated = await btcBus.CreateAddressAsyn<BitcoinAddress>(walletBusiness, bitcoinRepo, RPCClass, walletID);
+            var resultCreated = await btcBus.CreateAddressAsync<BitcoinAddress>(walletBusiness, bitcoinRepo, RPCClass, walletID);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }

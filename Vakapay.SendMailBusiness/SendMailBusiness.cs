@@ -13,6 +13,8 @@ using Vakapay.Commons.Helpers;
  using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
+ using Vakapay.Models.Repositories.Base;
+ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.SendMailBusiness
 {
@@ -189,6 +191,79 @@ namespace Vakapay.SendMailBusiness
                 }
             }
         }
+
+        private BlockchainTransaction GetTransaction(EmailQueue emailQueue)
+        {
+            switch (emailQueue.NetworkName)
+            {
+                 case NetworkName.BTC:
+                     switch (emailQueue.Template)
+                     {
+                         case EmailTemplate.SENT:
+                             return _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb)
+                                 .FindById(emailQueue.TransactionId);
+                         case EmailTemplate.RECEIVED:
+                             return _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb)
+                                 .FindById(emailQueue.TransactionId);
+                         case EmailTemplate.NEW_DEVICE:
+                             break;
+                         case EmailTemplate.VERIFY:
+                             break;
+                         default:
+                             throw new ArgumentOutOfRangeException();
+                     }
+                     break;
+                case NetworkName.ETH:
+                    switch (emailQueue.Template)
+                    {
+                        case EmailTemplate.SENT:
+                            return _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb)
+                                .FindById(emailQueue.TransactionId);
+                        case EmailTemplate.RECEIVED:
+                            return _vakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(_connectionDb)
+                                .FindById(emailQueue.TransactionId);
+                        case EmailTemplate.NEW_DEVICE:
+                            break;
+                        case EmailTemplate.VERIFY:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    break;
+                case NetworkName.VAKA:
+                    switch (emailQueue.Template)
+                    {
+                        case EmailTemplate.SENT:
+                            return _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb)
+                                .FindById(emailQueue.TransactionId);
+                        case EmailTemplate.RECEIVED:
+                            return _vakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(_connectionDb)
+                                .FindById(emailQueue.TransactionId);
+                        case EmailTemplate.NEW_DEVICE:
+                            break;
+                        case EmailTemplate.VERIFY:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    break;
+            }
+
+            return null;
+        }
+        
+        private string GetReceivedAddress(EmailQueue emailQueue)
+        {
+            try
+            {
+                return GetTransaction(emailQueue).ToAddress;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
         
         private string CreateEmailBody(EmailQueue emailQueue)
         {
@@ -221,7 +296,7 @@ namespace Vakapay.SendMailBusiness
                         
                     case EmailTemplate.SENT:
                         body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
-                        body = body.Replace("{networkName}", emailQueue.NetworkName);
+                        body = body.Replace("{toAddress}", GetReceivedAddress(emailQueue));
                         body = body.Replace("{amount}", emailQueue.GetAmount());
                         break;
                     case EmailTemplate.RECEIVED:

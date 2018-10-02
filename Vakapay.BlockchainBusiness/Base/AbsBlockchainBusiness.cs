@@ -167,13 +167,14 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <summary>
         /// Created Address with optimistic lock
         /// </summary>
+        /// <param name="wallet"></param>
         /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
         /// <param name="walletId"></param>
         /// <param name="other"></param>
-        /// <typeparam name="TBlockchainTransaction"></typeparam>
+        /// <typeparam name="TBlockchainAddress"></typeparam>
         /// <returns></returns>
-        public virtual async Task<ReturnObject> CreateAddressAsyn<TBlockchainAddress>(IWalletBusiness wallet,
+        public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(IWalletBusiness wallet,
             IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
             string other = "") where TBlockchainAddress : BlockchainAddress
         {
@@ -257,7 +258,7 @@ namespace Vakapay.BlockchainBusiness.Base
             }
         }
 
-        public virtual async Task<ReturnObject> ScanBlockAsyn<TWithDraw, TDeposit, TBlockInfor, TTransactionInfor>(
+        public virtual async Task<ReturnObject> ScanBlockAsync<TWithDraw, TDeposit, TBlockInfor, TTransactionInfor>(
             string networkName,
             IWalletBusiness wallet,
             IRepositoryBlockchainTransaction<TWithDraw> withdrawRepoQuery,

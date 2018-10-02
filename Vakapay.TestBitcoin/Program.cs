@@ -37,7 +37,7 @@ namespace Vakapay.TestBitcoin
                 var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
                 var bitcoinRepo = PersistenceFactory.GetBitcoinAddressRepository(connection);
                 var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
-                var result = bitcoinRpc.CreateAddressAsyn( walletBusiness, bitcoinRepo, rpc, "0c0f59ef-f14c-4b1f-b18d-ca28055162d5");
+                var result = bitcoinRpc.CreateAddressAsync( walletBusiness, bitcoinRepo, rpc, "0c0f59ef-f14c-4b1f-b18d-ca28055162d5");
                 Console.WriteLine(JsonConvert.SerializeObject(result));
 
             }

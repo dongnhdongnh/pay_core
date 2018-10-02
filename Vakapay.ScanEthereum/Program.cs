@@ -41,7 +41,7 @@ namespace Vakapay.ScanEthereum
 
 					var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
 					var ethereumDepoRepo = repoFactory.GetEthereumDepositeTransactionRepository(connection);
-					var resultSend = ethereumBusiness.ScanBlockAsyn<EthereumWithdrawTransaction, EthereumDepositTransaction, ETHEntities.ETHBlockInfor, ETHEntities.ETHTransaction>(NetworkName.ETH, WalletBusiness, ethereumRepo, ethereumDepoRepo, rpc);
+					var resultSend = ethereumBusiness.ScanBlockAsync<EthereumWithdrawTransaction, EthereumDepositTransaction, ETHEntities.ETHBlockInfor, ETHEntities.ETHTransaction>(NetworkName.ETH, WalletBusiness, ethereumRepo, ethereumDepoRepo, rpc);
 					Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
 

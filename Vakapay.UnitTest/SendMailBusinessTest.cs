@@ -34,10 +34,10 @@ namespace Vakapay.UnitTest
                 Status = Status.StatusPending,
                 CreatedAt = CommonHelper.GetUnixTimestamp(),
                 UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                Template = EmailConfig.Template_SentOrReceived,
+                Template = EmailTemplate.RECEIVED,
                 SignInUrl = "google.com.vn",
                 Amount = 1,
-                SentOrReceived = EmailConfig.SentOrReceived_Sent,
+//                SentOrReceived = EmailConfig.SentOrReceived_Sent,
                 NetworkName = "EOS"
             }).Result.Status);
         }
