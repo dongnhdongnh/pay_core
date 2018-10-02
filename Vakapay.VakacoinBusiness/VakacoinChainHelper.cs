@@ -33,7 +33,8 @@ namespace Vakapay.ScanVakaCoin
         }
 
         public VakacoinChainHelper(int blockInterval, VakacoinRPC rpcClient,
-            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, IWalletBusiness walletBusiness, SendMailBusiness.SendMailBusiness sendMailBusiness)
+            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, IWalletBusiness walletBusiness,
+            SendMailBusiness.SendMailBusiness sendMailBusiness)
         {
             _blockInterval = blockInterval;
             _rpcClient = rpcClient;
@@ -46,8 +47,14 @@ namespace Vakapay.ScanVakaCoin
 
         public IEnumerable<object> StreamBlock(uint startBlock = 0)
         {
+            if (CacheHelper.HaveKey(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, "VAKA")))
+                uint.TryParse(
+                    CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
+                        "VAKA")), out startBlock);
+            
             if (startBlock.Equals(0))
                 startBlock = _rpcClient.GetLastIrreversibleBlockNum().GetValueOrDefault();
+            
             while (true)
             {
                 uint lastIrreversibleBlock = _rpcClient.GetLastIrreversibleBlockNum().GetValueOrDefault();
@@ -56,6 +63,8 @@ namespace Vakapay.ScanVakaCoin
                 // Parse transactions from current block to last trusted block
                 for (uint blockNum = startBlock; blockNum <= lastIrreversibleBlock; blockNum++)
                 {
+                    CacheHelper.SetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
+                        "VAKA"), blockNum.ToString());
                     yield return _rpcClient.GetBlockByNumber(blockNum);
                 }
 
@@ -94,7 +103,7 @@ namespace Vakapay.ScanVakaCoin
                 _vakacoinBusiness.CreateDepositTransaction(packedTransaction.Id, (int) blockResponse.BlockNum,
                     transferData.Symbol(), transferData.Amount(), transferData.From, transferData.To, 0,
                     Status.StatusSuccess);
-                
+
                 //create pending email
                 var createEmailResult = CreatePendingEmail(transferData);
                 if (createEmailResult.Status == Status.StatusSuccess)
@@ -126,14 +135,14 @@ namespace Vakapay.ScanVakaCoin
             logger.Info("Create pending email");
             string address = transferData.To;
             string toEmail = _walletBusiness.FindEmailByAddressAndNetworkName(address, transferData.Symbol());
-            
+
             if (toEmail == null)
                 return new ReturnObject
                 {
                     Status = Status.StatusError,
                     Message = "Cannot find email address of user!!"
                 };
-            
+
             var email = new EmailQueue
             {
                 Id = CommonHelper.GenerateUuid(),
