@@ -8,13 +8,13 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.SendEmail
 {
-    class Program
+    internal static class Program
     {
-        public static IConfiguration InitConfiguration()
+        private static IConfiguration InitConfiguration()
         {
-            string environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
+            var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
 
-            if (String.IsNullOrWhiteSpace(environment))
+            if (string.IsNullOrWhiteSpace(environment))
                 environment = "Development";
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -23,28 +23,28 @@ namespace Vakapay.SendEmail
             
             return builder.Build();
         }
-        
-        static void Main(string[] args)
+
+        private static void Main(string[] args)
         {
-            IConfiguration configuration = InitConfiguration();
-            string apikey = configuration["Elastic:api"];
-            string from = configuration["Elastic:email"];
-            string fromName = configuration["fromName"];
-            string apiAddress = configuration["apiAddress"];
+            var configuration = InitConfiguration();
+            var apiKey = configuration["Elastic:api"];
+            var from = configuration["Elastic:email"];
+            var fromName = configuration["fromName"];
+            var apiAddress = configuration["apiAddress"];
 
             var repositoryConfig = new RepositoryConfiguration
             {
                 ConnectionString = configuration["ConnectionStrings"]
             };
             
-            VakapayRepositoryMysqlPersistenceFactory persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             var sendMailBusiness = new SendMailBusiness.SendMailBusiness(persistenceFactory);
 
             while (true)
             {
                 try
                 {
-                    var result = sendMailBusiness.SendEmailAsync(apikey, from, fromName, apiAddress);
+                    var result = sendMailBusiness.SendEmailAsync(apiKey, from, fromName, apiAddress);
                     Console.WriteLine(JsonHelper.SerializeObject(result.Result));
                 }
                 catch (Exception e)

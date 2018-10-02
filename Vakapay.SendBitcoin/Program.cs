@@ -11,11 +11,11 @@ using Vakapay.BitcoinBusiness;
 
 namespace Vakapay.SendBitcoin
 {
-    class Program
+    internal static class Program
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        static void Main()
+        private static void Main()
         {
             try
             {
@@ -39,7 +39,7 @@ namespace Vakapay.SendBitcoin
 
                 for (var i = 0; i < 10; i++)
                 {
-                    Thread ts = new Thread(() => runSend(repositoryConfig, bitcoinConnect));
+                    var ts = new Thread(() => RunSend(repositoryConfig, bitcoinConnect));
                     ts.Start();
                 }
             }
@@ -49,7 +49,7 @@ namespace Vakapay.SendBitcoin
             }
         }
 
-        static void runSend(RepositoryConfiguration repositoryConfig, BitcoinRPCConnect bitcoinConnect)
+        private static void RunSend(RepositoryConfiguration repositoryConfig, BitcoinRPCConnect bitcoinConnect)
         {
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
@@ -72,7 +72,7 @@ namespace Vakapay.SendBitcoin
             }
             catch (Exception e)
             {
-                logger.Error(e, "Send Bitcoin");
+                Logger.Error(e, "Send Bitcoin");
                 Console.WriteLine(e.ToString());
             }
         }

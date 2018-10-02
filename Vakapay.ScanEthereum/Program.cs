@@ -9,20 +9,21 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.ScanEthereum
 {
-	class Program
+	internal static class Program
 	{
-		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
-		static void Main(string[] args)
+		private const string ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
+
+		private static void Main(string[] args)
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
 				ConnectionString = ConnectionString
 			};
-			runScan(repositoryConfig);
+			RunScan(repositoryConfig);
 		}
 
 
-		static void runScan(RepositoryConfiguration repositoryConfig)
+		private static void RunScan(RepositoryConfiguration repositoryConfig)
 		{
 
 			var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

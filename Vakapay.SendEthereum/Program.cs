@@ -9,14 +9,13 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.SendEthereum
 {
-	class Program
+	internal static class Program
 	{
-
-		static void Main(string[] args)
+		private static void Main(string[] args)
 		{
 			try
 			{
-				long startTime = DateTime.Now.Ticks;
+				var startTime = DateTime.Now.Ticks;
 				CacheHelper.DeleteCacheString("cache");
 				var builder = new ConfigurationBuilder()
 					.SetBasePath(Directory.GetCurrentDirectory())
@@ -48,7 +47,7 @@ namespace Vakapay.SendEthereum
                 }*/
 				for (var i = 0; i < 100; i++)
 				{
-					Thread ts = new Thread(() => runSend(repositoryConfig, startTime));
+					var ts = new Thread(() => RunSend(repositoryConfig, startTime));
 					ts.Start();
 				}
 			}
@@ -63,7 +62,7 @@ namespace Vakapay.SendEthereum
 
 		}
 
-		static void runSend(RepositoryConfiguration repositoryConfig, long startTime)
+		private static void RunSend(RepositoryConfiguration repositoryConfig, long startTime)
 		{
 			var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 

@@ -12,12 +12,12 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.BitcoinNotifi
 {
-    class BitcoinNotify
+    internal static class BitcoinNotify
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly WalletBusiness.WalletBusiness WalletBusiness = null;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {

@@ -8,13 +8,13 @@ using VakaSharp.Api.v1;
 
 namespace Vakapay.ScanVakaCoin
 {
-    class Program
+    internal static class Program
     {
-        public static IConfiguration InitConfiguration()
+        private static IConfiguration InitConfiguration()
         {
-            string environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
+            var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
 
-            if (String.IsNullOrWhiteSpace(environment))
+            if (string.IsNullOrWhiteSpace(environment))
                 environment = "Development";
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -25,15 +25,15 @@ namespace Vakapay.ScanVakaCoin
         }
         public static void Main(string[] args)
         {
-            IConfiguration configuration = InitConfiguration();
+            var configuration = InitConfiguration();
             var repositoryConfig = new RepositoryConfiguration
             {
                 ConnectionString = configuration["ConnectionStrings"],
             };
-            VakapayRepositoryMysqlPersistenceFactory persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            VakacoinChainHelper helper = new VakacoinChainHelper(
-                Int32.Parse(configuration["Chain:BlockInterval"]),
+            var helper = new VakacoinChainHelper(
+                int.Parse(configuration["Chain:BlockInterval"]),
                 new VakacoinRPC(configuration["Chain:URL"]),
                 new VakacoinBusiness.VakacoinBusiness(persistenceFactory),
                 new WalletBusiness.WalletBusiness(persistenceFactory),
