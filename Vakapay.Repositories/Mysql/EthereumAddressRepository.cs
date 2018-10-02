@@ -31,47 +31,47 @@ namespace Vakapay.Repositories.Mysql
 //		{
 //			throw new System.NotImplementedException();
 //		}
-
-		public ReturnObject Insert(EthereumAddress objectInsert)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.InsertTask<string, EthereumAddress>(objectInsert);
-				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-				return new ReturnObject
-				{
-					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-				};
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
-		}
-
-		public EthereumAddress FindById(string Id)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		public List<EthereumAddress> FindBySql(string sqlString)
-		{
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Query<EthereumAddress>(sqlString);
-				return result.ToList();
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				return null;
-			}
-		}
+//
+//		public ReturnObject Insert(EthereumAddress objectInsert)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.InsertTask<string, EthereumAddress>(objectInsert);
+//				var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+//				return new ReturnObject
+//				{
+//					Status = status,
+//					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+//				};
+//			}
+//			catch (Exception e)
+//			{
+//				throw e;
+//			}
+//		}
+//
+//		public EthereumAddress FindById(string Id)
+//		{
+//			throw new System.NotImplementedException();
+//		}
+//
+//		public List<EthereumAddress> FindBySql(string sqlString)
+//		{
+//			try
+//			{
+//				if (Connection.State != ConnectionState.Open)
+//					Connection.Open();
+//				var result = Connection.Query<EthereumAddress>(sqlString);
+//				return result.ToList();
+//			}
+//			catch (Exception e)
+//			{
+//				Console.WriteLine(e);
+//				return null;
+//			}
+//		}
 
 	    public EthereumAddress FindByAddress(string address)
 	    {

@@ -76,6 +76,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestWalletBuisiness", "Vakapay.TestWalletBuisiness\Vakapay.TestWalletBuisiness.csproj", "{C7C059ED-620B-46D8-BEDA-4F3435B502ED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestTransactionsWithdraw", "Vakapay.TestTransactionsWithdraw\Vakapay.TestTransactionsWithdraw.csproj", "{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakaxa.VakaxaIdAPI", "Vakaxa.VakaxaIdAPI\Vakaxa.VakaxaIdAPI.csproj", "{8BCB6ED2-34A3-4FEA-BE09-942A6772AB0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
