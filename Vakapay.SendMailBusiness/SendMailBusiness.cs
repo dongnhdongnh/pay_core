@@ -199,15 +199,15 @@ namespace Vakapay.SendMailBusiness
                  case NetworkName.BTC:
                      switch (emailQueue.Template)
                      {
-                         case EmailTemplate.SENT:
+                         case EmailTemplate.Sent:
                              return _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb)
                                  .FindById(emailQueue.TransactionId);
-                         case EmailTemplate.RECEIVED:
+                         case EmailTemplate.Received:
                              return _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb)
                                  .FindById(emailQueue.TransactionId);
-                         case EmailTemplate.NEW_DEVICE:
+                         case EmailTemplate.NewDevice:
                              break;
-                         case EmailTemplate.VERIFY:
+                         case EmailTemplate.Verify:
                              break;
                          default:
                              throw new ArgumentOutOfRangeException();
@@ -216,15 +216,15 @@ namespace Vakapay.SendMailBusiness
                 case NetworkName.ETH:
                     switch (emailQueue.Template)
                     {
-                        case EmailTemplate.SENT:
+                        case EmailTemplate.Sent:
                             return _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb)
                                 .FindById(emailQueue.TransactionId);
-                        case EmailTemplate.RECEIVED:
+                        case EmailTemplate.Received:
                             return _vakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(_connectionDb)
                                 .FindById(emailQueue.TransactionId);
-                        case EmailTemplate.NEW_DEVICE:
+                        case EmailTemplate.NewDevice:
                             break;
-                        case EmailTemplate.VERIFY:
+                        case EmailTemplate.Verify:
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -233,15 +233,15 @@ namespace Vakapay.SendMailBusiness
                 case NetworkName.VAKA:
                     switch (emailQueue.Template)
                     {
-                        case EmailTemplate.SENT:
+                        case EmailTemplate.Sent:
                             return _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb)
                                 .FindById(emailQueue.TransactionId);
-                        case EmailTemplate.RECEIVED:
+                        case EmailTemplate.Received:
                             return _vakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(_connectionDb)
                                 .FindById(emailQueue.TransactionId);
-                        case EmailTemplate.NEW_DEVICE:
+                        case EmailTemplate.NewDevice:
                             break;
-                        case EmailTemplate.VERIFY:
+                        case EmailTemplate.Verify:
                             break;
                         default:
                             throw new ArgumentOutOfRangeException();
@@ -287,19 +287,19 @@ namespace Vakapay.SendMailBusiness
 
                 switch (emailQueue.Template)
                 {
-                    case EmailTemplate.NEW_DEVICE:
+                    case EmailTemplate.NewDevice:
                         body = body.Replace("{location}", emailQueue.DeviceLocation);
                         body = body.Replace("{ip}", emailQueue.DeviceIP);
                         body = body.Replace("{browser}", emailQueue.DeviceBrowser);
                         body = body.Replace("{authorizeUrl}", emailQueue.DeviceAuthorizeUrl);
                         break;
                         
-                    case EmailTemplate.SENT:
+                    case EmailTemplate.Sent:
                         body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
                         body = body.Replace("{toAddress}", GetReceivedAddress(emailQueue));
                         body = body.Replace("{amount}", emailQueue.GetAmount());
                         break;
-                    case EmailTemplate.RECEIVED:
+                    case EmailTemplate.Received:
                         body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
                         body = body.Replace("{networkName}", emailQueue.NetworkName);
                         body = body.Replace("{amount}", emailQueue.GetAmount());
@@ -307,7 +307,7 @@ namespace Vakapay.SendMailBusiness
                             EmailConfig.GetNumberOfNeededConfirmation(emailQueue.NetworkName));
                         break;
                         
-                    case EmailTemplate.VERIFY:
+                    case EmailTemplate.Verify:
                         body = body.Replace("{verifyEmailUrl}", emailQueue.VerifyUrl);
                         break;
                 }

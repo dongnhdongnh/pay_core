@@ -187,7 +187,7 @@ namespace Vakapay.BitcoinNotifi
 //                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
 //                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
                     btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount, "", //TODO add transaction Id
-                        EmailTemplate.RECEIVED, NetworkName.BTC);
+                        EmailTemplate.Received, NetworkName.BTC);
                 }
                 else
                 {

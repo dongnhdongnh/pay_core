@@ -140,7 +140,7 @@ namespace Vakapay.ScanVakaCoin
                 ToEmail = toEmail,
                 SignInUrl = EmailConfig.SignInUrl,
                 Amount = transferData.Amount(),
-                Template = EmailTemplate.RECEIVED,
+                Template = EmailTemplate.Received,
 //                SentOrReceived = EmailConfig.SentOrReceived_Received,
                 NetworkName = transferData.Symbol(),
                 Subject = EmailConfig.Subject_SentOrReceived,

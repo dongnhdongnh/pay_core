@@ -36,10 +36,10 @@ namespace Vakapay.Models.Domains
 
         public static readonly Dictionary<EmailTemplate, string> TemplateFiles = new Dictionary<EmailTemplate, string>()
         {
-            {EmailTemplate.NEW_DEVICE, "newDevice.htm"},
-            {EmailTemplate.SENT, "sent.htm"},
-            {EmailTemplate.RECEIVED, "received.htm"},
-            {EmailTemplate.VERIFY, "verify.htm"},
+            {EmailTemplate.NewDevice, "newDevice.htm"},
+            {EmailTemplate.Sent, "sent.htm"},
+            {EmailTemplate.Received, "received.htm"},
+            {EmailTemplate.Verify, "verify.htm"},
         };
 
         public static string GetNumberOfNeededConfirmation(string networkName)

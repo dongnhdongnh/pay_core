@@ -34,7 +34,7 @@ namespace Vakapay.UnitTest
                 Status = Status.StatusPending,
                 CreatedAt = CommonHelper.GetUnixTimestamp(),
                 UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                Template = EmailTemplate.RECEIVED,
+                Template = EmailTemplate.Received,
                 SignInUrl = "google.com.vn",
                 Amount = 1,
 //                SentOrReceived = EmailConfig.SentOrReceived_Sent,

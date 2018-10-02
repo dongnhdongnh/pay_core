@@ -131,7 +131,7 @@ namespace Vakapay.BlockchainBusiness.Base
 //                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
                         await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
                             email, pendingTransaction.Amount, pendingTransaction.Id,
-                            EmailTemplate.SENT, pendingTransaction.NetworkName());
+                            EmailTemplate.Sent, pendingTransaction.NetworkName());
                     }
                 }
 
