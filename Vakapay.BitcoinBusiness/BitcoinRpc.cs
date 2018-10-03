@@ -791,5 +791,17 @@ namespace Vakapay.BitcoinBusiness
                 return returnError(e);
             }
         }
+        
+        public ReturnObject Generate(int number)
+        {
+            try
+            {
+                return InvokeMethod("generate", number);
+            }
+            catch (Exception e)
+            {
+                return returnError(e);
+            }
+        }
     }
 }
