@@ -104,14 +104,13 @@ namespace Vakapay.Repositories.Mysql
 
                 var sQuery = $"SELECT Email FROM {TableName} t1 INNER JOIN {TableNameWallet} t2 ON t1.Id = t2.UserId "
                              + $"INNER JOIN {blockchainAddressTableName} t3 ON t2.Id = t3.WalletId ";
-                
+
                 if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
                 {
                     sQuery += $"WHERE t3.{nameof(VakacoinAccount.AccountName)} = @Address;";
                 }
                 else
                 {
-
                     sQuery += $"WHERE t3.{nameof(BlockchainAddress.Address)} = @Address;";
                 }
 

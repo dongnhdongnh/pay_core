@@ -61,7 +61,7 @@ namespace Vakapay.UserBusiness
                         Id = CommonHelper.GenerateUuid(),
                         Email = userModel.Email,
                         Phone = userModel.Phone,
-                        Fullname = userModel.Fullname,
+                        FullName = userModel.FullName,
                         Birthday = userModel.Birthday,
                         Status = Status.StatusActive,
                         CreatedAt = time,
@@ -97,7 +97,7 @@ namespace Vakapay.UserBusiness
                 }
                 else
                 {
-                    userCheck.Fullname = userModel.Fullname;
+                    userCheck.FullName = userModel.FullName;
                     userCheck.Phone = userModel.Phone;
                     userCheck.Birthday = userModel.Birthday;
                     //updated new user
@@ -128,6 +128,8 @@ namespace Vakapay.UserBusiness
             }
         }
 
+
+        // find UserInfo by id
         public User getUserByID(string id)
         {
             try
@@ -139,6 +141,27 @@ namespace Vakapay.UserBusiness
                     {
                         {"Id", id}
                     };
+
+                var user = userRepository.FindWhere(userRepository.QuerySearch(search));
+                return user;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return null;
+            }
+        }
+
+        // find UserInfo 
+        // new Dictionary<string, string>
+        //{
+        //    {"Email", email}
+        //};
+        public User getUserInfo(Dictionary<string, string> search)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
 
                 var user = userRepository.FindWhere(userRepository.QuerySearch(search));
                 return user;
