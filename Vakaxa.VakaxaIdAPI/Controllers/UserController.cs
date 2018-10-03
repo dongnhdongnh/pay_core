@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -14,7 +15,9 @@ using Vakaxa.VakaxaIdAPI.Model;
 
 namespace Vakaxa.VakaxaIdAPI.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
+    [EnableCors]
     [ApiController]
     [Authorize]
     public class UserController : ControllerBase
@@ -37,26 +40,27 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
         {
             try
             {
-               
                 var file = Request.Form.Files[0];
-                
+
                 string folderName = "wwwroot/avatar";
                 string webRootPath = Directory.GetCurrentDirectory();
-               
+
                 string newPath = Path.Combine(webRootPath, folderName);
-                
+
                 if (!Directory.Exists(newPath))
                 {
                     Directory.CreateDirectory(newPath);
                 }
 
+                Console.WriteLine(file.FileName);
                 if (file.Length > 0)
                 {
                     char[] MyChar = {'"', ' '};
                     string fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
                         .Trim(MyChar);
-
+                    Console.WriteLine(fileName);
                     string fullPath = Path.Combine(newPath, fileName);
+                    Console.WriteLine(fullPath);
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         file.CopyTo(stream);
@@ -65,7 +69,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     var successData = new ReturnObject
                     {
                         Status = Status.StatusSuccess,
-                        Data = fullPath
+                        Data = fullPath + "--" +  file.FileName + "--" + newPath + "--" + fileName
                     };
                     return ReturnObject.ToJson(successData);
                 }

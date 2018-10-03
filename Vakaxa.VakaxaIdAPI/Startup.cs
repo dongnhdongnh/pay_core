@@ -20,6 +20,9 @@ namespace Vakaxa.VakaxaIdAPI
             services.AddMvcCore()
                 .AddAuthorization()
                 .AddJsonFormatters();
+
+            services.AddCors();
+
             services.AddAuthentication("Bearer")
                 .AddIdentityServerAuthentication(options =>
                 {
@@ -42,10 +45,17 @@ namespace Vakaxa.VakaxaIdAPI
                 app.UseHsts();
             }
 
-            
-            
             app.UseHttpsRedirection();
             app.UseAuthentication();
+
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+
             app.UseMvc();
         }
     }
