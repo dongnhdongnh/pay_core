@@ -78,12 +78,12 @@ namespace Vakapay.UnitTest
             var userBus = new UserBusiness.UserBusiness(PersistenceFactory);
             var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
             var resultCreated = userBus.Login(walletBusiness,
-                new User {Email = "ngochuan2212@gmail.com", Phone = "+84988478266", FullName = "Ngo Ngoc Huan"});
+                new User {Email = "ngochuan2212@gmail.com", PhoneNumber = "+84988478266", FullName = "Ngo Ngoc Huan"});
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
 
             resultCreated = userBus.Login(walletBusiness,
-                new User {Email = "tieuthanhliem@gmail.com", Phone = "+84965995710", FullName = "Tieu Thanh Liem"});
+                new User {Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"});
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }

@@ -23,7 +23,7 @@ namespace Vakaxa.VakaxaIdAPI
             services.AddAuthentication("Bearer")
                 .AddIdentityServerAuthentication(options =>
                 {
-                    options.Authority = "http://localhost:5000";
+                    options.Authority = "http://192.168.1.157:5000";
                     options.RequireHttpsMetadata = false;
 
                     options.ApiName = "api1";
@@ -42,6 +42,8 @@ namespace Vakaxa.VakaxaIdAPI
                 app.UseHsts();
             }
 
+            
+            
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();

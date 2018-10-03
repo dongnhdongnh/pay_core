@@ -1,7 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -11,72 +14,135 @@ using Vakaxa.VakaxaIdAPI.Model;
 
 namespace Vakaxa.VakaxaIdAPI.Controllers
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	[Authorize]
-	public class UserController : ControllerBase
-	{
-		[HttpGet("getUserInfo")]
-		public IActionResult GetUserInfo()
-		{
-			return new JsonResult(from c in User.Claims where c.Type == "userInfo" select new { c.Value });
-		}
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class UserController : ControllerBase
+    {
+        private IHostingEnvironment _hostingEnvironment;
 
-		[HttpGet("checkUserLogin")]
-		public string CheckUserLogin()
-		{
-			try
-			{
-				var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
-				Console.WriteLine(jsonUser);
-				var userModel = UserModel.FromJson(jsonUser);
-				Console.WriteLine(userModel.Email);
-				var repositoryConfig = new RepositoryConfiguration
-				{
-					ConnectionString =
-						"server=127.0.0.1;userid=root;password=Chelsea1992;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
-				};
+        public UserController(IHostingEnvironment hostingEnvironment)
+        {
+            _hostingEnvironment = hostingEnvironment;
+        }
 
-				var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-				var userBusiness = new UserBusiness(persistenceFactory);
-				var walletBusiness = new WalletBusiness(persistenceFactory);
-				var resultData = userBusiness.Login(walletBusiness, userModel.Email, userModel.Phone, userModel.Fullname);
-				return ReturnObject.ToJson(resultData);
-			}
-			catch (Exception e)
-			{
-				var errorData = new ReturnObject
-				{
-					Status = Status.StatusSuccess,
-					Message = e.Message
-				};
-				return ReturnObject.ToJson(errorData);
-			}
-		}
+        [HttpGet("getUserInfo")]
+        public IActionResult GetUserInfo()
+        {
+            return new JsonResult(from c in User.Claims where c.Type == "userInfo" select new {c.Value});
+        }
 
-		// GET api/values/5
-		[HttpGet("{id}")]
-		public ActionResult<string> Get(int id)
-		{
-			return "value";
-		}
+        [HttpPost("upload-avatar"), DisableRequestSizeLimit]
+        public string UploadFile()
+        {
+            try
+            {
+               
+                var file = Request.Form.Files[0];
+                
+                string folderName = "wwwroot/avatar";
+                string webRootPath = Directory.GetCurrentDirectory();
+               
+                string newPath = Path.Combine(webRootPath, folderName);
+                
+                if (!Directory.Exists(newPath))
+                {
+                    Directory.CreateDirectory(newPath);
+                }
 
-		// POST api/values
-		[HttpPost]
-		public void Post([FromBody] string value)
-		{
-		}
+                if (file.Length > 0)
+                {
+                    char[] MyChar = {'"', ' '};
+                    string fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
+                        .Trim(MyChar);
 
-		// PUT api/values/5
-		[HttpPut("{id}")]
-		public void Put(int id, [FromBody] string value)
-		{
-		}
+                    string fullPath = Path.Combine(newPath, fileName);
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
 
-		// DELETE api/values/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
-		{
-		}
-	}
+                    var successData = new ReturnObject
+                    {
+                        Status = Status.StatusSuccess,
+                        Data = fullPath
+                    };
+                    return ReturnObject.ToJson(successData);
+                }
+
+                var errorData = new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Data = "Can't image"
+                };
+                return ReturnObject.ToJson(errorData);
+            }
+            catch (System.Exception ex)
+            {
+                var errorData = new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = ex.Message
+                };
+                return ReturnObject.ToJson(errorData);
+            }
+        }
+
+        [HttpGet("checkUserLogin")]
+        public string CheckUserLogin()
+        {
+            try
+            {
+                var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
+                Console.WriteLine(jsonUser);
+                var userModel = UserModel.FromJson(jsonUser);
+                Console.WriteLine(userModel.Email);
+                var repositoryConfig = new RepositoryConfiguration
+                {
+                    ConnectionString =
+                        "server=127.0.0.1;userid=root;password=Chelsea1992;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                };
+
+                var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+                var userBusiness = new UserBusiness(persistenceFactory);
+                var walletBusiness = new WalletBusiness(persistenceFactory);
+                //var resultData = userBusiness.Login(walletBusiness, userModel);
+                return null;
+            }
+            catch (Exception e)
+            {
+                var errorData = new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+                return ReturnObject.ToJson(errorData);
+            }
+        }
+
+        // GET api/values/5
+        [HttpGet("{id}")]
+        public ActionResult<string> Get(int id)
+        {
+            return "value";
+        }
+
+        // POST api/values
+        [HttpPost]
+        public void Post([FromBody] string value)
+        {
+        }
+
+        // PUT api/values/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+        }
+
+        // DELETE api/values/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
+    }
 }

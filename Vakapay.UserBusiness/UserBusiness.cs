@@ -60,7 +60,7 @@ namespace Vakapay.UserBusiness
                     {
                         Id = CommonHelper.GenerateUuid(),
                         Email = userModel.Email,
-                        Phone = userModel.Phone,
+                        PhoneNumber = userModel.PhoneNumber,
                         FullName = userModel.FullName,
                         Birthday = userModel.Birthday,
                         Status = Status.StatusActive,
@@ -98,7 +98,7 @@ namespace Vakapay.UserBusiness
                 else
                 {
                     userCheck.FullName = userModel.FullName;
-                    userCheck.Phone = userModel.Phone;
+                    userCheck.PhoneNumber = userModel.PhoneNumber;
                     userCheck.Birthday = userModel.Birthday;
                     //updated new user
                     var resultUpdatedUser = userRepository.Update(userCheck);
