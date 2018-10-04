@@ -1,0 +1,17 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "server=127.0.0.1;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+    },
+
+  "VakacoinNode1":{
+    "Url":"http://127.0.0.1:8000"
+  },
+
+  "EthereumNode1":{
+    "Url":"http://localhost:9900"
+  },
+
+  "BitcoinNode1":{
+    "Url":"http://127.0.0.1:18443"
+  }
+}
