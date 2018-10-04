@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
-using Microsoft.Extensions.Configuration;
+using Vakapay.Configuration;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.VakacoinBusiness;
@@ -15,18 +14,25 @@ namespace Vakapay.SendVakacoin
         {
             try
             {
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("setting.json");
-                IConfiguration configuration = builder.Build();
+//                var builder = new ConfigurationBuilder()
+//                    .SetBasePath(Directory.GetCurrentDirectory())
+//                    .AddJsonFile("setting.json");
+//                IConfiguration configuration = builder.Build();
+//
+//                var connectionString = configuration.GetConnectionString("DefaultConnection");
+//                var repositoryConfig = new RepositoryConfiguration
+//                {
+//                    ConnectionString = connectionString
+//                };
+//
+//                var nodeUrl = configuration["Node:Url"];
 
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                var nodeUrl = VakapayConfiguration.GetVakacoinNode();
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = connectionString
+                    ConnectionString = VakapayConfiguration.DefaultSqlConnection
                 };
-
-                var nodeUrl = configuration["Node:Url"];
+                
                 for(var i = 0; i < 20; i++)
                 {
                     var ts = new Thread(()=>RunSend(repositoryConfig, nodeUrl));

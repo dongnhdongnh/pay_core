@@ -73,10 +73,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.SendMailBusiness", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.WalletBusiness2", "Vakapay.WalletBusiness2\Vakapay.WalletBusiness2.csproj", "{BBD9FFC0-9344-40FD-BEED-FDBEE665C187}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestWalletBuisiness", "Vakapay.TestWalletBuisiness\Vakapay.TestWalletBuisiness.csproj", "{C7C059ED-620B-46D8-BEDA-4F3435B502ED}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestTransactionsWithdraw", "Vakapay.TestTransactionsWithdraw\Vakapay.TestTransactionsWithdraw.csproj", "{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakaxa.VakaxaIdAPI", "Vakaxa.VakaxaIdAPI\Vakaxa.VakaxaIdAPI.csproj", "{8BCB6ED2-34A3-4FEA-BE09-942A6772AB0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ApiServer", "Vakapay.ApiServer\Vakapay.ApiServer.csproj", "{8C67EB8E-1090-41F4-A0A2-2593152635A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.Configuration", "Vakapay.Configuration\Vakapay.Configuration.csproj", "{4419F19D-EA43-4F2E-BA31-B304C9305262}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -208,10 +211,6 @@ Global
 		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{33DD116E-C289-49BF-9DAA-60C185A9A207}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33DD116E-C289-49BF-9DAA-60C185A9A207}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{33DD116E-C289-49BF-9DAA-60C185A9A207}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{33DD116E-C289-49BF-9DAA-60C185A9A207}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
