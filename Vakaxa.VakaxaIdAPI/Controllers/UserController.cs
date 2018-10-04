@@ -41,26 +41,20 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
-
                 string folderName = "wwwroot/avatar";
                 string webRootPath = Directory.GetCurrentDirectory();
-
                 string newPath = Path.Combine(webRootPath, folderName);
-
                 if (!Directory.Exists(newPath))
                 {
                     Directory.CreateDirectory(newPath);
                 }
 
-                Console.WriteLine(file.FileName);
                 if (file.Length > 0)
                 {
                     char[] MyChar = {'"', ' '};
                     string fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
                         .Trim(MyChar);
-                    Console.WriteLine(fileName);
                     string fullPath = Path.Combine(newPath, fileName);
-                    Console.WriteLine(fullPath);
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         file.CopyTo(stream);
@@ -69,6 +63,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     var successData = new ReturnObject
                     {
                         Status = Status.StatusSuccess,
+                        Message = "Upload avatar success",
                         Data = fullPath + "--" +  file.FileName + "--" + newPath + "--" + fileName
                     };
                     return ReturnObject.ToJson(successData);

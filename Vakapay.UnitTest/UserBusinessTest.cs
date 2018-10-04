@@ -57,11 +57,35 @@ namespace Vakapay.UnitTest
                 };
             var resultCreated = userBus.getUserInfo(search);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
-            Assert.IsNotNull(resultCreated);
+           
 
+        }
 
+        [Test]
+        public void UserLog()
+        {
+            Console.WriteLine("start");
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = UserBusinessTest.ConnectionString
+            };
+
+            Console.WriteLine("New Address");
+            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            var userBus = new UserBusiness.UserBusiness(PersistenceFactory);
+
+            var log = new UserActionLog
+            {
+                Description = "aaaa",
+                Ip = "192.168.1.157",
+                ActionName = "loggin",
+                UserId = "aaaaaaaaaa",
+                CreatedAt = (int) CommonHelper.GetUnixTimestamp()
+            };
+            var resultCreated = userBus.AddActionLog(log);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
+
         }
 
         [Test]
@@ -83,7 +107,10 @@ namespace Vakapay.UnitTest
             Assert.IsNotNull(resultCreated);
 
             resultCreated = userBus.Login(walletBusiness,
-                new User {Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"});
+                new User
+                {
+                    Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"
+                });
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }

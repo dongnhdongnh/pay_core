@@ -30,6 +30,39 @@ namespace Vakapay.UserBusiness
                 : vakapayRepositoryFactory.GetOldConnection();
         }
 
+        /// <summary>
+        /// save action log user
+        /// </summary>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        public ReturnObject AddActionLog(UserActionLog log)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(log.UserId);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Can't User"
+                    };
+                }
+
+                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+
+                return logRepository.Insert(log);
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
 
         /// <summary>
         /// created User and wallet when login first
@@ -56,21 +89,13 @@ namespace Vakapay.UserBusiness
                 {
                     //login first
                     var time = (int) CommonHelper.GetUnixTimestamp();
-                    var newUser = new User
-                    {
-                        Id = CommonHelper.GenerateUuid(),
-                        Email = userModel.Email,
-                        PhoneNumber = userModel.PhoneNumber,
-                        FullName = userModel.FullName,
-                        Birthday = userModel.Birthday,
-                        Status = Status.StatusActive,
-                        CreatedAt = time,
-                        UpdatedAt = time
-                    };
-
+                    userModel.Id = CommonHelper.GenerateUuid();
+                    userModel.Status = Status.StatusActive;
+                    userModel.CreatedAt = time;
+                    userModel.UpdatedAt = time;
 
                     //created new user
-                    var resultCreatedUser = userRepository.Insert(newUser);
+                    var resultCreatedUser = userRepository.Insert(userModel);
 
                     if (resultCreatedUser.Status == Status.StatusError)
                         return new ReturnObject
@@ -80,7 +105,7 @@ namespace Vakapay.UserBusiness
                         };
 
                     // created wallet
-                    var resultCreatWallet = walletBusiness.MakeAllWalletForNewUser(newUser);
+                    var resultCreatWallet = walletBusiness.MakeAllWalletForNewUser(userModel);
 
                     if (resultCreatWallet.Status == Status.StatusError)
                         return new ReturnObject
@@ -92,7 +117,7 @@ namespace Vakapay.UserBusiness
                     return new ReturnObject
                     {
                         Status = Status.StatusSuccess,
-                        Data = JsonConvert.SerializeObject(newUser)
+                        Data = JsonConvert.SerializeObject(userModel)
                     };
                 }
                 else
@@ -136,13 +161,7 @@ namespace Vakapay.UserBusiness
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
 
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"Id", id}
-                    };
-
-                var user = userRepository.FindWhere(userRepository.QuerySearch(search));
+                var user = userRepository.FindById(id);
                 return user;
             }
             catch (Exception e)
