@@ -85,7 +85,6 @@ namespace Vakapay.UnitTest
             var resultCreated = userBus.AddActionLog(log);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
-
         }
 
         [Test]
@@ -107,10 +106,7 @@ namespace Vakapay.UnitTest
             Assert.IsNotNull(resultCreated);
 
             resultCreated = userBus.Login(walletBusiness,
-                new User
-                {
-                    Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"
-                });
+                new User {Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"});
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }

@@ -11,7 +11,6 @@ using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.UserBusiness;
 using Vakapay.WalletBusiness;
-using Vakaxa.VakaxaIdAPI.Model;
 
 namespace Vakaxa.VakaxaIdAPI.Controllers
 {
@@ -41,9 +40,9 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
-                string folderName = "wwwroot/avatar";
-                string webRootPath = Directory.GetCurrentDirectory();
-                string newPath = Path.Combine(webRootPath, folderName);
+                const string folderName = "wwwroot/avatar";
+                var webRootPath = Directory.GetCurrentDirectory();
+                var newPath = Path.Combine(webRootPath, folderName);
                 if (!Directory.Exists(newPath))
                 {
                     Directory.CreateDirectory(newPath);
@@ -51,10 +50,10 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
                 if (file.Length > 0)
                 {
-                    char[] MyChar = {'"', ' '};
-                    string fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
-                        .Trim(MyChar);
-                    string fullPath = Path.Combine(newPath, fileName);
+                    char[] myChar = {'"', ' '};
+                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
+                        .Trim(myChar);
+                    var fullPath = Path.Combine(newPath, fileName);
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         file.CopyTo(stream);
@@ -76,7 +75,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 };
                 return ReturnObject.ToJson(errorData);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 var errorData = new ReturnObject
                 {
@@ -94,7 +93,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             {
                 var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
                 Console.WriteLine(jsonUser);
-                var userModel = UserModel.FromJson(jsonUser);
+                var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
                 Console.WriteLine(userModel.Email);
                 var repositoryConfig = new RepositoryConfiguration
                 {
@@ -105,8 +104,8 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
                 var userBusiness = new UserBusiness(persistenceFactory);
                 var walletBusiness = new WalletBusiness(persistenceFactory);
-                //var resultData = userBusiness.Login(walletBusiness, userModel);
-                return null;
+                var resultData = userBusiness.Login(walletBusiness, userModel);
+                return ReturnObject.ToJson(resultData);
             }
             catch (Exception e)
             {

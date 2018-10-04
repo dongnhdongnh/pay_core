@@ -18,6 +18,11 @@ namespace Vakapay.Models.Entities
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Birthday { get; set; }
+        public string CountryCode { get; set; }
+        public string Avatar { get; set; }
+        public string Country { get; set; }
+        public string StreetAddress { get; set; }
+        public string PostalCode { get; set; }
         public string SecondPassword { get; set; }
         public string IpWhiteList { get; set; }
         public string Status { get; set; }

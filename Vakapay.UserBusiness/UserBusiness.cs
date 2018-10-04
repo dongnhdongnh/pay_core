@@ -84,11 +84,11 @@ namespace Vakapay.UserBusiness
                     };
 
                 var userCheck = userRepository.FindWhere(userRepository.QuerySearch(search));
+                var time = (int) CommonHelper.GetUnixTimestamp();
 
                 if (userCheck == null)
                 {
                     //login first
-                    var time = (int) CommonHelper.GetUnixTimestamp();
                     userModel.Id = CommonHelper.GenerateUuid();
                     userModel.Status = Status.StatusActive;
                     userModel.CreatedAt = time;
@@ -105,9 +105,9 @@ namespace Vakapay.UserBusiness
                         };
 
                     // created wallet
-                    var resultCreatWallet = walletBusiness.MakeAllWalletForNewUser(userModel);
+                    var resultCreateWallet = walletBusiness.MakeAllWalletForNewUser(userModel);
 
-                    if (resultCreatWallet.Status == Status.StatusError)
+                    if (resultCreateWallet.Status == Status.StatusError)
                         return new ReturnObject
                         {
                             Status = Status.StatusError,
@@ -120,22 +120,22 @@ namespace Vakapay.UserBusiness
                         Data = JsonConvert.SerializeObject(userModel)
                     };
                 }
-                else
-                {
-                    userCheck.FullName = userModel.FullName;
-                    userCheck.PhoneNumber = userModel.PhoneNumber;
-                    userCheck.Birthday = userModel.Birthday;
-                    //updated new user
-                    var resultUpdatedUser = userRepository.Update(userCheck);
+
+                //Update data user
+                userCheck.FullName = userModel.FullName;
+                userCheck.PhoneNumber = userModel.PhoneNumber;
+                userCheck.Birthday = userModel.Birthday;
+                userCheck.UpdatedAt = time;
+                //updated user
+                var resultUpdatedUser = userRepository.Update(userCheck);
 
 
-                    if (resultUpdatedUser.Status == Status.StatusError)
-                        return new ReturnObject
-                        {
-                            Status = Status.StatusError,
-                            Message = "Fail update to userRepository"
-                        };
-                }
+                if (resultUpdatedUser.Status == Status.StatusError)
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Fail update to userRepository"
+                    };
 
                 return new ReturnObject
                 {
