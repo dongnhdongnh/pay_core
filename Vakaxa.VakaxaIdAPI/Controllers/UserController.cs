@@ -1,11 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -21,11 +25,13 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
+        public IConfiguration Configuration { get; }
         private IHostingEnvironment _hostingEnvironment;
 
-        public UserController(IHostingEnvironment hostingEnvironment)
+        public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
+            Configuration = configuration;
         }
 
         [HttpGet("getUserInfo")]
@@ -40,7 +46,26 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
-                const string folderName = "wwwroot/avatar";
+                Request.Form.TryGetValue("id", out var userId);
+
+                var repositoryConfig = new RepositoryConfiguration
+                {
+                    ConnectionString = Configuration.GetConnectionString("DefaultConnection")
+                };
+                var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+                var userBusiness = new UserBusiness(persistenceFactory);
+
+                var userCheck = userBusiness.getUserByID(userId);
+
+                if (userCheck == null)
+                    return ReturnObject.ToJson(new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Data = "Can't User"
+                    });
+
+
+                const string folderName = "wwwroot/upload/avatar";
                 var webRootPath = Directory.GetCurrentDirectory();
                 var newPath = Path.Combine(webRootPath, folderName);
                 if (!Directory.Exists(newPath))
@@ -54,18 +79,25 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
                         .Trim(myChar);
                     var fullPath = Path.Combine(newPath, fileName);
+
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
                         file.CopyTo(stream);
                     }
 
-                    var successData = new ReturnObject
-                    {
-                        Status = Status.StatusSuccess,
-                        Message = "Upload avatar success",
-                        Data = fullPath + "--" +  file.FileName + "--" + newPath + "--" + fileName
-                    };
-                    return ReturnObject.ToJson(successData);
+                    var link = folderName + "/" + fileName;
+
+
+                    userCheck.Avatar = link;
+                    var updateUser = userBusiness.UpdateProfile(userCheck);
+
+                    if (updateUser.Status == Status.StatusSuccess)
+                        return ReturnObject.ToJson(new ReturnObject
+                        {
+                            Status = Status.StatusSuccess,
+                            Message = "Upload avatar success ",
+                            Data = link
+                        });
                 }
 
                 var errorData = new ReturnObject
@@ -73,6 +105,8 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     Status = Status.StatusError,
                     Data = "Can't image"
                 };
+
+
                 return ReturnObject.ToJson(errorData);
             }
             catch (Exception ex)
@@ -97,8 +131,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 Console.WriteLine(userModel.Email);
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString =
-                        "server=127.0.0.1;userid=root;password=Chelsea1992;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                    ConnectionString = Configuration.GetConnectionString("DefaultConnection")
                 };
 
                 var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

@@ -26,7 +26,7 @@ namespace Vakaxa.VakaxaIdAPI
             services.AddAuthentication("Bearer")
                 .AddIdentityServerAuthentication(options =>
                 {
-                    options.Authority = "http://192.168.1.157:5000";
+                    options.Authority = "https://vakaid.vakaxalab.com";
                     options.RequireHttpsMetadata = false;
 
                     options.ApiName = "api1";

@@ -65,6 +65,38 @@ namespace Vakapay.UserBusiness
         }
 
         /// <summary>
+        /// save user info
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public ReturnObject UpdateProfile(User user)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(user.Id);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Can't User"
+                    };
+                }
+
+                return userRepository.Update(user);
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
         /// created User and wallet when login first
         /// </summary>
         /// <param name="email"></param>
