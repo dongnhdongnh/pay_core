@@ -74,6 +74,7 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+              
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
                 {
@@ -83,7 +84,7 @@ namespace Vakapay.UserBusiness
                         Message = "Can't User"
                     };
                 }
-
+                
                 return userRepository.Update(user);
             }
             catch (Exception e)
@@ -236,7 +237,6 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-
                 var user = userRepository.FindWhere(userRepository.QuerySearch(search));
                 return user;
             }

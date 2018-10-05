@@ -55,7 +55,8 @@ namespace Vakaxa.VakaxaIdAPI
                     .AllowAnyMethod()
                     .AllowCredentials();
             });
-
+            
+            app.UseStaticFiles();
             app.UseMvc();
         }
     }

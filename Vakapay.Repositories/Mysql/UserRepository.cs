@@ -66,7 +66,7 @@ namespace Vakapay.Repositories.Mysql
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                var result = Connection.QuerySingle<User>(sql);
+                var result = Connection.QueryFirstOrDefault<User>(sql);
 
                 return result;
             }

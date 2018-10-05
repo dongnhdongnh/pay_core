@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Google.Protobuf.WellKnownTypes;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -46,7 +48,9 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
-                Request.Form.TryGetValue("id", out var userId);
+
+                var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
+                var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
 
                 var repositoryConfig = new RepositoryConfiguration
                 {
@@ -55,7 +59,10 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
                 var userBusiness = new UserBusiness(persistenceFactory);
 
-                var userCheck = userBusiness.getUserByID(userId);
+                var userCheck = userBusiness.getUserInfo(new Dictionary<string, string>
+                {
+                    {"Email", userModel.Email}
+                });
 
                 if (userCheck == null)
                     return ReturnObject.ToJson(new ReturnObject
@@ -66,6 +73,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
 
                 const string folderName = "wwwroot/upload/avatar";
+                var link = "/upload/avatar/";
                 var webRootPath = Directory.GetCurrentDirectory();
                 var newPath = Path.Combine(webRootPath, folderName);
                 if (!Directory.Exists(newPath))
@@ -75,9 +83,13 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
                 if (file.Length > 0)
                 {
-                    char[] myChar = {'"', ' '};
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
-                        .Trim(myChar);
+                    char[] myChar = {'"'};
+                    var fileName = CommonHelper.GetUnixTimestamp() + ContentDispositionHeaderValue
+                                       .Parse(file.ContentDisposition).FileName.ToString()
+                                       .Trim(myChar);
+
+                    fileName = fileName.Replace(" ", "-");
+                    
                     var fullPath = Path.Combine(newPath, fileName);
 
                     using (var stream = new FileStream(fullPath, FileMode.Create))
@@ -85,11 +97,22 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                         file.CopyTo(stream);
                     }
 
-                    var link = folderName + "/" + fileName;
+                    var oldAvatar = userCheck.Avatar;
 
+                    link = link + fileName;
 
-                    userCheck.Avatar = link;
+                    userCheck.Avatar = fileName;
                     var updateUser = userBusiness.UpdateProfile(userCheck);
+
+                    if (!string.IsNullOrEmpty(oldAvatar))
+                    {
+                        var oldFullPath = Path.Combine(newPath, oldAvatar);
+
+                        if (System.IO.File.Exists(oldFullPath))
+                        {
+                            System.IO.File.Delete(oldFullPath);
+                        }
+                    }
 
                     if (updateUser.Status == Status.StatusSuccess)
                         return ReturnObject.ToJson(new ReturnObject
@@ -160,8 +183,10 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public string Post([FromBody] string value)
         {
+            Console.WriteLine("aa");
+            return value;
         }
 
         // PUT api/values/5
