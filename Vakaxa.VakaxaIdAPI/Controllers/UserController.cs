@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -32,11 +32,9 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
         public IConfiguration Configuration { get; }
-        private IHostingEnvironment _hostingEnvironment;
 
         public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
-            _hostingEnvironment = hostingEnvironment;
             Configuration = configuration;
         }
 
@@ -52,19 +50,17 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
-
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
 
                 if (_userBusiness == null)
                 {
-                    CreateUserBusiniss();
+                    CreateUserBusiness();
                 }
 
                 var userCheck = _userBusiness.getUserInfo(new Dictionary<string, string>
                 {
                     {"Email", email}
                 });
-
 
                 if (userCheck == null)
                     return ReturnObject.ToJson(new ReturnObject
@@ -170,10 +166,20 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
                 Console.WriteLine(jsonUser);
                 var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
+                var jObjectUser = JObject.Parse(jsonUser);
+                if (jObjectUser.ContainsKey("StreetAddress"))
+                {
+                    var address = jObjectUser["StreetAddress"].ToString();
+                    if (address != null)
+                    {
+                        userModel.StreetAddress1 = address;
+                    }
+                }
+                
                 Console.WriteLine(userModel.Email);
                 if (_userBusiness == null)
                 {
-                    CreateUserBusiniss();
+                    CreateUserBusiness();
                 }
 
                 if (_walletBusiness == null)
@@ -186,12 +192,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             }
             catch (Exception e)
             {
-                var errorData = new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = e.Message
-                };
-                return ReturnObject.ToJson(errorData);
+                return CreateDataError(e.Message);
             }
         }
 
@@ -205,7 +206,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
                 if (_userBusiness == null)
                 {
-                    CreateUserBusiniss();
+                    CreateUserBusiness();
                 }
 
                 var userModel = _userBusiness.getUserInfo(query);
@@ -218,12 +219,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             }
             catch (Exception e)
             {
-                var errorData = new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = e.Message
-                };
-                return ReturnObject.ToJson(errorData);
+                return CreateDataError(e.Message);
             }
         }
 
@@ -235,16 +231,58 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
         }
 
         // POST api/values
-        [HttpPost]
-        public string Post([FromBody] string value)
+        [HttpPost("update-profile")]
+        public string UpdateUserProfile([FromBody] JObject value)
         {
-            Console.WriteLine("aa");
-            return value;
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiness();
+                }
+
+                var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
+                if (value.ContainsKey("streetAddress1"))
+                {
+                    userModel.StreetAddress1 = value["streetAddress1"].ToString();
+                }
+
+                if (value.ContainsKey("streetAddress2"))
+                {
+                    userModel.StreetAddress2 = value["streetAddress2"].ToString();
+                }
+
+                if (value.ContainsKey("city"))
+                {
+                    userModel.City = value["city"].ToString();
+                }
+
+                if (value.ContainsKey("postalCode"))
+                {
+                    userModel.PostalCode = value["postalCode"].ToString();
+                }
+
+                var result = _userBusiness.UpdateProfile(userModel);
+                return ReturnObject.ToJson(result);
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void Put(int id, [FromBody] JObject value)
         {
         }
 
@@ -254,7 +292,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
         {
         }
 
-        private void CreateUserBusiniss()
+        private void CreateUserBusiness()
         {
             if (_persistenceFactory == null)
             {
@@ -282,6 +320,16 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             };
 
             _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+        }
+
+        public string CreateDataError(string message)
+        {
+            var errorData = new ReturnObject
+            {
+                Status = Status.StatusError,
+                Message = message
+            };
+            return ReturnObject.ToJson(errorData);
         }
     }
 }

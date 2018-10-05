@@ -128,6 +128,7 @@ namespace Vakapay.UserBusiness
                     {
                         userModel.Id = CommonHelper.GenerateUuid();
                         userModel.Status = Status.StatusActive;
+                        userModel.FullName = userModel.FirstName + " " + userModel.LastName;
                         userModel.CreatedAt = time;
                         userModel.UpdatedAt = time;
 
