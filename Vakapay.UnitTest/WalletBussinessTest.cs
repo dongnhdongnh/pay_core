@@ -1,11 +1,13 @@
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
+using Vakapay.WalletBusiness;
 
 namespace Vakapay.UnitTest
 {
@@ -80,8 +82,8 @@ namespace Vakapay.UnitTest
 
 		}
 
-		[Test]
-		public async System.Threading.Tasks.Task CreateNewAddressAsync()
+		[TestCase("46b4594c-a45a-400d-86ce-9a7869d61180")]
+		public async System.Threading.Tasks.Task CreateNewAddressAsync(string walletId)
 		{
 
 			var repositoryConfig = new RepositoryConfiguration
@@ -94,17 +96,106 @@ namespace Vakapay.UnitTest
 			var connection = PersistenceFactory.GetDbConnection();
 			var ethAddressRepos = PersistenceFactory.GetEthereumAddressRepository(connection);
 			var _walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
-			var wallet = new Wallet();
-			wallet.Id = "46b4594c-a45a-400d-86ce-9a7869d61180";
 
-			string pass = CommonHelper.RandomString(15);
+			string pass = "password";
 			//	var resultTest = _ethBus.CreateNewAddAddress(wallet);
-			var outPut = await _ethBus.CreateAddressAsync<EthereumAddress>(_walletBusiness, ethAddressRepos, RPCClass, wallet.Id, pass);
+			var outPut = await _ethBus.CreateAddressAsync<EthereumAddress>(_walletBusiness, ethAddressRepos, RPCClass, walletId, pass);
 			Assert.IsNotNull(outPut);
 		}
-
+		
 		[Test]
-		public void InsertPendingTxsToWithdraw()
+		public void InitFakeAddressAndCoin()
+		{
+//			var rpc = new EthereumRpc("http://localhost:8545");
+//			var a = rpc.CreateNewAddress("password");
+			
+			var repositoryConfig = new RepositoryConfiguration
+			{
+				ConnectionString = VakapayConfig.ConnectionString
+			};
+
+			//Create user active for test
+			var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			var connection = persistenceFactory.GetDbConnection();
+			var userRepo = persistenceFactory.GetUserRepository(connection);
+			var walletRepo = persistenceFactory.GetWalletRepository(connection);
+
+
+			//fake userId
+			for (int i = 1; i < 10; i++)
+			{
+				var ins = userRepo.Insert(
+					new User()
+					{
+						Id = i.ToString(),
+						Status =  "Active"
+					}
+				);
+				Assert.AreEqual(Status.StatusSuccess, ins.Status);
+			}
+
+			//create wallet without address
+			for (int i = 1; i < 10; i++)
+			{
+				CreateAllWalletForUser(i.ToString());
+			}
+
+			//insert address into WalletDb 
+			// and insert to ethereumAddress
+			for (int i = 1; i < 10; i++)
+			{
+				var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), NetworkName.ETH);
+				CreateNewAddressAsync(prepareWallet.Id);
+			}
+
+			//send coin from rootAddress to new address
+			for (int i = 1; i < 10; i++)
+			{
+				var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), NetworkName.ETH);
+				InsertPendingTxsToWithdraw("46b4594c-a45a-400d-86ce-9a7869d61180", prepareWallet.Address);
+			}
+		}
+		
+		[Test]
+		public void CreateRadomPendingTxsToWithdraw()
+		{
+			var repositoryConfig = new RepositoryConfiguration()
+			{
+				ConnectionString = VakapayConfig.ConnectionString
+			};
+
+			var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			_walletBusiness =
+				new Vakapay.WalletBusiness.WalletBusiness(persistence);
+
+
+			var connection = persistence.GetDbConnection();
+			var userRepo = persistence.GetUserRepository(connection);
+			var walletRepo = persistence.GetWalletRepository(connection);
+
+			ReturnObject resultTest = null;
+			for (int i = 0; i < 1000; i++)
+			{
+				var rndFrom = new Random().Next(1, 10);
+				var rndTo = new Random().Next(1, 10);
+				var fromWallet = walletRepo.FindByUserAndNetwork(rndFrom.ToString(), NetworkName.ETH);
+
+				while (rndFrom == rndTo)
+				{
+					rndTo = new Random().Next(1, 10);
+				}
+				var toWalletAddr =  walletRepo.FindByUserAndNetwork(rndTo.ToString(), NetworkName.ETH);
+				resultTest = _walletBusiness.Withdraw(fromWallet, toWalletAddr.Address, 1);
+			}
+			
+			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
+			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
+		}
+
+		
+		//rootAddress
+		[TestCase("46b4594c-a45a-400d-86ce-9a7869d61180", "0x13f022d72158410433cbd66f5dd8bf6d2d129924")]
+		public void InsertPendingTxsToWithdraw(string walletId, string toAddr)
 		{
 			var repositoryConfig = new RepositoryConfiguration()
 			{
@@ -116,14 +207,12 @@ namespace Vakapay.UnitTest
 				new Vakapay.WalletBusiness.WalletBusiness(persistence);
 
 			var wallet = new Wallet();
-			wallet.Id = "46b4594c-a45a-400d-86ce-9a7869d61180";
-			var toAddr = "0x13f022d72158410433cbd66f5dd8bf6d2d129924";
+			wallet.Id = walletId;
 
 			ReturnObject resultTest = null;
-			for (int i = 0; i < 1000; i++)
-			{
-				 resultTest = _walletBusiness.Withdraw(wallet, toAddr, 5);
-			}
+			
+			resultTest = _walletBusiness.Withdraw(wallet, toAddr, 1000000000000000000000m);
+			
 			
 			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
