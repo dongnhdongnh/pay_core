@@ -116,7 +116,7 @@ CREATE TABLE `EmailQueue` (
   `SignInUrl` varchar(256) DEFAULT NULL,
   `TransactionId` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -172,16 +172,25 @@ DROP TABLE IF EXISTS `User`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `User` (
   `Id` varchar(200) NOT NULL,
-  `Email` varchar(100) DEFAULT NULL,
-  `Phone` varchar(20) DEFAULT NULL,
-  `Fullname` varchar(100) DEFAULT NULL,
-  `SecondPassword` varchar(100) DEFAULT NULL,
-  `IpWhiteList` varchar(100) DEFAULT NULL,
-  `Status` varchar(10) DEFAULT NULL,
+  `Email` varchar(255) DEFAULT NULL,
+  `Phone` varchar(200) DEFAULT NULL,
+  `Status` varchar(45) DEFAULT NULL,
+  `Fullname` varchar(255) DEFAULT NULL,
+  `SecondPassword` varchar(255) DEFAULT NULL,
+  `IpWhiteList` varchar(255) DEFAULT NULL,
   `CreatedAt` int(11) DEFAULT NULL,
   `UpdatedAt` int(11) DEFAULT NULL,
+  `Avatar` varchar(255) DEFAULT '',
+  `FirstName` varchar(255) DEFAULT '',
+  `LastName` varchar(255) DEFAULT '',
+  `CountryCode` varchar(50) DEFAULT '',
+  `Country` varchar(50) DEFAULT '',
+  `StreetAddress` varchar(255) DEFAULT '',
+  `PostalCode` varchar(50) DEFAULT '',
+  `PhoneNumber` varchar(255) NOT NULL DEFAULT '',
+  `Birthday` varchar(255) DEFAULT '',
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -231,7 +240,7 @@ CREATE TABLE `VakacoinDepositTransaction` (
   `InProcess` int(11) DEFAULT NULL,
   `Version` int(11) DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -259,7 +268,7 @@ CREATE TABLE `VakacoinWithdrawTransaction` (
   `Memo` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`Id`),
   KEY `idxStatus` (`Status`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -291,4 +300,4 @@ CREATE TABLE `Wallet` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-10-05 10:48:40
+-- Dump completed on 2018-10-05 11:00:27

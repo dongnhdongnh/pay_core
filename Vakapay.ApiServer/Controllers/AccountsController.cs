@@ -1,17 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using Vakapay.EthereumBusiness;
 
 namespace Vakapay.ApiServer.Controllers
 {
     
     [Route("v1/[controller]")]
     [ApiController]
-    public class AccountController : Controller
+    public class AccountsController : Controller
     {
         [HttpGet("GetBalance/{id}")]
         public ActionResult<string> GetBlock(int id)
         {
-            
+            return JsonHelper.SerializeObject("");
         }
 
         [HttpGet("Test/{pass}")]
