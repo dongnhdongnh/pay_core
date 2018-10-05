@@ -74,6 +74,7 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+              
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
                 {
@@ -83,7 +84,7 @@ namespace Vakapay.UserBusiness
                         Message = "Can't User"
                     };
                 }
-
+                
                 return userRepository.Update(user);
             }
             catch (Exception e)
@@ -120,54 +121,77 @@ namespace Vakapay.UserBusiness
 
                 if (userCheck == null)
                 {
+                    var transactionScope = ConnectionDb.BeginTransaction();
                     //login first
-                    userModel.Id = CommonHelper.GenerateUuid();
-                    userModel.Status = Status.StatusActive;
-                    userModel.CreatedAt = time;
-                    userModel.UpdatedAt = time;
+                    try
+                    {
+                        userModel.Id = CommonHelper.GenerateUuid();
+                        userModel.Status = Status.StatusActive;
+                        userModel.CreatedAt = time;
+                        userModel.UpdatedAt = time;
 
-                    //created new user
-                    var resultCreatedUser = userRepository.Insert(userModel);
+                        //created new user
+                        var resultCreatedUser = userRepository.Insert(userModel);
 
-                    if (resultCreatedUser.Status == Status.StatusError)
+                        if (resultCreatedUser.Status == Status.StatusError)
+                        {
+                            transactionScope.Rollback();
+                            return new ReturnObject
+                            {
+                                Status = Status.StatusError,
+                                Message = "Fail insert to userRepository"
+                            };
+                        }
+
+
+                        // created wallet
+                        var resultCreateWallet = walletBusiness.MakeAllWalletForNewUser(userModel);
+
+                        if (resultCreateWallet.Status == Status.StatusError)
+                        {
+                            transactionScope.Rollback();
+                            return new ReturnObject
+                            {
+                                Status = Status.StatusError,
+                                Message = "Fail insert wallet"
+                            };
+                        }
+
+                        transactionScope.Commit();
                         return new ReturnObject
                         {
-                            Status = Status.StatusError,
-                            Message = "Fail insert to userRepository"
+                            Status = Status.StatusSuccess,
+                            Data = JsonConvert.SerializeObject(userModel)
                         };
-
-                    // created wallet
-                    var resultCreateWallet = walletBusiness.MakeAllWalletForNewUser(userModel);
-
-                    if (resultCreateWallet.Status == Status.StatusError)
+                    }
+                    catch (Exception e)
+                    {
+                        transactionScope.Rollback();
                         return new ReturnObject
                         {
                             Status = Status.StatusError,
                             Message = "Fail insert wallet"
                         };
-
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusSuccess,
-                        Data = JsonConvert.SerializeObject(userModel)
-                    };
+                    }
                 }
+                else
+                {
+                    //Update data user
+                    userCheck.FullName = userModel.FullName;
+                    userCheck.PhoneNumber = userModel.PhoneNumber;
+                    userCheck.Birthday = userModel.Birthday;
+                    userCheck.UpdatedAt = time;
+                    //updated user
+                    var resultUpdatedUser = userRepository.Update(userCheck);
 
-                //Update data user
-                userCheck.FullName = userModel.FullName;
-                userCheck.PhoneNumber = userModel.PhoneNumber;
-                userCheck.Birthday = userModel.Birthday;
-                userCheck.UpdatedAt = time;
-                //updated user
-                var resultUpdatedUser = userRepository.Update(userCheck);
 
-
-                if (resultUpdatedUser.Status == Status.StatusError)
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusError,
-                        Message = "Fail update to userRepository"
-                    };
+                    if (resultUpdatedUser.Status == Status.StatusError)
+                        return new ReturnObject
+                        {
+                            Status = Status.StatusError,
+                            Message = "Fail update to userRepository"
+                        };
+                }
 
                 return new ReturnObject
                 {
@@ -213,7 +237,6 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-
                 var user = userRepository.FindWhere(userRepository.QuerySearch(search));
                 return user;
             }

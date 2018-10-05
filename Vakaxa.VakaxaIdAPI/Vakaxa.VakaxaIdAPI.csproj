@@ -23,4 +23,11 @@
       <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\avatar\less_is_more_2_by_ausman101-d6yider.png" />
+      <_ContentIncludedByDefault Remove="wwwroot\avatar\qqqq.jpg" />
+      <_ContentIncludedByDefault Remove="wwwroot\avatar\simple-minimalism.jpg" />
+      <_ContentIncludedByDefault Remove="wwwroot\avatar\vakabank.png" />
+    </ItemGroup>
+
 </Project>

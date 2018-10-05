@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Google.Protobuf.WellKnownTypes;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -25,6 +25,10 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
+        private UserBusiness _userBusiness;
+        private WalletBusiness _walletBusiness;
+        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
+
         public IConfiguration Configuration { get; }
         private IHostingEnvironment _hostingEnvironment;
 
@@ -46,16 +50,17 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
-                Request.Form.TryGetValue("id", out var userId);
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
 
-                var repositoryConfig = new RepositoryConfiguration
+                if (_userBusiness == null)
                 {
-                    ConnectionString = Configuration.GetConnectionString("DefaultConnection")
-                };
-                var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-                var userBusiness = new UserBusiness(persistenceFactory);
+                    CreateUserBusiniss();
+                }
 
-                var userCheck = userBusiness.getUserByID(userId);
+                var userCheck = _userBusiness.getUserInfo(new Dictionary<string, string>
+                {
+                    {"Email", email}
+                });
 
                 if (userCheck == null)
                     return ReturnObject.ToJson(new ReturnObject
@@ -66,6 +71,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
 
                 const string folderName = "wwwroot/upload/avatar";
+                var link = "/upload/avatar/";
                 var webRootPath = Directory.GetCurrentDirectory();
                 var newPath = Path.Combine(webRootPath, folderName);
                 if (!Directory.Exists(newPath))
@@ -75,9 +81,13 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
                 if (file.Length > 0)
                 {
-                    char[] myChar = {'"', ' '};
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.ToString()
-                        .Trim(myChar);
+                    char[] myChar = {'"'};
+                    var fileName = CommonHelper.GetUnixTimestamp() + ContentDispositionHeaderValue
+                                       .Parse(file.ContentDisposition).FileName.ToString()
+                                       .Trim(myChar);
+
+                    fileName = fileName.Replace(" ", "-");
+
                     var fullPath = Path.Combine(newPath, fileName);
 
                     using (var stream = new FileStream(fullPath, FileMode.Create))
@@ -85,11 +95,22 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                         file.CopyTo(stream);
                     }
 
-                    var link = folderName + "/" + fileName;
+                    var oldAvatar = userCheck.Avatar;
 
+                    link = link + fileName;
 
-                    userCheck.Avatar = link;
-                    var updateUser = userBusiness.UpdateProfile(userCheck);
+                    userCheck.Avatar = fileName;
+                    var updateUser = _userBusiness.UpdateProfile(userCheck);
+
+                    if (!string.IsNullOrEmpty(oldAvatar))
+                    {
+                        var oldFullPath = Path.Combine(newPath, oldAvatar);
+
+                        if (System.IO.File.Exists(oldFullPath))
+                        {
+                            System.IO.File.Delete(oldFullPath);
+                        }
+                    }
 
                     if (updateUser.Status == Status.StatusSuccess)
                         return ReturnObject.ToJson(new ReturnObject
@@ -129,16 +150,49 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 Console.WriteLine(jsonUser);
                 var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
                 Console.WriteLine(userModel.Email);
-                var repositoryConfig = new RepositoryConfiguration
+                if (_userBusiness == null)
                 {
-                    ConnectionString = Configuration.GetConnectionString("DefaultConnection")
-                };
+                    CreateUserBusiniss();
+                }
 
-                var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-                var userBusiness = new UserBusiness(persistenceFactory);
-                var walletBusiness = new WalletBusiness(persistenceFactory);
-                var resultData = userBusiness.Login(walletBusiness, userModel);
+                if (_walletBusiness == null)
+                {
+                    CreateWalletBusiness();
+                }
+
+                var resultData = _userBusiness.Login(_walletBusiness, userModel);
                 return ReturnObject.ToJson(resultData);
+            }
+            catch (Exception e)
+            {
+                var errorData = new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+                return ReturnObject.ToJson(errorData);
+            }
+        }
+
+        [HttpGet("get-info")]
+        public string GetCurrentUser()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiniss();
+                }
+
+                var userModel = _userBusiness.getUserInfo(query);
+                var success = new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = Vakapay.Models.Entities.User.ToJson(userModel)
+                };
+                return ReturnObject.ToJson(success);
             }
             catch (Exception e)
             {
@@ -160,8 +214,10 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public string Post([FromBody] string value)
         {
+            Console.WriteLine("aa");
+            return value;
         }
 
         // PUT api/values/5
@@ -174,6 +230,36 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        private void CreateUserBusiniss()
+        {
+            if (_persistenceFactory == null)
+            {
+                CreateVakapayRepositoryMysqlPersistenceFactory();
+            }
+
+            _userBusiness = new UserBusiness(_persistenceFactory);
+        }
+
+        private void CreateWalletBusiness()
+        {
+            if (_persistenceFactory == null)
+            {
+                CreateVakapayRepositoryMysqlPersistenceFactory();
+            }
+
+            _walletBusiness = new WalletBusiness(_persistenceFactory);
+        }
+
+        private void CreateVakapayRepositoryMysqlPersistenceFactory()
+        {
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = Configuration.GetConnectionString("DefaultConnection")
+            };
+
+            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
         }
     }
 }
