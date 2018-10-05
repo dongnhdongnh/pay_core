@@ -341,6 +341,12 @@ namespace Vakapay.VakacoinBusiness
                 var transaction = (VakacoinTransaction) blockchainTransaction;
 
                 var senderInfo = AccountRepository.FindByAddress(blockchainTransaction.FromAddress);
+
+                if (senderInfo == null)
+                {
+                    throw new System.Exception("Not found sender key!");
+                }
+                
                 var memo = transaction.Memo ?? "";
 
                 return await SendTransactionAsync(transaction.FromAddress, transaction.ToAddress,
@@ -350,7 +356,11 @@ namespace Vakapay.VakacoinBusiness
             {
                 Console.WriteLine(e);
                 Logger.Error(e);
-                return null;
+                return new ReturnObject()
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message,
+                };
             }
         }
 

@@ -155,9 +155,9 @@ namespace Vakapay.BlockchainBusiness.Base
             catch (Exception e)
             {
                 //release lock
+                transactionDbSend.Rollback();
                 var resultRelease = repoQuery.ReleaseLock(pendingTransaction);
                 Console.WriteLine(JsonHelper.SerializeObject(resultRelease));
-                transactionDbSend.Rollback();
                 throw e;
             }
         }
