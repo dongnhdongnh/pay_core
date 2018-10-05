@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Vakapay.BitcoinBusiness;
 using Vakapay.VakacoinBusiness;
 
 namespace Vakapay.ApiServer.Controllers

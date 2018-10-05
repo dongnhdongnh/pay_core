@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Data;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql.Base;

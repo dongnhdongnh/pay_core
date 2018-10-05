@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
-using NLog;
-using Vakapay.BlockchainBusiness;
 using Vakapay.BlockchainBusiness.Base;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;

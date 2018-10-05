@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Vakapay.Models.Domains;
+﻿using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities.ETH
 {

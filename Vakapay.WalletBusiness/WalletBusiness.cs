@@ -8,11 +8,6 @@ using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
-using Vakapay.EthereumBussiness;
-using Vakapay.BitcoinBusiness;
-using Vakapay.VakacoinBusiness;
-using Vakapay.SendMailBusiness;
-using Vakapay.UserBusiness;
 
 namespace Vakapay.WalletBusiness
 {

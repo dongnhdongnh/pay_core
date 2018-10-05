@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Vakapay.BitcoinBusiness;
@@ -11,7 +10,6 @@ using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.VakacoinBusiness;
-using Vakapay.WalletBusiness;
 
 namespace Vakapay.ScanWallet
 {

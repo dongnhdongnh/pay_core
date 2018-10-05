@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.InteropServices.ComTypes;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vakapay.Models.Entities
 {

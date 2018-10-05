@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using Vakapay.Models.Domains;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Vakapay.Models.Entities
 {

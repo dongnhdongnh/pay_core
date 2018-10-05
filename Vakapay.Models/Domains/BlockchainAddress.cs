@@ -1,5 +1,4 @@
-﻿using System;
-namespace Vakapay.Models.Domains
+﻿namespace Vakapay.Models.Domains
 {
 	public abstract class BlockchainAddress
 	{

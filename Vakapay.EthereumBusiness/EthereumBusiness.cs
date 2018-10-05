@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Vakapay.BlockchainBusiness;
 using Vakapay.BlockchainBusiness.Base;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
-using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.EthereumBusiness
 {

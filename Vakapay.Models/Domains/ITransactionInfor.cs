@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Vakapay.Models.Domains
+﻿namespace Vakapay.Models.Domains
 {
 	public abstract class ITransactionInfor
 	{

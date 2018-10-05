@@ -3,7 +3,6 @@ using System.Linq;
 using NLog;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.BTC;

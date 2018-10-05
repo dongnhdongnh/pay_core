@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Vakapay.Models.Entities;
+﻿using Vakapay.Models.Entities;
 
 namespace Vakapay.Models.Domains
 {

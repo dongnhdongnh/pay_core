@@ -1,9 +1,7 @@
 using Dapper;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using NLog;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;

@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
-using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 

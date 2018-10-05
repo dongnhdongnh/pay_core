@@ -1,5 +1,4 @@
-﻿using System;
-using Vakapay.Models.Entities;
+﻿using Vakapay.Models.Entities;
 
 namespace Vakapay.Models.Domains
 {

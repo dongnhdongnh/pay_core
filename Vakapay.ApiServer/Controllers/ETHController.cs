@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 
 namespace Vakapay.ApiService.Controllers

@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.BlockchainBusiness
 {

@@ -1,13 +1,11 @@
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.WalletBusiness;
 
 namespace Vakapay.UnitTest
 {

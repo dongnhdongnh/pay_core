@@ -1,14 +1,6 @@
-﻿using Dapper;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vakapay.Models.Domains;
+﻿using System.Data;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
-using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {

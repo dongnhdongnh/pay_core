@@ -1,5 +1,4 @@
-﻿using System;
-namespace Vakapay.Models.Entities
+﻿namespace Vakapay.Models.Entities
 {
     public class PermissionApiArray
     {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Timers;
 using Microsoft.Extensions.Configuration;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
@@ -19,9 +18,15 @@ namespace Vakapay.SendBitcoin
         {
             try
             {
+                var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
+
+                if (string.IsNullOrWhiteSpace(environment))
+                    environment = "Development";
+
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("setting.json");
+                    .AddJsonFile("appsettings.json", optional: true)
+                    .AddJsonFile($"appsettings.{environment}.json", optional: false);
                 IConfiguration Configuration = builder.Build();
 
                 var connectionString = Configuration.GetConnectionString("DefaultConnection");

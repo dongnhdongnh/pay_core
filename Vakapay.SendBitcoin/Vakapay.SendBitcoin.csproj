@@ -22,4 +22,9 @@
       <Version>4.5.9</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.Development.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+    </None>
+  </ItemGroup>
 </Project>
