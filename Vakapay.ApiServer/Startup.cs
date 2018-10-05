@@ -18,7 +18,20 @@ namespace Vakapay.ApiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvcCore()
+                .AddAuthorization()
+                .AddJsonFormatters();
+
+            services.AddCors();
+
+            services.AddAuthentication("Bearer")
+                .AddIdentityServerAuthentication(options =>
+                {
+                    options.Authority = "https://vakaid.vakaxalab.com";
+                    options.RequireHttpsMetadata = false;
+
+                    options.ApiName = "api1";
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,7 +50,16 @@ namespace Vakapay.ApiServer
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseStaticFiles();
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
 
             app.UseMvc(routes =>
             {
