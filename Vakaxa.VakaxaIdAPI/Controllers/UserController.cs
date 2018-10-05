@@ -9,8 +9,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.UserBusiness;
@@ -50,6 +52,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
+
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
 
                 if (_userBusiness == null)
@@ -61,6 +64,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 {
                     {"Email", email}
                 });
+
 
                 if (userCheck == null)
                     return ReturnObject.ToJson(new ReturnObject
@@ -99,9 +103,13 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
                     link = link + fileName;
 
+
+                    //update avatar for user
                     userCheck.Avatar = link;
                     var updateUser = _userBusiness.UpdateProfile(userCheck);
 
+
+                    //delete image old
                     if (!string.IsNullOrEmpty(oldAvatar))
                     {
                         var oldname = oldAvatar.Split("/");
@@ -115,12 +123,23 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     }
 
                     if (updateUser.Status == Status.StatusSuccess)
+                    {
+                        //save action log
+                        _userBusiness.AddActionLog(new UserActionLog
+                        {
+                            ActionName = ActionLog.Avatar,
+                            Description = fileName,
+                            Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
+                            UserId = userCheck.Id,
+                        });
+
                         return ReturnObject.ToJson(new ReturnObject
                         {
                             Status = Status.StatusSuccess,
                             Message = "Upload avatar success ",
                             Data = link
                         });
+                    }
                 }
 
                 var errorData = new ReturnObject

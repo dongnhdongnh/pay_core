@@ -39,6 +39,8 @@ namespace Vakapay.UserBusiness
         {
             try
             {
+                log.Id = CommonHelper.GenerateUuid();
+                log.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var userCheck = userRepository.FindById(log.UserId);
                 if (userCheck == null)
@@ -157,7 +159,7 @@ namespace Vakapay.UserBusiness
                         return new ReturnObject
                         {
                             Status = Status.StatusSuccess,
-                            Data = JsonConvert.SerializeObject(userModel)
+                            Data = JsonConvert.SerializeObject(userModel),
                         };
                     }
                     catch (Exception e)
