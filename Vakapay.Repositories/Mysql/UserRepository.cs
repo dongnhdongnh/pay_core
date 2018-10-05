@@ -27,25 +27,6 @@ namespace Vakapay.Repositories.Mysql
         }
 
 
-//        public User FindById(string id)
-//        {
-//            try
-//            {
-//                if (Connection.State != ConnectionState.Open)
-//                    Connection.Open();
-//
-//                string query = "SELECT * FROM User WHERE Id = @ID";
-//                var result = Connection.QuerySingle<User>(query, new {ID = id});
-//
-//                return result;
-//            }
-//            catch (Exception e)
-//            {
-//                Console.WriteLine("Exception when find by id " + e);
-//                return null;
-//            }
-//        }
-
         public string QuerySearch(Dictionary<string, string> models)
         {
             var sQuery = "SELECT * FROM " + TableName + " WHERE 1 = 1";
@@ -124,26 +105,6 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-//        public ReturnObject Insert(User objectInsert)
-//        {
-//            try
-//            {
-//                if (Connection.State != ConnectionState.Open)
-//                    Connection.Open();
-//                var result = Connection.InsertTask<string, User>(objectInsert);
-//                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-//                return new ReturnObject
-//                {
-//                    Status = status,
-//                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-//                };
-//            }
-//            catch (Exception e)
-//            {
-//                throw e;
-//            }
-//        }
-//        
         public string FindEmailByBitcoinAddress(string bitcoinAddress)
         {
             try

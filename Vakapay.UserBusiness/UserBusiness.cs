@@ -74,7 +74,7 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-              
+
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
                 {
@@ -84,7 +84,7 @@ namespace Vakapay.UserBusiness
                         Message = "Can't User"
                     };
                 }
-                
+
                 return userRepository.Update(user);
             }
             catch (Exception e)
@@ -121,7 +121,6 @@ namespace Vakapay.UserBusiness
 
                 if (userCheck == null)
                 {
-                    var transactionScope = ConnectionDb.BeginTransaction();
                     //login first
                     try
                     {
@@ -135,7 +134,6 @@ namespace Vakapay.UserBusiness
 
                         if (resultCreatedUser.Status == Status.StatusError)
                         {
-                            transactionScope.Rollback();
                             return new ReturnObject
                             {
                                 Status = Status.StatusError,
@@ -149,7 +147,6 @@ namespace Vakapay.UserBusiness
 
                         if (resultCreateWallet.Status == Status.StatusError)
                         {
-                            transactionScope.Rollback();
                             return new ReturnObject
                             {
                                 Status = Status.StatusError,
@@ -157,7 +154,6 @@ namespace Vakapay.UserBusiness
                             };
                         }
 
-                        transactionScope.Commit();
                         return new ReturnObject
                         {
                             Status = Status.StatusSuccess,
@@ -166,7 +162,6 @@ namespace Vakapay.UserBusiness
                     }
                     catch (Exception e)
                     {
-                        transactionScope.Rollback();
                         return new ReturnObject
                         {
                             Status = Status.StatusError,
@@ -183,7 +178,6 @@ namespace Vakapay.UserBusiness
                     userCheck.UpdatedAt = time;
                     //updated user
                     var resultUpdatedUser = userRepository.Update(userCheck);
-
 
                     if (resultUpdatedUser.Status == Status.StatusError)
                         return new ReturnObject
