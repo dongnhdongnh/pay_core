@@ -31,5 +31,7 @@ namespace Vakapay.Models.Entities
 
         public static User FromJson(string json) =>
             JsonConvert.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
+        public static string ToJson(User self) =>
+            JsonConvert.SerializeObject(self, JsonHelper.ConvertSettings);
     }
 }

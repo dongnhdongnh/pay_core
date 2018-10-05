@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Google.Protobuf.WellKnownTypes;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
@@ -27,6 +25,10 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
+        private UserBusiness _userBusiness;
+        private WalletBusiness _walletBusiness;
+        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
+
         public IConfiguration Configuration { get; }
         private IHostingEnvironment _hostingEnvironment;
 
@@ -48,20 +50,16 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             try
             {
                 var file = Request.Form.Files[0];
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
 
-                var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
-                var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
-
-                var repositoryConfig = new RepositoryConfiguration
+                if (_userBusiness == null)
                 {
-                    ConnectionString = Configuration.GetConnectionString("DefaultConnection")
-                };
-                var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-                var userBusiness = new UserBusiness(persistenceFactory);
+                    CreateUserBusiniss();
+                }
 
-                var userCheck = userBusiness.getUserInfo(new Dictionary<string, string>
+                var userCheck = _userBusiness.getUserInfo(new Dictionary<string, string>
                 {
-                    {"Email", userModel.Email}
+                    {"Email", email}
                 });
 
                 if (userCheck == null)
@@ -89,7 +87,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                                        .Trim(myChar);
 
                     fileName = fileName.Replace(" ", "-");
-                    
+
                     var fullPath = Path.Combine(newPath, fileName);
 
                     using (var stream = new FileStream(fullPath, FileMode.Create))
@@ -102,7 +100,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     link = link + fileName;
 
                     userCheck.Avatar = fileName;
-                    var updateUser = userBusiness.UpdateProfile(userCheck);
+                    var updateUser = _userBusiness.UpdateProfile(userCheck);
 
                     if (!string.IsNullOrEmpty(oldAvatar))
                     {
@@ -152,16 +150,49 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 Console.WriteLine(jsonUser);
                 var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
                 Console.WriteLine(userModel.Email);
-                var repositoryConfig = new RepositoryConfiguration
+                if (_userBusiness == null)
                 {
-                    ConnectionString = Configuration.GetConnectionString("DefaultConnection")
-                };
+                    CreateUserBusiniss();
+                }
 
-                var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-                var userBusiness = new UserBusiness(persistenceFactory);
-                var walletBusiness = new WalletBusiness(persistenceFactory);
-                var resultData = userBusiness.Login(walletBusiness, userModel);
+                if (_walletBusiness == null)
+                {
+                    CreateWalletBusiness();
+                }
+
+                var resultData = _userBusiness.Login(_walletBusiness, userModel);
                 return ReturnObject.ToJson(resultData);
+            }
+            catch (Exception e)
+            {
+                var errorData = new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+                return ReturnObject.ToJson(errorData);
+            }
+        }
+
+        [HttpGet("get-info")]
+        public string GetCurrentUser()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiniss();
+                }
+
+                var userModel = _userBusiness.getUserInfo(query);
+                var success = new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = Vakapay.Models.Entities.User.ToJson(userModel)
+                };
+                return ReturnObject.ToJson(success);
             }
             catch (Exception e)
             {
@@ -199,6 +230,36 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        private void CreateUserBusiniss()
+        {
+            if (_persistenceFactory == null)
+            {
+                CreateVakapayRepositoryMysqlPersistenceFactory();
+            }
+
+            _userBusiness = new UserBusiness(_persistenceFactory);
+        }
+
+        private void CreateWalletBusiness()
+        {
+            if (_persistenceFactory == null)
+            {
+                CreateVakapayRepositoryMysqlPersistenceFactory();
+            }
+
+            _walletBusiness = new WalletBusiness(_persistenceFactory);
+        }
+
+        private void CreateVakapayRepositoryMysqlPersistenceFactory()
+        {
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = Configuration.GetConnectionString("DefaultConnection")
+            };
+
+            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
         }
     }
 }
