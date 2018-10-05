@@ -69,6 +69,13 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                         Data = "Can't User"
                     });
 
+                if (file.Length > 2097152)
+                    return ReturnObject.ToJson(new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Data = "File max size 2Mb"
+                    });
+
 
                 const string folderName = "wwwroot/upload/avatar";
                 var link = "/upload/avatar/";
@@ -78,6 +85,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 {
                     Directory.CreateDirectory(newPath);
                 }
+
 
                 if (file.Length > 0)
                 {
