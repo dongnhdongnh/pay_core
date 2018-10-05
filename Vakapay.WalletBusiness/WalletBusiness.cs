@@ -95,16 +95,20 @@ namespace Vakapay.WalletBusiness
                 {
                     ConnectionDb.Open();
                 }
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-                var userCheck = userRepository.FindById(user.Id);
-                if (userCheck == null)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusError,
-                        Message = "User Not Found"
-                    };
-                }
+
+//                if (checkExisted)
+//                {
+//                    var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+//                    var userCheck = userRepository.FindById(user.Id);
+//                    if (userCheck == null)
+//                    {
+//                        return new ReturnObject
+//                        {
+//                            Status = Status.StatusError,
+//                            Message = "User Not Found"
+//                        };
+//                    }
+//                }
 
                 var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
                 var existUserNetwork =

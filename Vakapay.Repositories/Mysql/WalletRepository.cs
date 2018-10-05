@@ -245,5 +245,19 @@ namespace Vakapay.Repositories.Mysql
 				return null;
 			}
 		}
+		
+		public List<Wallet> FindAllWalletByUserId(string id)
+		{
+			try
+			{
+				var query = $"SELECT * FROM {TableName} WHERE UserId = '{id}'";
+				return FindBySql(query);
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
+		}
 	}
 }

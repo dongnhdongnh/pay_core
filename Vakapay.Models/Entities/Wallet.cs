@@ -14,5 +14,10 @@ namespace Vakapay.Models.Entities
         public int CreatedAt { get; set; }
         public int UpdatedAt { get; set; }
         public int Version { get; set; }
+        
+        public string GetAmount()
+        {
+            return Domains.NetworkName.GetAmount(NetworkName, Balance);
+        }
     }
 }

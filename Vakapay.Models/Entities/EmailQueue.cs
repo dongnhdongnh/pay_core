@@ -38,14 +38,7 @@ namespace Vakapay.Models.Entities
 
         public string GetAmount()
         {
-            if (NetworkName == Domains.NetworkName.VAKA)
-            {
-                return Amount.ToString("N4") + " " + NetworkName;
-            }
-            else
-            {
-                return Amount + " " + NetworkName;
-            }
+            return Domains.NetworkName.GetAmount(NetworkName, Amount);
         }
     }
 }

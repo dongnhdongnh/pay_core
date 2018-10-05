@@ -27,7 +27,7 @@ namespace Vakapay.Repositories.Mysql
 
 		public IDbConnection GetOldConnection()
 		{
-			return Connection;
+			return Connection ?? (Connection = new MySqlConnection(repositoryConfiguration.ConnectionString));
 		}
 
 		public IWalletRepository GetWalletRepository(IDbConnection dbConnection)
