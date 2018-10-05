@@ -63,18 +63,10 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 });
 
                 if (userCheck == null)
-                    return ReturnObject.ToJson(new ReturnObject
-                    {
-                        Status = Status.StatusError,
-                        Data = "Can't User"
-                    });
+                    return CreateDataError("Can't User");
 
                 if (file.Length > 2097152)
-                    return ReturnObject.ToJson(new ReturnObject
-                    {
-                        Status = Status.StatusError,
-                        Data = "File max size 2Mb"
-                    });
+                    return CreateDataError("File max size 2Mb");
 
 
                 const string folderName = "wwwroot/upload/avatar";
@@ -129,13 +121,22 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     if (updateUser.Status == Status.StatusSuccess)
                     {
                         //save action log
-                        _userBusiness.AddActionLog(new UserActionLog
+                        try
                         {
-                            ActionName = ActionLog.Avatar,
-                            Description = fileName,
-                            Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
-                            UserId = userCheck.Id,
-                        });
+                            _userBusiness.AddActionLog(new UserActionLog
+                            {
+                                ActionName = ActionLog.Avatar,
+                                Description = fileName,
+                                Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
+                                UserId = userCheck.Id,
+                            });
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            throw;
+                        }
+
 
                         return ReturnObject.ToJson(new ReturnObject
                         {
@@ -146,23 +147,11 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     }
                 }
 
-                var errorData = new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Data = "Can't image"
-                };
-
-
-                return ReturnObject.ToJson(errorData);
+                return CreateDataError("Can't update image");
             }
             catch (Exception ex)
             {
-                var errorData = new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = ex.Message
-                };
-                return ReturnObject.ToJson(errorData);
+                return CreateDataError(ex.Message);
             }
         }
 
@@ -183,8 +172,8 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                         userModel.StreetAddress1 = address;
                     }
                 }
-                
-                Console.WriteLine(userModel.Email);
+
+
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
@@ -196,6 +185,26 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 }
 
                 var resultData = _userBusiness.Login(_walletBusiness, userModel);
+
+
+                //save action log
+                try
+                {
+                    var dataInfo = Vakapay.Models.Entities.User.FromJson(resultData.Data);
+                    _userBusiness.AddActionLog(new UserActionLog
+                    {
+                        ActionName = ActionLog.Login,
+                        Description = dataInfo.Email,
+                        Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
+                        UserId = dataInfo.Id,
+                    });
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+
                 return ReturnObject.ToJson(resultData);
             }
             catch (Exception e)
@@ -280,6 +289,24 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 }
 
                 var result = _userBusiness.UpdateProfile(userModel);
+
+                //save action log
+                try
+                {
+                    _userBusiness.AddActionLog(new UserActionLog
+                    {
+                        ActionName = ActionLog.UpdateProfile,
+                        Description = userModel.Email,
+                        Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
+                        UserId = userModel.Id,
+                    });
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+
                 return ReturnObject.ToJson(result);
             }
             catch (Exception e)
