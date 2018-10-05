@@ -99,12 +99,14 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
                     link = link + fileName;
 
-                    userCheck.Avatar = fileName;
+                    userCheck.Avatar = link;
                     var updateUser = _userBusiness.UpdateProfile(userCheck);
 
                     if (!string.IsNullOrEmpty(oldAvatar))
                     {
-                        var oldFullPath = Path.Combine(newPath, oldAvatar);
+                        var oldname = oldAvatar.Split("/");
+
+                        var oldFullPath = Path.Combine(newPath, oldname[oldname.Length - 1]);
 
                         if (System.IO.File.Exists(oldFullPath))
                         {
@@ -181,6 +183,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
             {
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
+
                 if (_userBusiness == null)
                 {
                     CreateUserBusiniss();
