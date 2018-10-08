@@ -38,6 +38,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="appsettings.json" CopyToPublishDirectory="Always" />
     <None Update="appsettings.Development.json">
       <DependentUpon>appsettings.json</DependentUpon>
     </None>
