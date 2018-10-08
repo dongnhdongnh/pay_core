@@ -36,8 +36,8 @@ spec:
 {{ toYaml $.Values.application.env | indent 8 }}
         volumeMounts:
         - name: setting
-        mountPath: "/app/appsettings.Production.json"
-        subPath: "appsettings.Production.json"
+          mountPath: "/app/appsettings.Production.json"
+          subPath: "appsettings.Production.json"
         resources:
 {{ if (index $.Values.resources $i) }}
   {{ index $.Values.resources $i | toYaml | indent 10 }}
