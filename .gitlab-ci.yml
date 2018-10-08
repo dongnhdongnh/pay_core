@@ -2,6 +2,7 @@ image: harbor.vakaxalab.com/sysad/docker/kube-tool
 
 variables:
   DOCKER_DRIVER: overlay2
+  DOCKER_PATHS: "builder:docker/builder/Dockerfile;sendbtc:Vakapay.SendBitcoin/Dockerfile"
   CHART_FOLDER: docker/chart
 
 stages:
@@ -101,8 +102,6 @@ production:
 
 .auto_devops: &auto_devops |
   [[ "$TRACE" ]] && set -x
-  export DOCKER_PATHS=( "builder:docker/builder/Dockerfile"
-                        "sendbtc:Vakapay.SendBitcoin/Dockerfile")
   export RELEASE_NAME="$CI_PROJECT_PATH_SLUG-$(echo ${CI_ENVIRONMENT_NAME/\//-} | tr -s  '[:upper:]'  '[:lower:]' )"
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
   export CI_APPLICATION_TAG=$CI_COMMIT_SHA
@@ -212,16 +211,16 @@ production:
       echo ""
     fi
 
-    if [[ -f $DOCKER_PATH ]]; then
-      echo "Building Dockerfile-based application..."
-      for image in "${DOCKER_PATHS[@]}" ; do
-        image_name="${image%%:*}"
-        image_path="${image##*:}"
+    echo "Building Dockerfile-based application..."
+    for image in (${DOCKER_PATHS//;/ }); do
+      image_name="$(cut -d':' -f1 <<<"$image""
+      image_path="$(cut -d':' -f2 <<<"$image""
+      if [[ -f $image_path ]]; then
         docker build --cache-from "$CI_REGISTRY_IMAGE:latest" -t "$CI_APPLICATION_REPOSITORY/$image_name:$CI_APPLICATION_TAG" -f $image_path . --network host
-      done
-    else
-      echo "Must have Dockerfile in your project's code"
-    fi
+      else
+        echo "Must have Dockerfile in your project's code"
+      fi
+    done
 
     echo "Pushing to GitLab Container Registry..."
     docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
