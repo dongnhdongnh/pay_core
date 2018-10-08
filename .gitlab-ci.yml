@@ -97,7 +97,7 @@ production:
 .auto_devops: &auto_devops |
   [[ "$TRACE" ]] && set -x
   export RELEASE_NAME="$CI_PROJECT_PATH_SLUG-$(echo ${CI_ENVIRONMENT_NAME/\//-} | tr -s  '[:upper:]'  '[:lower:]' )"
-  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
+  export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE
   export CI_APPLICATION_TAG=$CI_COMMIT_SHA
 
   function get_replicas() {
@@ -210,7 +210,7 @@ production:
       image_name="$(echo $image | cut -d':' -f1)"
       image_path="$(echo $image | cut -d':' -f2)"
       if [[ -f $image_path ]]; then
-        docker build --cache-from "$CI_REGISTRY_IMAGE:latest" -t "$CI_APPLICATION_REPOSITORY/$image_name:$CI_APPLICATION_TAG" -f $image_path . --network host
+        docker build -t "$CI_APPLICATION_REPOSITORY/$image_name:$CI_APPLICATION_TAG" -f $image_path . --network host
       else
         echo "Must have Dockerfile in your project's code"
       fi

@@ -1,4 +1,4 @@
-FROM harbor.vakaxalab.com/vakagroup/vakapay/core:builder as builder
+FROM harbor.vakaxalab.com/vakagroup/vakapay/core/builder as builder
 
 FROM microsoft/dotnet:2.1-aspnetcore-runtime-alpine
 WORKDIR /app
