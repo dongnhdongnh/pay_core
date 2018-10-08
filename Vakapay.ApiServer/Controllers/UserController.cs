@@ -295,7 +295,7 @@ namespace Vakaxa.ApiServer.Controllers
                 if (value.ContainsKey("timezoneKey"))
                 {
                     var timezoneKey = value["timezoneKey"].ToString();
-                    if (!string.IsNullOrEmpty(timezoneKey) && Constants.listCurrency.ContainsKey(timezoneKey))
+                    if (!string.IsNullOrEmpty(timezoneKey) && Constants.listTimeZone.ContainsKey(timezoneKey))
                     {
                         userModel.TimezoneKey = timezoneKey;
                     }
