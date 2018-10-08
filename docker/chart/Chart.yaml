@@ -1,0 +1,4 @@
+apiVersion: v1
+description: "Vakapay deploy chart"
+name: vakapay
+version: 0.1

@@ -29,17 +29,16 @@ namespace Vakapay.SendBitcoin
                     .AddJsonFile($"appsettings.{environment}.json", optional: true);
                 IConfiguration Configuration = builder.Build();
 
-                var connectionString = Configuration.GetConnectionString("DefaultConnection");
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = connectionString
+                    ConnectionString = Configuration["DefaultConnection"]
                 };
 
                 var bitcoinConnect = new BitcoinRPCConnect
                 {
-                    Host = Configuration.GetSection("EndpointUrl").Value,
-                    UserName = Configuration.GetSection("User").Value,
-                    Password = Configuration.GetSection("Password").Value
+                    Host = Configuration["Chain:URL"],
+                    UserName = Configuration["Chain:User"],
+                    Password = Configuration["Chain:Password"]
                 };
 
                 for (var i = 0; i < 10; i++)

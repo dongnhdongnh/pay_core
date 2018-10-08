@@ -1,0 +1,50 @@
+{{- range $i, $v := .Values.replicaCount -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "trackableappname" (dict "chart" $ "suffix" $i) }}
+  labels:
+    app: {{ template "applabel" $ }}
+    track: "{{ $.Values.application.track }}"
+    tier: "{{ $i }}"
+    chart: "{{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}"
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+spec:
+  replicas: {{ $v }}
+  selector:
+    matchLabels:
+      app: {{ template "applabel" $ }}
+      tier: "{{ $i }}"
+  template:
+    metadata:
+      annotations:
+        security.alpha.kubernetes.io/unsafe-sysctls: net.core.somaxconn=65535
+      labels:
+        app: {{ template "applabel" $ }}
+        track: "{{ $.Values.application.track }}"
+        tier: "{{ $i }}"
+        release: {{ $.Release.Name }}
+    spec:
+      imagePullSecrets:
+{{ toYaml $.Values.image.secrets | indent 8 }}
+      containers:
+      - name: {{ template "name" $ }}
+        image: "{{ $.Values.image.repository }}/{{ $i | lower }}:{{ $.Values.image.tag }}"
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        env:
+{{ toYaml $.Values.application.env | indent 8 }}
+        volumeMounts:
+        - name: setting
+        mountPath: "/app/appsettings.Production.json"
+        subPath: "appsettings.Production.json"
+        resources:
+{{ if (index $.Values.resources $i) }}
+  {{ index $.Values.resources $i | toYaml | indent 10 }}
+{{ end }}
+      volumes:
+      - name: setting
+        secret:
+          secretName: {{ template "trackableappname" (dict "chart" $ "suffix" $i) }}
+---
+{{- end -}}

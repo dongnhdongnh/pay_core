@@ -1,0 +1,32 @@
+replicaCount:
+  sendBTC: 1
+image:
+  repository: $CI_APPLICATION_REPOSITORY
+  tag: $CI_APPLICATION_TAG
+  pullPolicy: Always
+  secrets:
+  - name: $secret_name
+application:
+  name: $CI_ENVIRONMENT_SLUG
+  track: $track
+  env:
+  - name: NETCORE_ENVIRONMENT
+    value: "Production"
+resources:
+  sendBTC:
+    #limits:
+      #cpu: 100m
+      #memory: 128Mi
+    #requests:
+      #cpu: 100m
+      #memory: 128Mi
+secret:
+  sendBTC: |-
+    {
+      "ConnectionStrings": "server=$MYSQL_HOST;userid=$MYSQL_USER;password=$MYSQL_PASSWORD;database=$MYSQL_DB;port=3306;Connection Timeout=120;SslMode=none",
+      "Chain": {
+        "URL": "http://$BITCOIN_HOST:$BITCOIN_RPC_PORT",
+        "User": "$BITCOIN_RPC_USER",
+        "Password": "$BITCOIN_RPC_PASSWORD"
+      }
+    }
