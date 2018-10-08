@@ -29,6 +29,9 @@ namespace Vakapay.Models.Entities
         public string Status { get; set; }
         public int CreatedAt { get; set; }
         public int UpdatedAt { get; set; }
+        public string CurrencyKey { get; set; }
+        public string TimezoneKey { get; set; }
+        public string Notifications { get; set; }
 
         public static User FromJson(string json) =>
             JsonConvert.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
