@@ -17,5 +17,8 @@ namespace Vakapay.Models.Repositories.Base
 		Task<ReturnObject> ReleaseLock(BlockchainTransaction transaction);
 		Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction);
 		List<BlockchainTransaction> FindTransactionHistory(int offset, int limit, string[] orderBy);
+		List<BlockchainTransaction> FindTransactionsFromAddress(string fromAddress);
+		List<BlockchainTransaction> FindTransactionsToAddress(string toAddress);
+		List<BlockchainTransaction> FindTransactionsInner(string innerAddress);
 	}
 }
