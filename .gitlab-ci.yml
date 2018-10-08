@@ -38,11 +38,8 @@ review:
     url: https://$CI_ENVIRONMENT_SLUG.$BASE_DOMAIN
   only:
     refs:
-      - branches
+      - tags
     kubernetes: active
-  except:
-    - master
-    - release
 
 stop_review:
   stage: cleanup
@@ -57,11 +54,8 @@ stop_review:
   allow_failure: true
   only:
     refs:
-      - branches
+      - tags
     kubernetes: active
-  except:
-    - master
-    - release
 
 staging:
   stage: staging
