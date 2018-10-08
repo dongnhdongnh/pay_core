@@ -78,8 +78,8 @@ namespace Vakapay.Configuration
                 environment = "Development";
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory() + "/../Vakapay.Configuration")
-                .AddJsonFile("Vakapay.Backend.Configuration.json", optional: true)
-                .AddJsonFile($"Vakapay.Backend.Configuration.{environment}.json", optional: false);
+                .AddJsonFile("Vakapay.Backend.Configuration.json", optional: false)
+                .AddJsonFile($"Vakapay.Backend.Configuration.{environment}.json", optional: true);
             
             return builder.Build();
         }

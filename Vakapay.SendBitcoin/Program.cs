@@ -25,8 +25,8 @@ namespace Vakapay.SendBitcoin
 
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: true)
-                    .AddJsonFile($"appsettings.{environment}.json", optional: false);
+                    .AddJsonFile("appsettings.json", optional: false)
+                    .AddJsonFile($"appsettings.{environment}.json", optional: true);
                 IConfiguration Configuration = builder.Build();
 
                 var connectionString = Configuration.GetConnectionString("DefaultConnection");
