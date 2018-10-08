@@ -31,7 +31,7 @@ namespace Vakapay.SendBitcoin
 
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = Configuration["DefaultConnection"]
+                    ConnectionString = Configuration["ConnectionStrings"]
                 };
 
                 var bitcoinConnect = new BitcoinRPCConnect
