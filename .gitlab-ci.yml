@@ -2,7 +2,7 @@ image: harbor.vakaxalab.com/sysad/docker/kube-tool
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_PATHS: "builder:docker/builder/Dockerfile;sendbtc:Vakapay.SendBitcoin/Dockerfile"
+  DOCKER_PATHS: "builder:docker/builder/Dockerfile sendbtc:Vakapay.SendBitcoin/Dockerfile"
   CHART_FOLDER: docker/chart
 
 stages:
@@ -212,9 +212,9 @@ production:
     fi
 
     echo "Building Dockerfile-based application..."
-    for image in (${DOCKER_PATHS//;/ }); do
-      image_name="$(cut -d':' -f1 <<<"$image""
-      image_path="$(cut -d':' -f2 <<<"$image""
+    for image in $DOCKER_PATHS ; do
+      image_name="$(echo $image | cut -d':' -f1)"
+      image_path="$(echo $image | cut -d':' -f2)"
       if [[ -f $image_path ]]; then
         docker build --cache-from "$CI_REGISTRY_IMAGE:latest" -t "$CI_APPLICATION_REPOSITORY/$image_name:$CI_APPLICATION_TAG" -f $image_path . --network host
       else
