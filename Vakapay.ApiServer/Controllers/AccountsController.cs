@@ -94,7 +94,12 @@ namespace Vakapay.ApiServer.Controllers
                 transactions.AddRange(vakacoinDepositTrxRepo.FindTransactionsByUserId(userId));
                 transactions.AddRange(vakacoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
 
-                var sortedTransactions = transactions.OrderBy(o=>o.UpdatedAt).ToList();
+                var sortedTransactions = transactions.OrderByDescending(o=>o.UpdatedAt).ToList();
+
+                if ( limit != null && limit > 0 )
+                {
+                    sortedTransactions = sortedTransactions.GetRange(0, (int) limit);
+                }
 
                 return JsonHelper.SerializeObject(new ReturnDataObject()
                     {Status = Status.StatusSuccess, Message = Message.MessageSuccess, Data = sortedTransactions});
