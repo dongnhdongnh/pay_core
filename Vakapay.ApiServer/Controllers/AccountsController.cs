@@ -42,25 +42,11 @@ namespace Vakapay.ApiServer.Controllers
 
                 foreach (var wallet in wallets)
                 {
-                    var existed = false;
-                    foreach (var balance in balances)
+                    balances.Add(new CurrencyBalance()
                     {
-                        if (balance.NetworkName == wallet.NetworkName)
-                        {
-                            balance.AmountDecimal += wallet.Balance;
-                            existed = true;
-                            break;
-                        }
-                    }
-
-                    if (!existed)
-                    {
-                        balances.Add(new CurrencyBalance()
-                        {
-                            NetworkName = wallet.NetworkName,
-                            AmountDecimal = wallet.Balance
-                        });
-                    }
+                        NetworkName = wallet.NetworkName,
+                        AmountDecimal = wallet.Balance
+                    });
                 }
 
                 var balanceResponse = new GetBalanceResponse()

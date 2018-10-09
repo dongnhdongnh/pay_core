@@ -12,10 +12,10 @@ namespace Vakapay.ApiServer.Models
         public string Amount => Vakapay.Models.Domains.NetworkName.GetAmount(NetworkName, AmountDecimal);
 
         [JsonIgnore]
-        public decimal AmountDecimal { get; set; }
+        public decimal AmountDecimal { private get; set; }
         
         [JsonIgnore]
-        public string NetworkName { get; set; }
+        public string NetworkName { private get; set; }
     }
     
     public class GetBalanceResponse
