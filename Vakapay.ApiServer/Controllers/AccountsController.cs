@@ -67,8 +67,8 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpGet]
-        [Route("{id}/transactions/{limit:int?}")]
-        public ActionResult<string> GetTransactions(string id, int? limit = null)
+        [Route("{userId}/transactions/{limit:int?}")]
+        public ActionResult<string> GetTransactions(string userId, int? limit = null)
         {
             try
             {
@@ -85,30 +85,15 @@ namespace Vakapay.ApiServer.Controllers
                 var vakacoinWithdrawTrxRepo =
                     new VakacoinWithdrawTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
 
-                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
-                var wallets = walletRepository.FindAllWalletByUserId(id);
-
                 var transactions = new List<BlockchainTransaction>();
 
-                foreach (var wallet in wallets)
-                {
-                    switch (wallet.NetworkName)
-                    {
-                        case NetworkName.BTC:
-                            transactions.AddRange(bitcoinDepositTrxRepo.FindTransactionsInner(wallet.Address));
-                            transactions.AddRange(bitcoinWithdrawTrxRepo.FindTransactionsInner(wallet.Address));
-                            break;
-                        case NetworkName.ETH:
-                            transactions.AddRange(ethereumDepositTrxRepo.FindTransactionsInner(wallet.Address));
-                            transactions.AddRange(ethereumWithdrawTrxRepo.FindTransactionsInner(wallet.Address));
-                            break;
-                        case NetworkName.VAKA:
-                            transactions.AddRange(vakacoinDepositTrxRepo.FindTransactionsInner(wallet.Address));
-                            transactions.AddRange(vakacoinWithdrawTrxRepo.FindTransactionsInner(wallet.Address));
-                            break;
-                    }
-                }
-                
+                transactions.AddRange(bitcoinDepositTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(bitcoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(ethereumDepositTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(ethereumWithdrawTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(vakacoinDepositTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(vakacoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
+
                 var sortedTransactions = transactions.OrderBy(o=>o.UpdatedAt).ToList();
 
                 return JsonHelper.SerializeObject(new ReturnDataObject()
