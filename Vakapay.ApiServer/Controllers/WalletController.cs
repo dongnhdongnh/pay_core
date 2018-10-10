@@ -34,6 +34,13 @@ namespace Vakapay.ApiServer.Controllers
             return "hello";
             //  return null;
         }
+        [HttpPost("all")]
+        public ActionResult<string> GetWalletsByUser([FromQuery]User user)
+        {
+            var wallets = _walletBusiness.LoadAllWalletByUser(user);
+            return JsonHelper.SerializeObject(wallets);
+            //  return null;
+        }
         //  WalletBusiness.WalletBusiness walletBusiness = new WalletBusiness.WalletBusiness();
         [HttpGet("Infor")]
         public ActionResult<string> GetWalletInfor([FromQuery]string walletID)
