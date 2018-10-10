@@ -6,7 +6,7 @@ namespace Vakapay.Models.Domains
 	{
 
 		ReturnObject CreateNewWallet(User user, string blockchainNetwork);
-		ReturnObject UpdateAddressForWallet(string walletId, string address);
+//		ReturnObject UpdateAddressForWallet(string walletId, string address);
 		bool CheckExistedAddress(string toAddress);
 		ReturnObject UpdateBalance(string toAddress, decimal transaValue, string networkName);
 		bool CheckExistedAndUpdateByAddress(string to, decimal v1, string v2);

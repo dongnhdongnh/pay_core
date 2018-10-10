@@ -7,7 +7,7 @@ namespace Vakapay.ApiService.Controllers
     [ApiController]
     public class BTCController : Controller
     {
-        BitcoinRpc _bitcoinRpcRpc = new BitcoinRpc("HELOO");
+        BitcoinRpc _bitcoinRpcRpc = new BitcoinRpc("HELOO", "", "");
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)

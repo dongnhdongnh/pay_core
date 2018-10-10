@@ -78,7 +78,9 @@ namespace Vakapay.ScanWallet
                                         case NetworkName.BTC:
                                             Console.WriteLine("make btc");
                                             task = bitcoinBusiness.CreateAddressAsync<BitcoinAddress>(walletBusiness,
-                                                btcAddressRepos, new BitcoinRpc(VakapayConfiguration.GetBitcoinNode()),
+                                                btcAddressRepos,
+                                                new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(), "",
+                                                    ""), //TODO Username Password
                                                 wallet.Id, pass);
                                             break;
 

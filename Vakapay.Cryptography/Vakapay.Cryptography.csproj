@@ -10,4 +10,13 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Vakapay.Commons\Vakapay.Commons.csproj" />
+      <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="BlockchainHeper.cs" />
+    </ItemGroup>
+
 </Project>

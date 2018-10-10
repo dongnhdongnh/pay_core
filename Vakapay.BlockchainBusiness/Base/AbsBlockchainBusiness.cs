@@ -212,16 +212,17 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 //update address into wallet db
                 //wallet.WalletBusiness(VakapayRepositoryFactory);
-                var updateWallet =
-                    wallet.UpdateAddressForWallet(walletId, address);
-                if (updateWallet.Status == Status.StatusError)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusError,
-                        Message = "Update address fail to WalletDB"
-                    };
-                }
+                //TODO check remove UpdateAddressForWallet
+//                var updateWallet =
+//                    wallet.UpdateAddressForWallet(walletId, address);
+//                if (updateWallet.Status == Status.StatusError)
+//                {
+//                    return new ReturnObject
+//                    {
+//                        Status = Status.StatusError,
+//                        Message = "Update address fail to WalletDB"
+//                    };
+//                }
 
                 //get all address = null with same networkName of walletId
                 //var wallets =
