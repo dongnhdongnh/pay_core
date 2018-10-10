@@ -61,7 +61,7 @@ namespace Vakapay.ApiServer
                     .AllowCredentials();
             });
 
-            app.UseMvc(routes =>
+            /*app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
@@ -70,7 +70,8 @@ namespace Vakapay.ApiServer
                 routes.MapSpaFallbackRoute(
                     name: "spa-fallback",
                     defaults: new {controller = "Home", action = "Index"});
-            });
+            });*/
+            app.UseMvc();
         }
     }
 }

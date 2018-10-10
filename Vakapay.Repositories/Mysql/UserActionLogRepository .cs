@@ -10,19 +10,12 @@ namespace Vakapay.Repositories.Mysql
 {
     public class UserActionLogRepository : MySqlBaseRepository<UserActionLog>, IUserActionLogRepository
     {
-        private string TableNameWallet { get; }
-        private string TableNameBitcoinAddress { get; }
-
         public UserActionLogRepository(string connectionString) : base(connectionString)
         {
-            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
-            TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
         public UserActionLogRepository(IDbConnection dbConnection) : base(dbConnection)
         {
-            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
-            TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
         public string QuerySearch(Dictionary<string, string> models)
@@ -53,6 +46,5 @@ namespace Vakapay.Repositories.Mysql
                 return null;
             }
         }
-
     }
 }

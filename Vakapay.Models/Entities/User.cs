@@ -32,6 +32,7 @@ namespace Vakapay.Models.Entities
         public string CurrencyKey { get; set; }
         public string TimezoneKey { get; set; }
         public string Notifications { get; set; }
+        public string SecretAuthToken { get; set; }
 
         public static User FromJson(string json) =>
             JsonConvert.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
