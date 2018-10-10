@@ -218,7 +218,7 @@ namespace Vakapay.UnitTest
 			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
 		}
 
-		[TestCase("64308d79-5523-4fd7-80a1-bba398b62c9b")]
+		[TestCase("8abc6056-9c81-4b6e-bb22-81f0ab0e0a28")]
 		public void GetHistory(string walletID)
 		{
 			var repositoryConfig = new RepositoryConfiguration

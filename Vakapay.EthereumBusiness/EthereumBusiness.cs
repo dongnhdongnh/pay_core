@@ -38,6 +38,7 @@ namespace Vakapay.EthereumBusiness
 		public override List<BlockchainTransaction> GetWithdrawHistory(int offset = -1, int limit = -1, string[] orderBy = null)
 		{
 			var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+            Console.WriteLine("Get ETH HISTORY");
 			return GetHistory<EthereumWithdrawTransaction>(ethereumwithdrawRepo, offset, limit, orderBy);
 		}
 

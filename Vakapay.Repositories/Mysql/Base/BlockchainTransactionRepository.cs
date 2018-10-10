@@ -288,10 +288,13 @@ namespace Vakapay.Repositories.Mysql
 
 		public List<BlockchainTransaction> FindTransactionHistory(int offset = -1, int limit = -1, string[] orderBy = null)
 		{
+            Console.WriteLine("IM< GETTING ON IT");
 			try
 			{
+                Console.WriteLine("WTF");
 				var _setQuery = new Dictionary<string, string>();
 				_setQuery.Add(nameof(BlockchainTransaction.Status), Status.StatusCompleted);
+                Console.WriteLine(TableName+"_"+ Status.StatusCompleted);
 				return FindBySql(SqlHelper.Query_Search(TableName, _setQuery, limit, offset, orderBy)).ToList<BlockchainTransaction>();
 			}
 			catch (Exception e)

@@ -413,6 +413,7 @@ namespace Vakapay.BlockchainBusiness.Base
         {
             try
             {
+                Console.WriteLine("FIND HISTORY FROM ABS");
                 return repoQuery.FindTransactionHistory(offset, limit, orderBy);
             }
             catch (Exception e)
