@@ -9,5 +9,6 @@ namespace Vakapay.Models.Domains
         public const string UpdateNotifications = "UpdateNotifications";
         public const string TwofaEnable = "TwofaEnable";
         public const string UpdateOptionVerification = "UpdateOptionVerification";
+        public const string CloseAccount = "CloseAccount";
     }
 }

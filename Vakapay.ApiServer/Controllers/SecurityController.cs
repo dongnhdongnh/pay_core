@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace Vakaxa.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    public class TwofaController : ControllerBase
+    public class SecurityController : ControllerBase
     {
         private readonly UserBusiness _userBusiness;
         private WalletBusiness _walletBusiness;
@@ -38,7 +38,7 @@ namespace Vakaxa.ApiServer.Controllers
 
         private IConfiguration Configuration { get; }
 
-        public TwofaController(
+        public SecurityController(
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
         )
@@ -166,7 +166,7 @@ namespace Vakaxa.ApiServer.Controllers
 
 
         // POST api/values
-        [HttpPost("option/require-send-code-phone")]
+        [HttpPost("close-account/require-send-code-phone")]
         public string SendCodeOption()
         {
             try
@@ -179,61 +179,17 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = CheckToken(userModel, ActionLog.UpdateOptionVerification);
+                    var checkSecret = CheckToken(userModel, ActionLog.CloseAccount);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
 
                     var secretAuthToken = ActionCode.FromJson(checkSecret);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                    if (string.IsNullOrEmpty(secretAuthToken.CloseAccount))
                         return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.UpdateOptionVerification;
-
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
-
-                    Console.WriteLine(code);
-
-                    var dataSend = _userBusiness.SendSms(userModel, code);
-
-                    return ReturnObject.ToJson(dataSend);
-                }
-
-                return CreateDataError("Can't send code");
-            }
-            catch (Exception e)
-            {
-                return CreateDataError(e.Message);
-            }
-        }
-
-        // POST api/values
-        [HttpPost("enable/require-send-code-phone")]
-        public string SendCodeEnable()
-        {
-            try
-            {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.getUserInfo(query);
-
-
-                if (userModel != null)
-                {
-                    var checkSecret = CheckToken(userModel, ActionLog.TwofaEnable);
-
-                    if (checkSecret == null)
-                        return CreateDataError("Can't send code");
-
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
-
-                    var secret = secretAuthToken.TwofaEnable;
+                    var secret = secretAuthToken.CloseAccount;
 
                     var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
                     var code = authenticator.GetCode(secret);
@@ -270,7 +226,7 @@ namespace Vakaxa.ApiServer.Controllers
                         case ActionLog.UpdateOptionVerification:
                             newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
-                        case "CloseAccount":
+                        case ActionLog.CloseAccount:
                             newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
                     }
@@ -295,7 +251,7 @@ namespace Vakaxa.ApiServer.Controllers
                             }
 
                             break;
-                        case "CloseAccount":
+                        case ActionLog.CloseAccount:
                             if (string.IsNullOrEmpty(newSecret.CloseAccount))
                             {
                                 newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();

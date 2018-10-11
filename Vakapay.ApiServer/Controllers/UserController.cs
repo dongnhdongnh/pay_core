@@ -120,7 +120,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
                 //save action log
-                CreateDataActionLog(email, userCheck.Id, ActionLog.Avatar);
+                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(new ReturnObject
                 {
@@ -168,7 +169,8 @@ namespace Vakaxa.ApiServer.Controllers
 
 
                 //save action log
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.Login);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.Login,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(resultData);
             }
@@ -249,7 +251,8 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(result);
             }
@@ -308,7 +311,8 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(result);
             }
@@ -345,7 +349,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 var result = _userBusiness.UpdateProfile(userModel);
 
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(result);
             }
@@ -393,25 +398,6 @@ namespace Vakaxa.ApiServer.Controllers
                 Message = message
             };
             return ReturnObject.ToJson(errorData);
-        }
-
-        private void CreateDataActionLog(string email, string idUser, string actionLog)
-        {
-            //save action log
-            try
-            {
-                _userBusiness.AddActionLog(new UserActionLog
-                {
-                    ActionName = actionLog,
-                    Description = email,
-                    Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserId = idUser
-                });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
         }
     }
 }
