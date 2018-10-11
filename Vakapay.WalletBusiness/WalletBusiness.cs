@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
-using MySqlX.XDevAPI.Common;
 using Newtonsoft.Json.Linq;
 using NLog;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Helpers;
 using Vakapay.Configuration;
+using Vakapay.Cryptography;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -650,7 +650,7 @@ namespace Vakapay.WalletBusiness
             return user.Email;
         }
         
-        public static bool ValidateAddress(string address, string networkName)
+        public bool ValidateAddress(string address, string networkName)
         {
             switch (networkName)
             {
@@ -661,16 +661,13 @@ namespace Vakapay.WalletBusiness
                     var result = bitcoinRpc.ValidateAddress(address);
                     var jsonResult = JObject.Parse(result.Data);
                     return jsonResult["isvalid"].Value<bool>();
-                    break;
-                
+
                 case NetworkName.ETH:
-                    // TODO call web3.utils.isAddress ethereum rpc
-                    
-                    break;
+                    return BlockchainHeper.IsEthereumAddress(address);
+
                 case NetworkName.VAKA:
                     var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
                     return vakacoinRpc.CheckAccountExist(address);
-                    break;
             }
 
             return true;

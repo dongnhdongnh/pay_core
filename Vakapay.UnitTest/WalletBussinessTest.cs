@@ -273,9 +273,18 @@ namespace Vakapay.UnitTest
 		//	Assert.IsTrue(block > 0);
 		//}
 		
-		[TestCase( NetworkName.BTC, "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67fG", true)]
-		[TestCase( NetworkName.BTC, "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67f", false)]
-		public void ValidateAddress(string networkName, string address, bool result)
+		[TestCase( NetworkName.BTC, true,  "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67fG")]
+		[TestCase( NetworkName.BTC, false, "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67f")]
+		[TestCase( NetworkName.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( NetworkName.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( NetworkName.ETH, true,  "c1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( NetworkName.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFFF232D")]
+		[TestCase( NetworkName.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFEF232D")]
+		[TestCase( NetworkName.ETH, true,  "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
+		[TestCase( NetworkName.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFEf232d")]
+		[TestCase( NetworkName.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232l")]
+		[TestCase( NetworkName.ETH, false, "0xC1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
+		public void ValidateAddress(string networkName, bool result, string address)
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
