@@ -46,6 +46,48 @@ namespace Vakaxa.ApiServer.Controllers
             Configuration = configuration;
         }
 
+        // POST api/values
+        [HttpPost("update-verify-options")]
+        public string UpdateOption([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiness();
+                }
+
+                var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
+                if (value.ContainsKey("option"))
+                {
+                    var option = value["option"];
+
+                    userModel.Verification = (int) option;
+
+                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+                    // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
+
+                    return ReturnObject.ToJson(resultUpdate);
+                }
+
+                return CreateDataError("Can't update options");
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
 
         // POST api/values
         [HttpPost("enable/verify-with-phone")]
@@ -62,6 +104,13 @@ namespace Vakaxa.ApiServer.Controllers
                 }
 
                 var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
                 if (value.ContainsKey("code"))
                 {
                     var code = value["code"].ToString();
