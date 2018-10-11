@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -31,7 +32,7 @@ namespace Vakaxa.ApiServer.Controllers
         private WalletBusiness _walletBusiness;
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
@@ -79,75 +80,54 @@ namespace Vakaxa.ApiServer.Controllers
                 }
 
 
-                if (file.Length > 0)
+                if (file.Length <= 0) return CreateDataError("Can't update image");
+                char[] myChar = {'"'};
+                var fileName = CommonHelper.GetUnixTimestamp() + ContentDispositionHeaderValue
+                                   .Parse(file.ContentDisposition).FileName.ToString()
+                                   .Trim(myChar);
+
+                fileName = fileName.Replace(" ", "-");
+
+                var fullPath = Path.Combine(newPath, fileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
-                    char[] myChar = {'"'};
-                    var fileName = CommonHelper.GetUnixTimestamp() + ContentDispositionHeaderValue
-                                       .Parse(file.ContentDisposition).FileName.ToString()
-                                       .Trim(myChar);
+                    file.CopyTo(stream);
+                }
 
-                    fileName = fileName.Replace(" ", "-");
+                var oldAvatar = userCheck.Avatar;
 
-                    var fullPath = Path.Combine(newPath, fileName);
+                link = link + fileName;
 
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
+
+                //update avatar for user
+                userCheck.Avatar = link;
+                var updateUser = _userBusiness.UpdateProfile(userCheck);
+
+
+                //delete image old
+                if (!string.IsNullOrEmpty(oldAvatar))
+                {
+                    var oldName = oldAvatar.Split("/");
+
+                    var oldFullPath = Path.Combine(newPath, oldName[oldName.Length - 1]);
+
+                    if (System.IO.File.Exists(oldFullPath))
                     {
-                        file.CopyTo(stream);
-                    }
-
-                    var oldAvatar = userCheck.Avatar;
-
-                    link = link + fileName;
-
-
-                    //update avatar for user
-                    userCheck.Avatar = link;
-                    var updateUser = _userBusiness.UpdateProfile(userCheck);
-
-
-                    //delete image old
-                    if (!string.IsNullOrEmpty(oldAvatar))
-                    {
-                        var oldname = oldAvatar.Split("/");
-
-                        var oldFullPath = Path.Combine(newPath, oldname[oldname.Length - 1]);
-
-                        if (System.IO.File.Exists(oldFullPath))
-                        {
-                            System.IO.File.Delete(oldFullPath);
-                        }
-                    }
-
-                    if (updateUser.Status == Status.StatusSuccess)
-                    {
-                        //save action log
-                        try
-                        {
-                            _userBusiness.AddActionLog(new UserActionLog
-                            {
-                                ActionName = ActionLog.Avatar,
-                                Description = fileName,
-                                Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
-                                UserId = userCheck.Id,
-                            });
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            throw;
-                        }
-
-
-                        return ReturnObject.ToJson(new ReturnObject
-                        {
-                            Status = Status.StatusSuccess,
-                            Message = "Upload avatar success ",
-                            Data = link
-                        });
+                        System.IO.File.Delete(oldFullPath);
                     }
                 }
 
-                return CreateDataError("Can't update image");
+                if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
+                //save action log
+                CreateDataActionLog(email, userCheck.Id, ActionLog.Avatar);
+
+                return ReturnObject.ToJson(new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Message = "Upload avatar success ",
+                    Data = link
+                });
             }
             catch (Exception ex)
             {
@@ -188,22 +168,7 @@ namespace Vakaxa.ApiServer.Controllers
 
 
                 //save action log
-                try
-                {
-                    var dataInfo = Vakapay.Models.Entities.User.FromJson(resultData.Data);
-                    _userBusiness.AddActionLog(new UserActionLog
-                    {
-                        ActionName = ActionLog.Login,
-                        Description = dataInfo.Email,
-                        Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
-                        UserId = dataInfo.Id,
-                    });
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.Login);
 
                 return ReturnObject.ToJson(resultData);
             }
@@ -238,13 +203,6 @@ namespace Vakaxa.ApiServer.Controllers
             {
                 return CreateDataError(e.Message);
             }
-        }
-
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public ActionResult<string> Get(int id)
-        {
-            return "value";
         }
 
         // POST api/values
@@ -291,21 +249,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                try
-                {
-                    _userBusiness.AddActionLog(new UserActionLog
-                    {
-                        ActionName = ActionLog.UpdateProfile,
-                        Description = userModel.Email,
-                        Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
-                        UserId = userModel.Id,
-                    });
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile);
 
                 return ReturnObject.ToJson(result);
             }
@@ -315,16 +259,100 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] JObject value)
+        [HttpPost("update-preferences")]
+        public string UpdatePreferences([FromBody] JObject value)
         {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiness();
+                }
+
+                var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
+                if (value.ContainsKey("currencyKey"))
+                {
+                    var currencyKey = value["currencyKey"].ToString();
+                    if (!string.IsNullOrEmpty(currencyKey) && Constants.listCurrency.ContainsKey(currencyKey))
+                    {
+                        userModel.CurrencyKey = currencyKey;
+                    }
+                    else
+                    {
+                        return CreateDataError("Currency Key is not exist");
+                    }
+                }
+
+                if (value.ContainsKey("timezoneKey"))
+                {
+                    var timezoneKey = value["timezoneKey"].ToString();
+                    if (!string.IsNullOrEmpty(timezoneKey) && Constants.listTimeZone.ContainsKey(timezoneKey))
+                    {
+                        userModel.TimezoneKey = timezoneKey;
+                    }
+                    else
+                    {
+                        return CreateDataError("Timezone Key is not exist");
+                    }
+                }
+
+                var result = _userBusiness.UpdateProfile(userModel);
+
+                //save action log
+                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences);
+
+                return ReturnObject.ToJson(result);
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
         }
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpPost("update-notifications")]
+        public string UpdateNotifications([FromBody] JObject value)
         {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiness();
+                }
+
+                var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
+                if (value.ContainsKey("notifications"))
+                {
+                    userModel.CurrencyKey = value["notifications"].ToString();
+                }
+
+                var result = _userBusiness.UpdateProfile(userModel);
+
+                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications);
+
+                return ReturnObject.ToJson(result);
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
         }
 
         private void CreateUserBusiness()
@@ -365,6 +393,25 @@ namespace Vakaxa.ApiServer.Controllers
                 Message = message
             };
             return ReturnObject.ToJson(errorData);
+        }
+
+        private void CreateDataActionLog(string email, string idUser, string actionLog)
+        {
+            //save action log
+            try
+            {
+                _userBusiness.AddActionLog(new UserActionLog
+                {
+                    ActionName = actionLog,
+                    Description = email,
+                    Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
+                    UserId = idUser
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 }

@@ -207,6 +207,151 @@ namespace Vakapay.UserBusiness
         }
 
 
+        // Send code when do action
+        public ReturnObject SendSms(User user, string code)
+        {
+            try
+            {
+                var sendSmsRepository = vakapayRepositoryFactory.GetSendSmsRepository(ConnectionDb);
+
+                var newSms = new SmsQueue
+                {
+                    Id = CommonHelper.GenerateUuid(),
+                    Status = Status.StatusPending,
+                    To = user.PhoneNumber,
+                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    TextSend = "Vakaxa security code is: " + code,
+                };
+
+                var resultSms = sendSmsRepository.Insert(newSms);
+
+                if (resultSms.Status == Status.StatusError)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Fail insert to sendSms " + resultSms.Message
+                    };
+                }
+
+
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Message = "Success"
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /*// Send code when do action, chua dung den
+        public ReturnObject SendCode(User user, string action)
+        {
+            try
+            {
+                var userTokenRepository = vakapayRepositoryFactory.GetUserTokenRepository(ConnectionDb);
+                var sendSmsRepository = vakapayRepositoryFactory.GetSendSmsRepository(ConnectionDb);
+
+                var search =
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", user.Id},
+                        {"Action", action},
+                        {"status", Status.StatusPending}
+                    };
+
+                var tokenCheck = userTokenRepository.FindWhere(userTokenRepository.QuerySearch(search));
+
+                if (tokenCheck != null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusSuccess,
+                        Message = "Success"
+                    };
+                }
+
+                var transactionScope = ConnectionDb.BeginTransaction();
+                try
+                {
+                    //save token
+                    var newToken = new UserToken
+                    {
+                        Id = CommonHelper.GenerateUuid(),
+                        Status = Status.StatusPending,
+                        Action = action,
+                        CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                        UserId = user.Id,
+                        Token = CommonHelper.RandomNumber(6)
+                    };
+
+                    var resultAdd = userTokenRepository.Insert(newToken);
+
+                    if (resultAdd.Status == Status.StatusError)
+                    {
+                        transactionScope.Rollback();
+                        return new ReturnObject
+                        {
+                            Status = Status.StatusError,
+                            Message = "Fail insert to userTokenRepository"
+                        };
+                    }
+
+                    var newSms = new SmsQueue
+                    {
+                        Id = CommonHelper.GenerateUuid(),
+                        Status = Status.StatusPending,
+                        To = user.PhoneNumber,
+                        CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                        TextSend = "Vakaxa security code is: " + newToken.Token,
+                    };
+
+                    var resultSms = sendSmsRepository.Insert(newSms);
+
+                    if (resultSms.Status == Status.StatusError)
+                    {
+                        transactionScope.Rollback();
+                        return new ReturnObject
+                        {
+                            Status = Status.StatusError,
+                            Message = "Fail insert to sendSms " + resultSms.Message
+                        };
+                    }
+                }
+                catch (Exception e)
+                {
+                    transactionScope.Rollback();
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = e.Message
+                    };
+                }
+
+                transactionScope.Commit();
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Message = "Success"
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }*/
+
         // find UserInfo by id
         public User getUserByID(string id)
         {
