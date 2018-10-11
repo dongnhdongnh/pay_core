@@ -136,13 +136,13 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
-        [HttpGet("checkUserLogin")]
+        /*[HttpGet("checkUserLogin")]
         public string CheckUserLogin()
         {
             try
             {
                 var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
-                Console.WriteLine(jsonUser);
+
                 var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
                 var jObjectUser = JObject.Parse(jsonUser);
                 if (jObjectUser.ContainsKey("StreetAddress"))
@@ -165,7 +165,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateWalletBusiness();
                 }
 
-                var resultData = _userBusiness.Login(_walletBusiness, userModel);
+                var resultData = _userBusiness.Login(userModel);
 
 
                 //save action log
@@ -178,7 +178,7 @@ namespace Vakaxa.ApiServer.Controllers
             {
                 return CreateDataError(e.Message);
             }
-        }
+        }*/
 
         [HttpGet("get-info")]
         public string GetCurrentUser()
@@ -194,6 +194,31 @@ namespace Vakaxa.ApiServer.Controllers
                 }
 
                 var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
+
+                    var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
+
+                    var resultData = _userBusiness.Login(userClaims);
+
+                    if (resultData.Status == Status.StatusError)
+                        return CreateDataError("Can't not created User");
+
+
+                    userModel = Vakapay.Models.Entities.User.FromJson(resultData.Data);
+
+                    if (_walletBusiness == null)
+                    {
+                        CreateWalletBusiness();
+                    }
+
+                    _walletBusiness.MakeAllWalletForNewUser(userModel);
+
+                    return ReturnObject.ToJson(resultData);
+                }
+
                 var success = new ReturnObject
                 {
                     Status = Status.StatusSuccess,
