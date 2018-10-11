@@ -47,7 +47,7 @@ namespace Vakaxa.ApiServer.Controllers
         }
 
         // POST api/values
-        [HttpPost("update-verify-options")]
+        [HttpPost("option/update")]
         public string UpdateOption([FromBody] JObject value)
         {
             try
@@ -68,17 +68,37 @@ namespace Vakaxa.ApiServer.Controllers
                     return CreateDataError("User not exist in DB");
                 }
 
-                if (value.ContainsKey("option"))
+
+                if (value.ContainsKey("code"))
                 {
-                    var option = value["option"];
+                    var code = value["code"].ToString();
+                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
-                    userModel.Verification = (int) option;
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
-                    // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
+                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                        return CreateDataError("Can't send code");
 
-                    return ReturnObject.ToJson(resultUpdate);
+                    var secret = secretAuthToken.UpdateOptionVerification;
+
+                    bool isok = authenticator.CheckCode(secret, code);
+
+                    if (isok)
+                    {
+                        if (value.ContainsKey("option"))
+                        {
+                            var option = value["option"];
+
+                            userModel.Verification = (int) option;
+
+                            var resultUpdate = _userBusiness.UpdateProfile(userModel);
+                            // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
+
+                            return ReturnObject.ToJson(resultUpdate);
+                        }
+                    }
                 }
+
 
                 return CreateDataError("Can't update options");
             }
@@ -144,9 +164,10 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
+
         // POST api/values
-        [HttpPost("enable/require-send-code-phone")]
-        public string SendCode([FromBody] JObject value)
+        [HttpPost("option/require-send-code-phone")]
+        public string SendCodeOption()
         {
             try
             {
@@ -162,7 +183,55 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = CheckToken(userModel, "TwofaEnable");
+                    var checkSecret = CheckToken(userModel, ActionLog.UpdateOptionVerification);
+
+                    if (checkSecret == null)
+                        return CreateDataError("Can't send code");
+
+                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                        return CreateDataError("Can't send code");
+
+                    var secret = secretAuthToken.UpdateOptionVerification;
+
+                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                    var code = authenticator.GetCode(secret);
+
+                    Console.WriteLine(code);
+
+                    var dataSend = _userBusiness.SendSms(userModel, code);
+
+                    return ReturnObject.ToJson(dataSend);
+                }
+
+                return CreateDataError("Can't send code");
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
+        // POST api/values
+        [HttpPost("enable/require-send-code-phone")]
+        public string SendCodeEnable()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiness();
+                }
+
+                var userModel = _userBusiness.getUserInfo(query);
+
+
+                if (userModel != null)
+                {
+                    var checkSecret = CheckToken(userModel, ActionLog.TwofaEnable);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
@@ -203,8 +272,11 @@ namespace Vakaxa.ApiServer.Controllers
                 {
                     switch (action)
                     {
-                        case "TwofaEnable":
+                        case ActionLog.TwofaEnable:
                             newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            break;
+                        case ActionLog.UpdateOptionVerification:
+                            newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
                         case "CloseAccount":
                             newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
@@ -217,10 +289,17 @@ namespace Vakaxa.ApiServer.Controllers
 
                     switch (action)
                     {
-                        case "TwofaEnable":
+                        case ActionLog.TwofaEnable:
                             if (string.IsNullOrEmpty(newSecret.TwofaEnable))
                             {
                                 newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            }
+
+                            break;
+                        case ActionLog.UpdateOptionVerification:
+                            if (string.IsNullOrEmpty(newSecret.UpdateOptionVerification))
+                            {
+                                newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             }
 
                             break;
