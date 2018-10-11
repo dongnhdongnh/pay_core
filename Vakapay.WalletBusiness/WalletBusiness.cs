@@ -199,12 +199,13 @@ namespace Vakapay.WalletBusiness
             /*
              * 1. Validate User status
              * 2. Validate Network status
-             * 3. Validate amount
-             * 4. Update Wallet Balance
-             * 5. Make new transaction withdraw pending
+             * 3. Validate toAddress
+             * 4. Validate amount
+             * 5. Update Wallet Balance
+             * 6. Make new transaction withdraw pending
              *
              *
-             * 
+             *
              */
 
             try
@@ -227,32 +228,23 @@ namespace Vakapay.WalletBusiness
                     vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
 
 
-                //Validate User status
-                //and validate Network status
+                // 1. Validate User status
                 var walletById = walletRepository.FindById(wallet.Id);
-//                var walletByAddress = walletRepository.FindByAddress(toAddress);
-
-//                if (walletByAddress == null || walletById == null)
-//                {
-//                    return new ReturnObject
-//                    {
-//                        Status = Status.StatusError,
-//                        Message = "Address not exists"
-//                    };
-//                }
 
                 var userCheck = userRepository.FindById(walletById.UserId);
                 if (userCheck == null ||
-                    userCheck.Status != Status.StatusActive //||
-//                    !walletById.NetworkName.Equals(walletByAddress.NetworkName)
-                )
+                    userCheck.Status != Status.StatusActive )
                 {
                     return new ReturnObject
                     {
                         Status = Status.StatusError,
-                        Message = "User Not Found || Not Active" // || Not same Network"
+                        Message = "User Not Found || Not Active"
                     };
                 }
+
+                // 2. TODO validate Network status
+
+                // 3. Validate toAddress
 
                 if (ValidateAddress(toAddress, wallet.NetworkName) == false)
                 {
@@ -265,7 +257,7 @@ namespace Vakapay.WalletBusiness
 
                 var free = GetFee(wallet.NetworkName);
 
-                // Validate amount
+                // 4. Validate amount
                 if (walletById.Balance < amount + free)
                 {
                     return new ReturnObject()
@@ -275,11 +267,7 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                //Update Wallet Balance
-//                walletById.Balance -= amount;
-//                walletById.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
-//                var updateWallet = walletRepository.Update(walletById);
-
+                // 5. Update Wallet Balance
                 var updateWallet = UpdateBalance(-(amount + free), wallet.Id, wallet.Version );
                 if (updateWallet == null || updateWallet.Status == Status.StatusError)
                 {
@@ -290,8 +278,8 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                //Make new transaction withdraw pending by
-                //insert into ethereumwithdrawtransaction database
+                // 6. Make new transaction withdraw pending by
+                //insert into EthereumWithdrawTransaction database
                 ReturnObject insertWithdraw = null;
                 if (walletById.NetworkName.Equals(NetworkName.ETH))
                 {
@@ -299,13 +287,11 @@ namespace Vakapay.WalletBusiness
                     {
                         Id = CommonHelper.GenerateUuid(),
                         Status = Status.StatusPending,
-//                        FromAddress = walletById.Address, //Comment Id: NoAddressNeeded
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
                         Amount = amount,
                         CreatedAt = CommonHelper.GetUnixTimestamp(),
                         UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                        //						NetworkName = NetworkName.ETH,
                         InProcess = 0,
                         Version = 0
                     };
@@ -316,7 +302,7 @@ namespace Vakapay.WalletBusiness
                         return new ReturnObject()
                         {
                             Status = Status.StatusError,
-                            Message = "Fail insert to ethereumwithdrawtransaction"
+                            Message = "Fail insert to EthereumWithdrawTransaction"
                         };
                     }
                 }
@@ -327,13 +313,11 @@ namespace Vakapay.WalletBusiness
                     {
                         Id = CommonHelper.GenerateUuid(),
                         Status = Status.StatusPending,
-//                        FromAddress = walletById.Address,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
                         Amount = amount,
                         CreatedAt = CommonHelper.GetUnixTimestamp(),
                         UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                        //						NetworkName = NetworkName.BTC,
                         InProcess = 0,
                         Version = 0
                     };
@@ -355,13 +339,11 @@ namespace Vakapay.WalletBusiness
                     {
                         Id = CommonHelper.GenerateUuid(),
                         Status = Status.StatusPending,
-//                        FromAddress = walletById.Address,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
                         Amount = amount,
                         CreatedAt = CommonHelper.GetUnixTimestamp(),
                         UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                        //						NetworkName = NetworkName.VAKA,
                         InProcess = 0,
                         Version = 0
                     };
@@ -392,12 +374,12 @@ namespace Vakapay.WalletBusiness
 
         private decimal GetFee(string walletNetworkName)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); //TODO  must implement
         }
 
         private string GetSenderAddress(Wallet wallet, string toAddress, decimal amount)
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException(); //TODO  must implement
         }
 
 //        public ReturnObject UpdateAddressForWallet(string walletId, string address)
