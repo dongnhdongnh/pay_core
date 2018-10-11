@@ -152,7 +152,8 @@ namespace Vakapay.UnitTest
 			for (int i = 1; i < 10; i++)
 			{
 				var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), NetworkName.ETH);
-				InsertPendingTxsToWithdraw("46b4594c-a45a-400d-86ce-9a7869d61180", prepareWallet.Address);
+				//Todo update prepareWallet.Address
+//				InsertPendingTxsToWithdraw("46b4594c-a45a-400d-86ce-9a7869d61180", prepareWallet.Address);
 			}
 		}
 		
@@ -185,7 +186,8 @@ namespace Vakapay.UnitTest
 					rndTo = new Random().Next(1, 10);
 				}
 				var toWalletAddr =  walletRepo.FindByUserAndNetwork(rndTo.ToString(), NetworkName.ETH);
-				resultTest = _walletBusiness.Withdraw(fromWallet, toWalletAddr.Address, 1);
+				// TODO 
+//				resultTest = _walletBusiness.Withdraw(fromWallet, toWalletAddr.Address, 1);
 			}
 			
 			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
@@ -270,5 +272,30 @@ namespace Vakapay.UnitTest
 
 		//	Assert.IsTrue(block > 0);
 		//}
+		
+		[TestCase( NetworkName.BTC, true,  "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67fG")]
+		[TestCase( NetworkName.BTC, false, "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67f")]
+		[TestCase( NetworkName.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( NetworkName.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( NetworkName.ETH, true,  "c1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( NetworkName.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFFF232D")]
+		[TestCase( NetworkName.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFEF232D")]
+		[TestCase( NetworkName.ETH, true,  "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
+		[TestCase( NetworkName.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFEf232d")]
+		[TestCase( NetworkName.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232l")]
+		[TestCase( NetworkName.ETH, false, "0xC1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
+		public void ValidateAddress(string networkName, bool result, string address)
+		{
+			var repositoryConfig = new RepositoryConfiguration
+			{
+				ConnectionString = VakapayConfig.ConnectionString
+			};
+
+			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+			_walletBusiness =
+				new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
+
+			Assert.AreEqual(result, _walletBusiness.ValidateAddress(address, networkName));
+		}
 	}
 }

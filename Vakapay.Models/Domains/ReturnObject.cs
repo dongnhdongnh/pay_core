@@ -14,4 +14,11 @@ namespace Vakapay.Models.Domains
         public static ReturnObject FromJson(string json) =>
             JsonConvert.DeserializeObject<ReturnObject>(json, JsonHelper.ConvertSettings);
     }
+    
+    public class ReturnDataObject
+    {
+        public string Status { get; set; }
+        public string Message { get; set; }
+        public object Data { get; set; }
+    }
 }

@@ -5,6 +5,7 @@ namespace Vakapay.Models.Domains
     public abstract class BlockchainTransaction
     {
         public string Id { get; set; }
+        public string UserId { get; set; }
         public string Hash { get; set; }
         public int BlockNumber { get; set; }
         public decimal Amount { get; set; }

@@ -22,13 +22,13 @@ namespace Vakapay.BitcoinBusiness
             Credentials = new NetworkCredential(userName, password);
         }
 
-		public BitcoinRpc(string rPCEndpoint)
-		{
-			this.rPCEndpoint = rPCEndpoint;
-		}
+//		public BitcoinRpc(string rPCEndpoint)
+//		{
+//			this.rPCEndpoint = rPCEndpoint;
+//		}
 
 		private IBlockchainRPC _blockchainRpcImplementation;
-		private string rPCEndpoint;
+//		private string rPCEndpoint;
 
 		private ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
         {

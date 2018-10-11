@@ -12,6 +12,8 @@
   },
 
   "BitcoinNode1":{
-    "Url":"http://127.0.0.1:18443"
+    "Url":"http://127.0.0.1:18443",
+    "User1":"bitcoinrpc",
+    "Password1":"123456"
   }
 }
