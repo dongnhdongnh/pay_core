@@ -40,6 +40,24 @@ namespace Vakapay.Repositories.Mysql.Base
             }
         }
 
+        public List<TAddress> FindByWalletId(string walletId)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                var sQuery = $"SELECT * FROM {TableName} WHERE WalletId = @WI";
+                var result = Connection.Query<TAddress>(sQuery, new {WI = walletId}).ToList();
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"FindByWalletId walletID ({walletId}) Fail =>> fail: " + e.Message);
+                throw;
+            }
+        }
+
         public abstract Task<ReturnObject> InsertAddress(string address, string walletId, string other);
     }
 }

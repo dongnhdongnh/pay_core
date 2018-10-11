@@ -379,7 +379,9 @@ namespace Vakapay.WalletBusiness
 
         private string GetSenderAddress(Wallet wallet, string toAddress, decimal amount)
         {
-            throw new NotImplementedException(); //TODO  must implement
+//            throw new NotImplementedException(); //TODO  must implement
+            //TODO fake
+            return GetAddresses(wallet.Id, wallet.NetworkName)[0];
         }
 
 //        public ReturnObject UpdateAddressForWallet(string walletId, string address)
@@ -422,7 +424,7 @@ namespace Vakapay.WalletBusiness
                 if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var wallet = walletRepository.FindByAddress(toAddress, networkName);
+                var wallet = walletRepository.FindByAddressAndNetworkName(toAddress, networkName);
                 if (wallet == null)
                 {
                     return new ReturnObject
@@ -530,7 +532,7 @@ namespace Vakapay.WalletBusiness
                 if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var wallet = walletRepository.FindByAddress(address, networkName);
+                var wallet = walletRepository.FindByAddressAndNetworkName(address, networkName);
 
                 return wallet != null;
             }
@@ -538,6 +540,22 @@ namespace Vakapay.WalletBusiness
             {
                 Console.WriteLine(e);
                 return false;
+            }
+        }
+
+        public List<string> GetAddresses(string walletId, string networkName)
+        {
+            try
+            {
+                if (ConnectionDb.State != ConnectionState.Open)
+                    ConnectionDb.Open();
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                return walletRepository.GetAddresses(walletId, networkName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
             }
         }
 
@@ -629,10 +647,10 @@ namespace Vakapay.WalletBusiness
             var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
             var wallets = walletRepository.FindByAddressAndNetworkName(addr, networkName);
 
-            if (wallets == null || !wallets.Any())
+            if (wallets == null)
                 return null;
 
-            return wallets.SingleOrDefault();
+            return wallets;
         }
 
         public string FindEmailByAddressAndNetworkName(string addr, string networkName)

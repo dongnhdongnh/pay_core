@@ -6,6 +6,12 @@ namespace Vakapay.Models.Entities
     [Table("VakacoinAccount")]
     public class VakacoinAccount : BlockchainAddress, IBlockchainAddress
     {
+        public new string Address
+        {
+            get => AccountName;
+            set => AccountName = value;
+        }
+
         public string AccountName { get; set; }
         public string OwnerPrivateKey { get; set; }
         public string OwnerPublicKey { get; set; }
