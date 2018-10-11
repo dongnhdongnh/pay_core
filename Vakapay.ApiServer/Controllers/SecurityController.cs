@@ -55,9 +55,42 @@ namespace Vakaxa.ApiServer.Controllers
             _userBusiness = new UserBusiness(_persistenceFactory);
         }
 
+        [HttpGet("get-info")]
+        public string GetInfo()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+
+                var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    return CreateDataError("Can't User");
+                }
+
+                var success = new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = JsonConvert.SerializeObject(new SecurityModel
+                    {
+                        twofaOption = userModel.Verification,
+                        isEnableTwofa = userModel.TwoFactor
+                    })
+                };
+                return ReturnObject.ToJson(success);
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
         // POST api/values
-        [HttpPost("option/update")]
-        public string UpdateOption([FromBody] JObject value)
+        [HttpPost("close-account/update")]
+        public string UpdateCloseAccount([FromBody] JObject value)
         {
             try
             {
@@ -117,7 +150,7 @@ namespace Vakaxa.ApiServer.Controllers
 
         // POST api/values
         [HttpPost("close-account/require-send-code-phone")]
-        public string SendCodeOption()
+        public string SendCodeClose()
         {
             try
             {

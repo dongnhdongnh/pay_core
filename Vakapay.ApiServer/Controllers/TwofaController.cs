@@ -115,7 +115,7 @@ namespace Vakaxa.ApiServer.Controllers
 
 
         // POST api/values
-        [HttpPost("enable/verify-with-phone")]
+        [HttpPost("enable/update")]
         public string VerifyCode([FromBody] JObject value)
         {
             try
@@ -147,12 +147,9 @@ namespace Vakaxa.ApiServer.Controllers
 
                     if (isok)
                     {
-                        var resultSend = new ReturnObject
-                        {
-                            Status = Status.StatusSuccess,
-                        };
+                        userModel.TwoFactor = true;
 
-                        return ReturnObject.ToJson(resultSend);
+                        return ReturnObject.ToJson(_userBusiness.UpdateProfile(userModel));
                     }
                 }
 
