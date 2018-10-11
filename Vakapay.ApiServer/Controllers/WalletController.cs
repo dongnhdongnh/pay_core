@@ -9,7 +9,7 @@ using Vakapay.Repositories.Mysql;
 using Vakapay.WalletBusiness;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Domains;
-
+using Vakapay.UserBusiness;
 namespace Vakapay.ApiServer.Controllers
 {
     [Route("api/[controller]")]
@@ -18,6 +18,7 @@ namespace Vakapay.ApiServer.Controllers
     {
 
         WalletBusiness.WalletBusiness _walletBusiness;
+        UserBusiness.UserBusiness _userBusiness;
         public WalletController()
         {
             var repositoryConfig = new RepositoryConfiguration
@@ -27,6 +28,8 @@ namespace Vakapay.ApiServer.Controllers
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
                     new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
+            _userBusiness
+            = new Vakapay.UserBusiness.UserBusiness(PersistenceFactory);
         }
         [HttpGet("test")]
         public ActionResult<string> GetTest()
@@ -34,13 +37,42 @@ namespace Vakapay.ApiServer.Controllers
             return "hello";
             //  return null;
         }
-        [HttpPost("all")]
-        public ActionResult<string> GetWalletsByUser([FromQuery]User user)
+        [HttpGet("all")]
+        public ActionResult<ReturnObject> GetWalletsByUser([FromQuery]string userID)
         {
-            var wallets = _walletBusiness.LoadAllWalletByUser(user);
-            return JsonHelper.SerializeObject(wallets);
-            //  return null;
+            try
+            {
+                var user = _userBusiness.getUserByID(userID);
+                if (user == null)
+                    return new ReturnObject()
+                    {
+                        Status = Status.StatusError,
+                        Message = "No user"
+                    };
+                var wallets = _walletBusiness.LoadAllWalletByUser(user);
+                return new ReturnObject()
+                {
+                    Status = Status.StatusCompleted,
+                    Message = JsonHelper.SerializeObject(wallets)
+                };
+            }
+            catch (Exception e)
+            {
+
+                return new ReturnObject()
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
         }
+        //[HttpPost("all")]
+        //public ActionResult<string> GetWalletsByUser([FromBody]User user)
+        //{
+        //    var wallets = _walletBusiness.LoadAllWalletByUser(user);
+        //    return JsonHelper.SerializeObject(wallets);
+        //    //  return null;
+        //}
         //  WalletBusiness.WalletBusiness walletBusiness = new WalletBusiness.WalletBusiness();
         [HttpGet("Infor")]
         public ActionResult<string> GetWalletInfor([FromQuery]string walletID)
@@ -51,10 +83,29 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("History")]
-        public ActionResult<string> GetWalletHistory([FromBody]Wallet walletID)
+        public ActionResult<ReturnObject> GetWalletHistory([FromBody]Wallet walletID)
         {
-            var _history = _walletBusiness.GetHistory(walletID, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
-            return JsonHelper.SerializeObject(_history);
+            try
+            {
+                var _history = _walletBusiness.GetHistory(walletID, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
+                //  return 
+                return new ReturnObject()
+                {
+                    Status = Status.StatusCompleted,
+                    Message = JsonHelper.SerializeObject(_history)
+                };
+            }
+            catch (Exception e)
+            {
+
+
+                return new ReturnObject()
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+
             //  return null;
         }
     }
