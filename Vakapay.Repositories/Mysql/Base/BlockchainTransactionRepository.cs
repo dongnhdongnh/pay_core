@@ -302,5 +302,95 @@ namespace Vakapay.Repositories.Mysql
 			}
 			//	throw new NotImplementedException();
 		}
+
+		public List<BlockchainTransaction> FindTransactionsByUserId(string userId)
+		{
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+				if (string.IsNullOrEmpty(userId))
+				{
+					throw new Exception("FindTransactionsByUserId: UserId cannot be null or empty");
+				}
+
+				var sqlString = $"Select * from {TableName} where UserId = @UserId";
+				var result = Connection.Query<TTransaction>(sqlString, new {UserId = userId})
+					.ToList<BlockchainTransaction>();
+				return result;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
+		public List<BlockchainTransaction> FindTransactionsFromAddress(string fromAddress)
+		{
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+				if (string.IsNullOrEmpty(fromAddress))
+				{
+					return new List<BlockchainTransaction>();
+				}
+
+				var sqlString = $"Select * from {TableName} where FromAddress = @Address";
+				var result = Connection.Query<TTransaction>(sqlString, new {Address = fromAddress})
+					.ToList<BlockchainTransaction>();
+				return result;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
+		public List<BlockchainTransaction> FindTransactionsToAddress(string toAddress)
+		{
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+
+				if (string.IsNullOrEmpty(toAddress))
+				{
+					return new List<BlockchainTransaction>();
+				}
+
+				var sqlString = $"Select * from {TableName} where ToAddress = @Address";
+				var result = Connection.Query<TTransaction>(sqlString, new {Address = toAddress})
+					.ToList<BlockchainTransaction>();
+				return result;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
+
+		public List<BlockchainTransaction> FindTransactionsInner(string innerAddress)
+		{
+			var className = this.GetClassName();
+
+			if (className.Contains("Deposit"))
+			{
+				return FindTransactionsToAddress(innerAddress);
+			}
+
+			if (className.Contains("Withdraw"))
+			{
+				return FindTransactionsFromAddress(innerAddress);
+			}
+
+			throw new Exception(className + ": Transaction repository class name not contain \"Deposit\" or \"Withdraw\" keyword");
+		}
 	}
 }

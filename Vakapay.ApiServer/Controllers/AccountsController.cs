@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiServer.Models;
 using Vakapay.Configuration;
@@ -29,31 +30,89 @@ namespace Vakapay.ApiServer.Controllers
         [HttpGet("GetBalance/{id}")]
         public ActionResult<string> GetBalance(string id)
         {
-            var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
-            var userRepository = new UserRepository(VakapayRepositoryFactory.GetOldConnection());
-            var wallets = walletRepository.FindAllWalletByUserId(id);
-            var user = userRepository.FindById(id);
-
-            var balance = new List<CurrencyBalance>();
-
-            foreach (var wallet in wallets)
+            try
             {
-                balance.Add(new CurrencyBalance()
+
+                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
+                var userRepository = new UserRepository(VakapayRepositoryFactory.GetOldConnection());
+                var wallets = walletRepository.FindAllWalletByUserId(id);
+                var user = userRepository.FindById(id);
+
+                var balances = new List<CurrencyBalance>();
+
+                foreach (var wallet in wallets)
                 {
-                    Currency = NetworkName.CurrencySymbols[wallet.NetworkName],
-                    Amount = wallet.GetAmount()
-                });
+                    balances.Add(new CurrencyBalance()
+                    {
+                        NetworkName = wallet.NetworkName,
+                        AmountDecimal = wallet.Balance
+                    });
+                }
+
+                var balanceResponse = new GetBalanceResponse()
+                {
+                    Id = id,
+                    Balance = balances
+                };
+
+                return JsonHelper.SerializeObject(new ReturnDataObject()
+                    {Status = Status.StatusSuccess, Message = Message.MessageSuccess, Data = balanceResponse});
             }
-
-            var balanceResponse = new GetBalanceResponse()
+            catch (Exception e)
             {
-                Id = id,
-                Balance = balance
-            };
-
-
-            return JsonHelper.SerializeObject(new Response(){Data = balanceResponse});
+                Console.WriteLine(e);
+                return JsonHelper.SerializeObject(new ReturnObject()
+                    {Status = Status.StatusError, Message = e.Message});
+            }
         }
+
+        [HttpGet]
+        [Route("{userId}/transactions/{limit:int?}")]
+        public ActionResult<string> GetTransactions(string userId, int? limit = null)
+        {
+            try
+            {
+                var bitcoinDepositTrxRepo =
+                    new BitcoinDepositTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
+                var bitcoinWithdrawTrxRepo =
+                    new BitcoinWithdrawTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
+                var ethereumDepositTrxRepo =
+                    new EthereumDepositTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
+                var ethereumWithdrawTrxRepo =
+                    new EthereumWithdrawnTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
+                var vakacoinDepositTrxRepo =
+                    new VakacoinDepositTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
+                var vakacoinWithdrawTrxRepo =
+                    new VakacoinWithdrawTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
+
+                var transactions = new List<BlockchainTransaction>();
+
+                transactions.AddRange(bitcoinDepositTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(bitcoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(ethereumDepositTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(ethereumWithdrawTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(vakacoinDepositTrxRepo.FindTransactionsByUserId(userId));
+                transactions.AddRange(vakacoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
+
+                var sortedTransactions = transactions.OrderByDescending(o=>o.UpdatedAt).ToList();
+
+                if ( limit != null && limit > 0 )
+                {
+                    sortedTransactions = sortedTransactions.GetRange(0, (int) limit);
+                }
+
+                return JsonHelper.SerializeObject(new ReturnDataObject()
+                    {Status = Status.StatusSuccess, Message = Message.MessageSuccess, Data = sortedTransactions});
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return JsonHelper.SerializeObject(new ReturnObject()
+                    {Status = Status.StatusError, Message = e.Message});
+            }
+        }
+        
+        
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)
