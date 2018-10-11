@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -112,7 +113,8 @@ namespace Vakapay.Repositories.Mysql
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				Int32 unixTimestamp = (Int32)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+//				Int32 unixTimestamp = (Int32)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+				var unixTimestamp = (int)CommonHelper.GetUnixTimestamp();
 				string sQuery =
 					$"UPDATE {TableName} SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID AND Version = @VERSION";
 
@@ -129,29 +131,66 @@ namespace Vakapay.Repositories.Mysql
 				return new ReturnObject
 				{
 					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+					Message = status == Status.StatusError ? "Cannot update" : "Update Success"
 				};
 			}
 			catch (Exception e)
 			{
-				throw e;
+				throw;
 			}
 		}
 
-		public Wallet FindByAddress(string address)
+//		public Wallet FindByAddress(string address)
+//		{
+//			try
+//			{
+//				string query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
+//				List<Wallet> wallets = FindBySql(query);
+//				if (wallets == null || wallets.Count == 0)
+//					return null;
+//				return wallets[0];
+//			}
+//			catch (Exception e)
+//			{
+//				Console.WriteLine(e);
+//				return null;
+//			}
+//		}
+
+		public Wallet FindByAddress(string toAddress, string networkName)
 		{
 			try
 			{
-				string query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
-				List<Wallet> wallets = FindBySql(query);
-				if (wallets == null || wallets.Count == 0)
+				var walletId = "";
+				BlockchainAddress blockchainAddress = null;
+				switch (networkName)
+				{
+					case NetworkName.BTC:
+						blockchainAddress = new BitcoinAddressRepository(Connection).FindByAddress(toAddress);
+						break;
+
+					case NetworkName.ETH:
+						blockchainAddress = new EthereumAddressRepository(Connection).FindByAddress(toAddress);
+						break;
+
+					case NetworkName.VAKA:
+						blockchainAddress = new VakacoinAccountRepository(Connection).FindByAddress(toAddress);
+						break;
+				}
+
+				if (blockchainAddress == null)
+				{
 					return null;
-				return wallets[0];
+				}
+
+				walletId = blockchainAddress.WalletId;
+
+				return FindById(walletId);
 			}
 			catch (Exception e)
 			{
 				Console.WriteLine(e);
-				return null;
+				throw;
 			}
 		}
 

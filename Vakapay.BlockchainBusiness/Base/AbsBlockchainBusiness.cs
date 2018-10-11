@@ -374,7 +374,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     {
                         string _toAddress = _trans.to;
                         string _fromAddress = _trans.from;
-                        if (!wallet.CheckExistedAddress(_toAddress))
+                        if (!wallet.CheckExistedAddress(_toAddress, networkName))
                         {
                             //logger.Info(to + " is not exist in Wallet!!!");
                             continue;
