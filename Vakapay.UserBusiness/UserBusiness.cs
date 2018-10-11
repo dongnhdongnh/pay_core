@@ -33,19 +33,67 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// save action log user
         /// </summary>
+        /// <param name="idUser"></param>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public ReturnObject GetActionLog(string idUser, int offset , int limit)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(idUser);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Can't User"
+                    };
+                }
+
+                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+
+                var search =
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", idUser}
+                    };
+                
+                var resultGetLog = logRepository.GetListLog(logRepository.QuerySearch(search), offset, limit);
+
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = JsonConvert.SerializeObject(resultGetLog)
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// save action log user
+        /// </summary>
         /// <param name="email"></param>
         /// <param name="idUser"></param>
         /// <param name="actionLog"></param>
         /// <param name="ip"></param>
         /// <returns></returns>
-        public ReturnObject AddActionLog(string email, string idUser, string actionLog, string ip)
+        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip)
         {
             try
             {
                 var log = new UserActionLog
                 {
                     ActionName = actionLog,
-                    Description = email,
+                    Description = description,
                     Ip = ip,
                     UserId = idUser,
                     Id = CommonHelper.GenerateUuid(),

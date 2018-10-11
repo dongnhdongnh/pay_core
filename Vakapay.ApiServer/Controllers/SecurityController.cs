@@ -98,7 +98,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                             var resultUpdate = _userBusiness.UpdateProfile(userModel);
                             // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
-
+                            _userBusiness.AddActionLog(email, userModel.Id, ActionLog.TwofaEnable,
+                                Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
                             return ReturnObject.ToJson(resultUpdate);
                         }
                     }
@@ -106,57 +107,6 @@ namespace Vakaxa.ApiServer.Controllers
 
 
                 return CreateDataError("Can't update options");
-            }
-            catch (Exception e)
-            {
-                return CreateDataError(e.Message);
-            }
-        }
-
-
-        // POST api/values
-        [HttpPost("enable/verify-with-phone")]
-        public string VerifyCode([FromBody] JObject value)
-        {
-            try
-            {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.getUserInfo(query);
-
-                if (userModel == null)
-                {
-                    //return error
-                    return CreateDataError("User not exist in DB");
-                }
-
-                if (value.ContainsKey("code"))
-                {
-                    var code = value["code"].ToString();
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
-
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
-
-                    var secret = secretAuthToken.TwofaEnable;
-
-                    bool isok = authenticator.CheckCode(secret, code);
-
-                    if (isok)
-                    {
-                        var resultSend = new ReturnObject
-                        {
-                            Status = Status.StatusSuccess,
-                        };
-
-                        return ReturnObject.ToJson(resultSend);
-                    }
-                }
-
-                return CreateDataError("Can't verify code");
             }
             catch (Exception e)
             {

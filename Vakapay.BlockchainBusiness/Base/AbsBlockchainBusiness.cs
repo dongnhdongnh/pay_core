@@ -149,7 +149,8 @@ namespace Vakapay.BlockchainBusiness.Base
                 return new ReturnObject
                 {
                     Status = sendTransaction.Status,
-                    Message = sendTransaction.Message
+                    Message = sendTransaction.Message,
+                    Data = sendTransaction.Data
                 };
             }
             catch (Exception e)
