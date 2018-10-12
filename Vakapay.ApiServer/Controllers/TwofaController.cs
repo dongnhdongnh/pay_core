@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
@@ -92,6 +93,10 @@ namespace Vakaxa.ApiServer.Controllers
 
                             userModel.Verification = (int) option;
 
+                            _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                                ActionLog.UpdateOptionVerification,
+                                HelpersApi.getIp(Request));
+
                             return _userBusiness.UpdateProfile(userModel).ToJson();
                         }
                     }
@@ -141,6 +146,10 @@ namespace Vakaxa.ApiServer.Controllers
                     if (isok)
                     {
                         userModel.TwoFactor = true;
+
+                        _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                            ActionLog.TwofaEnable,
+                            HelpersApi.getIp(Request));
 
                         return _userBusiness.UpdateProfile(userModel).ToJson();
                     }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
@@ -121,8 +122,9 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (updateUser.Status != Status.STATUS_SUCCESS) return CreateDataError("Can't update image");
                 //save action log
-                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.AVATAR,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
+                _userBusiness.AddActionLog(email, userCheck.Id,
+                    ActionLog.AVATAR,
+                    HelpersApi.getIp(Request));
 
                 return new ReturnObject
                 {
@@ -230,8 +232,9 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                return _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UPDATE_PROFILE,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.UPDATE_PROFILE,
+                    HelpersApi.getIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -288,8 +291,9 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                return _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UPDATE_PREFERENCES,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.UPDATE_PREFERENCES,
+                    HelpersApi.getIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -324,8 +328,9 @@ namespace Vakaxa.ApiServer.Controllers
 
                 var result = _userBusiness.UpdateProfile(userModel);
 
-                return _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UPDATE_NOTIFICATION,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.UPDATE_NOTIFICATION,
+                    HelpersApi.getIp(Request)).ToJson();
             }
             catch (Exception e)
             {
