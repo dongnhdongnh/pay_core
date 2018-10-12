@@ -81,7 +81,7 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// save action log user
         /// </summary>
-        /// <param name="email"></param>
+        /// <param name="description"></param>
         /// <param name="idUser"></param>
         /// <param name="actionLog"></param>
         /// <param name="ip"></param>
@@ -205,9 +205,7 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// created User and wallet when login first
         /// </summary>
-        /// <param name="email"></param>
-        /// <param name="phone"></param>
-        /// <param name="fullName"></param>
+        /// <param name="userModel"></param>
         /// <returns></returns>
         public ReturnObject Login(User userModel)
         {
@@ -308,7 +306,7 @@ namespace Vakapay.UserBusiness
                     Status = Status.StatusPending,
                     To = user.PhoneNumber,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
-                    TextSend = "Vakaxa security code is: " + code,
+                    TextSend = "VaKaXaPay security code is: " + code,
                 };
 
                 var resultSms = sendSmsRepository.Insert(newSms);
@@ -441,7 +439,7 @@ namespace Vakapay.UserBusiness
         }*/
 
         // find UserInfo by id
-        public User getUserByID(string id)
+        public User GetUserById(string id)
         {
             try
             {
@@ -462,7 +460,7 @@ namespace Vakapay.UserBusiness
         //{
         //    {"Email", email}
         //};
-        public User getUserInfo(Dictionary<string, string> search)
+        public User GetUserInfo(Dictionary<string, string> search)
         {
             try
             {
@@ -482,7 +480,7 @@ namespace Vakapay.UserBusiness
         //{
         //    {"Ip", ip}
         //};
-        public WebSession getWebSession(Dictionary<string, string> search)
+        public WebSession GetWebSession(Dictionary<string, string> search)
         {
             try
             {
@@ -494,6 +492,37 @@ namespace Vakapay.UserBusiness
             {
                 Console.WriteLine(e.ToString());
                 return null;
+            }
+        }
+
+        public ReturnObject GetListWebSession(string idUser, int offset, int limit)
+        {
+            try
+            {
+                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+
+                var search =
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", idUser}
+                    };
+
+                var resultGetLog =
+                    webSessionRepository.GetListWebSession(webSessionRepository.QuerySearch(search), offset, limit);
+
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = JsonConvert.SerializeObject(resultGetLog)
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
             }
         }
     }

@@ -8,6 +8,7 @@ namespace Vakapay.Models.Repositories
     {
         string QuerySearch(Dictionary<string, string> models);
         WebSession FindWhere(string sql);
-        List<WebSession> GetListLog(string sql, int skip, int take);
+        List<WebSession> GetListWebSession(string sql, int skip, int take);
+        int GetCount();
     }
 }

@@ -451,7 +451,7 @@ namespace Vakapay.WalletBusiness
                 }
                 else
                 {
-                    User user = userBusiness.getUserByID(wallet.UserId);
+                    User user = userBusiness.GetUserById(wallet.UserId);
                     if (user != null)
                     {
                         var currentTime = CommonHelper.GetUnixTimestamp();

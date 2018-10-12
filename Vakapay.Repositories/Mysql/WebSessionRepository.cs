@@ -32,24 +32,6 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public List<WebSession> GetListLog(string sql, int skip = 0, int take = 10)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-
-                var result = Connection.Query<WebSession>(sql).Skip(skip).Take(take).ToList();
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                Logger.Error("UserRepository =>> GetListLog fail: " + e.Message);
-                return null;
-            }
-        }
-
         public WebSession FindWhere(string sql)
         {
             try
@@ -63,9 +45,47 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                Logger.Error("UserRepository =>> FindWhere fail: " + e.Message);
+                Logger.Error("WebSessionRepository =>> FindWhere fail: " + e.Message);
                 return null;
             }
+        }
+
+        public List<WebSession> GetListWebSession(string sql, int skip, int take)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var result = Connection.Query<WebSession>(sql).Skip(skip).Take(take).ToList();
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("WebSessionRepository =>> GetListWebSession fail: " + e.Message);
+                return null;
+            }
+        }
+
+        public int GetCount()
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                {
+                    Connection.Open();
+                }
+                var sQuery = "SELECT count(*) FROM " + TableName+";";
+                var count = Convert.ToInt32(Connection.Query<int>(sQuery));
+                return count;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("WebSessionRepository =>> GetCount fail: " + e.Message);
+                return 0;
+            }
+            
         }
     }
 }

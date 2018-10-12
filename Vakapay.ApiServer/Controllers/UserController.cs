@@ -3,32 +3,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using IdentityModel.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UAParser;
 using Vakapay.ApiServer.Helpers;
-using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.UserBusiness;
-using Vakapay.WalletBusiness;
 
-namespace Vakaxa.ApiServer.Controllers
+namespace Vakapay.ApiServer.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -37,8 +30,8 @@ namespace Vakaxa.ApiServer.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
-        private UserBusiness _userBusiness;
-        private WalletBusiness _walletBusiness;
+        private UserBusiness.UserBusiness _userBusiness;
+        private WalletBusiness.WalletBusiness _walletBusiness;
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
         private IConfiguration Configuration { get; }
@@ -67,7 +60,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userCheck = _userBusiness.getUserInfo(new Dictionary<string, string>
+                var userCheck = _userBusiness.GetUserInfo(new Dictionary<string, string>
                 {
                     {"Email", email}
                 });
@@ -190,7 +183,7 @@ namespace Vakaxa.ApiServer.Controllers
         }*/
 
         [HttpGet("get-info")]
-        public async Task<string> GetCurrentUser()
+        public string GetCurrentUser()
         {
             try
             {
@@ -202,7 +195,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -258,8 +251,8 @@ namespace Vakaxa.ApiServer.Controllers
                     var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
 
 
-                    //save webs ession
-                    var checkWebSession = _userBusiness.getWebSession(search);
+                    //save web session
+                    var checkWebSession = _userBusiness.GetWebSession(search);
                     if (checkWebSession == null)
                     {
                         _userBusiness.SaveWebSession(webSession);
@@ -299,7 +292,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -354,7 +347,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -415,7 +408,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -442,7 +435,7 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
-        public string getIp(HttpRequest request)
+        public string GetIp(HttpRequest request)
         {
             string ip = request.Headers["X-Forwarded-For"].ToString();
 
@@ -459,7 +452,7 @@ namespace Vakaxa.ApiServer.Controllers
                 CreateVakapayRepositoryMysqlPersistenceFactory();
             }
 
-            _userBusiness = new UserBusiness(_persistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(_persistenceFactory);
         }
 
         private void CreateWalletBusiness()
@@ -469,7 +462,7 @@ namespace Vakaxa.ApiServer.Controllers
                 CreateVakapayRepositoryMysqlPersistenceFactory();
             }
 
-            _walletBusiness = new WalletBusiness(_persistenceFactory);
+            _walletBusiness = new WalletBusiness.WalletBusiness(_persistenceFactory);
         }
 
         private void CreateVakapayRepositoryMysqlPersistenceFactory()
