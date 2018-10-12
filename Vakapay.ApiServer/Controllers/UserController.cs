@@ -17,6 +17,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UAParser;
+using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
@@ -129,7 +130,7 @@ namespace Vakaxa.ApiServer.Controllers
                 if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
                 //save action log
                 //var ip = HttpContext.Connection.RemoteIPAddress.ToString();
-                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar, CommonHelper.getIp(Request));
+                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar, HelpersApi.getIp(Request));
 
                 return ReturnObject.ToJson(new ReturnObject
                 {
@@ -227,11 +228,12 @@ namespace Vakaxa.ApiServer.Controllers
                     _walletBusiness.MakeAllWalletForNewUser(userModel);
                 }
 
-                string ip = CommonHelper.getIp(Request);
+                string ip = HelpersApi.getIp(Request);
 
                 Console.WriteLine(JsonConvert.SerializeObject(Request.Headers));
                 Console.WriteLine(ip);
                 Console.WriteLine(HttpContext.Connection.LocalIpAddress.ToString());
+                Console.WriteLine(HttpContext.Connection.RemoteIpAddress.ToString());
 
                 if (!string.IsNullOrEmpty(ip))
                 {
@@ -330,7 +332,7 @@ namespace Vakaxa.ApiServer.Controllers
                 //save action log
                 // var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile,
-                    CommonHelper.getIp(Request));
+                    HelpersApi.getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
@@ -391,7 +393,7 @@ namespace Vakaxa.ApiServer.Controllers
                 //save action log
                 //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences,
-                    CommonHelper.getIp(Request));
+                    HelpersApi.getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
@@ -430,7 +432,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications,
-                    CommonHelper.getIp(Request));
+                    HelpersApi.getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
@@ -440,6 +442,16 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
+        public string getIp(HttpRequest request)
+        {
+            string ip = request.Headers["X-Forwarded-For"].ToString();
+
+            if (!string.IsNullOrEmpty(ip))
+                ip = request.Headers["X-Real-IP"].ToString();
+
+            return ip;
+        }
+        
         private void CreateUserBusiness()
         {
             if (_persistenceFactory == null)
