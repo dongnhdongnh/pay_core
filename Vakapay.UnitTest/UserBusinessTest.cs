@@ -55,7 +55,7 @@ namespace Vakapay.UnitTest
                 {
                     {"Email", ""}
                 };
-            var resultCreated = userBus.getUserInfo(search);
+            var resultCreated = userBus.GetUserInfo(search);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
         }
 
