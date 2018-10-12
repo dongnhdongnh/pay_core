@@ -8,7 +8,5 @@
 		public string Status { get; set; }
 		public int CreatedAt { get; set; }
 		public int UpdatedAt { get; set; }
-
-		public string Password { get; set; }
 	}
 }

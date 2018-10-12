@@ -6,10 +6,6 @@ namespace Vakapay.Models.Entities
     [Table("User")]
     public class User
     {
-        public User()
-        {
-        }
-
         public string Id { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
@@ -38,9 +34,9 @@ namespace Vakapay.Models.Entities
         public bool TwoFactor { get; set; }
 
         public static User FromJson(string json) =>
-            JsonConvert.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
+            JsonHelper.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
 
         public static string ToJson(User self) =>
-            JsonConvert.SerializeObject(self, JsonHelper.ConvertSettings);
+            JsonHelper.SerializeObject(self, JsonHelper.ConvertSettings);
     }
 }

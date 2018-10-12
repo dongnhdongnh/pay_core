@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using NLog;
 using Vakapay.BlockchainBusiness;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Entities;
@@ -91,7 +92,7 @@ namespace Vakapay.VakacoinBusiness
                 Logger.Error(e);
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -155,7 +156,7 @@ namespace Vakapay.VakacoinBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Data = accountName
                 };
             }
@@ -164,7 +165,7 @@ namespace Vakapay.VakacoinBusiness
                 Logger.Error(e);
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -212,7 +213,7 @@ namespace Vakapay.VakacoinBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Data = result
                 };
             }
@@ -221,7 +222,7 @@ namespace Vakapay.VakacoinBusiness
                 Logger.Error(e);
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -239,7 +240,7 @@ namespace Vakapay.VakacoinBusiness
                 }).Result;
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Data = result.Assets[0]
                 };
             }
@@ -248,7 +249,7 @@ namespace Vakapay.VakacoinBusiness
                 Logger.Error(e);
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -271,32 +272,6 @@ namespace Vakapay.VakacoinBusiness
         public GetBlockResponse GetBlockByNumber(uint blockNumber)
         {
             return DefaultApi.GetBlock(new GetBlockRequest {BlockNumOrId = blockNumber.ToString()}).Result;
-        }
-
-        public ArrayList GetAllTransactionsInBlock(uint blockNumber)
-        {
-            try
-            {
-                var block = DefaultApi.GetBlock(new GetBlockRequest {BlockNumOrId = blockNumber.ToString()}).Result;
-                List<TransactionReceipt> transactions = block.Transactions;
-                ArrayList jsonTrxs = new ArrayList();
-                foreach (var transaction in transactions)
-                {
-                    if (JsonHelper.IsValidJson(transaction.Trx.ToString())) //true if transaction.trx is json format
-                    {
-                        var json = transaction.Trx;
-                        jsonTrxs.Add(json);
-                    }
-                }
-
-                return jsonTrxs;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Logger.Error(e);
-                return null;
-            }
         }
 
         public ReturnObject CreateNewAddress(string password)
@@ -350,7 +325,7 @@ namespace Vakapay.VakacoinBusiness
                 var memo = transaction.Memo ?? "";
 
                 return await SendTransactionAsync(transaction.FromAddress, transaction.ToAddress,
-                    transaction.GetStringAmount(), memo, senderInfo.GetSecret());
+                    transaction.GetStringAmount(), memo, senderInfo.ActivePrivateKey);
             }
             catch (Exception e)
             {
@@ -358,7 +333,7 @@ namespace Vakapay.VakacoinBusiness
                 Logger.Error(e);
                 return new ReturnObject()
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message,
                 };
             }

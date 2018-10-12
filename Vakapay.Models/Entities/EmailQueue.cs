@@ -38,7 +38,7 @@ namespace Vakapay.Models.Entities
 
         public string GetAmount()
         {
-            return Domains.NetworkName.GetAmount(NetworkName, Amount);
+            return Domains.CryptoCurrency.GetAmount(NetworkName, Amount);
         }
     }
 }

@@ -14,6 +14,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
@@ -78,8 +79,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    return ReturnObject.ToJson(_userBusiness.GetActionLog(userModel.Id, Convert.ToInt32(offset),
-                        Convert.ToInt32(limit)));
+                    return _userBusiness.GetActionLog(userModel.Id, Convert.ToInt32(offset),
+                        Convert.ToInt32(limit)).ToJson();
                 }
 
                 return CreateDataError("Can't get list account activity");
@@ -93,12 +94,11 @@ namespace Vakaxa.ApiServer.Controllers
 
         public string CreateDataError(string message)
         {
-            var errorData = new ReturnObject
+            return new ReturnObject
             {
-                Status = Status.StatusError,
+                Status = Status.STATUS_ERROR,
                 Message = message
-            };
-            return ReturnObject.ToJson(errorData);
+            }.ToJson();
         }
     }
 }

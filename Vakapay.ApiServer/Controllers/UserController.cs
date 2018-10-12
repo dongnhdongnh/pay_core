@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
@@ -118,67 +119,23 @@ namespace Vakaxa.ApiServer.Controllers
                     }
                 }
 
-                if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
+                if (updateUser.Status != Status.STATUS_SUCCESS) return CreateDataError("Can't update image");
                 //save action log
-                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar,
+                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.AVATAR,
                     Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
-                return ReturnObject.ToJson(new ReturnObject
+                return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Message = "Upload avatar success ",
                     Data = link
-                });
+                }.ToJson();
             }
             catch (Exception ex)
             {
                 return CreateDataError(ex.Message);
             }
         }
-
-        /*[HttpGet("checkUserLogin")]
-        public string CheckUserLogin()
-        {
-            try
-            {
-                var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
-
-                var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
-                var jObjectUser = JObject.Parse(jsonUser);
-                if (jObjectUser.ContainsKey("StreetAddress"))
-                {
-                    var address = jObjectUser["StreetAddress"].ToString();
-                    if (address != null)
-                    {
-                        userModel.StreetAddress1 = address;
-                    }
-                }
-
-
-                if (_userBusiness == null)
-                {
-                    CreateUserBusiness();
-                }
-
-                if (_walletBusiness == null)
-                {
-                    CreateWalletBusiness();
-                }
-
-                var resultData = _userBusiness.Login(userModel);
-
-
-                //save action log
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.Login,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
-
-                return ReturnObject.ToJson(resultData);
-            }
-            catch (Exception e)
-            {
-                return CreateDataError(e.Message);
-            }
-        }*/
 
         [HttpGet("get-info")]
         public string GetCurrentUser()
@@ -203,7 +160,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                     var resultData = _userBusiness.Login(userClaims);
 
-                    if (resultData.Status == Status.StatusError)
+                    if (resultData.Status == Status.STATUS_ERROR)
                         return CreateDataError("Can't not created User");
 
 
@@ -214,17 +171,14 @@ namespace Vakaxa.ApiServer.Controllers
                         CreateWalletBusiness();
                     }
 
-                    _walletBusiness.MakeAllWalletForNewUser(userModel);
-
-                    return ReturnObject.ToJson(resultData);
+                    return _walletBusiness.MakeAllWalletForNewUser(userModel).ToJson();
                 }
 
-                var success = new ReturnObject
+                return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Data = Vakapay.Models.Entities.User.ToJson(userModel)
-                };
-                return ReturnObject.ToJson(success);
+                }.ToJson();
             }
             catch (Exception e)
             {
@@ -276,10 +230,8 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
-
-                return ReturnObject.ToJson(result);
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UPDATE_PROFILE,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
             }
             catch (Exception e)
             {
@@ -336,10 +288,8 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
-
-                return ReturnObject.ToJson(result);
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UPDATE_PREFERENCES,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
             }
             catch (Exception e)
             {
@@ -374,10 +324,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 var result = _userBusiness.UpdateProfile(userModel);
 
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
-
-                return ReturnObject.ToJson(result);
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UPDATE_NOTIFICATION,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
             }
             catch (Exception e)
             {
@@ -417,12 +365,11 @@ namespace Vakaxa.ApiServer.Controllers
 
         public string CreateDataError(string message)
         {
-            var errorData = new ReturnObject
+            return new ReturnObject
             {
-                Status = Status.StatusError,
+                Status = Status.STATUS_ERROR,
                 Message = message
-            };
-            return ReturnObject.ToJson(errorData);
+            }.ToJson();
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories.Base;
@@ -29,7 +30,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
-				return FindTransactionByStatus(Status.StatusPending);
+				return FindTransactionByStatus(Status.STATUS_PENDING);
 			}
 			catch (Exception e)
 			{
@@ -41,7 +42,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
-				return FindTransactionsByStatus(Status.StatusPending);
+				return FindTransactionsByStatus(Status.STATUS_PENDING);
 			}
 			catch (Exception e)
 			{
@@ -70,7 +71,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
-				return FindTransactionByStatus(Status.StatusError);
+				return FindTransactionByStatus(Status.STATUS_ERROR);
 			}
 			catch (Exception e)
 			{
@@ -121,11 +122,11 @@ namespace Vakapay.Repositories.Mysql
 			int cache = transaction.Version;
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
-			_setQuery.Add(nameof(transaction.InProcess), "1");
+			_setQuery.Add(nameof(transaction.IsProcessing), "1");
 			var _updateQuery = new Dictionary<string, string>();
 			_updateQuery.Add(nameof(transaction.Id), transaction.Id);
 			_updateQuery.Add(nameof(transaction.Version), transaction.Version.ToString());
-			_updateQuery.Add(nameof(transaction.InProcess), "0");
+			_updateQuery.Add(nameof(transaction.IsProcessing), "0");
 			if (cache != transaction.Version)
 			{
 				Console.WriteLine("fucking error");
@@ -167,11 +168,11 @@ namespace Vakapay.Repositories.Mysql
 			int cache = transaction.Version;
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
-			_setQuery.Add(nameof(transaction.InProcess), "0");
+			_setQuery.Add(nameof(transaction.IsProcessing), "0");
 			var _updateQuery = new Dictionary<string, string>();
 			_updateQuery.Add(nameof(transaction.Id), transaction.Id);
 			_updateQuery.Add(nameof(transaction.Version), transaction.Version.ToString());
-			_updateQuery.Add(nameof(transaction.InProcess), "1");
+			_updateQuery.Add(nameof(transaction.IsProcessing), "1");
 			if (cache != transaction.Version)
 			{
 				Console.WriteLine("fucking error");
@@ -214,7 +215,7 @@ namespace Vakapay.Repositories.Mysql
 			int cache = transaction.Version;
 			var _setQuery = new Dictionary<string, string>();
 			_setQuery.Add(nameof(transaction.Version), (transaction.Version + 1).ToString());
-			_setQuery.Add(nameof(transaction.InProcess), "0");
+			_setQuery.Add(nameof(transaction.IsProcessing), "0");
 			_setQuery.Add(nameof(transaction.Status), transaction.Status);
 			_setQuery.Add(nameof(transaction.UpdatedAt), transaction.UpdatedAt.ToString());
 			if (transaction.Hash != null)
@@ -224,7 +225,7 @@ namespace Vakapay.Repositories.Mysql
 			var _updateQuery = new Dictionary<string, string>();
 			_updateQuery.Add(nameof(transaction.Id), transaction.Id);
 			_updateQuery.Add(nameof(transaction.Version), transaction.Version.ToString());
-			_updateQuery.Add(nameof(transaction.InProcess), "1");
+			_updateQuery.Add(nameof(transaction.IsProcessing), "1");
 			if (cache != transaction.Version)
 			{
 				Console.WriteLine("fucking error");
@@ -276,7 +277,7 @@ namespace Vakapay.Repositories.Mysql
 					Connection.Open();
 				//Console.WriteLine("FIND TRANSACTION BY STATUS");
 				var sqlString = $"Select * from {TableName} where BlockNumber = @BlockNumber and InProcess = 0 and Status=@Status";
-				var result = Connection.Query<TTransaction>(sqlString, new { BlockNumber = 0, Status = Status.StatusCompleted })
+				var result = Connection.Query<TTransaction>(sqlString, new { BlockNumber = 0, Status = Status.STATUS_COMPLETED })
 					.ToList<BlockchainTransaction>();
 				return result;
 			}
@@ -291,7 +292,7 @@ namespace Vakapay.Repositories.Mysql
 			try
 			{
 				var _setQuery = new Dictionary<string, string>();
-				_setQuery.Add(nameof(BlockchainTransaction.Status), Status.StatusCompleted);
+				_setQuery.Add(nameof(BlockchainTransaction.Status), Status.STATUS_COMPLETED);
 				return FindBySql(SqlHelper.Query_Search(TableName, _setQuery, limit, offset, orderBy)).ToList<BlockchainTransaction>();
 			}
 			catch (Exception e)

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using Newtonsoft.Json;
 using NLog;
+using Vakapay.BlockchainBusiness;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -47,7 +49,7 @@ namespace Vakapay.UserBusiness
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Can't User"
                     };
                 }
@@ -64,15 +66,15 @@ namespace Vakapay.UserBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
-                    Data = JsonConvert.SerializeObject(resultGetLog)
+                    Status = Status.STATUS_SUCCESS,
+                    Data = JsonHelper.SerializeObject(resultGetLog)
                 };
             }
             catch (Exception e)
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -106,7 +108,7 @@ namespace Vakapay.UserBusiness
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Can't User"
                     };
                 }
@@ -119,7 +121,7 @@ namespace Vakapay.UserBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -141,7 +143,7 @@ namespace Vakapay.UserBusiness
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Can't User"
                     };
                 }
@@ -152,7 +154,7 @@ namespace Vakapay.UserBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -186,33 +188,32 @@ namespace Vakapay.UserBusiness
                     try
                     {
                         userModel.Id = CommonHelper.GenerateUuid();
-                        userModel.Status = Status.StatusActive;
+                        userModel.Status = Status.STATUS_ACTIVE;
                         userModel.FullName = userModel.FirstName + " " + userModel.LastName;
                         userModel.CreatedAt = time;
                         userModel.UpdatedAt = time;
                         //created new user
                         var resultCreatedUser = userRepository.Insert(userModel);
 
-                        if (resultCreatedUser.Status == Status.StatusError)
+                        if (resultCreatedUser.Status == Status.STATUS_ERROR)
                             return new ReturnObject
                             {
-                                Status = Status.StatusError,
+                                Status = Status.STATUS_ERROR,
                                 Message = "Fail insert to userRepository"
                             };
 
 
                         return new ReturnObject
                         {
-                            Status = Status.StatusSuccess,
-                            Data = JsonConvert.SerializeObject(userModel),
+                            Status = Status.STATUS_SUCCESS,
+                            Data = JsonHelper.SerializeObject(userModel),
                         };
                     }
                     catch (Exception e)
                     {
                         return new ReturnObject
                         {
-                            Status = Status.StatusError,
-                            Message = e.Message
+                            Status = Status.STATUS_ERROR,
                         };
                     }
                 }
@@ -226,25 +227,25 @@ namespace Vakapay.UserBusiness
                     //updated user
                     var resultUpdatedUser = userRepository.Update(userCheck);
 
-                    if (resultUpdatedUser.Status == Status.StatusError)
+                    if (resultUpdatedUser.Status == Status.STATUS_ERROR)
                         return new ReturnObject
                         {
-                            Status = Status.StatusError,
+                            Status = Status.STATUS_ERROR,
                             Message = "Fail update to userRepository"
                         };
                 }
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
-                    Data = JsonConvert.SerializeObject(userCheck)
+                    Status = Status.STATUS_SUCCESS,
+                    Data = JsonHelper.SerializeObject(userCheck)
                 };
             }
             catch (Exception e)
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -261,7 +262,7 @@ namespace Vakapay.UserBusiness
                 var newSms = new SmsQueue
                 {
                     Id = CommonHelper.GenerateUuid(),
-                    Status = Status.StatusPending,
+                    Status = Status.STATUS_PENDING,
                     To = user.PhoneNumber,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     TextSend = "Vakaxa security code is: " + code,
@@ -269,11 +270,11 @@ namespace Vakapay.UserBusiness
 
                 var resultSms = sendSmsRepository.Insert(newSms);
 
-                if (resultSms.Status == Status.StatusError)
+                if (resultSms.Status == Status.STATUS_ERROR)
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Fail insert to sendSms " + resultSms.Message
                     };
                 }
@@ -281,7 +282,7 @@ namespace Vakapay.UserBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Message = "Success"
                 };
             }
@@ -289,7 +290,7 @@ namespace Vakapay.UserBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }

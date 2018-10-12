@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiServer.Models;
+using Vakapay.Commons.Constants;
 using Vakapay.Configuration;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -44,7 +43,7 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     balances.Add(new CurrencyBalance()
                     {
-                        NetworkName = wallet.NetworkName,
+                        Currency = wallet.Currency,
                         AmountDecimal = wallet.Balance
                     });
                 }
@@ -55,14 +54,14 @@ namespace Vakapay.ApiServer.Controllers
                     Balance = balances
                 };
 
-                return JsonHelper.SerializeObject(new ReturnDataObject()
-                    {Status = Status.StatusSuccess, Message = Message.MessageSuccess, Data = balanceResponse});
+                return JsonHelper.SerializeObject(new ReturnObject()
+                    {Status = Status.STATUS_SUCCESS, Data = JsonHelper.SerializeObject(balanceResponse)});
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 return JsonHelper.SerializeObject(new ReturnObject()
-                    {Status = Status.StatusError, Message = e.Message});
+                    {Status = Status.STATUS_ERROR, Message = e.Message});
             }
         }
 
@@ -101,14 +100,14 @@ namespace Vakapay.ApiServer.Controllers
                     sortedTransactions = sortedTransactions.GetRange(0, (int) limit);
                 }
 
-                return JsonHelper.SerializeObject(new ReturnDataObject()
-                    {Status = Status.StatusSuccess, Message = Message.MessageSuccess, Data = sortedTransactions});
+                return JsonHelper.SerializeObject(new ReturnObject()
+                    {Status = Status.STATUS_SUCCESS, Data = JsonHelper.SerializeObject(sortedTransactions)});
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 return JsonHelper.SerializeObject(new ReturnObject()
-                    {Status = Status.StatusError, Message = e.Message});
+                    {Status = Status.STATUS_ERROR, Message = e.Message});
             }
         }
         

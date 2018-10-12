@@ -56,16 +56,5 @@ namespace Vakapay.Models.Entities.ETH
 			public string input;
 			public string nonce;
 		}
-
-		public class BlockInfor
-		{
-			public string number;
-			public string hash;
-			public TransactionInfor[] transactions;
-			public string transactionsRoot;
-			public string totalDifficulty;
-		}
-
-
 	}
 }

@@ -1,20 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
-using Vakapay.Commons.Helpers;
-using Vakapay.Models;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -96,10 +92,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                             userModel.Verification = (int) option;
 
-                            var resultUpdate = _userBusiness.UpdateProfile(userModel);
-                            // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
-
-                            return ReturnObject.ToJson(resultUpdate);
+                            return _userBusiness.UpdateProfile(userModel).ToJson();
                         }
                     }
                 }
@@ -149,7 +142,7 @@ namespace Vakaxa.ApiServer.Controllers
                     {
                         userModel.TwoFactor = true;
 
-                        return ReturnObject.ToJson(_userBusiness.UpdateProfile(userModel));
+                        return _userBusiness.UpdateProfile(userModel).ToJson();
                     }
                 }
 
@@ -193,9 +186,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                     Console.WriteLine(code);
 
-                    var dataSend = _userBusiness.SendSms(userModel, code);
-
-                    return ReturnObject.ToJson(dataSend);
+                    return _userBusiness.SendSms(userModel, code).ToJson();
                 }
 
                 return CreateDataError("Can't send code");
@@ -237,9 +228,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                     Console.WriteLine(code);
 
-                    var dataSend = _userBusiness.SendSms(userModel, code);
-
-                    return ReturnObject.ToJson(dataSend);
+                    return _userBusiness.SendSms(userModel, code).ToJson();
                 }
 
                 return CreateDataError("Can't send code");
@@ -305,10 +294,10 @@ namespace Vakaxa.ApiServer.Controllers
                 userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                if (resultUpdate.Status == Status.StatusError)
+                if (resultUpdate.Status == Status.STATUS_ERROR)
                     return null;
 
-                return JsonConvert.SerializeObject(newSecret);
+                return JsonHelper.SerializeObject(newSecret);
             }
             catch (Exception e)
             {
@@ -318,12 +307,11 @@ namespace Vakaxa.ApiServer.Controllers
 
         public string CreateDataError(string message)
         {
-            var errorData = new ReturnObject
+            return new ReturnObject
             {
-                Status = Status.StatusError,
+                Status = Status.STATUS_ERROR,
                 Message = message
-            };
-            return ReturnObject.ToJson(errorData);
+            }.ToJson();
         }
     }
 }

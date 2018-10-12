@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Specialized;
 using System.Data;
 using System.IO;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -47,7 +48,7 @@ namespace Vakapay.SendMailBusiness
                 _logger.Error(e);
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.ToString()
                 };
             }
@@ -62,7 +63,7 @@ namespace Vakapay.SendMailBusiness
             if (pendingEmail?.Id == null)
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Message = "Pending email not found"
                 };
 
@@ -74,12 +75,12 @@ namespace Vakapay.SendMailBusiness
             try
             {
                 var lockResult = await sendEmailRepository.LockForProcess(pendingEmail);
-                if (lockResult.Status == Status.StatusError)
+                if (lockResult.Status == Status.STATUS_ERROR)
                 {
                     transctionScope.Rollback();
                     return new ReturnObject
                     {
-                        Status = Status.StatusSuccess,
+                        Status = Status.STATUS_SUCCESS,
                         Message = "Cannot Lock For Process"
                     };
                 }
@@ -91,7 +92,7 @@ namespace Vakapay.SendMailBusiness
                 transctionScope.Rollback();
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.ToString()
                 };
             }
@@ -103,11 +104,11 @@ namespace Vakapay.SendMailBusiness
             try
             {
                 var sendResult = await SendEmail(pendingEmail, apikey, from, fromName, apiAddress);
-                if (sendResult.Status == Status.StatusError)
+                if (sendResult.Status == Status.STATUS_ERROR)
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Cannot Send email"
                     };
                 }
@@ -117,11 +118,11 @@ namespace Vakapay.SendMailBusiness
                 pendingEmail.InProcess = 0;
 
                 var updateResult = await sendEmailRepository.SafeUpdate(pendingEmail);
-                if (updateResult.Status == Status.StatusError)
+                if (updateResult.Status == Status.STATUS_ERROR)
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Cannot update email status"
                     };
                 }
@@ -146,7 +147,7 @@ namespace Vakapay.SendMailBusiness
             if (emailBody == null)
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = "Cannot find template"
                 };
             var values = new NameValueCollection
@@ -168,9 +169,9 @@ namespace Vakapay.SendMailBusiness
                 {
                     byte[] apiResponse = client.UploadValues(address, values);
 
-                    var result = JsonConvert.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
+                    var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool) result["success"] ? Status.StatusSuccess : Status.StatusError;
+                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
@@ -182,7 +183,7 @@ namespace Vakapay.SendMailBusiness
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = ex.Message
                     };
                 }
@@ -193,24 +194,25 @@ namespace Vakapay.SendMailBusiness
         {
             switch (emailQueue.NetworkName)
             {
-                 case NetworkName.BTC:
-                     switch (emailQueue.Template)
-                     {
-                         case EmailTemplate.Sent:
-                             return _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb)
-                                 .FindById(emailQueue.TransactionId);
-                         case EmailTemplate.Received:
-                             return _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb)
-                                 .FindById(emailQueue.TransactionId);
-                         case EmailTemplate.NewDevice:
-                             break;
-                         case EmailTemplate.Verify:
-                             break;
-                         default:
-                             throw new ArgumentOutOfRangeException();
-                     }
-                     break;
-                case NetworkName.ETH:
+                case CryptoCurrency.BTC:
+                    switch (emailQueue.Template)
+                    {
+                        case EmailTemplate.Sent:
+                            return _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb)
+                                .FindById(emailQueue.TransactionId);
+                        case EmailTemplate.Received:
+                            return _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb)
+                                .FindById(emailQueue.TransactionId);
+                        case EmailTemplate.NewDevice:
+                            break;
+                        case EmailTemplate.Verify:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    break;
+                case CryptoCurrency.ETH:
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:
@@ -226,8 +228,9 @@ namespace Vakapay.SendMailBusiness
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
                     break;
-                case NetworkName.VAKA:
+                case CryptoCurrency.VKC:
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:
@@ -243,12 +246,13 @@ namespace Vakapay.SendMailBusiness
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
+
                     break;
             }
 
             return null;
         }
-        
+
         private string GetReceivedAddress(EmailQueue emailQueue)
         {
             try
@@ -261,7 +265,7 @@ namespace Vakapay.SendMailBusiness
                 throw;
             }
         }
-        
+
         private string CreateEmailBody(EmailQueue emailQueue)
         {
             try
@@ -269,7 +273,7 @@ namespace Vakapay.SendMailBusiness
                 string body = string.Empty;
                 string directory = Directory.GetParent(Directory.GetCurrentDirectory()) + "/MailTemplate/" +
                                    EmailConfig.TemplateFiles[emailQueue.Template];
-                
+
                 using (StreamReader reader = new StreamReader(directory))
                 {
                     body = reader.ReadToEnd();
@@ -290,7 +294,7 @@ namespace Vakapay.SendMailBusiness
                         body = body.Replace("{browser}", emailQueue.DeviceBrowser);
                         body = body.Replace("{authorizeUrl}", emailQueue.DeviceAuthorizeUrl);
                         break;
-                        
+
                     case EmailTemplate.Sent:
                         body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
                         body = body.Replace("{toAddress}", GetReceivedAddress(emailQueue));
@@ -303,7 +307,7 @@ namespace Vakapay.SendMailBusiness
                         body = body.Replace("{numberOfConfirmation}",
                             EmailConfig.GetNumberOfNeededConfirmation(emailQueue.NetworkName));
                         break;
-                        
+
                     case EmailTemplate.Verify:
                         body = body.Replace("{verifyEmailUrl}", emailQueue.VerifyUrl);
                         break;

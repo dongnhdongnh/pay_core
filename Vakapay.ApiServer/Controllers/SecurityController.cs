@@ -13,6 +13,7 @@ using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
@@ -71,16 +72,15 @@ namespace Vakaxa.ApiServer.Controllers
                     return CreateDataError("Can't User");
                 }
 
-                var success = new ReturnObject
+                return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
-                    Data = JsonConvert.SerializeObject(new SecurityModel
+                    Status = Status.STATUS_SUCCESS,
+                    Data = JsonHelper.SerializeObject(new SecurityModel
                     {
                         twofaOption = userModel.Verification,
                         isEnableTwofa = userModel.TwoFactor
                     })
-                };
-                return ReturnObject.ToJson(success);
+                }.ToJson();
             }
             catch (Exception e)
             {
@@ -130,10 +130,9 @@ namespace Vakaxa.ApiServer.Controllers
                             userModel.Verification = (int) option;
 
                             var resultUpdate = _userBusiness.UpdateProfile(userModel);
-                            // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
-                            _userBusiness.AddActionLog(email, userModel.Id, ActionLog.TwofaEnable,
-                                Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
-                            return ReturnObject.ToJson(resultUpdate);
+                            // resultUpdate.Data = JsonHelper.SerializeObject(userModel);
+                            return _userBusiness.AddActionLog(email, userModel.Id, ActionLog.TwofaEnable,
+                                Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
                         }
                     }
                 }
@@ -179,9 +178,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                     Console.WriteLine(code);
 
-                    var dataSend = _userBusiness.SendSms(userModel, code);
-
-                    return ReturnObject.ToJson(dataSend);
+                    return _userBusiness.SendSms(userModel, code).ToJson();
                 }
 
                 return CreateDataError("Can't send code");
@@ -247,10 +244,10 @@ namespace Vakaxa.ApiServer.Controllers
                 userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                if (resultUpdate.Status == Status.StatusError)
+                if (resultUpdate.Status == Status.STATUS_ERROR)
                     return null;
 
-                return JsonConvert.SerializeObject(newSecret);
+                return JsonHelper.SerializeObject(newSecret);
             }
             catch (Exception e)
             {
@@ -260,12 +257,11 @@ namespace Vakaxa.ApiServer.Controllers
 
         public string CreateDataError(string message)
         {
-            var errorData = new ReturnObject
+            return new ReturnObject
             {
-                Status = Status.StatusError,
+                Status = Status.STATUS_ERROR,
                 Message = message
-            };
-            return ReturnObject.ToJson(errorData);
+            }.ToJson();
         }
     }
 }

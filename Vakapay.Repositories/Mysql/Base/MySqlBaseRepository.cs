@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using MySql.Data.MySqlClient;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories.Base;
 
@@ -26,12 +27,12 @@ namespace Vakapay.Repositories.Mysql.Base
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 				var result = Connection.Update(objectUpdate);
-				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+				var status = result > 0 ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 				Logger.Debug(GetClassName() + " =>> update status: " + status);
 				return new ReturnObject
 				{
 					Status = status,
-					Message = status == Status.StatusError ? "Cannot Update" : "Update Success",
+					Message = status == Status.STATUS_ERROR ? "Cannot Update" : "Update Success",
 					Data = ""
 				};
 			}
@@ -40,7 +41,7 @@ namespace Vakapay.Repositories.Mysql.Base
 				Logger.Error(GetClassName() + " =>> update fail: " + e.Message);
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = "Cannot update: " + e.Message,
 					Data = ""
 				};
@@ -55,12 +56,12 @@ namespace Vakapay.Repositories.Mysql.Base
 					Connection.Open();
 
 				var result = Connection.Delete(FindById(Id));
-				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+				var status = result > 0 ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 				Logger.Debug(GetClassName() + " =>> Delete status: " + status);
 				return new ReturnObject
 				{
 					Status = status,
-					Message = status == Status.StatusError ? "Cannot delete" : "Delete Success"
+					Message = status == Status.STATUS_ERROR ? "Cannot delete" : "Delete Success"
 				};
 			}
 			catch (Exception e)
@@ -68,7 +69,7 @@ namespace Vakapay.Repositories.Mysql.Base
 				Logger.Error(GetClassName() + " =>> Delete fail: " + e.Message);
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = "Cannot delete: " + e.Message,
 					Data = ""
 				};
@@ -82,12 +83,12 @@ namespace Vakapay.Repositories.Mysql.Base
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 				var result = Connection.InsertTask<string, TModel>(objectInsert);
-				var status = !string.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
+				var status = !string.IsNullOrEmpty(result) ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 				Logger.Debug(GetClassName() + " =>> insert status: " + status);
 				return new ReturnObject
 				{
 					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+					Message = status == Status.STATUS_ERROR ? "Cannot insert" : "Insert Success"
 				};
 			}
 			catch (Exception e)
@@ -96,7 +97,7 @@ namespace Vakapay.Repositories.Mysql.Base
 				Logger.Error(GetClassName() + " =>> insert fail: " + e.Message);
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = "Cannot insert: " + e.Message,
 					Data = ""
 				};
@@ -158,19 +159,19 @@ namespace Vakapay.Repositories.Mysql.Base
 					result = Connection.Execute(sqlString);
 				}
 
-				var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+				var status = result > 0 ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 				//	Console.WriteLine("Excute thing " + result);
 				return new ReturnObject
 				{
 					Status = status,
-					Message = status == Status.StatusError ? "Cannot Excute" : "Excute Success"
+					Message = status == Status.STATUS_ERROR ? "Cannot Excute" : "Excute Success"
 				};
 			}
 			catch (Exception e)
 			{
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}
