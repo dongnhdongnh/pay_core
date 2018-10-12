@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 
 namespace Vakapay.Models.Domains
 {
-    [JsonObject]
     public class ReturnObject
     {
         public string Status { get; set; }
