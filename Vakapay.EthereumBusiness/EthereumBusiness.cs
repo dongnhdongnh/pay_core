@@ -49,11 +49,16 @@ namespace Vakapay.EthereumBusiness
 		}
 
 
-
-		//public override List<BlockchainTransaction> GetWithdrawHistory()
-		//{
-		//	var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-		//	return GetHistory<EthereumWithdrawTransaction>(ethereumwithdrawRepo);
-		//}
-	}
+        public override List<BlockchainTransaction> GetAllHistory(int offset = -1, int limit = -1, string[] orderBy = null)
+        {
+            var depositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
+            var withdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+            return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(withdrawRepo, depositRepo, offset, limit, orderBy);
+        }
+        //public override List<BlockchainTransaction> GetWithdrawHistory()
+        //{
+        //	var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
+        //	return GetHistory<EthereumWithdrawTransaction>(ethereumwithdrawRepo);
+        //}
+    }
 }

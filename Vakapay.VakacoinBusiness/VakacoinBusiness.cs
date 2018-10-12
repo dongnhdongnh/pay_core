@@ -31,7 +31,7 @@ namespace Vakapay.VakacoinBusiness
         public void SetAccountRepositoryForRpc(VakacoinRPC rpc)
         {
             rpc.AccountRepository =
-                (VakacoinAccountRepository) VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
+                (VakacoinAccountRepository)VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
         }
 
         /// <summary>
@@ -61,9 +61,9 @@ namespace Vakapay.VakacoinBusiness
                     OwnerPublicKey = keyPair.PublicKey,
                     ActivePrivateKey = keyPair.PrivateKey,
                     ActivePublicKey = keyPair.PublicKey,
-                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     Id = CommonHelper.GenerateUuid(),
-                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId,
                 });
 
@@ -106,9 +106,9 @@ namespace Vakapay.VakacoinBusiness
                     OwnerPublicKey = ownerPublicKey,
                     ActivePrivateKey = activePrivateKey,
                     ActivePublicKey = activePublicKey,
-                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     Id = CommonHelper.GenerateUuid(),
-                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId
                 });
 
@@ -167,8 +167,8 @@ namespace Vakapay.VakacoinBusiness
                     VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
                 blockchainTransaction.Id = CommonHelper.GenerateUuid();
                 blockchainTransaction.Status = Status.StatusPending;
-                blockchainTransaction.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
-                blockchainTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                blockchainTransaction.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
+                blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                 return vakacoinwithdrawRepo.Insert(blockchainTransaction);
             }
             catch (Exception e)
@@ -241,9 +241,9 @@ namespace Vakapay.VakacoinBusiness
                     };
 
                 VakacoinRPCObj = rpcClass as VakacoinRPC;
-                
+
                 var results = CreateNewAccount(walletId); // Create account and add account name to VakacoinAccount table
-                
+
                 if (results.Status == Status.StatusError)
                     return results;
 
@@ -253,7 +253,7 @@ namespace Vakapay.VakacoinBusiness
                 //wallet.WalletBusiness(VakapayRepositoryFactory);
                 var updateWallet =
                     wallet.UpdateAddressForWallet(walletId, accountName);
-                
+
                 if (updateWallet.Status == Status.StatusError)
                 {
                     return new ReturnObject
@@ -291,6 +291,13 @@ namespace Vakapay.VakacoinBusiness
         {
             var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
             return GetHistory<VakacoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+        }
+
+        public override List<BlockchainTransaction> GetAllHistory(int offset = -1, int limit = -1, string[] orderBy = null)
+        {
+            var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
+            var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
+            return GetAllHistory<VakacoinWithdrawTransaction,VakacoinDepositTransaction>(withdrawRepo, depositRepo, offset, limit, orderBy);
         }
     }
 }

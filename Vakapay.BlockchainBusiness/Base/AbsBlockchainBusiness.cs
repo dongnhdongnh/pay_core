@@ -116,7 +116,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 var sendTransaction = await rpcClass.SendTransactionAsync(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
                 pendingTransaction.InProcess = 0;
-                pendingTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                 pendingTransaction.Hash = sendTransaction.Data;
 
                 //create database email when send success
@@ -125,9 +125,9 @@ namespace Vakapay.BlockchainBusiness.Base
                     var email = GetEmailByTransaction(pendingTransaction);
                     if (email != null)
                     {
-//                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
-//                            email, pendingTransaction.Amount,
-//                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
+                        //                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
+                        //                            email, pendingTransaction.Amount,
+                        //                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
                         await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
                             email, pendingTransaction.Amount, pendingTransaction.Id,
                             EmailTemplate.Sent, pendingTransaction.NetworkName());
@@ -353,12 +353,12 @@ namespace Vakapay.BlockchainBusiness.Base
                                 Console.WriteLine("HELLO " + _currentPending.Hash);
                                 _currentPending.BlockNumber = _blockNumber;
                                 _currentPending.Fee = _fee;
-                                _currentPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                                _currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                                 //	_currentPending.Status = Status.StatusCompleted;
                                 //	_currentPending.InProcess = 0;
                                 Console.WriteLine("CaLL UPDATE");
 
-                                withdrawRepoQuery.Update((TWithDraw) _currentPending);
+                                withdrawRepoQuery.Update((TWithDraw)_currentPending);
                                 withdrawPendingTransactions.RemoveAt(i);
                             }
                         }
@@ -384,7 +384,7 @@ namespace Vakapay.BlockchainBusiness.Base
                             int _transaValue = 0;
                             if (_trans.value.HexToInt(out _transaValue))
                             {
-                                wallet.UpdateBalance(_toAddress, (Decimal) _transaValue, networkName);
+                                wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, networkName);
                             }
                         }
                     }
@@ -407,6 +407,43 @@ namespace Vakapay.BlockchainBusiness.Base
             }
         }
 
+        /// <summary>
+        /// get history from both withdrawn and deposit table
+        /// </summary>
+        /// <typeparam name="TBlockchainTransaction"></typeparam>
+        /// <param name="repoQuery"></param>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(
+       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, int offset = -1, int limit = -1,
+       string[] orderBy = null)
+        {
+            try
+            {
+                Console.WriteLine("FIND HISTORY FROM ABS");
+                //WithdrawnrepoQuery.GetTableName();
+                //DepositrepoQuery.GetTableName();
+                //   WithdrawnrepoQuery.FindBySql();
+                return WithdrawnrepoQuery.FindTransactionHistoryAll(WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), offset, limit, orderBy);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                throw e;
+            }
+        }
+
+        /// <summary>
+        /// get history from withdrawn or deposit table
+        /// </summary>
+        /// <typeparam name="TBlockchainTransaction"></typeparam>
+        /// <param name="repoQuery">withdrawn or deposit</param>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
         public virtual List<BlockchainTransaction> GetHistory<TBlockchainTransaction>(
             IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, int offset = -1, int limit = -1,
             string[] orderBy = null)
@@ -437,6 +474,13 @@ namespace Vakapay.BlockchainBusiness.Base
             return null;
         }
 
+        public virtual List<BlockchainTransaction> GetAllHistory(int offset = -1, int limit = -1,
+            string[] orderBy = null)
+        {
+            Console.WriteLine("Not override");
+            return null;
+        }
+
         /// <summary>
         /// CreateDataEmail
         /// </summary>
@@ -448,8 +492,8 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="networkName"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-//        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
-//            string networkName, string sendOrReceiver)
+        //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
+        //            string networkName, string sendOrReceiver)
         public async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
             EmailTemplate template, string networkName)
         {
@@ -466,7 +510,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     Template = template,
                     Subject = subject,
                     NetworkName = networkName,
-//                    SentOrReceived = sendOrReceiver,
+                    //                    SentOrReceived = sendOrReceiver,
                     Amount = amount,
                     TransactionId = transactionId,
                     Status = Status.StatusPending,

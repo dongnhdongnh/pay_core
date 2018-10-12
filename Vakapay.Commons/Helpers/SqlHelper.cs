@@ -48,8 +48,6 @@ namespace Vakapay.Commons.Helpers
 			{
 				output += " OFFSET " + limit;
 			}
-
-
 			Console.WriteLine(output);
 			return output;
 		}
