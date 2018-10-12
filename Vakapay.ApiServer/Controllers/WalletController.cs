@@ -83,15 +83,17 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("History")]
-        public ActionResult<ReturnObject> GetWalletHistory([FromBody]Wallet walletID)
+        public ActionResult<ReturnObject> GetWalletHistory([FromBody]WalletSearch walletSearch)
         {
             try
             {
-                var _history = _walletBusiness.GetHistory(walletID, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
-                //  return 
+                //  var _history = _walletBusiness.GetHistory(walletSearch.wallet, 1, 3, new string[] { nameof(BlockchainTransaction.CreatedAt) });
+                int numberData = 0;
+                var _history = _walletBusiness.GetHistory(out numberData,walletSearch.wallet, walletSearch.offset, walletSearch.limit, walletSearch.orderBy);
                 return new ReturnObject()
                 {
                     Status = Status.StatusCompleted,
+                    Data=numberData.ToString(),
                     Message = JsonHelper.SerializeObject(_history)
                 };
             }
@@ -107,6 +109,13 @@ namespace Vakapay.ApiServer.Controllers
             }
 
             //  return null;
+        }
+        public class WalletSearch
+        {
+            public Wallet wallet;
+            public int offset = -1;
+            public int limit = -1;
+            public string[] orderBy = null;
         }
     }
 }

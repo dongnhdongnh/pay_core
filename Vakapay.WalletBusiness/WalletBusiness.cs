@@ -589,21 +589,23 @@ namespace Vakapay.WalletBusiness
         /// <param name="offet">-1 for not config</param>
         /// <param name="limit">-1 for not config</param>
         /// <param name="orderBy">null for not config</param>
-        public List<BlockchainTransaction> GetHistory(Wallet wallet, int offet = -1, int limit = -1, string[] orderBy = null)
+        public List<BlockchainTransaction> GetHistory(out int numberData,Wallet wallet, int offet = -1, int limit = -1, string[] orderBy = null)
         {
+            numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
             Console.WriteLine(wallet.NetworkName);
+           
             switch (wallet.NetworkName)
             {
                 case NetworkName.ETH:
                     
-                    output = ethereumBussiness.GetWithdrawHistory(offet, limit, orderBy);
+                    output = ethereumBussiness.GetAllHistory(out numberData, wallet.Address,offet, limit, orderBy);
                     break;
                 case NetworkName.VAKA:
-                    output = vakacoinBussiness.GetWithdrawHistory(offet, limit, orderBy);
+                    output = vakacoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
                     break;
                 case NetworkName.BTC:
-                    output = bitcoinBussiness.GetWithdrawHistory(offet, limit, orderBy);
+                    output = bitcoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
                     break;
                 default:
                     break;

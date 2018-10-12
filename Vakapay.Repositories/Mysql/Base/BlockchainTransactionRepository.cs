@@ -306,11 +306,19 @@ namespace Vakapay.Repositories.Mysql
             }
             //	throw new NotImplementedException();
         }
-        public List<BlockchainTransaction> FindTransactionHistoryAll(string TableNameWithdrawn, string TableNameDeposit, int offset, int limit, string[] orderByValue)
+        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string walletAdress, string TableNameWithdrawn, string TableNameDeposit, int offset, int limit, string[] orderByValue)
         {
+            numberData = -1;
             try
             {
-                var output = $"Select * from ( SELECT * FROM {TableNameWithdrawn} UNION ALL  SELECT * FROM {TableNameDeposit})";
+                var _selectThing = "Id,FromAddress,ToAddress,CreatedAt,Amount,Status";
+                var output = $"Select * from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE FromAddress='{walletAdress}'" +
+                    $" UNION ALL " +
+                    $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE ToAddress='{walletAdress}') as t_uni ";
+                var output_count = $"Select count(*) from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE FromAddress='{walletAdress}'" +
+                   $" UNION ALL " +
+                   $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE ToAddress='{walletAdress}') as t_uni ";
+                numberData = ExcuteCount(output_count);
                 StringBuilder orderStr = new StringBuilder("");
                 int count = 0;
                 if (orderByValue != null)
@@ -334,9 +342,9 @@ namespace Vakapay.Repositories.Mysql
                 }
                 if (offset > 0)
                 {
-                    output += " OFFSET " + limit;
+                    output += " OFFSET " + offset;
                 }
-               
+
                 return FindBySql(output).ToList<BlockchainTransaction>();
             }
             catch (Exception e)
@@ -345,7 +353,7 @@ namespace Vakapay.Repositories.Mysql
                 return null;
                 //	throw;
             }
-           
+
         }
 
         public string GetTableName()
@@ -354,6 +362,6 @@ namespace Vakapay.Repositories.Mysql
             // throw new NotImplementedException();
         }
 
-       
+
     }
 }

@@ -231,12 +231,13 @@ namespace Vakapay.UnitTest
 					new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
 
 			var wallet = _walletBusiness.GetWalletByID(walletID);
+            int numberDB;
 			if (wallet == null)
 			{
 				Console.WriteLine("wallet null");
 			}
 			else
-				_walletBusiness.GetHistory(wallet, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
+				_walletBusiness.GetHistory(out numberDB,wallet, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
 		}
 
 		//[Test]

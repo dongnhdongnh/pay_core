@@ -416,7 +416,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
         /// <returns></returns>
-        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(
+        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string walletAdress,
        IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, int offset = -1, int limit = -1,
        string[] orderBy = null)
         {
@@ -426,7 +426,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 //WithdrawnrepoQuery.GetTableName();
                 //DepositrepoQuery.GetTableName();
                 //   WithdrawnrepoQuery.FindBySql();
-                return WithdrawnrepoQuery.FindTransactionHistoryAll(WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), offset, limit, orderBy);
+                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData,walletAdress, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), offset, limit, orderBy);
             }
             catch (Exception e)
             {
@@ -474,9 +474,10 @@ namespace Vakapay.BlockchainBusiness.Base
             return null;
         }
 
-        public virtual List<BlockchainTransaction> GetAllHistory(int offset = -1, int limit = -1,
+        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string walletAdress, int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
+            numberData = -1;
             Console.WriteLine("Not override");
             return null;
         }

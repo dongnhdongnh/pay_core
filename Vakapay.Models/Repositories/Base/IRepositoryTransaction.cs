@@ -18,7 +18,7 @@ namespace Vakapay.Models.Repositories.Base
 		Task<ReturnObject> SafeUpdate(BlockchainTransaction transaction);
 		List<BlockchainTransaction> FindTransactionHistory(int offset, int limit, string[] orderBy);
 
-        List<BlockchainTransaction> FindTransactionHistoryAll(string TableNameWithdrawn,string TableNameDeposit,int offset, int limit, string[] orderBy);
+        List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData,string walletAdress,string TableNameWithdrawn,string TableNameDeposit,int offset, int limit, string[] orderBy);
         string GetTableName();
       //  List<BlockchainTransaction> FindAllTransactionHistory(string table,int offset, int limit, string[] orderBy);
     }

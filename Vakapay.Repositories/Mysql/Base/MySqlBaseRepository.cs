@@ -130,6 +130,7 @@ namespace Vakapay.Repositories.Mysql.Base
 					Connection.Open();
 
 				var result = Connection.Query<TModel>(sqlString);
+              
 
 				return result.ToList();
 			}
@@ -175,5 +176,23 @@ namespace Vakapay.Repositories.Mysql.Base
 				};
 			}
 		}
-	}
+
+        public int ExcuteCount(string sql)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+              return Connection.ExecuteScalar<int>(sql);
+
+
+             
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
+    }
 }

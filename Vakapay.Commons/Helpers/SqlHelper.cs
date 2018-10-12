@@ -46,7 +46,7 @@ namespace Vakapay.Commons.Helpers
 			}
 			if (offset > 0)
 			{
-				output += " OFFSET " + limit;
+				output += " OFFSET " + offset;
 			}
 			Console.WriteLine(output);
 			return output;
