@@ -104,26 +104,6 @@ namespace Vakapay.Repositories.Mysql
                 return null;
             }
         }
-
-        public ReturnObject Insert(User objectInsert)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                var result = Connection.InsertTask<string, User>(objectInsert);
-                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-                };
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
         
         public string FindEmailByBitcoinAddress(string bitcoinAddress)
         {

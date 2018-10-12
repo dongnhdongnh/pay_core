@@ -120,7 +120,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
                 //save action log
-                CreateDataActionLog(email, userCheck.Id, ActionLog.Avatar);
+                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(new ReturnObject
                 {
@@ -135,13 +136,13 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
-        [HttpGet("checkUserLogin")]
+        /*[HttpGet("checkUserLogin")]
         public string CheckUserLogin()
         {
             try
             {
                 var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
-                Console.WriteLine(jsonUser);
+
                 var userModel = Vakapay.Models.Entities.User.FromJson(jsonUser);
                 var jObjectUser = JObject.Parse(jsonUser);
                 if (jObjectUser.ContainsKey("StreetAddress"))
@@ -164,11 +165,12 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateWalletBusiness();
                 }
 
-                var resultData = _userBusiness.Login(_walletBusiness, userModel);
+                var resultData = _userBusiness.Login(userModel);
 
 
                 //save action log
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.Login);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.Login,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(resultData);
             }
@@ -176,7 +178,7 @@ namespace Vakaxa.ApiServer.Controllers
             {
                 return CreateDataError(e.Message);
             }
-        }
+        }*/
 
         [HttpGet("get-info")]
         public string GetCurrentUser()
@@ -192,6 +194,31 @@ namespace Vakaxa.ApiServer.Controllers
                 }
 
                 var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
+
+                    var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
+
+                    var resultData = _userBusiness.Login(userClaims);
+
+                    if (resultData.Status == Status.StatusError)
+                        return CreateDataError("Can't not created User");
+
+
+                    userModel = Vakapay.Models.Entities.User.FromJson(resultData.Data);
+
+                    if (_walletBusiness == null)
+                    {
+                        CreateWalletBusiness();
+                    }
+
+                    _walletBusiness.MakeAllWalletForNewUser(userModel);
+
+                    return ReturnObject.ToJson(resultData);
+                }
+
                 var success = new ReturnObject
                 {
                     Status = Status.StatusSuccess,
@@ -249,7 +276,8 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(result);
             }
@@ -308,7 +336,8 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(result);
             }
@@ -345,7 +374,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 var result = _userBusiness.UpdateProfile(userModel);
 
-                CreateDataActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications);
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications,
+                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
                 return ReturnObject.ToJson(result);
             }
@@ -393,25 +423,6 @@ namespace Vakaxa.ApiServer.Controllers
                 Message = message
             };
             return ReturnObject.ToJson(errorData);
-        }
-
-        private void CreateDataActionLog(string email, string idUser, string actionLog)
-        {
-            //save action log
-            try
-            {
-                _userBusiness.AddActionLog(new UserActionLog
-                {
-                    ActionName = actionLog,
-                    Description = email,
-                    Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
-                    UserId = idUser
-                });
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
         }
     }
 }

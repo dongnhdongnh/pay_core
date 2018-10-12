@@ -33,9 +33,13 @@ namespace Vakapay.Models.Entities
         public string TimezoneKey { get; set; }
         public string Notifications { get; set; }
         public string SecretAuthToken { get; set; }
+        public int Verification { get; set; }
+        public int IsLock { get; set; }
+        public bool TwoFactor { get; set; }
 
         public static User FromJson(string json) =>
             JsonConvert.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
+
         public static string ToJson(User self) =>
             JsonConvert.SerializeObject(self, JsonHelper.ConvertSettings);
     }

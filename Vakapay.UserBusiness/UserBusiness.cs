@@ -33,14 +33,73 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// save action log user
         /// </summary>
-        /// <param name="log"></param>
+        /// <param name="idUser"></param>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
         /// <returns></returns>
-        public ReturnObject AddActionLog(UserActionLog log)
+        public ReturnObject GetActionLog(string idUser, int offset , int limit)
         {
             try
             {
-                log.Id = CommonHelper.GenerateUuid();
-                log.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(idUser);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Can't User"
+                    };
+                }
+
+                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+
+                var search =
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", idUser}
+                    };
+                
+                var resultGetLog = logRepository.GetListLog(logRepository.QuerySearch(search), offset, limit);
+
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = JsonConvert.SerializeObject(resultGetLog)
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// save action log user
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="idUser"></param>
+        /// <param name="actionLog"></param>
+        /// <param name="ip"></param>
+        /// <returns></returns>
+        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip)
+        {
+            try
+            {
+                var log = new UserActionLog
+                {
+                    ActionName = actionLog,
+                    Description = description,
+                    Ip = ip,
+                    UserId = idUser,
+                    Id = CommonHelper.GenerateUuid(),
+                    CreatedAt = (int) CommonHelper.GetUnixTimestamp()
+                };
+
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var userCheck = userRepository.FindById(log.UserId);
                 if (userCheck == null)
@@ -106,7 +165,7 @@ namespace Vakapay.UserBusiness
         /// <param name="phone"></param>
         /// <param name="fullName"></param>
         /// <returns></returns>
-        public ReturnObject Login(IWalletBusiness walletBusiness, User userModel)
+        public ReturnObject Login(User userModel)
         {
             try
             {
@@ -131,31 +190,16 @@ namespace Vakapay.UserBusiness
                         userModel.FullName = userModel.FirstName + " " + userModel.LastName;
                         userModel.CreatedAt = time;
                         userModel.UpdatedAt = time;
-
                         //created new user
                         var resultCreatedUser = userRepository.Insert(userModel);
 
                         if (resultCreatedUser.Status == Status.StatusError)
-                        {
                             return new ReturnObject
                             {
                                 Status = Status.StatusError,
                                 Message = "Fail insert to userRepository"
                             };
-                        }
 
-
-                        // created wallet
-                        var resultCreateWallet = walletBusiness.MakeAllWalletForNewUser(userModel);
-
-                        if (resultCreateWallet.Status == Status.StatusError)
-                        {
-                            return new ReturnObject
-                            {
-                                Status = Status.StatusError,
-                                Message = "Fail insert wallet"
-                            };
-                        }
 
                         return new ReturnObject
                         {
@@ -168,7 +212,7 @@ namespace Vakapay.UserBusiness
                         return new ReturnObject
                         {
                             Status = Status.StatusError,
-                            Message = "Fail insert wallet"
+                            Message = e.Message
                         };
                     }
                 }

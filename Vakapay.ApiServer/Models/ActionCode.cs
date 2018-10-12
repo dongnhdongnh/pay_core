@@ -5,6 +5,7 @@ namespace Vakapay.ApiServer.Models
     public class ActionCode
     {
         public string TwofaEnable { get; set; }
+        public string UpdateOptionVerification { get; set; }
 
         public string CloseAccount { get; set; }
 

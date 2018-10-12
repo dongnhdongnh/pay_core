@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace Vakaxa.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    public class TwofaController : ControllerBase
+    public class SecurityController : ControllerBase
     {
         private readonly UserBusiness _userBusiness;
         private WalletBusiness _walletBusiness;
@@ -38,7 +38,7 @@ namespace Vakaxa.ApiServer.Controllers
 
         private IConfiguration Configuration { get; }
 
-        public TwofaController(
+        public SecurityController(
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
         )
@@ -55,9 +55,42 @@ namespace Vakaxa.ApiServer.Controllers
             _userBusiness = new UserBusiness(_persistenceFactory);
         }
 
+        [HttpGet("get-info")]
+        public string GetInfo()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+
+                var userModel = _userBusiness.getUserInfo(query);
+
+                if (userModel == null)
+                {
+                    return CreateDataError("Can't User");
+                }
+
+                var success = new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Data = JsonConvert.SerializeObject(new SecurityModel
+                    {
+                        twofaOption = userModel.Verification,
+                        isEnableTwofa = userModel.TwoFactor
+                    })
+                };
+                return ReturnObject.ToJson(success);
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
         // POST api/values
-        [HttpPost("option/update")]
-        public string UpdateOption([FromBody] JObject value)
+        [HttpPost("close-account/update")]
+        public string UpdateCloseAccount([FromBody] JObject value)
         {
             try
             {
@@ -98,7 +131,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                             var resultUpdate = _userBusiness.UpdateProfile(userModel);
                             // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
-
+                            _userBusiness.AddActionLog(email, userModel.Id, ActionLog.TwofaEnable,
+                                Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
                             return ReturnObject.ToJson(resultUpdate);
                         }
                     }
@@ -115,56 +149,8 @@ namespace Vakaxa.ApiServer.Controllers
 
 
         // POST api/values
-        [HttpPost("enable/update")]
-        public string VerifyCode([FromBody] JObject value)
-        {
-            try
-            {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.getUserInfo(query);
-
-                if (userModel == null)
-                {
-                    //return error
-                    return CreateDataError("User not exist in DB");
-                }
-
-                if (value.ContainsKey("code"))
-                {
-                    var code = value["code"].ToString();
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
-
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
-
-                    var secret = secretAuthToken.TwofaEnable;
-
-                    bool isok = authenticator.CheckCode(secret, code);
-
-                    if (isok)
-                    {
-                        userModel.TwoFactor = true;
-
-                        return ReturnObject.ToJson(_userBusiness.UpdateProfile(userModel));
-                    }
-                }
-
-                return CreateDataError("Can't verify code");
-            }
-            catch (Exception e)
-            {
-                return CreateDataError(e.Message);
-            }
-        }
-
-
-        // POST api/values
-        [HttpPost("option/require-send-code-phone")]
-        public string SendCodeOption()
+        [HttpPost("close-account/require-send-code-phone")]
+        public string SendCodeClose()
         {
             try
             {
@@ -176,61 +162,17 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = CheckToken(userModel, ActionLog.UpdateOptionVerification);
+                    var checkSecret = CheckToken(userModel, ActionLog.CloseAccount);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
 
                     var secretAuthToken = ActionCode.FromJson(checkSecret);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                    if (string.IsNullOrEmpty(secretAuthToken.CloseAccount))
                         return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.UpdateOptionVerification;
-
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
-
-                    Console.WriteLine(code);
-
-                    var dataSend = _userBusiness.SendSms(userModel, code);
-
-                    return ReturnObject.ToJson(dataSend);
-                }
-
-                return CreateDataError("Can't send code");
-            }
-            catch (Exception e)
-            {
-                return CreateDataError(e.Message);
-            }
-        }
-
-        // POST api/values
-        [HttpPost("enable/require-send-code-phone")]
-        public string SendCodeEnable()
-        {
-            try
-            {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.getUserInfo(query);
-
-
-                if (userModel != null)
-                {
-                    var checkSecret = CheckToken(userModel, ActionLog.TwofaEnable);
-
-                    if (checkSecret == null)
-                        return CreateDataError("Can't send code");
-
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
-
-                    var secret = secretAuthToken.TwofaEnable;
+                    var secret = secretAuthToken.CloseAccount;
 
                     var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
                     var code = authenticator.GetCode(secret);
@@ -267,7 +209,7 @@ namespace Vakaxa.ApiServer.Controllers
                         case ActionLog.UpdateOptionVerification:
                             newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
-                        case "CloseAccount":
+                        case ActionLog.CloseAccount:
                             newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
                     }
@@ -292,7 +234,7 @@ namespace Vakaxa.ApiServer.Controllers
                             }
 
                             break;
-                        case "CloseAccount":
+                        case ActionLog.CloseAccount:
                             if (string.IsNullOrEmpty(newSecret.CloseAccount))
                             {
                                 newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
