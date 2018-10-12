@@ -46,6 +46,11 @@ namespace Vakapay.Repositories.Mysql
             return new UserActionLogRepository(dbConnection);
         }
 
+        public IWebSessionRepository GetWebSessionRepository(IDbConnection dbConnection)
+        {
+            return new WebSessionRepository(dbConnection);
+        }
+
         public IEthereumAddressRepository GetEthereumAddressRepository(IDbConnection dbConnection)
         {
             return new EthereumAddressRepository(dbConnection);

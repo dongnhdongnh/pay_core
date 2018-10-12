@@ -37,7 +37,7 @@ namespace Vakapay.UserBusiness
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public ReturnObject GetActionLog(string idUser, int offset , int limit)
+        public ReturnObject GetActionLog(string idUser, int offset, int limit)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace Vakapay.UserBusiness
                     {
                         {"UserId", idUser}
                     };
-                
+
                 var resultGetLog = logRepository.GetListLog(logRepository.QuerySearch(search), offset, limit);
 
                 return new ReturnObject
@@ -114,6 +114,50 @@ namespace Vakapay.UserBusiness
                 var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
 
                 return logRepository.Insert(log);
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// save web session
+        /// </summary>
+        /// <param name="webSession"></param>
+        /// <returns></returns>
+        public ReturnObject SaveWebSession(WebSession webSession)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(webSession.UserId);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Can't User"
+                    };
+                }
+
+                var logRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+
+                if (string.IsNullOrEmpty(webSession.Id))
+                {
+                    webSession.Id = CommonHelper.GenerateUuid();
+                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                    return logRepository.Insert(webSession);
+                }
+                else
+                {
+                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                    return logRepository.Update(webSession);
+                }
             }
             catch (Exception e)
             {
@@ -425,6 +469,26 @@ namespace Vakapay.UserBusiness
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var user = userRepository.FindWhere(userRepository.QuerySearch(search));
                 return user;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return null;
+            }
+        }
+
+        // find WebSession
+        // new Dictionary<string, string>
+        //{
+        //    {"Ip", ip}
+        //};
+        public WebSession getWebSession(Dictionary<string, string> search)
+        {
+            try
+            {
+                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var webSession = webSessionRepository.FindWhere(webSessionRepository.QuerySearch(search));
+                return webSession;
             }
             catch (Exception e)
             {

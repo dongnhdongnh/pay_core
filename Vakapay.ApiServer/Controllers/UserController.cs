@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using UAParser;
+using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
@@ -120,6 +125,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
                 //save action log
+                //var ip = HttpContext.Connection.RemoteIPAddress.ToString();
                 _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar,
                     Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
@@ -181,7 +187,7 @@ namespace Vakaxa.ApiServer.Controllers
         }*/
 
         [HttpGet("get-info")]
-        public string GetCurrentUser()
+        public async Task<string> GetCurrentUser()
         {
             try
             {
@@ -197,15 +203,16 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel == null)
                 {
+                    //login first
                     var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
 
                     var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
 
+                    //created user
                     var resultData = _userBusiness.Login(userClaims);
 
                     if (resultData.Status == Status.StatusError)
                         return CreateDataError("Can't not created User");
-
 
                     userModel = Vakapay.Models.Entities.User.FromJson(resultData.Data);
 
@@ -214,10 +221,49 @@ namespace Vakaxa.ApiServer.Controllers
                         CreateWalletBusiness();
                     }
 
+                    //created wallet
                     _walletBusiness.MakeAllWalletForNewUser(userModel);
-
-                    return ReturnObject.ToJson(resultData);
                 }
+
+                var ip = HttpContext.Connection.RemoteIpAddress.ToString();
+                Console.WriteLine(JsonConvert.SerializeObject(Request.Headers));
+
+                if (!string.IsNullOrEmpty(ip))
+                {
+                    //get location for ip
+                    /*var location =
+                        await IPGeographicalLocation.QueryGeographicalLocationAsync(ip);*/
+
+
+                    var uaString = Request.Headers["User-Agent"].FirstOrDefault();
+                    var uaParser = Parser.GetDefault();
+                    ClientInfo browser = uaParser.Parse(uaString);
+
+                    var webSession = new WebSession
+                    {
+                        Browser = browser.ToString(),
+                        Ip = ip,
+                        // Location = location.City + "," + location.CountryName,
+                        UserId = userModel.Id,
+                        Current = true
+                    };
+
+                    var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
+
+
+                    //save webs ession
+                    var checkWebSession = _userBusiness.getWebSession(search);
+                    if (checkWebSession == null)
+                    {
+                        _userBusiness.SaveWebSession(webSession);
+                    }
+                    else
+                    {
+                        checkWebSession.Current = true;
+                        _userBusiness.SaveWebSession(checkWebSession);
+                    }
+                }
+
 
                 var success = new ReturnObject
                 {
@@ -276,6 +322,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
+                // var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile,
                     Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
@@ -336,6 +383,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var result = _userBusiness.UpdateProfile(userModel);
 
                 //save action log
+                //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences,
                     Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
@@ -374,6 +422,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 var result = _userBusiness.UpdateProfile(userModel);
 
+                //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications,
                     Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
 
