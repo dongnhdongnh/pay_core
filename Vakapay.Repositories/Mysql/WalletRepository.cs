@@ -299,7 +299,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
-				string query = $"SELECT * FROM {TableName} WHERE ISNULL(Address)";
+				string query = $"SELECT * FROM {TableName} WHERE HasAddress='false'";
 				List<Wallet> wallets = FindBySql(query);
 				if (wallets == null || wallets.Count <= 0)
 					return null;

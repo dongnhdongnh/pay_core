@@ -173,7 +173,7 @@ namespace Vakapay.UnitTest
 		}
 
 		[Test]
-		public void Withdraw()
+		public void WithdrawVakacoin()
 		{
 			var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection());
 			var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
@@ -182,7 +182,18 @@ namespace Vakapay.UnitTest
 			var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
 			Assert.AreEqual(res.Status, Status.StatusSuccess);
 		}
-		
+
+		[Test]
+		public void WithdrawBitcoin()
+		{
+			var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection());
+			var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
+			var wallet = walletRepository.FindByUserAndNetwork( userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id, NetworkName.BTC);
+
+			var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
+			Assert.AreEqual(res.Status, Status.StatusSuccess);
+		}
+
 		[Test]
 		public void CreateRadomPendingTxsToWithdraw()
 		{

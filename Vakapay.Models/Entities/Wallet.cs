@@ -11,6 +11,7 @@ namespace Vakapay.Models.Entities
         public string UserId { get; set; }
         public string NetworkName { get; set; }
 //        public string Address { get; set; }
+        public bool HasAddress { get; set; }
         public int CreatedAt { get; set; }
         public int UpdatedAt { get; set; }
         public int Version { get; set; }

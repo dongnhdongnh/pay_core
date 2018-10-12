@@ -290,8 +290,8 @@ namespace VakaSharp
 
         public async Task<string> CreateTransaction(Transaction trx)
         {
-            if (VakaConfig.SignProvider == null)
-                throw new ArgumentNullException("SignProvider");
+//            if (VakaConfig.SignProvider == null)
+//                throw new ArgumentNullException("SignProvider");
 
             GetInfoResponse getInfoResult = null;
             string chainId = VakaConfig.ChainId;
@@ -320,15 +320,21 @@ namespace VakaSharp
             }
 
             var packedTrx = await AbiSerializer.SerializePackedTransaction(trx);
-            var availableKeys = await VakaConfig.SignProvider.GetAvailableKeys();
-            var requiredKeys = await GetRequiredKeys(availableKeys.ToList(), trx);
 
-            IEnumerable<string> abis = null;
+            IEnumerable<string> signatures = new string[]{};
+            if (VakaConfig.SignProvider != null)
+            {
+                var availableKeys = await VakaConfig.SignProvider.GetAvailableKeys();
+                var requiredKeys = await GetRequiredKeys(availableKeys.ToList(), trx);
 
-            if (trx.Actions != null)
-                abis = trx.Actions.Select(a => a.Account);
+                IEnumerable<string> abis = null;
 
-            var signatures = await VakaConfig.SignProvider.Sign(chainId, requiredKeys, packedTrx, abis);
+                if (trx.Actions != null)
+                    abis = trx.Actions.Select(a => a.Account);
+
+
+                signatures = await VakaConfig.SignProvider.Sign(chainId, requiredKeys, packedTrx, abis);
+            }
 
             var result = await Api.PushTransaction(new PushTransactionRequest()
             {

@@ -243,7 +243,7 @@ namespace Vakapay.WalletBusiness
                 }
 
                 // 2. TODO validate Network status
-                var validateNetworks = ValidateNetworksStatus();
+                var validateNetworks = ValidateNetworkStatus(wallet.NetworkName);
                 if ( validateNetworks.Status == Status.StatusError)
                 {
                     return validateNetworks;
@@ -379,7 +379,7 @@ namespace Vakapay.WalletBusiness
             }
         }
 
-        private ReturnObject ValidateNetworksStatus()
+        private ReturnObject ValidateNetworkStatus(string walletNetworkName)
         {
 //            throw new NotImplementedException();
 
@@ -392,14 +392,43 @@ namespace Vakapay.WalletBusiness
              */
 
             // 3. Validate Vakacoin Network Status
+
             try
             {
-                var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
-                var networkInfoRet = vakacoinRpc.GetInfo();
-
-                if (networkInfoRet.Status != Status.StatusSuccess)
+                ReturnObject getInfoResult;
+                switch (walletNetworkName)
                 {
-                    return networkInfoRet;
+                    case NetworkName.BTC:
+                        var bitcoinRpcAccount = VakapayConfiguration.GetBitcoinRpcAccount();
+                        var bitcoinRpc = new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(), bitcoinRpcAccount.Username,
+                            bitcoinRpcAccount.Password);
+
+                        getInfoResult = bitcoinRpc.GetInfo();
+
+                        if (getInfoResult.Status != Status.StatusSuccess)
+                        {
+                            return getInfoResult;
+                        }
+                        break;
+
+                    case NetworkName.ETH:
+                        break;//TODO
+
+                    case NetworkName.VAKA:
+                        var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
+                        getInfoResult = vakacoinRpc.GetInfo();
+
+                        if (getInfoResult.Status != Status.StatusSuccess)
+                        {
+                            return getInfoResult;
+                        }
+                        break;
+                    default:
+                        return new ReturnObject()
+                        {
+                            Status = Status.StatusError,
+                            Message = "Undefined network name!"
+                        };
                 }
             }
             catch (Exception e)
@@ -416,18 +445,18 @@ namespace Vakapay.WalletBusiness
 
         private decimal GetFee(string walletNetworkName)
         {
+            // throw new NotImplementedException(); //TODO  must implement
             switch (walletNetworkName)
             {
-//            throw new NotImplementedException(); //TODO  must implement
                 // TODO fake:
-                case NetworkName.VAKA:
-                    return 0;
-                case NetworkName.ETH:
-                    return (decimal) 0.0005;
                 case NetworkName.BTC:
                     return (decimal) 0.0005;
+                case NetworkName.ETH:
+                    return (decimal) 0.0005;
+                case NetworkName.VAKA:
+                    return 0;
                 default:
-                    return new decimal(0.0005);
+                    throw new Exception("Undefined network name!");
             }
         }
 
@@ -719,7 +748,41 @@ namespace Vakapay.WalletBusiness
 
             return user.Email;
         }
-        
+
+        public ReturnObject SetHasAddressForWallet(string walletId)
+        {
+            try
+            {
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var whereUpdateAddr = walletRepository.FindById(walletId);
+
+                //update HasAddress for walletId
+                whereUpdateAddr.HasAddress = true;
+
+                whereUpdateAddr.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                var walletUpdate = walletRepository.Update(whereUpdateAddr);
+                if (walletUpdate.Status == Status.StatusError)
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Update wallet address fail"
+                    };
+                return new ReturnObject
+                {
+                    Status = Status.StatusSuccess,
+                    Message = "Add address to wallet complete"
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
+
         public bool ValidateAddress(string address, string networkName)
         {
             switch (networkName)
