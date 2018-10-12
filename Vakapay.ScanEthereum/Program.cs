@@ -45,7 +45,6 @@ namespace Vakapay.ScanEthereum
 					var resultSend = ethereumBusiness.ScanBlockAsync<EthereumWithdrawTransaction, EthereumDepositTransaction, ETHEntities.ETHBlockInfor, ETHEntities.ETHTransaction>(NetworkName.ETH, WalletBusiness, ethereumRepo, ethereumDepoRepo, rpc);
 					Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
-
 					Console.WriteLine("==========Scan Ethereum End==========");
 					Console.WriteLine("==========Wait for next scan==========");
 					Thread.Sleep(5000);

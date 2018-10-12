@@ -3,7 +3,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-    [Table("ethereumaddress")]
+    [Table("EthereumAddress")]
     public class EthereumAddress : BlockchainAddress
     {
         public override string GetAddress()
