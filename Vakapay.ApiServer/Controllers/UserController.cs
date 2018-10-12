@@ -129,7 +129,7 @@ namespace Vakaxa.ApiServer.Controllers
                 if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
                 //save action log
                 //var ip = HttpContext.Connection.RemoteIPAddress.ToString();
-                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar, getIp(Request));
+                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar, CommonHelper.getIp(Request));
 
                 return ReturnObject.ToJson(new ReturnObject
                 {
@@ -227,7 +227,7 @@ namespace Vakaxa.ApiServer.Controllers
                     _walletBusiness.MakeAllWalletForNewUser(userModel);
                 }
 
-                string ip = getIp(Request);
+                string ip = CommonHelper.getIp(Request);
 
                 Console.WriteLine(JsonConvert.SerializeObject(Request.Headers));
                 Console.WriteLine(ip);
@@ -283,15 +283,6 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
-        private string getIp(HttpRequest request)
-        {
-            string ip = request.Headers["X-Forwarded-For"].ToString();
-
-            if (!string.IsNullOrEmpty(ip))
-                ip = request.Headers["X-Real-IP"].ToString();
-
-            return ip;
-        }
 
         // POST api/values
         [HttpPost("update-profile")]
@@ -338,7 +329,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 //save action log
                 // var ip = HttpContext.Connection.RemoteIpAddress.ToString();
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile, getIp(Request));
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile,
+                    CommonHelper.getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
@@ -398,7 +390,8 @@ namespace Vakaxa.ApiServer.Controllers
 
                 //save action log
                 //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences, getIp(Request));
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences,
+                    CommonHelper.getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
@@ -437,7 +430,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications,
-                    getIp(Request));
+                    CommonHelper.getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }

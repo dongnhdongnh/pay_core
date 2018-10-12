@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace Vakapay.Commons.Helpers
 {
@@ -34,6 +35,17 @@ namespace Vakapay.Commons.Helpers
 			return sb.ToString();
 		}
 
+		
+		public static string getIp(HttpRequest request)
+		{
+			string ip = request.Headers["X-Forwarded-For"].ToString();
+
+			if (!string.IsNullOrEmpty(ip))
+				ip = request.Headers["X-Real-IP"].ToString();
+
+			return ip;
+		}
+		
 		public static bool ValidateGuid(string guidString)
 		{
 			return Guid.TryParse(guidString, out var _);

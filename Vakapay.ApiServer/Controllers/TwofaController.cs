@@ -99,6 +99,9 @@ namespace Vakaxa.ApiServer.Controllers
                             var resultUpdate = _userBusiness.UpdateProfile(userModel);
                             // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
 
+                            _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateOptionVerification,
+                                CommonHelper.getIp(Request));
+                            
                             return ReturnObject.ToJson(resultUpdate);
                         }
                     }
@@ -149,6 +152,8 @@ namespace Vakaxa.ApiServer.Controllers
                     {
                         userModel.TwoFactor = true;
 
+                        _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.TwofaEnable,
+                            CommonHelper.getIp(Request));
                         return ReturnObject.ToJson(_userBusiness.UpdateProfile(userModel));
                     }
                 }
