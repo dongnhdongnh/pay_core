@@ -4,12 +4,15 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityModel.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Internal;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -126,8 +129,7 @@ namespace Vakaxa.ApiServer.Controllers
                 if (updateUser.Status != Status.StatusSuccess) return CreateDataError("Can't update image");
                 //save action log
                 //var ip = HttpContext.Connection.RemoteIPAddress.ToString();
-                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
+                _userBusiness.AddActionLog(email, userCheck.Id, ActionLog.Avatar, getIp(Request));
 
                 return ReturnObject.ToJson(new ReturnObject
                 {
@@ -225,8 +227,11 @@ namespace Vakaxa.ApiServer.Controllers
                     _walletBusiness.MakeAllWalletForNewUser(userModel);
                 }
 
-                var ip = HttpContext.Connection.RemoteIpAddress.ToString();
+                string ip = getIp(Request);
+
                 Console.WriteLine(JsonConvert.SerializeObject(Request.Headers));
+                Console.WriteLine(ip);
+                Console.WriteLine(HttpContext.Connection.LocalIpAddress.ToString());
 
                 if (!string.IsNullOrEmpty(ip))
                 {
@@ -278,6 +283,16 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
+        private string getIp(HttpRequest request)
+        {
+            string ip = request.Headers["X-Forwarded-For"].ToString();
+
+            if (!string.IsNullOrEmpty(ip))
+                ip = request.Headers["X-Real-IP"].ToString();
+
+            return ip;
+        }
+
         // POST api/values
         [HttpPost("update-profile")]
         public string UpdateUserProfile([FromBody] JObject value)
@@ -323,8 +338,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 //save action log
                 // var ip = HttpContext.Connection.RemoteIpAddress.ToString();
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateProfile, getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
@@ -384,8 +398,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 //save action log
                 //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdatePreferences, getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
@@ -424,7 +437,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 //var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.UpdateNotifications,
-                    Request.Headers["X-Original-Forwarded-For"].FirstOrDefault());
+                    getIp(Request));
 
                 return ReturnObject.ToJson(result);
             }
