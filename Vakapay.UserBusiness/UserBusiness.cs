@@ -298,7 +298,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var sendSmsRepository = vakapayRepositoryFactory.GetSendSmsRepository(ConnectionDb);
+                var sendSmsRepository = new SendSmsBusiness.SendSmsBusiness(vakapayRepositoryFactory, false);
 
                 var newSms = new SmsQueue
                 {
@@ -309,7 +309,7 @@ namespace Vakapay.UserBusiness
                     TextSend = "VaKaXaPay security code is: " + code,
                 };
 
-                var resultSms = sendSmsRepository.Insert(newSms);
+                var resultSms = sendSmsRepository.CreateSmsQueueAsync(newSms);
 
                 if (resultSms.Status == Status.StatusError)
                 {
