@@ -46,7 +46,7 @@ namespace Vakapay.ApiServer.Controllers
 
 
         // POST api/values
-        [HttpGet("get-list-account-activity")]
+        [HttpGet("account-activity/get-list")]
         public string GetActivity()
         {
             try
