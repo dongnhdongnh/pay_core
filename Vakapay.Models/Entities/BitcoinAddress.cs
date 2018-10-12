@@ -6,7 +6,14 @@ namespace Vakapay.Models.Entities
     [Table("BitcoinAddress")]
     public class BitcoinAddress : BlockchainAddress
     {
-       
-       
+        public override string GetAddress()
+        {
+            return Address;
+        }
+
+        public override string GetSecret()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

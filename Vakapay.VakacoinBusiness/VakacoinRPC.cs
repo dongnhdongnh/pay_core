@@ -61,7 +61,7 @@ namespace Vakapay.VakacoinBusiness
             try
             {
                 var account = DefaultApi.GetAccount(new GetAccountRequest() {AccountName = accountName}).Result;
-                return !account.AccountName.Equals("");
+                return !string.IsNullOrEmpty(account.AccountName);
             }
             catch (Exception e)
             {

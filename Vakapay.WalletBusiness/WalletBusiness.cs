@@ -244,8 +244,8 @@ namespace Vakapay.WalletBusiness
 
                 // 2. TODO validate Network status
 
-                // 3. Validate toAddress
 
+                // 3. Validate toAddress
                 if (ValidateAddress(toAddress, wallet.NetworkName) == false)
                 {
                     return new ReturnObject
@@ -289,6 +289,7 @@ namespace Vakapay.WalletBusiness
                         Status = Status.StatusPending,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
+                        Fee = free,
                         Amount = amount,
                         CreatedAt = CommonHelper.GetUnixTimestamp(),
                         UpdatedAt = CommonHelper.GetUnixTimestamp(),
@@ -315,6 +316,7 @@ namespace Vakapay.WalletBusiness
                         Status = Status.StatusPending,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
+                        Fee = free,
                         Amount = amount,
                         CreatedAt = CommonHelper.GetUnixTimestamp(),
                         UpdatedAt = CommonHelper.GetUnixTimestamp(),
@@ -341,6 +343,7 @@ namespace Vakapay.WalletBusiness
                         Status = Status.StatusPending,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
+                        Fee = free,
                         Amount = amount,
                         CreatedAt = CommonHelper.GetUnixTimestamp(),
                         UpdatedAt = CommonHelper.GetUnixTimestamp(),
@@ -374,7 +377,9 @@ namespace Vakapay.WalletBusiness
 
         private decimal GetFee(string walletNetworkName)
         {
-            throw new NotImplementedException(); //TODO  must implement
+//            throw new NotImplementedException(); //TODO  must implement
+            // TODO fake:
+            return new decimal(0.0005);
         }
 
         private string GetSenderAddress(Wallet wallet, string toAddress, decimal amount)
