@@ -8,12 +8,12 @@ public class JsonHelper
 {
     public static T DeserializeObject<T>(string json, JsonSerializerSettings setting = null)
     {
-        return JsonHelper.DeserializeObject<T>(json, setting);
+        return JsonConvert.DeserializeObject<T>(json, setting);
     }
 
     public static string SerializeObject(Object obj, JsonSerializerSettings setting = null)
     {
-        return JsonHelper.SerializeObject(obj, setting);
+        return JsonConvert.SerializeObject(obj, setting);
     }
         
     public static readonly JsonSerializerSettings ConvertSettings = new JsonSerializerSettings
