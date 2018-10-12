@@ -9,14 +9,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
+using Vakapay.UserBusiness;
+using Vakapay.WalletBusiness;
 
-namespace Vakapay.ApiServer.Controllers
+namespace Vakaxa.ApiServer.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -25,8 +27,8 @@ namespace Vakapay.ApiServer.Controllers
     [Authorize]
     public class TwofaController : ControllerBase
     {
-        private readonly UserBusiness.UserBusiness _userBusiness;
-        private WalletBusiness.WalletBusiness _walletBusiness;
+        private readonly UserBusiness _userBusiness;
+        private WalletBusiness _walletBusiness;
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory { get; }
 
 
@@ -46,7 +48,7 @@ namespace Vakapay.ApiServer.Controllers
 
             _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            _userBusiness = new UserBusiness.UserBusiness(_persistenceFactory);
+            _userBusiness = new UserBusiness(_persistenceFactory);
         }
 
         // POST api/values
@@ -59,7 +61,7 @@ namespace Vakapay.ApiServer.Controllers
                 var query = new Dictionary<string, string> {{"Email", email}};
 
 
-                var userModel = _userBusiness.GetUserInfo(query);
+                var userModel = _userBusiness.getUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -90,14 +92,7 @@ namespace Vakapay.ApiServer.Controllers
 
                             userModel.Verification = (int) option;
 
-                            var resultUpdate = _userBusiness.UpdateProfile(userModel);
-                            // resultUpdate.Data = JsonConvert.SerializeObject(userModel);
-
-                            _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                                ActionLog.UpdateOptionVerification,
-                                HelpersApi.getIp(Request));
-
-                            return ReturnObject.ToJson(resultUpdate);
+                            return _userBusiness.UpdateProfile(userModel).ToJson();
                         }
                     }
                 }
@@ -121,7 +116,7 @@ namespace Vakapay.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-                var userModel = _userBusiness.GetUserInfo(query);
+                var userModel = _userBusiness.getUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -147,9 +142,7 @@ namespace Vakapay.ApiServer.Controllers
                     {
                         userModel.TwoFactor = true;
 
-                        _userBusiness.AddActionLog(userModel.Email, userModel.Id, ActionLog.TwofaEnable,
-                            HelpersApi.getIp(Request));
-                        return ReturnObject.ToJson(_userBusiness.UpdateProfile(userModel));
+                        return _userBusiness.UpdateProfile(userModel).ToJson();
                     }
                 }
 
@@ -171,7 +164,7 @@ namespace Vakapay.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-                var userModel = _userBusiness.GetUserInfo(query);
+                var userModel = _userBusiness.getUserInfo(query);
 
 
                 if (userModel != null)
@@ -193,9 +186,7 @@ namespace Vakapay.ApiServer.Controllers
 
                     Console.WriteLine(code);
 
-                    var dataSend = _userBusiness.SendSms(userModel, code);
-
-                    return ReturnObject.ToJson(dataSend);
+                    return _userBusiness.SendSms(userModel, code).ToJson();
                 }
 
                 return CreateDataError("Can't send code");
@@ -215,7 +206,7 @@ namespace Vakapay.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-                var userModel = _userBusiness.GetUserInfo(query);
+                var userModel = _userBusiness.getUserInfo(query);
 
 
                 if (userModel != null)
@@ -237,9 +228,7 @@ namespace Vakapay.ApiServer.Controllers
 
                     Console.WriteLine(code);
 
-                    var dataSend = _userBusiness.SendSms(userModel, code);
-
-                    return ReturnObject.ToJson(dataSend);
+                    return _userBusiness.SendSms(userModel, code).ToJson();
                 }
 
                 return CreateDataError("Can't send code");
@@ -305,10 +294,10 @@ namespace Vakapay.ApiServer.Controllers
                 userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                if (resultUpdate.Status == Status.StatusError)
+                if (resultUpdate.Status == Status.STATUS_ERROR)
                     return null;
 
-                return JsonConvert.SerializeObject(newSecret);
+                return JsonHelper.SerializeObject(newSecret);
             }
             catch (Exception e)
             {
@@ -318,12 +307,11 @@ namespace Vakapay.ApiServer.Controllers
 
         public string CreateDataError(string message)
         {
-            var errorData = new ReturnObject
+            return new ReturnObject
             {
-                Status = Status.StatusError,
+                Status = Status.STATUS_ERROR,
                 Message = message
-            };
-            return ReturnObject.ToJson(errorData);
+            }.ToJson();
         }
     }
 }

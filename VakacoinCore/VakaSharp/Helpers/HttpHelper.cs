@@ -113,7 +113,7 @@ namespace VakaSharp.Helpers
         {
             return new HttpRequestMessage(HttpMethod.Post, url)
             {
-                Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonHelper.SerializeObject(data), Encoding.UTF8, "application/json")
             };
         }
 
@@ -152,7 +152,7 @@ namespace VakaSharp.Helpers
             ApiErrorException apiError = null;
             try
             {
-                apiError = JsonConvert.DeserializeObject<ApiErrorException>(content);
+                apiError = JsonHelper.DeserializeObject<ApiErrorException>(content);
             }
             catch(Exception)
             {

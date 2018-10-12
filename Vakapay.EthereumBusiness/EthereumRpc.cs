@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Cache;
 using System.Threading.Tasks;
 using Vakapay.BlockchainBusiness;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities.ETH;
 using Vakapay.Commons.Helpers;
@@ -78,7 +79,7 @@ namespace Vakapay.EthereumBusiness
 					//Console.WriteLine("FROM CACHE:" + httpWebRequest.GetResponse().IsFromCache);
 					return new ReturnObject
 					{
-						Status = Status.StatusCompleted,
+						Status = Status.STATUS_COMPLETED,
 						//Message = _getter,
 						Data = result,
 					};
@@ -90,7 +91,7 @@ namespace Vakapay.EthereumBusiness
 
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}
@@ -118,7 +119,7 @@ namespace Vakapay.EthereumBusiness
 
 				//var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
 				var _result = EthereumSendRPC(EthereumRPCList.RPCName.personal_sendTransaction, new Object[] { _sender, passphrase });
-				if (_result.Status == Status.StatusError)
+				if (_result.Status == Status.STATUS_ERROR)
 				{
 
 					return _result;
@@ -126,7 +127,7 @@ namespace Vakapay.EthereumBusiness
 				EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
 				return new ReturnObject
 				{
-					Status = Status.StatusCompleted,
+					Status = Status.STATUS_COMPLETED,
 					Data = _getter.result.ToString()
 				};
 
@@ -136,7 +137,7 @@ namespace Vakapay.EthereumBusiness
 
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}
@@ -175,7 +176,7 @@ namespace Vakapay.EthereumBusiness
 			{
 				ReturnObject _result = EthereumSendRPC(EthereumRPCList.RPCName.personal_newAccount, new Object[] { password });
 				Console.WriteLine(_result);
-				if (_result.Status == Status.StatusError)
+				if (_result.Status == Status.STATUS_ERROR)
 				{
 
 					return _result;
@@ -186,7 +187,7 @@ namespace Vakapay.EthereumBusiness
 					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
 					return new ReturnObject
 					{
-						Status = Status.StatusCompleted,
+						Status = Status.STATUS_COMPLETED,
 						Data = _getter.result.ToString()
 					};
 				}
@@ -196,7 +197,7 @@ namespace Vakapay.EthereumBusiness
 
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}
@@ -245,7 +246,7 @@ namespace Vakapay.EthereumBusiness
 			{
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}
@@ -257,7 +258,7 @@ namespace Vakapay.EthereumBusiness
 			{
 				ReturnObject _result = EthereumSendRPC(EthereumRPCList.RPCName.eth_getBlockByNumber, new Object[] { blockNumber.IntToHex(), true });
 				//Console.WriteLine(_result);
-				if (_result.Status == Status.StatusError)
+				if (_result.Status == Status.STATUS_ERROR)
 				{
 
 					return _result;
@@ -268,7 +269,7 @@ namespace Vakapay.EthereumBusiness
 					EthRPCJson.Getter _getter = JsonHelper.DeserializeObject<EthRPCJson.Getter>(_result.Data.ToString());
 					return new ReturnObject
 					{
-						Status = Status.StatusCompleted,
+						Status = Status.STATUS_COMPLETED,
 						Data = JsonHelper.SerializeObject(_getter.result)
 					};
 				}
@@ -278,7 +279,7 @@ namespace Vakapay.EthereumBusiness
 
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}
@@ -324,7 +325,7 @@ namespace Vakapay.EthereumBusiness
 			try
 			{
 				var _result = EthereumSendRPC(EthereumRPCList.RPCName.eth_blockNumber);
-				if (_result.Status == Status.StatusError)
+				if (_result.Status == Status.STATUS_ERROR)
 				{
 
 					return _result;
@@ -339,7 +340,7 @@ namespace Vakapay.EthereumBusiness
 					}
 					return new ReturnObject
 					{
-						Status = Status.StatusCompleted,
+						Status = Status.STATUS_COMPLETED,
 						Data = _blockNumber.ToString()
 					};
 				}
@@ -349,7 +350,7 @@ namespace Vakapay.EthereumBusiness
 
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}

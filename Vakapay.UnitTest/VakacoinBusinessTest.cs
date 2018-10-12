@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -44,7 +45,7 @@ namespace Vakapay.UnitTest
         {
             var walletReposity = _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection() ?? _vakapayRepositoryFactory.GetDbConnection());
             var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection() ?? _vakapayRepositoryFactory.GetDbConnection());
-            var wallet = walletReposity.FindByUserAndNetwork( userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id, NetworkName.VAKA);
+            var wallet = walletReposity.FindByUserAndNetwork( userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id, CryptoCurrency.VKC);
             
             _vb.AddAccount(wallet.Id, "useraaaaaaaa", "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr", "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D");
             _vb.AddAccount(wallet.Id, "useraaaaaaab", "5JUNYmkJ5wVmtVY8x9A1KKzYe9UWLZ4Fq1hzGZxfwfzJB8jkw6u", "VAKA7yBtksm8Kkg85r4in4uCbfN77uRwe82apM8jjbhFVDgEgz3w8S");
@@ -1187,7 +1188,7 @@ namespace Vakapay.UnitTest
             for (int i = 0; i < numOfTrans; i++)
             {
                 outPut = _vb.FakePendingTransaction(_trans);
-                Assert.AreEqual(outPut.Status, Status.StatusSuccess);
+                Assert.AreEqual(outPut.Status, Status.STATUS_SUCCESS);
             }
 
             Console.WriteLine(JsonHelper.SerializeObject(outPut));

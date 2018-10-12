@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using NLog;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -24,7 +25,7 @@ namespace Vakapay.Repositories.Mysql
 
         public EmailQueue FindPendingEmail()
         {
-            return FindEmailByStatus(Status.StatusPending);
+            return FindEmailByStatus(Status.STATUS_PENDING);
         }
         
         private EmailQueue FindEmailByStatus(string status)

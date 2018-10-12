@@ -1,13 +1,12 @@
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.WalletBusiness;
 
 namespace Vakapay.UnitTest
 {
@@ -63,7 +62,6 @@ namespace Vakapay.UnitTest
 			_walletBusiness =
 				new Vakapay.WalletBusiness.WalletBusiness(persistence);
 			var user = new User();
-			var blockChain = new BlockchainNetwork();
 			user.Id = userID;
 
 			//blockChain.Name = NetworkName.ETH;
@@ -78,7 +76,7 @@ namespace Vakapay.UnitTest
 			//_walletBusiness.CreateNewWallet(user, blockChain.Name);
 			var resultTest = _walletBusiness.MakeAllWalletForNewUser(user);
 			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
-			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
+			Assert.AreEqual(Status.STATUS_SUCCESS, resultTest.Status);
 
 		}
 
@@ -131,7 +129,7 @@ namespace Vakapay.UnitTest
 						Status =  "Active"
 					}
 				);
-				Assert.AreEqual(Status.StatusSuccess, ins.Status);
+				Assert.AreEqual(Status.STATUS_SUCCESS, ins.Status);
 			}
 
 			//create wallet without address
@@ -144,14 +142,14 @@ namespace Vakapay.UnitTest
 			// and insert to ethereumAddress
 			for (int i = 1; i < 10; i++)
 			{
-				var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), NetworkName.ETH);
+				var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), CryptoCurrency.ETH);
 				CreateNewAddressAsync(prepareWallet.Id);
 			}
 
 			//send coin from rootAddress to new address
 			for (int i = 1; i < 10; i++)
 			{
-				var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), NetworkName.ETH);
+				var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), CryptoCurrency.ETH);
 				//Todo update prepareWallet.Address
 //				InsertPendingTxsToWithdraw("46b4594c-a45a-400d-86ce-9a7869d61180", prepareWallet.Address);
 			}
@@ -179,19 +177,19 @@ namespace Vakapay.UnitTest
 			{
 				var rndFrom = new Random().Next(1, 10);
 				var rndTo = new Random().Next(1, 10);
-				var fromWallet = walletRepo.FindByUserAndNetwork(rndFrom.ToString(), NetworkName.ETH);
+				var fromWallet = walletRepo.FindByUserAndNetwork(rndFrom.ToString(), CryptoCurrency.ETH);
 
 				while (rndFrom == rndTo)
 				{
 					rndTo = new Random().Next(1, 10);
 				}
-				var toWalletAddr =  walletRepo.FindByUserAndNetwork(rndTo.ToString(), NetworkName.ETH);
+				var toWalletAddr =  walletRepo.FindByUserAndNetwork(rndTo.ToString(), CryptoCurrency.ETH);
 				// TODO 
 //				resultTest = _walletBusiness.Withdraw(fromWallet, toWalletAddr.Address, 1);
 			}
 			
 			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
-			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
+			Assert.AreEqual(Status.STATUS_SUCCESS, resultTest.Status);
 		}
 
 		
@@ -217,7 +215,7 @@ namespace Vakapay.UnitTest
 			
 			
 			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
-			Assert.AreEqual(Status.StatusSuccess, resultTest.Status);
+			Assert.AreEqual(Status.STATUS_SUCCESS, resultTest.Status);
 		}
 
 		[TestCase("64308d79-5523-4fd7-80a1-bba398b62c9b")]
@@ -273,17 +271,17 @@ namespace Vakapay.UnitTest
 		//	Assert.IsTrue(block > 0);
 		//}
 		
-		[TestCase( NetworkName.BTC, true,  "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67fG")]
-		[TestCase( NetworkName.BTC, false, "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67f")]
-		[TestCase( NetworkName.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
-		[TestCase( NetworkName.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
-		[TestCase( NetworkName.ETH, true,  "c1912fee45d61c87cc5ea59dae31190fffff232d")]
-		[TestCase( NetworkName.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFFF232D")]
-		[TestCase( NetworkName.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFEF232D")]
-		[TestCase( NetworkName.ETH, true,  "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
-		[TestCase( NetworkName.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFEf232d")]
-		[TestCase( NetworkName.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232l")]
-		[TestCase( NetworkName.ETH, false, "0xC1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
+		[TestCase( CryptoCurrency.BTC, true,  "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67fG")]
+		[TestCase( CryptoCurrency.BTC, false, "n4MN27Lk7Yh3pwfjCiAbRXtRVjs4Uk67f")]
+		[TestCase( CryptoCurrency.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( CryptoCurrency.ETH, true,  "0xc1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( CryptoCurrency.ETH, true,  "c1912fee45d61c87cc5ea59dae31190fffff232d")]
+		[TestCase( CryptoCurrency.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFFF232D")]
+		[TestCase( CryptoCurrency.ETH, true,  "0XC1912FEE45D61C87CC5EA59DAE31190FFFEF232D")]
+		[TestCase( CryptoCurrency.ETH, true,  "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
+		[TestCase( CryptoCurrency.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFEf232d")]
+		[TestCase( CryptoCurrency.ETH, false, "0xc1912fEE45d61C87Cc5EA59DaE31190FFFFf232l")]
+		[TestCase( CryptoCurrency.ETH, false, "0xC1912fEE45d61C87Cc5EA59DaE31190FFFFf232d")]
 		public void ValidateAddress(string networkName, bool result, string address)
 		{
 			var repositoryConfig = new RepositoryConfiguration

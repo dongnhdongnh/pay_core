@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using Vakapay.BlockchainBusiness.Base;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Cryptography;
 using Vakapay.Models.Domains;
@@ -47,7 +48,7 @@ namespace Vakapay.VakacoinBusiness
 
                 var resultRpc = VakacoinRPCObj.CreateRandomAccount(keyPair.PublicKey);
 
-                if (resultRpc.Status == Status.StatusError)
+                if (resultRpc.Status == Status.STATUS_ERROR)
                     return resultRpc;
 
                 var repo = VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
@@ -55,7 +56,7 @@ namespace Vakapay.VakacoinBusiness
                 //TODO Encrypt Password Before save
                 var returnDb = repo.Insert(new VakacoinAccount
                 {
-                    Status = Status.StatusActive,
+                    Status = Status.STATUS_ACTIVE,
                     AccountName = resultRpc.Data,
                     OwnerPrivateKey = keyPair.PrivateKey,
                     OwnerPublicKey = keyPair.PublicKey,
@@ -67,13 +68,13 @@ namespace Vakapay.VakacoinBusiness
                     WalletId = walletId,
                 });
 
-                return returnDb.Status == Status.StatusSuccess ? resultRpc : returnDb;
+                return returnDb.Status == Status.STATUS_SUCCESS ? resultRpc : returnDb;
             }
             catch (Exception e)
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -100,7 +101,7 @@ namespace Vakapay.VakacoinBusiness
                 //TODO Encrypt Password Before save
                 var returnObject = repo.Insert(new VakacoinAccount
                 {
-                    Status = Status.StatusActive,
+                    Status = Status.STATUS_ACTIVE,
                     AccountName = accountName,
                     OwnerPrivateKey = ownerPrivateKey,
                     OwnerPublicKey = ownerPublicKey,
@@ -118,7 +119,7 @@ namespace Vakapay.VakacoinBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -133,7 +134,6 @@ namespace Vakapay.VakacoinBusiness
                     DbConnection.Open();
                 var transaction = new VakacoinDepositTransaction
                 {
-                    Id = CommonHelper.GenerateUuid(),
                     TrxId = trxId,
                     BlockNumber = blockNumber,
                     Amount = amount,
@@ -143,7 +143,7 @@ namespace Vakapay.VakacoinBusiness
                     Status = status,
                     CreatedAt = CommonHelper.GetUnixTimestamp(),
                     UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                    InProcess = 0,
+                    IsProcessing = 0,
                     Version = 0
                 };
                 var result = VakacoinDepositRepo.Insert(transaction);
@@ -153,7 +153,7 @@ namespace Vakapay.VakacoinBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -165,8 +165,7 @@ namespace Vakapay.VakacoinBusiness
             {
                 var vakacoinwithdrawRepo =
                     VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
-                blockchainTransaction.Id = CommonHelper.GenerateUuid();
-                blockchainTransaction.Status = Status.StatusPending;
+                blockchainTransaction.Status = Status.STATUS_PENDING;
                 blockchainTransaction.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
                 blockchainTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                 return vakacoinwithdrawRepo.Insert(blockchainTransaction);
@@ -175,7 +174,7 @@ namespace Vakapay.VakacoinBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -236,7 +235,7 @@ namespace Vakapay.VakacoinBusiness
                 if (walletCheck == null)
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Wallet Not Found"
                     };
 
@@ -244,7 +243,7 @@ namespace Vakapay.VakacoinBusiness
                 
                 var results = CreateNewAccount(walletId); // Create account and add account name to VakacoinAccount table
                 
-                if (results.Status == Status.StatusError)
+                if (results.Status == Status.STATUS_ERROR)
                     return results;
 
                 var accountName = results.Data;
@@ -266,7 +265,7 @@ namespace Vakapay.VakacoinBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Message = "Create vakacoin account success!"
                 };
             }
@@ -274,7 +273,7 @@ namespace Vakapay.VakacoinBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }

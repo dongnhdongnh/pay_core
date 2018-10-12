@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text;
 using Dapper;
 using NLog;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 
 namespace Vakapay.Repositories.Mysql
@@ -106,12 +108,12 @@ namespace Vakapay.Repositories.Mysql
 
                 var result = Connection.Execute(sqlString);
 
-                var status = result > 0 ? Status.StatusSuccess : Status.StatusError;
+                var status = result > 0 ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                 return new ReturnObject
                 {
                     Status = status,
-                    Message = status == Status.StatusError ? "Cannot Excute" : "Excute Success",
+                    Message = status == Status.STATUS_ERROR ? "Cannot Excute" : "Excute Success",
                     Data = sqlString
                 };
             }
@@ -119,7 +121,7 @@ namespace Vakapay.Repositories.Mysql
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message,
                     Data = sqlString
                 };

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -125,11 +126,11 @@ namespace Vakapay.Repositories.Mysql
 						TIMESTAMP = unixTimestamp
 					});
 
-				var status = !String.IsNullOrEmpty(result.ToString()) ? Status.StatusSuccess : Status.StatusError;
+				var status = !String.IsNullOrEmpty(result.ToString()) ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 				return new ReturnObject
 				{
 					Status = status,
-					Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
+					Message = status == Status.STATUS_ERROR ? "Cannot insert" : "Insert Success"
 				};
 			}
 			catch (Exception e)

@@ -1,6 +1,6 @@
 ﻿using System;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -33,10 +33,9 @@ namespace Vakapay.TestCreateTransaction
                         BlockNumber = 0,
                         FromAddress = null,
                         Hash = null,
-                        Id = CommonHelper.GenerateUuid(),
-                        InProcess = 0,
+                        IsProcessing = 0,
 //                        NetworkName = "ETH",
-                        Status = Status.StatusPending,
+                        Status = Status.STATUS_PENDING,
                         Version = 0,
                         UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                         ToAddress = "0x13f022d72158410433cbd66f5dd8bf6d2d129924"

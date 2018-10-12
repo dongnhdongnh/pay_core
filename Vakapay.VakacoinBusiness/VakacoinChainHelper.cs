@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using NLog;
 using Vakapay.BlockchainBusiness;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -89,7 +90,7 @@ namespace Vakapay.ScanVakaCoin
         public void ParseValidTransferAction(Action action, PackedTransaction packedTransaction,
             GetBlockResponse blockResponse)
         {
-            TransferData transferData = JsonConvert.DeserializeObject<TransferData>(action.Data.ToString());
+            TransferData transferData = JsonHelper.DeserializeObject<TransferData>(action.Data.ToString());
             if (String.IsNullOrEmpty(transferData.Quantity))
                 return;
             if (TRANSACTION_SYMBOL_ARRAY.Contains(transferData.Symbol()))
@@ -102,11 +103,11 @@ namespace Vakapay.ScanVakaCoin
                 // Save to table in db
                 _vakacoinBusiness.CreateDepositTransaction(packedTransaction.Id, (int) blockResponse.BlockNum,
                     transferData.Symbol(), transferData.Amount(), transferData.From, transferData.To, 0,
-                    Status.StatusSuccess);
+                    Status.STATUS_SUCCESS);
 
                 //create pending email
                 var createEmailResult = CreatePendingEmail(transferData);
-                if (createEmailResult.Status == Status.StatusSuccess)
+                if (createEmailResult.Status == Status.STATUS_SUCCESS)
                     logger.Info("Create pending email success");
                 else
                     logger.Error("Create Pending email error!!!" + createEmailResult.Message);
@@ -124,7 +125,7 @@ namespace Vakapay.ScanVakaCoin
                     continue;
 
                 PackedTransaction packedTransaction =
-                    JsonConvert.DeserializeObject<PackedTransaction>(transactionReceipt.Trx.ToString());
+                    JsonHelper.DeserializeObject<PackedTransaction>(transactionReceipt.Trx.ToString());
                 foreach (Action action in packedTransaction.Transaction.Actions)
                     yield return (action, packedTransaction);
             }
@@ -139,7 +140,7 @@ namespace Vakapay.ScanVakaCoin
             if (toEmail == null)
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = "Cannot find email address of user!!"
                 };
 
@@ -153,7 +154,7 @@ namespace Vakapay.ScanVakaCoin
 //                SentOrReceived = EmailConfig.SentOrReceived_Received,
                 NetworkName = transferData.Symbol(),
                 Subject = EmailConfig.Subject_SentOrReceived,
-                Status = Status.StatusPending,
+                Status = Status.STATUS_PENDING,
                 CreatedAt = CommonHelper.GetUnixTimestamp(),
                 UpdatedAt = CommonHelper.GetUnixTimestamp(),
                 InProcess = 0,

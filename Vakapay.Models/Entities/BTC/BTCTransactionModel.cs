@@ -2,7 +2,7 @@ namespace Vakapay.Models.Entities.BTC
 {
     using Newtonsoft.Json;
 
-    public partial class BtcTransactionModel
+    public class BtcTransactionModel
     {
         [JsonProperty("amount")] public decimal Amount { get; set; }
 
@@ -27,6 +27,12 @@ namespace Vakapay.Models.Entities.BTC
         [JsonProperty("details")] public BtcTransactionDetailModel[] BtcTransactionDetailsModel { get; set; }
 
         [JsonProperty("hex")] public string Hex { get; set; }
+
+        public static BtcTransactionModel FromJson(string json) =>
+            JsonHelper.DeserializeObject<BtcTransactionModel>(json, JsonHelper.ConvertSettings);
+
+        public string ToJson() =>
+            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
     }
 
     public class BtcTransactionDetailModel
@@ -42,17 +48,5 @@ namespace Vakapay.Models.Entities.BTC
         [JsonProperty("label")] public string Label { get; set; }
 
         [JsonProperty("vout")] public long VOut { get; set; }
-    }
-
-    public partial class BtcTransactionModel
-    {
-        public static BtcTransactionModel FromJson(string json) =>
-            JsonConvert.DeserializeObject<BtcTransactionModel>(json, JsonHelper.ConvertSettings);
-    }
-
-    public static class Serialize
-    {
-        public static string ToJson(this BtcTransactionModel self) =>
-            JsonConvert.SerializeObject(self, JsonHelper.ConvertSettings);
     }
 }

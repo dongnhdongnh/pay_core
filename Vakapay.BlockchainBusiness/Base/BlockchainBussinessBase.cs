@@ -6,8 +6,9 @@ namespace Vakapay.BlockchainBusiness.Base
 {
     public class BlockchainBussinessBase<T> : IDisposable
     {
-        public  IVakapayRepositoryFactory vakapayRepositoryFactory { get; }
+        public IVakapayRepositoryFactory vakapayRepositoryFactory { get; }
         public IDbConnection DbConnection { get; }
+
         public BlockchainBussinessBase(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
         {
             vakapayRepositoryFactory = _vakapayRepositoryFactory;
@@ -15,9 +16,8 @@ namespace Vakapay.BlockchainBusiness.Base
                 ? vakapayRepositoryFactory.GetDbConnection()
                 : vakapayRepositoryFactory.GetOldConnection();
         }
-        
-        
-        
+
+
         public void Dispose()
         {
         }

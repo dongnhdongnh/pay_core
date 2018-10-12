@@ -6,16 +6,13 @@ namespace Vakapay.ApiServer.Models
     public class CurrencyBalance
     {
         [JsonProperty(PropertyName = "currency")]
-        public string Currency => Vakapay.Models.Domains.NetworkName.CurrencySymbols[NetworkName];
+        public string Currency;
         
         [JsonProperty(PropertyName = "amount")]
-        public string Amount => Vakapay.Models.Domains.NetworkName.GetAmount(NetworkName, AmountDecimal);
+        public string Amount => Vakapay.Models.Domains.CryptoCurrency.GetAmount(Currency, AmountDecimal);
 
         [JsonIgnore]
         public decimal AmountDecimal { private get; set; }
-        
-        [JsonIgnore]
-        public string NetworkName { private get; set; }
     }
     
     public class GetBalanceResponse

@@ -1,9 +1,11 @@
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql.Base;
 
@@ -104,7 +106,7 @@ namespace Vakapay.Repositories.Mysql
                 {
                     Id = CommonHelper.GenerateUuid(),
                     Address = address,
-                    Status = Status.StatusActive,
+                    Status = Status.STATUS_ACTIVE,
                     WalletId = walletId,
                     CreatedAt = time,
                     UpdatedAt = time

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -99,7 +100,7 @@ namespace Vakapay.Repositories.Mysql
 				Password = other,
 				CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
 				UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
-				Status = Status.StatusActive
+				Status = Status.STATUS_ACTIVE
 			};
 
 			return Task.Run(() => this.Insert(insertObject));
