@@ -142,7 +142,7 @@ namespace Vakapay.UserBusiness
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Can't User"
                     };
                 }
@@ -165,7 +165,7 @@ namespace Vakapay.UserBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -513,7 +513,7 @@ namespace Vakapay.UserBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Data = JsonConvert.SerializeObject(resultGetLog)
                 };
             }
@@ -521,7 +521,7 @@ namespace Vakapay.UserBusiness
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }

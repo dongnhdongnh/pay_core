@@ -59,7 +59,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userCheck = _userBusiness.getUserInfo(new Dictionary<string, string>
+                var userCheck = _userBusiness.GetUserInfo(new Dictionary<string, string>
                 {
                     {"Email", email}
                 });
@@ -150,7 +150,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -199,7 +199,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -251,7 +251,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -309,7 +309,7 @@ namespace Vakaxa.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {

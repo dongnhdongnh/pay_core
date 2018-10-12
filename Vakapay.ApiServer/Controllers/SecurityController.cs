@@ -65,7 +65,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var query = new Dictionary<string, string> {{"Email", email}};
 
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -98,7 +98,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var query = new Dictionary<string, string> {{"Email", email}};
 
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -156,7 +156,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
 
                 if (userModel != null)

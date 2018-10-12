@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -47,7 +48,7 @@ namespace Vakapay.SendSmsBusiness
                 _logger.Error(e);
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.ToString()
                 };
             }
@@ -62,7 +63,7 @@ namespace Vakapay.SendSmsBusiness
             if (pendingSms?.Id == null)
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Message = "Pending sms not found"
                 };
 
@@ -74,12 +75,12 @@ namespace Vakapay.SendSmsBusiness
             try
             {
                 var lockResult = await sendSmsRepository.LockForProcess(pendingSms);
-                if (lockResult.Status == Status.StatusError)
+                if (lockResult.Status == Status.STATUS_ERROR)
                 {
                     transctionScope.Rollback();
                     return new ReturnObject
                     {
-                        Status = Status.StatusSuccess,
+                        Status = Status.STATUS_SUCCESS,
                         Message = "Cannot Lock For Process"
                     };
                 }
@@ -91,7 +92,7 @@ namespace Vakapay.SendSmsBusiness
                 transctionScope.Rollback();
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.ToString()
                 };
             }
@@ -103,11 +104,11 @@ namespace Vakapay.SendSmsBusiness
             try
             {
                 var sendResult = await SendSms(pendingSms, apikey, apiAddress);
-                if (sendResult.Status == Status.StatusError)
+                if (sendResult.Status == Status.STATUS_ERROR)
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Cannot Send sms"
                     };
                 }
@@ -117,11 +118,11 @@ namespace Vakapay.SendSmsBusiness
                 pendingSms.InProcess = 0;
 
                 var updateResult = await sendSmsRepository.SafeUpdate(pendingSms);
-                if (updateResult.Status == Status.StatusError)
+                if (updateResult.Status == Status.STATUS_ERROR)
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Cannot update sms status"
                     };
                 }
@@ -162,7 +163,7 @@ namespace Vakapay.SendSmsBusiness
 
                     var result = JsonConvert.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool) result["success"] ? Status.StatusSuccess : Status.StatusError;
+                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
@@ -174,7 +175,7 @@ namespace Vakapay.SendSmsBusiness
                 {
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = ex.Message
                     };
                 }
