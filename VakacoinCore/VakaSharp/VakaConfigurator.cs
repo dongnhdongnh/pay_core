@@ -1,4 +1,8 @@
-﻿namespace VakaSharp
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace VakaSharp
 {
     public class VakaConfigurator
     {

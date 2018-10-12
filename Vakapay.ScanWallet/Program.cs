@@ -46,6 +46,8 @@ namespace Vakapay.ScanWallet
                 var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(repoFactory);
                 var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(repoFactory);
 
+                var bitcoinRpcAccount = VakapayConfiguration.GetBitcoinRpcAccount();
+
                 //	get all address = null with same networkName of walletId
                 while (true)
                 {
@@ -80,8 +82,8 @@ namespace Vakapay.ScanWallet
                                             Console.WriteLine("make btc");
                                             task = bitcoinBusiness.CreateAddressAsync<BitcoinAddress>(walletBusiness,
                                                 btcAddressRepos,
-                                                new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(), "",
-                                                    ""), //TODO Username Password
+                                                new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(), bitcoinRpcAccount.Username,
+                                                    bitcoinRpcAccount.Password),
                                                 wallet.Id, pass);
                                             break;
 

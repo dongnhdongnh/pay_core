@@ -39,6 +39,8 @@ namespace Vakapay.UnitTest
 
 		Vakapay.EthereumBusiness.EthereumBusiness _ethBus;
 		EthereumRpc _rpcClass;
+		private VakapayRepositoryMysqlPersistenceFactory _vakapayRepositoryFactory;
+
 		EthereumRpc RPCClass
 		{
 			get
@@ -47,6 +49,19 @@ namespace Vakapay.UnitTest
 					_rpcClass = new EthereumRpc(VakapayConfig.RPCEndpoint);
 				return _rpcClass;
 			}
+		}
+
+		[SetUp]
+		public void Setup()
+		{
+			var repositoryConfig = new RepositoryConfiguration()
+			{
+				ConnectionString = VakapayConfig.ConnectionString
+			};
+
+			_vakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+
+			_walletBusiness = new WalletBusiness.WalletBusiness(_vakapayRepositoryFactory);
 		}
 
 		[TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c306")]
@@ -154,7 +169,29 @@ namespace Vakapay.UnitTest
 //				InsertPendingTxsToWithdraw("46b4594c-a45a-400d-86ce-9a7869d61180", prepareWallet.Address);
 			}
 		}
-		
+
+		[Test]
+		public void WithdrawVakacoin()
+		{
+			var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection());
+			var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
+			var wallet = walletRepository.FindByUserAndNetwork( userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id, NetworkName.VAKA);
+
+			var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
+			Assert.AreEqual(res.Status, Status.StatusSuccess);
+		}
+
+		[Test]
+		public void WithdrawBitcoin()
+		{
+			var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection());
+			var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
+			var wallet = walletRepository.FindByUserAndNetwork( userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id, NetworkName.BTC);
+
+			var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
+			Assert.AreEqual(res.Status, Status.StatusSuccess);
+		}
+
 		[Test]
 		public void CreateRadomPendingTxsToWithdraw()
 		{

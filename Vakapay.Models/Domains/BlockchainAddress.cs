@@ -1,6 +1,6 @@
 ﻿namespace Vakapay.Models.Domains
 {
-	public abstract class BlockchainAddress
+	public abstract class BlockchainAddress : IBlockchainAddress
 	{
 		public string Id { get; set; }
 		public string Address { get; set; }
@@ -8,5 +8,8 @@
 		public string Status { get; set; }
 		public int CreatedAt { get; set; }
 		public int UpdatedAt { get; set; }
+
+		public abstract string GetAddress();
+		public abstract string GetSecret();
 	}
 }

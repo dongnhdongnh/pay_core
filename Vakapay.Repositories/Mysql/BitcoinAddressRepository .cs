@@ -11,7 +11,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class BitcoinAddressRepository : MySqlBaseRepository<BitcoinAddress>, IBitcoinAddressRepository
+    public class BitcoinAddressRepository : BlockchainAddressRepository<BitcoinAddress>, IBitcoinAddressRepository
     {
         private IBitcoinAddressRepository _bitcoinAddressRepositoryImplementation;
 
@@ -96,7 +96,7 @@ namespace Vakapay.Repositories.Mysql
 //            }
 //        }
 
-        public async Task<ReturnObject> InsertAddress(string address, string walletId, string account = "")
+        public override async Task<ReturnObject> InsertAddress(string address, string walletId, string account = "")
         {
             try
             {
@@ -120,9 +120,9 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public BitcoinAddress FindByAddress(string address)
-        {
-            throw new NotImplementedException();
-        }
+//        public BitcoinAddress FindByAddress(string address)
+//        {
+//            throw new NotImplementedException();
+//        }
     }
 }

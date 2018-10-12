@@ -215,35 +215,16 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 //update address into wallet db
                 //wallet.WalletBusiness(VakapayRepositoryFactory);
-                //TODO check remove UpdateAddressForWallet
-//                var updateWallet =
-//                    wallet.UpdateAddressForWallet(walletId, address);
-//                if (updateWallet.Status == Status.StatusError)
-//                {
-//                    return new ReturnObject
-//                    {
-//                        Status = Status.StatusError,
-//                        Message = "Update address fail to WalletDB"
-//                    };
-//                }
-
-                //get all address = null with same networkName of walletId
-                //var wallets =
-                //	walletRepository.FindByAddressAndNetworkName(null,
-                //		walletCheck.NetworkName);
-                //if (wallets == null || wallets.Count <= 0)
-                //{
-                //	return new ReturnObject
-                //	{
-                //		Status = Status.StatusCompleted,
-                //		Message = "Finish Update"
-                //	};
-                //}
-
-                //var pass = CommonHelper.RandomString(15);
-                //await CreateAddressAsyn<TBlockchainAddress>(repoQuery, rpcClass,
-                //	wallets[0].Id, pass);
-
+                var updateWallet =
+                    wallet.SetHasAddressForWallet(walletId);
+                if (updateWallet.Status == Status.StatusError)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.StatusError,
+                        Message = "Update address fail to WalletDB"
+                    };
+                }
 
                 return new ReturnObject
                 {
@@ -375,9 +356,9 @@ namespace Vakapay.BlockchainBusiness.Base
                 {
                     foreach (EthereumTransactionResponse _trans in _block.TransactionsResponse)
                     {
-                        string _toAddress = _trans.To;
-                        string _fromAddress = _trans.From;
-                        if (!wallet.CheckExistedAddress(_toAddress))
+                        string _toAddress = _trans.to;
+                        string _fromAddress = _trans.from;
+                        if (!wallet.CheckExistedAddress(_toAddress, networkName))
                         {
                             //logger.Info(to + " is not exist in Wallet!!!");
                             continue;

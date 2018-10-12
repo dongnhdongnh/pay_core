@@ -9,7 +9,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class VakacoinAccountRepository : MySqlBaseRepository<VakacoinAccount>, IVakacoinAccountRepository
+    public class VakacoinAccountRepository : BlockchainAddressRepository<VakacoinAccount>, IVakacoinAccountRepository
     {
         public VakacoinAccountRepository(string connectionString) : base(connectionString)
         {
@@ -19,12 +19,12 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        public VakacoinAccount FindByAddress(string address) //FindByAccountName
+        public new VakacoinAccount FindByAddress(string address) //FindByAccountName
         {
             return FindByAccountName(address);
         }
 
-        public Task<ReturnObject> InsertAddress(string address, string walletId, string other)
+        public override Task<ReturnObject> InsertAddress(string address, string walletId, string other)
         {
             throw new NotImplementedException();
         }
