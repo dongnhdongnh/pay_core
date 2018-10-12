@@ -383,5 +383,26 @@ namespace Vakapay.VakacoinBusiness
         {
             throw new NotImplementedException();
         }
+
+        public ReturnObject GetInfo()
+        {
+            try
+            {
+                var rest = DefaultApi.GetInfo().Result;
+                return new ReturnObject()
+                {
+                    Status = Status.StatusSuccess,
+                    Data = rest.ToString()
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.StatusError,
+                    Message = e.Message
+                };
+            }
+        }
     }
 }

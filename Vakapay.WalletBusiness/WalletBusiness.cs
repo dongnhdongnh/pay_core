@@ -243,7 +243,11 @@ namespace Vakapay.WalletBusiness
                 }
 
                 // 2. TODO validate Network status
-
+                var validateNetworks = ValidateNetworksStatus();
+                if ( validateNetworks.Status == Status.StatusError)
+                {
+                    return validateNetworks;
+                }
 
                 // 3. Validate toAddress
                 if (ValidateAddress(toAddress, wallet.NetworkName) == false)
@@ -375,11 +379,56 @@ namespace Vakapay.WalletBusiness
             }
         }
 
+        private ReturnObject ValidateNetworksStatus()
+        {
+//            throw new NotImplementedException();
+
+            /*
+             * 1. Validate Bitcoin Network Status
+             * 2. Validate Ethereum Network Status
+             * 3. Validate Vakacoin Network Status
+             *
+             * Return network error in result.Message
+             */
+
+            // 3. Validate Vakacoin Network Status
+            try
+            {
+                var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
+                var networkInfoRet = vakacoinRpc.GetInfo();
+
+                if (networkInfoRet.Status != Status.StatusSuccess)
+                {
+                    return networkInfoRet;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            return new ReturnObject()
+            {
+                Status = Status.StatusSuccess
+            };
+        }
+
         private decimal GetFee(string walletNetworkName)
         {
+            switch (walletNetworkName)
+            {
 //            throw new NotImplementedException(); //TODO  must implement
-            // TODO fake:
-            return new decimal(0.0005);
+                // TODO fake:
+                case NetworkName.VAKA:
+                    return 0;
+                case NetworkName.ETH:
+                    return (decimal) 0.0005;
+                case NetworkName.BTC:
+                    return (decimal) 0.0005;
+                default:
+                    return new decimal(0.0005);
+            }
         }
 
         private string GetSenderAddress(Wallet wallet, string toAddress, decimal amount)
