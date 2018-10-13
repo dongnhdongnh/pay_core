@@ -526,5 +526,52 @@ namespace Vakapay.UserBusiness
                 };
             }
         }
+        
+        /// <summary>
+        /// DeleteWebSessionById
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ReturnObject DeleteWebSessionById(string id)
+        {
+            try
+            {
+                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var resultObject = webSessionRepository.Delete(id);
+                return resultObject;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+        
+        /// <summary>
+        /// DeleteActivityById
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ReturnObject DeleteActivityById(string id)
+        {
+            try
+            {
+                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+                var resultObject = logRepository.Delete(id);
+                return resultObject;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+        
     }
 }
