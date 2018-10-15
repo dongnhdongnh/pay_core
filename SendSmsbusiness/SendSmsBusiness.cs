@@ -133,9 +133,9 @@ namespace Vakapay.SendSmsBusiness
             catch (Exception e)
             {
                 // release lock
+                transactionSend.Rollback();
                 var releaseResult = sendSmsRepository.ReleaseLock(pendingSms);
                 Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
-                transactionSend.Rollback();
                 throw;
             }
         }
