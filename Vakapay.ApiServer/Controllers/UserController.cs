@@ -193,30 +193,24 @@ namespace Vakaxa.ApiServer.Controllers
                     var uaParser = Parser.GetDefault();
                     ClientInfo browser = uaParser.Parse(uaString);
 
-                    var webSession = new WebSession
+                    var confirmedDevices = new ConfirmedDevices
                     {
                         Browser = browser.ToString(),
                         Ip = ip,
                         Location = !string.IsNullOrEmpty(location.CountryName)
                             ? location.City + "," + location.CountryName
                             : "localhost",
-                        UserId = userModel.Id,
-                        Current = true
+                        UserId = userModel.Id
                     };
 
                     var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
 
 
-                    //save web session
-                    var checkWebSession = _userBusiness.GetWebSession(search);
-                    if (checkWebSession == null)
+                    //save devices
+                    var checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
+                    if (checkConfirmedDevices == null)
                     {
-                        _userBusiness.SaveWebSession(webSession);
-                    }
-                    else
-                    {
-                        checkWebSession.Current = true;
-                        _userBusiness.SaveWebSession(checkWebSession);
+                        _userBusiness.SaveConfirmedDevices(confirmedDevices);
                     }
                 }
 

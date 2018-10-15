@@ -140,14 +140,14 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// save web session
         /// </summary>
-        /// <param name="webSession"></param>
+        /// <param name="confirmedDevices"></param>
         /// <returns></returns>
-        public ReturnObject SaveWebSession(WebSession webSession)
+        public ReturnObject SaveConfirmedDevices(ConfirmedDevices confirmedDevices)
         {
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-                var userCheck = userRepository.FindById(webSession.UserId);
+                var userCheck = userRepository.FindById(confirmedDevices.UserId);
                 if (userCheck == null)
                 {
                     return new ReturnObject
@@ -157,19 +157,11 @@ namespace Vakapay.UserBusiness
                     };
                 }
 
-                var logRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var logRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
 
-                if (string.IsNullOrEmpty(webSession.Id))
-                {
-                    webSession.Id = CommonHelper.GenerateUuid();
-                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
-                    return logRepository.Insert(webSession);
-                }
-                else
-                {
-                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
-                    return logRepository.Update(webSession);
-                }
+                confirmedDevices.Id = CommonHelper.GenerateUuid();
+                confirmedDevices.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                return logRepository.Insert(confirmedDevices);
             }
             catch (Exception e)
             {
@@ -486,18 +478,19 @@ namespace Vakapay.UserBusiness
             }
         }
 
-        // find WebSession
+        // find ConfirmedDevices
         // new Dictionary<string, string>
         //{
         //    {"Ip", ip}
         //};
-        public WebSession GetWebSession(Dictionary<string, string> search)
+        public ConfirmedDevices GetConfirmedDevices(Dictionary<string, string> search)
         {
             try
             {
-                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
-                var webSession = webSessionRepository.FindWhere(webSessionRepository.QuerySearch(search));
-                return webSession;
+                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var confirmedDevices =
+                    confirmedDevicesRepository.FindWhere(confirmedDevicesRepository.QuerySearch(search));
+                return confirmedDevices;
             }
             catch (Exception e)
             {
@@ -506,11 +499,12 @@ namespace Vakapay.UserBusiness
             }
         }
 
-        public ReturnObject GetListWebSession(string idUser, int offset, int limit)
+        public ReturnObject GetListConfirmedDevices(string idUser, int offset, int limit,
+            ConfirmedDevices checkConfirmedDevices)
         {
             try
             {
-                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
 
                 var search =
                     new Dictionary<string, string>
@@ -519,7 +513,19 @@ namespace Vakapay.UserBusiness
                     };
 
                 var resultGetLog =
-                    webSessionRepository.GetListWebSession(webSessionRepository.QuerySearch(search), offset, limit);
+                    confirmedDevicesRepository.GetListConfirmedDevices(confirmedDevicesRepository.QuerySearch(search),
+                        offset, limit);
+
+
+                if (!string.IsNullOrEmpty(checkConfirmedDevices.Id))
+                {
+                    foreach (var log in resultGetLog)
+                    {
+                        if (log.Id.Equals(checkConfirmedDevices.Id))
+
+                            log.Current = true;
+                    }
+                }
 
                 return new ReturnObject
                 {
@@ -538,16 +544,16 @@ namespace Vakapay.UserBusiness
         }
 
         /// <summary>
-        /// DeleteWebSessionById
+        /// DeleteConfirmedDevicesById
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ReturnObject DeleteWebSessionById(string id)
+        public ReturnObject DeleteConfirmedDevicesById(string id)
         {
             try
             {
-                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
-                var resultObject = webSessionRepository.Delete(id);
+                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var resultObject = confirmedDevicesRepository.Delete(id);
                 return resultObject;
             }
             catch (Exception e)
