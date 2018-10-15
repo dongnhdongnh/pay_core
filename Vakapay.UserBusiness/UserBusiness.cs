@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
 using Vakapay.BlockchainBusiness;
@@ -88,17 +89,26 @@ namespace Vakapay.UserBusiness
         /// <param name="actionLog"></param>
         /// <param name="ip"></param>
         /// <returns></returns>
-        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip)
+        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip,
+            string source = "web")
         {
             try
             {
+                //get location for ip
+                var location =
+                    IPGeographicalLocation.QueryGeographicalLocationAsync(ip);
+
                 var log = new UserActionLog
                 {
                     ActionName = actionLog,
                     Description = description,
                     Ip = ip,
                     UserId = idUser,
+                    Location = !string.IsNullOrEmpty(location.Result.CountryName)
+                        ? location.Result.City + "," + location.Result.CountryName
+                        : "localhost",
                     Id = CommonHelper.GenerateUuid(),
+                    Source = source,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp()
                 };
 
@@ -130,14 +140,14 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// save web session
         /// </summary>
-        /// <param name="webSession"></param>
+        /// <param name="confirmedDevices"></param>
         /// <returns></returns>
-        public ReturnObject SaveWebSession(WebSession webSession)
+        public ReturnObject SaveConfirmedDevices(ConfirmedDevices confirmedDevices)
         {
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-                var userCheck = userRepository.FindById(webSession.UserId);
+                var userCheck = userRepository.FindById(confirmedDevices.UserId);
                 if (userCheck == null)
                 {
                     return new ReturnObject
@@ -147,19 +157,11 @@ namespace Vakapay.UserBusiness
                     };
                 }
 
-                var logRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var logRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
 
-                if (string.IsNullOrEmpty(webSession.Id))
-                {
-                    webSession.Id = CommonHelper.GenerateUuid();
-                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
-                    return logRepository.Insert(webSession);
-                }
-                else
-                {
-                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
-                    return logRepository.Update(webSession);
-                }
+                confirmedDevices.Id = CommonHelper.GenerateUuid();
+                confirmedDevices.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                return logRepository.Insert(confirmedDevices);
             }
             catch (Exception e)
             {
@@ -181,7 +183,7 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-
+                    
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
                 {
@@ -476,18 +478,19 @@ namespace Vakapay.UserBusiness
             }
         }
 
-        // find WebSession
+        // find ConfirmedDevices
         // new Dictionary<string, string>
         //{
         //    {"Ip", ip}
         //};
-        public WebSession GetWebSession(Dictionary<string, string> search)
+        public ConfirmedDevices GetConfirmedDevices(Dictionary<string, string> search)
         {
             try
             {
-                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
-                var webSession = webSessionRepository.FindWhere(webSessionRepository.QuerySearch(search));
-                return webSession;
+                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var confirmedDevices =
+                    confirmedDevicesRepository.FindWhere(confirmedDevicesRepository.QuerySearch(search));
+                return confirmedDevices;
             }
             catch (Exception e)
             {
@@ -496,11 +499,12 @@ namespace Vakapay.UserBusiness
             }
         }
 
-        public ReturnObject GetListWebSession(string idUser, int offset, int limit)
+        public ReturnObject GetListConfirmedDevices(string idUser, int offset, int limit,
+            ConfirmedDevices checkConfirmedDevices)
         {
             try
             {
-                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
 
                 var search =
                     new Dictionary<string, string>
@@ -509,13 +513,70 @@ namespace Vakapay.UserBusiness
                     };
 
                 var resultGetLog =
-                    webSessionRepository.GetListWebSession(webSessionRepository.QuerySearch(search), offset, limit);
+                    confirmedDevicesRepository.GetListConfirmedDevices(confirmedDevicesRepository.QuerySearch(search),
+                        offset, limit);
+
+
+                if (!string.IsNullOrEmpty(checkConfirmedDevices.Id))
+                {
+                    foreach (var log in resultGetLog)
+                    {
+                        if (log.Id.Equals(checkConfirmedDevices.Id))
+                            log.Current = 1;
+                    }
+                }
 
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
                     Data = JsonConvert.SerializeObject(resultGetLog)
                 };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// DeleteConfirmedDevicesById
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ReturnObject DeleteConfirmedDevicesById(string id)
+        {
+            try
+            {
+                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var resultObject = confirmedDevicesRepository.Delete(id);
+                return resultObject;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// DeleteActivityById
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ReturnObject DeleteActivityById(string id)
+        {
+            try
+            {
+                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+                var resultObject = logRepository.Delete(id);
+                return resultObject;
             }
             catch (Exception e)
             {

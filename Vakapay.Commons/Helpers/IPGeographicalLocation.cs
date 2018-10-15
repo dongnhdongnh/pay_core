@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Vakapay.ApiServer.Models
+namespace Vakapay.Commons.Helpers
 {
     public class IPGeographicalLocation
     {
@@ -23,11 +23,11 @@ namespace Vakapay.ApiServer.Models
 
         [JsonProperty("time_zone")] public string TimeZone { get; set; }
 
-        [JsonProperty("latitude")] public float Latitude { get; set; }
+        [JsonProperty("latitude")] public string Latitude { get; set; }
 
-        [JsonProperty("longitude")] public float Longitude { get; set; }
+        [JsonProperty("longitude")] public string Longitude { get; set; }
 
-        [JsonProperty("metro_code")] public int MetroCode { get; set; }
+        [JsonProperty("metro_code")] public string MetroCode { get; set; }
 
         private IPGeographicalLocation()
         {

@@ -7,7 +7,7 @@ namespace Vakapay.ApiServer.Models
         public string TwofaEnable { get; set; }
         public string UpdateOptionVerification { get; set; }
 
-        public string CloseAccount { get; set; }
+        public string LockScreen { get; set; }
 
 
         public static ActionCode FromJson(string json) =>

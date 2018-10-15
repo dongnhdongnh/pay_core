@@ -30,7 +30,7 @@ namespace Vakapay.Models.Entities
         public string Notifications { get; set; }
         public string SecretAuthToken { get; set; }
         public int Verification { get; set; }
-        public int IsLock { get; set; }
+        public int IsLockScreen { get; set; }
         public bool TwoFactor { get; set; }
 
         public static User FromJson(string json) =>
