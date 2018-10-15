@@ -608,25 +608,25 @@ namespace Vakapay.WalletBusiness
         {
             numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
-            Console.WriteLine(wallet.NetworkName);
+            Console.WriteLine(wallet.Currency);
            
             switch (wallet.Currency)
             {
                 case CryptoCurrency.ETH:
                     
-                    output = ethereumBussiness.GetAllHistory(out numberData, wallet.Address,offet, limit, orderBy);
+                   // output = ethereumBussiness.GetAllHistory(out numberData, wallet.Address,offet, limit, orderBy);
                     break;
-                case CryptoCurrency.VAKA:
-                    output = vakacoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
+                case CryptoCurrency.VKC:
+                   // output = vakacoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
                     break;
                 case CryptoCurrency.BTC:
-                    output = bitcoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
+                  //  output = bitcoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
                     break;
                 default:
                     break;
             }
            
-            Console.WriteLine("get history " + wallet.NetworkName + "_count=_" + output.Count);
+            Console.WriteLine("get history " + wallet.Currency + "_count=_" + output.Count);
             return output;
         }
 

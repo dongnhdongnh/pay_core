@@ -10,6 +10,8 @@ using Vakapay.WalletBusiness;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Domains;
 using Vakapay.UserBusiness;
+using Vakapay.Commons.Constants;
+
 namespace Vakapay.ApiServer.Controllers
 {
     [Route("api/[controller]")]
@@ -42,17 +44,17 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var user = _userBusiness.getUserByID(userID);
+                var user = _userBusiness.GetUserById(userID);
                 if (user == null)
                     return new ReturnObject()
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "No user"
                     };
                 var wallets = _walletBusiness.LoadAllWalletByUser(user);
                 return new ReturnObject()
                 {
-                    Status = Status.StatusCompleted,
+                    Status = Status.STATUS_COMPLETED,
                     Message = JsonHelper.SerializeObject(wallets)
                 };
             }
@@ -61,7 +63,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 return new ReturnObject()
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -92,7 +94,7 @@ namespace Vakapay.ApiServer.Controllers
                 var _history = _walletBusiness.GetHistory(out numberData,walletSearch.wallet, walletSearch.offset, walletSearch.limit, walletSearch.orderBy);
                 return new ReturnObject()
                 {
-                    Status = Status.StatusCompleted,
+                    Status = Status.STATUS_COMPLETED,
                     Data=numberData.ToString(),
                     Message = JsonHelper.SerializeObject(_history)
                 };
@@ -103,7 +105,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 return new ReturnObject()
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }

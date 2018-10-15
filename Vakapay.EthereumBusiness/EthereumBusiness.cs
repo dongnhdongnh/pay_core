@@ -39,8 +39,8 @@ namespace Vakapay.EthereumBusiness
             try
             {
                 var repo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
-                blockchainTransaction.Id = CommonHelper.GenerateUuid();
-                blockchainTransaction.Status = Status.StatusCompleted;
+              //  blockchainTransaction.Id = CommonHelper.GenerateUuid();
+                blockchainTransaction.Status = Status.STATUS_COMPLETED;
                 blockchainTransaction.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
                 blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                 return repo.Insert(blockchainTransaction);
@@ -50,7 +50,7 @@ namespace Vakapay.EthereumBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }

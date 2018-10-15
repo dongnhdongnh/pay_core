@@ -117,7 +117,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 //TODO EDIT RPC Class
                 var sendTransaction = await rpcClass.SendTransactionAsync(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
-                pendingTransaction.InProcess = 0;
+                pendingTransaction.IsProcessing = 0;
                 pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                 pendingTransaction.Hash = sendTransaction.Data;
 
