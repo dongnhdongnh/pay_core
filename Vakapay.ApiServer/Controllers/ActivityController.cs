@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
@@ -79,7 +80,7 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         // POST api/values
-        [HttpGet("web-session/get-list/")]
+        [HttpGet("web-session/get-list")]
         public string GetWebSession()
         {
             try
@@ -104,6 +105,57 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
                 return CreateDataError("Can't get list Web Session activity");
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
+        // POST api/values
+        [HttpPost("web-session/delete")]
+        public string DeleteWebSessionById([FromBody] JObject value)
+        {
+            try
+            {
+                if (value.ContainsKey("Id"))
+                {
+                  return  _userBusiness.DeleteWebSessionById(value["Id"].ToString()).ToJson();
+
+                }
+
+                return CreateDataError("ID Not exist.");
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+        
+        // POST api/values
+        [HttpPost("account-activity/delete")]
+        public string DeleteUserActivityById([FromBody] JObject value)
+        {
+            try
+            {
+                if (value.ContainsKey("Id"))
+                {
+                    return  _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson();
+
+                }
+
+                return CreateDataError("ID Not exist.");
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
             }
             catch (Exception e)
             {

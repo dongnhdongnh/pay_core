@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
 using Vakapay.BlockchainBusiness;
@@ -88,17 +89,26 @@ namespace Vakapay.UserBusiness
         /// <param name="actionLog"></param>
         /// <param name="ip"></param>
         /// <returns></returns>
-        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip)
+        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip,
+            string source = "web")
         {
             try
             {
+                //get location for ip
+                var location =
+                    IPGeographicalLocation.QueryGeographicalLocationAsync(ip);
+
                 var log = new UserActionLog
                 {
                     ActionName = actionLog,
                     Description = description,
                     Ip = ip,
                     UserId = idUser,
+                    Location = !string.IsNullOrEmpty(location.Result.CountryName)
+                        ? location.Result.City + "," + location.Result.CountryName
+                        : "localhost",
                     Id = CommonHelper.GenerateUuid(),
+                    Source = source,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp()
                 };
 
@@ -516,6 +526,52 @@ namespace Vakapay.UserBusiness
                     Status = Status.STATUS_SUCCESS,
                     Data = JsonConvert.SerializeObject(resultGetLog)
                 };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// DeleteWebSessionById
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ReturnObject DeleteWebSessionById(string id)
+        {
+            try
+            {
+                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var resultObject = webSessionRepository.Delete(id);
+                return resultObject;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// DeleteActivityById
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ReturnObject DeleteActivityById(string id)
+        {
+            try
+            {
+                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+                var resultObject = logRepository.Delete(id);
+                return resultObject;
             }
             catch (Exception e)
             {
