@@ -19,6 +19,7 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.UserBusiness;
