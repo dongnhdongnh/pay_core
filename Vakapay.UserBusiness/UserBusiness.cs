@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
 using Vakapay.BlockchainBusiness;
@@ -88,17 +89,26 @@ namespace Vakapay.UserBusiness
         /// <param name="actionLog"></param>
         /// <param name="ip"></param>
         /// <returns></returns>
-        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip)
+        public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip,
+            string source = "web")
         {
             try
             {
+                //get location for ip
+                var location =
+                    IPGeographicalLocation.QueryGeographicalLocationAsync(ip);
+
                 var log = new UserActionLog
                 {
                     ActionName = actionLog,
                     Description = description,
                     Ip = ip,
                     UserId = idUser,
+                    Location = !string.IsNullOrEmpty(location.Result.CountryName)
+                        ? location.Result.City + "," + location.Result.CountryName
+                        : "localhost",
                     Id = CommonHelper.GenerateUuid(),
+                    Source = source,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp()
                 };
 
@@ -526,7 +536,7 @@ namespace Vakapay.UserBusiness
                 };
             }
         }
-        
+
         /// <summary>
         /// DeleteWebSessionById
         /// </summary>
@@ -549,7 +559,7 @@ namespace Vakapay.UserBusiness
                 };
             }
         }
-        
+
         /// <summary>
         /// DeleteActivityById
         /// </summary>
@@ -572,6 +582,5 @@ namespace Vakapay.UserBusiness
                 };
             }
         }
-        
     }
 }

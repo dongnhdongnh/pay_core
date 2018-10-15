@@ -80,7 +80,7 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         // POST api/values
-        [HttpGet("web-session/get-list/")]
+        [HttpGet("web-session/get-list")]
         public string GetWebSession()
         {
             try
@@ -145,6 +145,17 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
                 return CreateDataError("ID Not exist.");
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
             }
             catch (Exception e)
             {
