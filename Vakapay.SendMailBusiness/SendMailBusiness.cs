@@ -120,6 +120,7 @@ namespace Vakapay.SendMailBusiness
                 var updateResult = await sendEmailRepository.SafeUpdate(pendingEmail);
                 if (updateResult.Status == Status.STATUS_ERROR)
                 {
+                    transactionSend.Rollback();
                     return new ReturnObject
                     {
                         Status = Status.STATUS_ERROR,
