@@ -395,7 +395,6 @@ namespace Vakapay.Repositories.Mysql
 			throw new Exception(className + ": Transaction repository class name not contain \"Deposit\" or \"Withdraw\" keyword");
 		}
 
-
 		   public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string walletAdress, string TableNameWithdrawn, string TableNameDeposit, int offset, int limit, string[] orderByValue)
         {
             numberData = -1;

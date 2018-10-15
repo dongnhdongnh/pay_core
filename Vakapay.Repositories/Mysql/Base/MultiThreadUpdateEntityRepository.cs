@@ -292,28 +292,5 @@ namespace Vakapay.Repositories.Mysql.Base
             //	throw;
             //}
         }
-
-        public List<TEntity> FindTransactionHistory(int offset = -1, int limit = -1,
-            string[] orderBy = null)
-        {
-            try
-            {
-                var setQuery = new Dictionary<string, string>
-                {
-                    {nameof(BlockchainTransaction.Status), Status.STATUS_COMPLETED}
-                };
-
-                return FindBySql(SqlHelper.Query_Search(TableName, setQuery, limit, offset, orderBy))
-                    .ToList();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return null;
-                //	throw;
-            }
-
-            //	throw new NotImplementedException();
-        }
     }
 }
