@@ -11,12 +11,10 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace VakaSharp.Api.{1}
+namespace VakaSharp.Api.v1
 {
     public class VakaApi
     { 
-        private const string APIVersion = "v1";
-        
         public VakaConfigurator Config { get; set; }
         public VakaApi(VakaConfigurator config)
         {
@@ -28,7 +26,7 @@ namespace VakaSharp.Api.{1}
 <#		if(!string.IsNullOrWhiteSpace(method.ResponseGenericTypes)) {#>
 		public async Task<<#= SnakeCaseToPascalCase(method.Name) #>Response<#= method.ResponseGenericTypes #>> <#= SnakeCaseToPascalCase(method.Name) #><#= method.ResponseGenericTypes #>(JsonSerializerSettings jsonSettings = null)
         {
-            var url = string.Format("{0}/{1}/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint, APIVersion);
+            var url = string.Format("{0}/v1/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint);
 <#        if(method.IsResponseCollection) { #>
 			return new <#= SnakeCaseToPascalCase(method.Name) #>Response() { <#= SnakeCaseToPascalCase(method.Response[0].Name) #> = await HttpHelper.GetJsonAsync<<#= method.Response[0].Type#>>(url, jsonSettings) };
 <#        } else { #>
@@ -38,7 +36,7 @@ namespace VakaSharp.Api.{1}
 <#      } #>
 		public async Task<<#= SnakeCaseToPascalCase(method.Name) #>Response> <#= SnakeCaseToPascalCase(method.Name) #>(JsonSerializerSettings jsonSettings = null)
         {
-            var url = string.Format("{0}/{1}/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint, APIVersion);
+            var url = string.Format("{0}/v1/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint);
 <#        if(method.IsResponseCollection) { #>
 			return new <#= SnakeCaseToPascalCase(method.Name) #>Response() { <#= SnakeCaseToPascalCase(method.Response[0].Name) #> = await HttpHelper.GetJsonAsync<<#= method.Response[0].Type#>>(url, jsonSettings) };
 <#        } else { #>
@@ -49,7 +47,7 @@ namespace VakaSharp.Api.{1}
 <#		if(!string.IsNullOrWhiteSpace(method.ResponseGenericTypes)) {#>
 		public async Task<<#= SnakeCaseToPascalCase(method.Name) #>Response<#= method.ResponseGenericTypes #>> <#= SnakeCaseToPascalCase(method.Name) #><#= method.ResponseGenericTypes #>(<#= SnakeCaseToPascalCase(method.Name) #>Request data<#= method.IsCachable ? ", bool reload = false" : "" #>, JsonSerializerSettings jsonSettings = null)
         {
-            var url = string.Format("{0}/{1}/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint, APIVersion);
+            var url = string.Format("{0}/v1/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint);
 <#        if(method.IsResponseCollection) { #>
 			return new <#= SnakeCaseToPascalCase(method.Name) #>Response() { <#= SnakeCaseToPascalCase(method.Response[0].Name) #> = await HttpHelper.PostJson<#= method.IsCachable ? "WithCache" : "" #>Async<<#= method.Response[0].Type#>>(url, data<#= method.IsCachable ? ", reload" : "" #>, jsonSettings) };
 <#        } else { #>
@@ -59,7 +57,7 @@ namespace VakaSharp.Api.{1}
 <#      } #>
 		public async Task<<#= SnakeCaseToPascalCase(method.Name) #>Response> <#= SnakeCaseToPascalCase(method.Name) #>(<#= SnakeCaseToPascalCase(method.Name) #>Request data<#= method.IsCachable ? ", bool reload = false" : "" #>, JsonSerializerSettings jsonSettings = null)
         {
-            var url = string.Format("{0}/{1}/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint, APIVersion);
+            var url = string.Format("{0}/v1/<#= method.Module #>/<#= method.Name #>", Config.HttpEndpoint);
 <#        if(method.IsResponseCollection) { #>
 			return new <#= SnakeCaseToPascalCase(method.Name) #>Response() { <#= SnakeCaseToPascalCase(method.Response[0].Name) #> = await HttpHelper.PostJson<#= method.IsCachable ? "WithCache" : "" #>Async<<#= method.Response[0].Type#>>(url, data<#= method.IsCachable ? ", reload" : "" #>, jsonSettings) };
 <#        } else { #>

@@ -58,7 +58,7 @@ namespace Vakapay.SendSmsBusiness
             string apiAddress)
         {
             var sendSmsRepository = _vakapayRepositoryFactory.GetSendSmsRepository(_connectionDb);
-            var pendingSms = sendSmsRepository.FindPendingSms();
+            var pendingSms = sendSmsRepository.FindRowPending();
 
             if (pendingSms?.Id == null)
                 return new ReturnObject
@@ -115,11 +115,12 @@ namespace Vakapay.SendSmsBusiness
 
                 pendingSms.Status = sendResult.Status;
                 pendingSms.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
-                pendingSms.InProcess = 0;
+                pendingSms.IsProcessing = 0;
 
                 var updateResult = await sendSmsRepository.SafeUpdate(pendingSms);
                 if (updateResult.Status == Status.STATUS_ERROR)
                 {
+                    transactionSend.Rollback();
                     return new ReturnObject
                     {
                         Status = Status.STATUS_ERROR,
@@ -133,9 +134,9 @@ namespace Vakapay.SendSmsBusiness
             catch (Exception e)
             {
                 // release lock
+                transactionSend.Rollback();
                 var releaseResult = sendSmsRepository.ReleaseLock(pendingSms);
                 Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
-                transactionSend.Rollback();
                 throw;
             }
         }

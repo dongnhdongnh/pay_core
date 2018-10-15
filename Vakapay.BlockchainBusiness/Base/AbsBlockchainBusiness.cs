@@ -39,7 +39,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <returns></returns>
         public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
             IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
-            string privateKey = "")
+            string privateKey = "") where TBlockchainTransaction : BlockchainTransaction
         {
             /*
              * 1. Query Transaction Withdraw pending
@@ -49,7 +49,9 @@ namespace Vakapay.BlockchainBusiness.Base
              * 5. Update Transaction Status
              */
             // find transaction pending
-            var pendingTransaction = repoQuery.FindTransactionPending();
+//            var pendingTransaction = repoQuery.FindTransactionPending();
+            var pendingTransaction = repoQuery.FindRowPending();
+
             if (pendingTransaction?.Id == null)
             {
                 //if (!CacheHelper.HaveKey("cache"))
@@ -118,7 +120,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 var sendTransaction = await rpcClass.SendTransactionAsync(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
                 pendingTransaction.IsProcessing = 0;
-                pendingTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+//                pendingTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp(); // set in SafeUpdate
                 pendingTransaction.Hash = sendTransaction.Data;
 
                 //create database email when send success
@@ -176,7 +178,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="other"></param>
         /// <typeparam name="TBlockchainAddress"></typeparam>
         /// <returns></returns>
-        public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(IWalletBusiness wallet,
+        public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(
             IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
             string other = "") where TBlockchainAddress : BlockchainAddress
         {
@@ -215,35 +217,6 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 //update address into wallet db
                 //wallet.WalletBusiness(VakapayRepositoryFactory);
-                //TODO check remove UpdateAddressForWallet
-//                var updateWallet =
-//                    wallet.UpdateAddressForWallet(walletId, address);
-//                if (updateWallet.Status == Status.StatusError)
-//                {
-//                    return new ReturnObject
-//                    {
-//                        Status = Status.StatusError,
-//                        Message = "Update address fail to WalletDB"
-//                    };
-//                }
-
-                //get all address = null with same networkName of walletId
-                //var wallets =
-                //	walletRepository.FindByAddressAndNetworkName(null,
-                //		walletCheck.NetworkName);
-                //if (wallets == null || wallets.Count <= 0)
-                //{
-                //	return new ReturnObject
-                //	{
-                //		Status = Status.StatusCompleted,
-                //		Message = "Finish Update"
-                //	};
-                //}
-
-                //var pass = CommonHelper.RandomString(15);
-                //await CreateAddressAsyn<TBlockchainAddress>(repoQuery, rpcClass,
-                //	wallets[0].Id, pass);
-
 
                 return new ReturnObject
                 {
@@ -377,7 +350,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     {
                         string _toAddress = _trans.To;
                         string _fromAddress = _trans.From;
-                        if (!wallet.CheckExistedAddress(_toAddress))
+                        if (!wallet.CheckExistedAddress(_toAddress, networkName))
                         {
                             //logger.Info(to + " is not exist in Wallet!!!");
                             continue;

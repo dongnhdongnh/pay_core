@@ -5,9 +5,8 @@ using Vakapay.Models.Entities.BTC;
 
 namespace Vakapay.Models.Domains
 {
-    public abstract class BlockchainTransaction
+    public abstract class BlockchainTransaction : MultiThreadUpdateEntity
     {
-        public string Id { get; } = CommonHelper.GenerateUuid();
         public string UserId { get; set; }
         public string Hash { get; set; }
         public int BlockNumber { get; set; }
@@ -15,11 +14,6 @@ namespace Vakapay.Models.Domains
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
         public decimal Fee { get; set; }
-        public string Status { get; set; }
-        public long CreatedAt { get; set; }
-        public long UpdatedAt { get; set; }
-        public int IsProcessing { get; set; }
-        public int Version { get; set; }
 
         public string NetworkName()
         {

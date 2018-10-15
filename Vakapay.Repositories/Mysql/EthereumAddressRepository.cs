@@ -12,7 +12,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumAddressRepository : MySqlBaseRepository<EthereumAddress>, IEthereumAddressRepository
+	public class EthereumAddressRepository : BlockchainAddressRepository<EthereumAddress>, IEthereumAddressRepository
 	{
 		public EthereumAddressRepository(string connectionString) : base(connectionString)
 		{
@@ -73,24 +73,24 @@ namespace Vakapay.Repositories.Mysql
 //			}
 //		}
 
-	    public EthereumAddress FindByAddress(string address)
-	    {
-		    try
-		    {
-			    string query = $"SELECT * FROM EthereumAddress WHERE Address = '{address}'";
-			    List<EthereumAddress> etherAddress = FindBySql(query);
-			    if (etherAddress == null || etherAddress.Count == 0)
-				    return null;
-			    return etherAddress.First();
-		    }
-		    catch (Exception e)
-		    {
-			    Console.WriteLine(e);
-			    return null;
-		    }
-	    }
+//	    public EthereumAddress FindByAddress(string address)
+//	    {
+//		    try
+//		    {
+//			    string query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
+//			    List<EthereumAddress> etherAddress = FindBySql(query);
+//			    if (etherAddress == null || etherAddress.Count == 0)
+//				    return null;
+//			    return etherAddress.First();
+//		    }
+//		    catch (Exception e)
+//		    {
+//			    Console.WriteLine(e);
+//			    return null;
+//		    }
+//	    }
 	    
-		public Task<ReturnObject> InsertAddress(string address, string walletId, string other)
+		public override Task<ReturnObject> InsertAddress(string address, string walletId, string other)
 		{
 			EthereumAddress insertObject = new EthereumAddress()
 			{
