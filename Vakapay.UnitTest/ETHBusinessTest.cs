@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
@@ -70,7 +71,7 @@ namespace Vakapay.UnitTest
 		[Test]
 		public void DeleteCache()
 		{
-			Assert.IsNotNull((String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, NetworkName.ETH)));
+			Assert.IsNotNull((String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, CryptoCurrency.ETH)));
 		}
 
 		[Test]
@@ -87,14 +88,7 @@ namespace Vakapay.UnitTest
 			{
 				Id = CommonHelper.GenerateUuid(),
 			};
-			var blockChainNetwork = new BlockchainNetwork
-			{
-				Name = NetworkName.ETH,
-				Status = Status.StatusActive,
-				Sysbol = "ETH",
-				Id = CommonHelper.GenerateUuid()
-			};
-			var result = WalletBusiness.CreateNewWallet(user, NetworkName.ETH);
+			var result = WalletBusiness.CreateNewWallet(user, CryptoCurrency.ETH);
 			Console.WriteLine(JsonHelper.SerializeObject(result));
 			Assert.IsNotNull(result);
 		}

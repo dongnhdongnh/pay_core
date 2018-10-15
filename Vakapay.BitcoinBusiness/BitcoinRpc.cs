@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.BlockchainBusiness;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.BitcoinBusiness
@@ -22,15 +23,9 @@ namespace Vakapay.BitcoinBusiness
             Credentials = new NetworkCredential(userName, password);
         }
 
-		public BitcoinRpc(string rPCEndpoint)
-		{
-			this.rPCEndpoint = rPCEndpoint;
-		}
+        private IBlockchainRPC _blockchainRpcImplementation;
 
-		private IBlockchainRPC _blockchainRpcImplementation;
-		private string rPCEndpoint;
-
-		private ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
+        private ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
         {
             try
             {
@@ -59,7 +54,7 @@ namespace Vakapay.BitcoinBusiness
                     }
                 }
 
-                string s = JsonConvert.SerializeObject(joe);
+                string s = JsonHelper.SerializeObject(joe);
 
                 // serialize json for the request
                 byte[] byteArray = Encoding.UTF8.GetBytes(s);
@@ -87,21 +82,21 @@ namespace Vakapay.BitcoinBusiness
                             {
                                 var result = sr.ReadToEnd();
 
-                                var results = JsonConvert.DeserializeObject<JObject>(result);
+                                var results = JsonHelper.DeserializeObject<JObject>(result);
 
 
                                 if (string.IsNullOrEmpty(results["error"].ToString()))
                                 {
                                     return new ReturnObject
                                     {
-                                        Status = Status.StatusCompleted,
+                                        Status = Status.STATUS_COMPLETED,
                                         Data = results["result"].ToString()
                                     };
                                 }
-    
+
                                 return new ReturnObject
                                 {
-                                    Status = Status.StatusError,
+                                    Status = Status.STATUS_ERROR,
                                     Message = results["error"].ToString()
                                 };
                             }
@@ -707,7 +702,7 @@ namespace Vakapay.BitcoinBusiness
         {
             return new ReturnObject
             {
-                Status = Status.StatusError,
+                Status = Status.STATUS_ERROR,
                 Message = e.Message
             };
         }
@@ -791,7 +786,7 @@ namespace Vakapay.BitcoinBusiness
                 return returnError(e);
             }
         }
-        
+
         public ReturnObject Generate(int number)
         {
             try

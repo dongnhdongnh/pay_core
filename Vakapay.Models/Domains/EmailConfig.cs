@@ -47,13 +47,13 @@ namespace Vakapay.Models.Domains
             long confirmation = 0;
             switch (networkName)
             {
-                case NetworkName.VAKA:
+                case CryptoCurrency.VKC:
                     confirmation = EmailConfig.VakaConfirmations;
                     break;
-                case NetworkName.ETH:
+                case CryptoCurrency.ETH:
                     confirmation = EmailConfig.EthConfirmations;
                     break;
-                case NetworkName.BTC:
+                case CryptoCurrency.BTC:
                     confirmation = EmailConfig.BtcConfirmations;
                     break;
             }

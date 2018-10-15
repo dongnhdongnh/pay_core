@@ -2,6 +2,7 @@
 using System.Linq;
 using NLog;
 using Vakapay.BitcoinBusiness;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -143,7 +144,7 @@ namespace Vakapay.BitcoinNotifi
                     {
                         currentBtcDepositTransaction.BlockHash = transactionModel.BlockHash;
                         currentBtcDepositTransaction.Amount = transactionModel.Amount;
-                        currentBtcDepositTransaction.Status = Status.StatusCompleted;
+                        currentBtcDepositTransaction.Status = Status.STATUS_COMPLETED;
                         currentBtcDepositTransaction.UpdatedAt = currentTime;
                         btcDepositTransactionRepository.Update(currentBtcDepositTransaction);
                     }
@@ -186,7 +187,7 @@ namespace Vakapay.BitcoinNotifi
 //                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
 //                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
                     btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount, "", //TODO add transaction Id
-                        EmailTemplate.Received, NetworkName.BTC);
+                        EmailTemplate.Received, CryptoCurrency.BTC);
                 }
                 else
                 {
@@ -216,7 +217,6 @@ namespace Vakapay.BitcoinNotifi
                 Logger.Debug("cretateNewBtcDepositTransaction ");
                 var btcDepositTransaction = new BitcoinDepositTransaction
                 {
-                    Id = CommonHelper.GenerateUuid(),
                     Hash = transactionModel.Txid,
                     BlockNumber = 0,
                     BlockHash = transactionModel.BlockHash,
@@ -225,7 +225,7 @@ namespace Vakapay.BitcoinNotifi
                     FromAddress = "",
                     ToAddress = transactionModelDetail.Address,
                     Fee = 0,
-                    Status = Status.StatusPending,
+                    Status = Status.STATUS_PENDING,
                     CreatedAt = currentTime,
                     UpdatedAt = currentTime
                 };

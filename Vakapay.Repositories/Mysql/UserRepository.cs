@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using Dapper;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql.Base;
 
@@ -102,26 +104,6 @@ namespace Vakapay.Repositories.Mysql
             {
                 Logger.Error("UserRepository =>> FindEmailByAddressOfWallet fail: " + e.Message);
                 return null;
-            }
-        }
-
-        public ReturnObject Insert(User objectInsert)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                var result = Connection.InsertTask<string, User>(objectInsert);
-                var status = !String.IsNullOrEmpty(result) ? Status.StatusSuccess : Status.StatusError;
-                return new ReturnObject
-                {
-                    Status = status,
-                    Message = status == Status.StatusError ? "Cannot insert" : "Insert Success"
-                };
-            }
-            catch (Exception e)
-            {
-                throw e;
             }
         }
         

@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -26,12 +26,12 @@ namespace Vakapay.UnitTest
         [Test]
         public void CreateEmailTest()
         {
-            Assert.AreEqual(Status.StatusSuccess, _mailBusiness.CreateEmailQueueAsync(new EmailQueue
+            Assert.AreEqual(Status.STATUS_SUCCESS, _mailBusiness.CreateEmailQueueAsync(new EmailQueue
             {
                 Id = CommonHelper.GenerateUuid(),
                 ToEmail = "doantoansai1992@gmail.com",
                 Subject = "Unit test subject",
-                Status = Status.StatusPending,
+                Status = Status.STATUS_PENDING,
                 CreatedAt = CommonHelper.GetUnixTimestamp(),
                 UpdatedAt = CommonHelper.GetUnixTimestamp(),
                 Template = EmailTemplate.Received,

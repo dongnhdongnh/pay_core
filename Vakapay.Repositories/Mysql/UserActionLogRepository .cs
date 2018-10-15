@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Dapper;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -10,19 +11,12 @@ namespace Vakapay.Repositories.Mysql
 {
     public class UserActionLogRepository : MySqlBaseRepository<UserActionLog>, IUserActionLogRepository
     {
-        private string TableNameWallet { get; }
-        private string TableNameBitcoinAddress { get; }
-
         public UserActionLogRepository(string connectionString) : base(connectionString)
         {
-            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
-            TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
         public UserActionLogRepository(IDbConnection dbConnection) : base(dbConnection)
         {
-            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
-            TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
         public string QuerySearch(Dictionary<string, string> models)
@@ -36,6 +30,25 @@ namespace Vakapay.Repositories.Mysql
             return sQuery;
         }
 
+        
+        public List<UserActionLog> GetListLog(string sql, int skip = 0, int take = 10)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var result = Connection.Query<UserActionLog>(sql).Skip(skip).Take(take).ToList();
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("UserRepository =>> GetListLog fail: " + e.Message);
+                return null;
+            }
+        }
+        
         public UserActionLog FindWhere(string sql)
         {
             try
@@ -53,6 +66,5 @@ namespace Vakapay.Repositories.Mysql
                 return null;
             }
         }
-
     }
 }

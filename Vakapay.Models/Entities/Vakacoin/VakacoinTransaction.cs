@@ -10,7 +10,18 @@ namespace Vakapay.Models.Entities
 
         public string GetStringAmount()
         {
-            return string.Format("{0:0.0000}", Amount) + "VAKA";
+            return string.Format("{0:0.0000}", Amount) + nameof(CryptoCurrency.VKC);
         }
     }
+    
+    [Table("VakacoinDepositTransaction")]
+    public class VakacoinDepositTransaction : VakacoinTransaction
+    {
+        public string TrxId { get; set; }
+    }
+    
+	[Table("VakacoinWithdrawTransaction")]
+	public class VakacoinWithdrawTransaction : VakacoinTransaction
+	{
+	}
 }

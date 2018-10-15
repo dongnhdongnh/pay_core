@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -118,14 +119,14 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                         }
                     }
 
-                    if (updateUser.Status == Status.StatusSuccess)
+                    if (updateUser.Status == Status.STATUS_SUCCESS)
                     {
                         //save action log
                         try
                         {
                             _userBusiness.AddActionLog(new UserActionLog
                             {
-                                ActionName = ActionLog.Avatar,
+                                ActionName = ActionLog.AVATAR,
                                 Description = fileName,
                                 Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
                                 UserId = userCheck.Id,
@@ -140,7 +141,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
 
                         return ReturnObject.ToJson(new ReturnObject
                         {
-                            Status = Status.StatusSuccess,
+                            Status = Status.STATUS_SUCCESS,
                             Message = "Upload avatar success ",
                             Data = link
                         });
@@ -193,7 +194,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                     var dataInfo = Vakapay.Models.Entities.User.FromJson(resultData.Data);
                     _userBusiness.AddActionLog(new UserActionLog
                     {
-                        ActionName = ActionLog.Login,
+                        ActionName = ActionLog.LOGIN,
                         Description = dataInfo.Email,
                         Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
                         UserId = dataInfo.Id,
@@ -229,7 +230,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 var userModel = _userBusiness.getUserInfo(query);
                 var success = new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Data = Vakapay.Models.Entities.User.ToJson(userModel)
                 };
                 return ReturnObject.ToJson(success);
@@ -295,7 +296,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
                 {
                     _userBusiness.AddActionLog(new UserActionLog
                     {
-                        ActionName = ActionLog.UpdateProfile,
+                        ActionName = ActionLog.UPDATE_PROFILE,
                         Description = userModel.Email,
                         Ip = Request.HttpContext.Connection.RemoteIpAddress.ToString(),
                         UserId = userModel.Id,
@@ -361,7 +362,7 @@ namespace Vakaxa.VakaxaIdAPI.Controllers
         {
             var errorData = new ReturnObject
             {
-                Status = Status.StatusError,
+                Status = Status.STATUS_ERROR,
                 Message = message
             };
             return ReturnObject.ToJson(errorData);

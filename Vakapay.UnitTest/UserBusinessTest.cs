@@ -55,10 +55,8 @@ namespace Vakapay.UnitTest
                 {
                     {"Email", ""}
                 };
-            var resultCreated = userBus.getUserInfo(search);
+            var resultCreated = userBus.GetUserInfo(search);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
-           
-
         }
 
         [Test]
@@ -82,7 +80,7 @@ namespace Vakapay.UnitTest
                 UserId = "aaaaaaaaaa",
                 CreatedAt = (int) CommonHelper.GetUnixTimestamp()
             };
-            var resultCreated = userBus.AddActionLog(log);
+            var resultCreated = userBus.AddActionLog(log.Description, log.UserId, log.ActionName, log.Ip);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }
@@ -100,13 +98,16 @@ namespace Vakapay.UnitTest
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             var userBus = new UserBusiness.UserBusiness(PersistenceFactory);
             var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
-            var resultCreated = userBus.Login(walletBusiness,
+            var resultCreated = userBus.Login(
                 new User {Email = "ngochuan2212@gmail.com", PhoneNumber = "+84988478266", FullName = "Ngo Ngoc Huan"});
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
 
-            resultCreated = userBus.Login(walletBusiness,
-                new User {Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"});
+            resultCreated = userBus.Login(
+                new User
+                {
+                    Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"
+                });
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }

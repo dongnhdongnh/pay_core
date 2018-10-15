@@ -6,10 +6,6 @@ namespace Vakapay.Models.Entities
     [Table("User")]
     public class User
     {
-        public User()
-        {
-        }
-
         public string Id { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
@@ -29,10 +25,18 @@ namespace Vakapay.Models.Entities
         public string Status { get; set; }
         public int CreatedAt { get; set; }
         public int UpdatedAt { get; set; }
+        public string CurrencyKey { get; set; }
+        public string TimezoneKey { get; set; }
+        public string Notifications { get; set; }
+        public string SecretAuthToken { get; set; }
+        public int Verification { get; set; }
+        public int IsLock { get; set; }
+        public bool TwoFactor { get; set; }
 
         public static User FromJson(string json) =>
-            JsonConvert.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
+            JsonHelper.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
+
         public static string ToJson(User self) =>
-            JsonConvert.SerializeObject(self, JsonHelper.ConvertSettings);
+            JsonHelper.SerializeObject(self, JsonHelper.ConvertSettings);
     }
 }

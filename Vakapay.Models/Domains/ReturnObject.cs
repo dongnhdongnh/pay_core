@@ -8,10 +8,10 @@ namespace Vakapay.Models.Domains
         public string Message { get; set; }
         public string Data { get; set; }
 
-        public static string ToJson(ReturnObject self) =>
-            JsonConvert.SerializeObject(self, JsonHelper.ConvertSettings);
+        public string ToJson() =>
+            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
 
         public static ReturnObject FromJson(string json) =>
-            JsonConvert.DeserializeObject<ReturnObject>(json, JsonHelper.ConvertSettings);
+            JsonHelper.DeserializeObject<ReturnObject>(json, JsonHelper.ConvertSettings);
     }
 }

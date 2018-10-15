@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
 
@@ -62,7 +64,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 //Console.WriteLine("END TIME " + CacheHelper.GetCacheString("cache"));
                 return new ReturnObject
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Message = "Not found Transaction"
                 };
             }
@@ -80,12 +82,12 @@ namespace Vakapay.BlockchainBusiness.Base
             {
                 //lock transaction for process
                 var resultLock = await repoQuery.LockForProcess(pendingTransaction);
-                if (resultLock.Status == Status.StatusError)
+                if (resultLock.Status == Status.STATUS_ERROR)
                 {
                     transactionScope.Rollback();
                     return new ReturnObject
                     {
-                        Status = Status.StatusSuccess,
+                        Status = Status.STATUS_SUCCESS,
                         Message = "Cannot Lock For Process"
                     };
                 }
@@ -98,7 +100,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 transactionScope.Rollback();
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.ToString()
                 };
             }
@@ -120,7 +122,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 pendingTransaction.Hash = sendTransaction.Data;
 
                 //create database email when send success
-                if (sendTransaction.Status == Status.StatusSuccess)
+                if (sendTransaction.Status == Status.STATUS_SUCCESS)
                 {
                     var email = GetEmailByTransaction(pendingTransaction);
                     if (email != null)
@@ -135,12 +137,12 @@ namespace Vakapay.BlockchainBusiness.Base
                 }
 
                 var result = await repoQuery.SafeUpdate(pendingTransaction);
-                if (result.Status == Status.StatusError)
+                if (result.Status == Status.STATUS_ERROR)
                 {
                     transactionDbSend.Rollback();
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Cannot Save Transaction Status"
                     };
                 }
@@ -149,7 +151,8 @@ namespace Vakapay.BlockchainBusiness.Base
                 return new ReturnObject
                 {
                     Status = sendTransaction.Status,
-                    Message = sendTransaction.Message
+                    Message = sendTransaction.Message,
+                    Data = sendTransaction.Data
                 };
             }
             catch (Exception e)
@@ -186,12 +189,12 @@ namespace Vakapay.BlockchainBusiness.Base
                 if (walletCheck == null)
                     return new ReturnObject
                     {
-                        Status = Status.StatusError,
+                        Status = Status.STATUS_ERROR,
                         Message = "Wallet Not Found"
                     };
 
                 var resultsRPC = rpcClass.CreateNewAddress(other);
-                if (resultsRPC.Status == Status.StatusError)
+                if (resultsRPC.Status == Status.STATUS_ERROR)
                     return resultsRPC;
 
                 var address = resultsRPC.Data;
@@ -212,16 +215,17 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 //update address into wallet db
                 //wallet.WalletBusiness(VakapayRepositoryFactory);
-                var updateWallet =
-                    wallet.UpdateAddressForWallet(walletId, address);
-                if (updateWallet.Status == Status.StatusError)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusError,
-                        Message = "Update address fail to WalletDB"
-                    };
-                }
+                //TODO check remove UpdateAddressForWallet
+//                var updateWallet =
+//                    wallet.UpdateAddressForWallet(walletId, address);
+//                if (updateWallet.Status == Status.StatusError)
+//                {
+//                    return new ReturnObject
+//                    {
+//                        Status = Status.StatusError,
+//                        Message = "Update address fail to WalletDB"
+//                    };
+//                }
 
                 //get all address = null with same networkName of walletId
                 //var wallets =
@@ -251,13 +255,13 @@ namespace Vakapay.BlockchainBusiness.Base
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
         }
 
-        public virtual async Task<ReturnObject> ScanBlockAsync<TWithDraw, TDeposit, TBlockInfor, TTransactionInfor>(
+        public virtual async Task<ReturnObject> ScanBlockAsync<TWithDraw, TDeposit, TBlockResponse, TTransaction>(
             string networkName,
             IWalletBusiness wallet,
             IRepositoryBlockchainTransaction<TWithDraw> withdrawRepoQuery,
@@ -265,8 +269,8 @@ namespace Vakapay.BlockchainBusiness.Base
             IBlockchainRPC rpcClass)
             where TWithDraw : BlockchainTransaction
             where TDeposit : BlockchainTransaction
-            where TTransactionInfor : ITransactionInfor
-            where TBlockInfor : IBlockInfor<TTransactionInfor>
+            where TBlockResponse : EthereumBlockResponse
+            where TTransaction : EthereumTransactionResponse
         {
             try
             {
@@ -281,7 +285,7 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 //get blockNumber:
                 var _result = rpcClass.GetBlockNumber();
-                if (_result.Status == Status.StatusError)
+                if (_result.Status == Status.STATUS_ERROR)
                 {
                     throw new Exception("Cant GetBlockNumber");
                 }
@@ -295,20 +299,20 @@ namespace Vakapay.BlockchainBusiness.Base
                 if (lastBlock >= blockNumber)
                     lastBlock = blockNumber;
                 Console.WriteLine("SCAN FROM " + lastBlock + "___" + blockNumber);
-                List<TBlockInfor> blocks = new List<TBlockInfor>();
+                List<TBlockResponse> blocks = new List<TBlockResponse>();
                 for (int i = lastBlock; i <= blockNumber; i++)
                 {
                     if (i < 0) continue;
                     _result = rpcClass.GetBlockByNumber(i);
-                    if (_result.Status == Status.StatusError)
+                    if (_result.Status == Status.STATUS_ERROR)
                     {
                         return _result;
                     }
 
                     if (_result.Data == null)
                         continue;
-                    TBlockInfor _block = JsonHelper.DeserializeObject<TBlockInfor>(_result.Data.ToString());
-                    if (_block.transactions.Length > 0)
+                    TBlockResponse _block = JsonHelper.DeserializeObject<TBlockResponse>(_result.Data.ToString());
+                    if (_block.TransactionsResponse.Length > 0)
                     {
                         blocks.Add(_block);
                     }
@@ -329,7 +333,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 Console.WriteLine("Scan withdrawPendingTransactions");
                 if (withdrawPendingTransactions.Count > 0)
                 {
-                    foreach (TBlockInfor _block in blocks)
+                    foreach (TBlockResponse _block in blocks)
                     {
                         if (withdrawPendingTransactions.Count <= 0)
                         {
@@ -340,16 +344,16 @@ namespace Vakapay.BlockchainBusiness.Base
                         for (int i = withdrawPendingTransactions.Count - 1; i >= 0; i--)
                         {
                             BlockchainTransaction _currentPending = withdrawPendingTransactions[i];
-                            ITransactionInfor _trans =
-                                _block.transactions.SingleOrDefault(x => x.hash.Equals(_currentPending.Hash));
+                            EthereumTransactionResponse _trans =
+                                _block.TransactionsResponse.SingleOrDefault(x => x.Hash.Equals(_currentPending.Hash));
                             int _blockNumber = -1;
                             int _fee = 0;
 
                             if (_trans != null)
                             {
-                                _trans.blockNumber.HexToInt(out _blockNumber);
-                                if (_trans.fee != null)
-                                    _trans.fee.HexToInt(out _fee);
+                                _trans.BlockNumber.HexToInt(out _blockNumber);
+                                if (_trans.Fee != null)
+                                    _trans.Fee.HexToInt(out _fee);
                                 Console.WriteLine("HELLO " + _currentPending.Hash);
                                 _currentPending.BlockNumber = _blockNumber;
                                 _currentPending.Fee = _fee;
@@ -367,12 +371,12 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 Console.WriteLine("Scan withdrawPendingTransactions Done");
                 //check wallet balance and update 
-                foreach (TBlockInfor _block in blocks)
+                foreach (TBlockResponse _block in blocks)
                 {
-                    foreach (ITransactionInfor _trans in _block.transactions)
+                    foreach (EthereumTransactionResponse _trans in _block.TransactionsResponse)
                     {
-                        string _toAddress = _trans.to;
-                        string _fromAddress = _trans.from;
+                        string _toAddress = _trans.To;
+                        string _fromAddress = _trans.From;
                         if (!wallet.CheckExistedAddress(_toAddress))
                         {
                             //logger.Info(to + " is not exist in Wallet!!!");
@@ -382,7 +386,7 @@ namespace Vakapay.BlockchainBusiness.Base
                         {
                             //Console.WriteLine("value" + _trans.value);
                             int _transaValue = 0;
-                            if (_trans.value.HexToInt(out _transaValue))
+                            if (_trans.Value.HexToInt(out _transaValue))
                             {
                                 wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, networkName);
                             }
@@ -393,7 +397,7 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 return new ReturnObject
                 {
-                    Status = Status.StatusCompleted,
+                    Status = Status.STATUS_COMPLETED,
                     Message = "Scan done"
                 };
             }
@@ -401,7 +405,7 @@ namespace Vakapay.BlockchainBusiness.Base
             {
                 return new ReturnObject
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -514,7 +518,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     //                    SentOrReceived = sendOrReceiver,
                     Amount = amount,
                     TransactionId = transactionId,
-                    Status = Status.StatusPending,
+                    Status = Status.STATUS_PENDING,
                     CreatedAt = currentTime,
                     UpdatedAt = currentTime
                 };

@@ -7,6 +7,7 @@ using Vakapay.Configuration;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.VakacoinBusiness;
@@ -65,9 +66,9 @@ namespace Vakapay.ScanWallet
                                 try
                                 {
                                     var pass = CommonHelper.RandomString(15);
-                                    switch (wallet.NetworkName)
+                                    switch (wallet.Currency)
                                     {
-                                        case NetworkName.ETH:
+                                        case CryptoCurrency.ETH:
                                             Console.WriteLine("make eth");
                                             task = ethereumBusiness.CreateAddressAsync<EthereumAddress>(walletBusiness,
                                                 ethAddressRepos,
@@ -75,14 +76,16 @@ namespace Vakapay.ScanWallet
                                                 wallet.Id, pass);
                                             break;
 
-                                        case NetworkName.BTC:
+                                        case CryptoCurrency.BTC:
                                             Console.WriteLine("make btc");
                                             task = bitcoinBusiness.CreateAddressAsync<BitcoinAddress>(walletBusiness,
-                                                btcAddressRepos, new BitcoinRpc(VakapayConfiguration.GetBitcoinNode()),
+                                                btcAddressRepos,
+                                                new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(), "",
+                                                    ""), //TODO Username Password
                                                 wallet.Id, pass);
                                             break;
 
-                                        case NetworkName.VAKA:
+                                        case CryptoCurrency.VKC:
                                             Console.WriteLine("make vaka");
                                             task = vakaBusiness.CreateAddressAsync<VakacoinAccount>(walletBusiness,
                                                 vakaAddressRepos,

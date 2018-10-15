@@ -10,7 +10,7 @@ namespace Vakapay.UnitTest
         [SetUp]
         public void Setup()
         {
-            btcRpc = new BitcoinRpc("HELOO");
+            btcRpc = new BitcoinRpc("HELOO", "", "");
         }
 
         [Test]

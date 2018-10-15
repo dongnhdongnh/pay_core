@@ -6,15 +6,14 @@ using Newtonsoft.Json.Linq;
 
 public class JsonHelper
 {
-    public static T DeserializeObject<T>(string json)
+    public static T DeserializeObject<T>(string json, JsonSerializerSettings setting = null)
     {
-        return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(json);
+        return JsonConvert.DeserializeObject<T>(json, setting);
     }
 
-    // public static string SerializeObject(Object obj)
-    public static string SerializeObject(Object obj)
+    public static string SerializeObject(Object obj, JsonSerializerSettings setting = null)
     {
-        return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+        return JsonConvert.SerializeObject(obj, setting);
     }
         
     public static readonly JsonSerializerSettings ConvertSettings = new JsonSerializerSettings
@@ -25,27 +24,4 @@ public class JsonHelper
             new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
         }
     };
-    public static bool IsValidJson(string strInput)
-    {
-        strInput = strInput.Trim();
-        if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
-            (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
-        {
-            try
-            {
-                var obj = JToken.Parse(strInput);
-                return true;
-            }
-            catch (Exception ex) //some other exception
-            {
-                Console.WriteLine(ex.ToString());
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-
-    }
 }

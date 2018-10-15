@@ -10,6 +10,7 @@ namespace Vakapay.Models.Repositories
 		IWalletRepository GetWalletRepository(IDbConnection dbConnection);
 		IUserRepository GetUserRepository(IDbConnection dbConnection);
 		IUserActionLogRepository GetUserActionLogRepository(IDbConnection dbConnection);
+		IWebSessionRepository GetWebSessionRepository(IDbConnection dbConnection);
 		IEthereumAddressRepository GetEthereumAddressRepository(IDbConnection dbConnection);
 		IEthereumWithdrawTransactionRepository GetEthereumWithdrawTransactionRepository(IDbConnection dbConnection);
 		IEthereumDepositTransactionRepository GetEthereumDepositeTransactionRepository(IDbConnection dbConnection);
@@ -20,5 +21,6 @@ namespace Vakapay.Models.Repositories
 		IVakacoinWithdrawTransactionRepository GetVakacoinWithdrawTransactionRepository(IDbConnection dbConnection);
 		IBitcoinDepositTransactionRepository GetBitcoinDepositTransactionRepository(IDbConnection dbConnection);
 		ISendEmailRepository GetSendEmailRepository(IDbConnection dbConnection);
+		ISendSmsRepository GetSendSmsRepository(IDbConnection dbConnection);
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Vakapay.BlockchainBusiness.Base;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -18,8 +19,7 @@ namespace Vakapay.EthereumBusiness
 			try
 			{
 				var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-				blockchainTransaction.Id = CommonHelper.GenerateUuid();
-				blockchainTransaction.Status = Status.StatusPending;
+				blockchainTransaction.Status = Status.STATUS_PENDING;
 				blockchainTransaction.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
 				blockchainTransaction.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
 				return ethereumwithdrawRepo.Insert(blockchainTransaction);
@@ -29,7 +29,7 @@ namespace Vakapay.EthereumBusiness
 
 				return new ReturnObject
 				{
-					Status = Status.StatusError,
+					Status = Status.STATUS_ERROR,
 					Message = e.Message
 				};
 			}
