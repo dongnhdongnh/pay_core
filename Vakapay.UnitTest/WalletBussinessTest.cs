@@ -218,27 +218,27 @@ namespace Vakapay.UnitTest
 			Assert.AreEqual(Status.STATUS_SUCCESS, resultTest.Status);
 		}
 
-		[TestCase("8abc6056-9c81-4b6e-bb22-81f0ab0e0a28")]
-		public void GetHistory(string walletID)
-		{
-			var repositoryConfig = new RepositoryConfiguration
-			{
-				ConnectionString = VakapayConfig.ConnectionString
-			};
+		//[TestCase("8abc6056-9c81-4b6e-bb22-81f0ab0e0a28")]
+		//public void GetHistory(string walletID)
+		//{
+		//	var repositoryConfig = new RepositoryConfiguration
+		//	{
+		//		ConnectionString = VakapayConfig.ConnectionString
+		//	};
 
-			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-			_walletBusiness =
-					new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
+		//	var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+		//	_walletBusiness =
+		//			new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
 
-			var wallet = _walletBusiness.GetWalletByID(walletID);
-            int numberDB;
-			if (wallet == null)
-			{
-				Console.WriteLine("wallet null");
-			}
-			else
-				_walletBusiness.GetHistory(out numberDB,wallet, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
-		}
+		//	var wallet = _walletBusiness.GetWalletByID(walletID);
+  //          int numberDB;
+		//	if (wallet == null)
+		//	{
+		//		Console.WriteLine("wallet null");
+		//	}
+		//	else
+		//		_walletBusiness.GetHistory(out numberDB,wallet, 1, 3, new string[] { nameof(BlockchainTransaction.Amount) });
+		//}
 
 		//[Test]
 		//public void SendTransaction_GetHash()
