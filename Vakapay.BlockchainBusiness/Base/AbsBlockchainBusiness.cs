@@ -178,7 +178,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="other"></param>
         /// <typeparam name="TBlockchainAddress"></typeparam>
         /// <returns></returns>
-        public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(IWalletBusiness wallet,
+        public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(
             IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
             string other = "") where TBlockchainAddress : BlockchainAddress
         {
@@ -217,16 +217,6 @@ namespace Vakapay.BlockchainBusiness.Base
 
                 //update address into wallet db
                 //wallet.WalletBusiness(VakapayRepositoryFactory);
-                var updateWallet =
-                    wallet.SetHasAddressForWallet(walletId);
-                if (updateWallet.Status == Status.STATUS_ERROR)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Update address fail to WalletDB"
-                    };
-                }
 
                 return new ReturnObject
                 {

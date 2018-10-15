@@ -4,7 +4,7 @@ namespace Vakapay.Models.Domains
 {
     public abstract class MultiThreadUpdateEntity
     {
-        public string Id { get; } = CommonHelper.GenerateUuid();
+        public string Id { get; set; } = CommonHelper.GenerateUuid();
         public int IsProcessing { get; set; }
         public int Version { get; set; }
         public string Status { get; set; }

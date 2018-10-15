@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -12,7 +13,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class WalletRepository : MySqlBaseRepository<Wallet>, IWalletRepository
+	public class WalletRepository : MultiThreadUpdateEntityRepository<Wallet>, IWalletRepository
 	{
 //		const string TABLENAME = "wallet";
 		public WalletRepository(string connectionString) : base(connectionString)
@@ -342,6 +343,11 @@ namespace Vakapay.Repositories.Mysql
 				Console.WriteLine(e);
 				return null;
 			}
+		}
+
+		public Task<ReturnObject> SafeUpdate(Wallet row)
+		{
+			return base.SafeUpdate(row, new[] {nameof(row.AddressCount)});
 		}
 	}
 }

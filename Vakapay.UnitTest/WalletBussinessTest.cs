@@ -110,7 +110,7 @@ namespace Vakapay.UnitTest
             string pass = "password";
             //	var resultTest = _ethBus.CreateNewAddAddress(wallet);
             var outPut =
-                await _ethBus.CreateAddressAsync<EthereumAddress>(_walletBusiness, ethAddressRepos, RPCClass, walletId,
+                await _ethBus.CreateAddressAsync<EthereumAddress>(ethAddressRepos, RPCClass, walletId,
                     pass);
             Assert.IsNotNull(outPut);
         }
