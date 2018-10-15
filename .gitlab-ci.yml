@@ -23,7 +23,8 @@ builder:
     - setup_docker
     - build builder
   only:
-    - branches
+    - master
+    - release
 
 sendbtc:
   stage: build_program
@@ -34,7 +35,8 @@ sendbtc:
     - setup_docker
     - build sendbtc
   only:
-    - branches
+    - master
+    - release
 
 review:
   stage: review
