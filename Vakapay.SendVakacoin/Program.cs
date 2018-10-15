@@ -33,7 +33,7 @@ namespace Vakapay.SendVakacoin
                     ConnectionString = VakapayConfiguration.DefaultSqlConnection
                 };
                 
-                for(var i = 0; i < 20; i++)
+                for(var i = 0; i < 1; i++)
                 {
                     var ts = new Thread(()=>RunSend(repositoryConfig, nodeUrl));
                     ts.Start();

@@ -159,6 +159,11 @@ namespace Vakapay.WalletBusiness
             //return null;
         }
 
+        public bool CheckExistedAddress(string toAddress)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Find all wallet of user
         /// </summary>
@@ -542,7 +547,7 @@ namespace Vakapay.WalletBusiness
                 }
                 else
                 {
-                    User user = userBusiness.getUserByID(wallet.UserId);
+                    User user = userBusiness.GetUserById(wallet.UserId);
                     if (user != null)
                     {
                         var currentTime = CommonHelper.GetUnixTimestamp();
@@ -712,25 +717,30 @@ namespace Vakapay.WalletBusiness
         /// <param name="offet">-1 for not config</param>
         /// <param name="limit">-1 for not config</param>
         /// <param name="orderBy">null for not config</param>
-        public void GetHistory(Wallet wallet, int offet = -1, int limit = -1, string[] orderBy = null)
+        public List<BlockchainTransaction> GetHistory(out int numberData,Wallet wallet, int offet = -1, int limit = -1, string[] orderBy = null)
         {
+            numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
+            Console.WriteLine(wallet.Currency);
+           
             switch (wallet.Currency)
             {
                 case CryptoCurrency.ETH:
-                    output = ethereumBussiness.GetWithdrawHistory(offet, limit, orderBy);
+                    
+                   // output = ethereumBussiness.GetAllHistory(out numberData, wallet.Address,offet, limit, orderBy);
                     break;
                 case CryptoCurrency.VKC:
-                    output = vakacoinBussiness.GetWithdrawHistory(offet, limit, orderBy);
+                   // output = vakacoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
                     break;
                 case CryptoCurrency.BTC:
-                    output = bitcoinBussiness.GetWithdrawHistory(offet, limit, orderBy);
+                  //  output = bitcoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
                     break;
                 default:
                     break;
             }
-
+           
             Console.WriteLine("get history " + wallet.Currency + "_count=_" + output.Count);
+            return output;
         }
 
         public Wallet FindByAddressAndNetworkName(string addr, string networkName)

@@ -166,15 +166,15 @@ namespace Vakapay.Repositories.Mysql
 				BlockchainAddress blockchainAddress = null;
 				switch (networkName)
 				{
-					case NetworkName.BTC:
+					case CryptoCurrency.BTC:
 						blockchainAddress = new BitcoinAddressRepository(Connection).FindByAddress(address);
 						break;
 
-					case NetworkName.ETH:
+					case CryptoCurrency.ETH:
 						blockchainAddress = new EthereumAddressRepository(Connection).FindByAddress(address);
 						break;
 
-					case NetworkName.VAKA:
+					case CryptoCurrency.VKC:
 						blockchainAddress = new VakacoinAccountRepository(Connection).FindByAddress(address);
 						break;
 				}
@@ -202,17 +202,17 @@ namespace Vakapay.Repositories.Mysql
 				List<BlockchainAddress> blockchainAddresses = null;
 				switch (networkName)
 				{
-					case NetworkName.BTC:
+					case CryptoCurrency.BTC:
 						blockchainAddresses = new BitcoinAddressRepository(Connection).FindByWalletId(walletId)
 							.ToList<BlockchainAddress>();
 						break;
 
-					case NetworkName.ETH:
+					case CryptoCurrency.ETH:
 						blockchainAddresses = new EthereumAddressRepository(Connection).FindByWalletId(walletId)
 							.ToList<BlockchainAddress>();
 						break;
 
-					case NetworkName.VAKA:
+					case CryptoCurrency.VKC:
 						blockchainAddresses = new VakacoinAccountRepository(Connection).FindByWalletId(walletId)
 							.ToList<BlockchainAddress>();
 						break;

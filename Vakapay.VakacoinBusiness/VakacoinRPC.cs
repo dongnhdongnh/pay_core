@@ -366,7 +366,7 @@ namespace Vakapay.VakacoinBusiness
                 var rest = DefaultApi.GetInfo().Result;
                 return new ReturnObject()
                 {
-                    Status = Status.StatusSuccess,
+                    Status = Status.STATUS_SUCCESS,
                     Data = rest.ToString()
                 };
             }
@@ -374,7 +374,7 @@ namespace Vakapay.VakacoinBusiness
             {
                 return new ReturnObject()
                 {
-                    Status = Status.StatusError,
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }

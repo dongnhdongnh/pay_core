@@ -34,6 +34,7 @@ namespace Vakapay.Commons.Helpers
 			return sb.ToString();
 		}
 
+		
 		public static bool ValidateGuid(string guidString)
 		{
 			return Guid.TryParse(guidString, out var _);

@@ -17,5 +17,4 @@ namespace Vakapay.Models.Entities
             return Password;
         }
     }
-    }
 }

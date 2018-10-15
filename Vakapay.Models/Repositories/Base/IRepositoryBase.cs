@@ -12,7 +12,8 @@ namespace Vakapay.Models.Repositories.Base
         List<TModel> FindBySql(string sqlString);
 
 		ReturnObject ExcuteSQL(string sqlString, object transaction = null);
-		//ReturnObject SafeUpdate(TModel objectUpdate);
+        int ExcuteCount(string sql);
+        //ReturnObject SafeUpdate(TModel objectUpdate);
 
-	}
+    }
 }

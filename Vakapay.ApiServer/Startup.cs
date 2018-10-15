@@ -18,7 +18,8 @@ namespace Vakapay.ApiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvcCore()
+         
+            services.AddMvcCore().AddRazorViewEngine()
                 .AddAuthorization()
                 .AddJsonFormatters();
 
@@ -40,10 +41,12 @@ namespace Vakapay.ApiServer
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true
                 });
+
             }
             else
             {
@@ -61,16 +64,7 @@ namespace Vakapay.ApiServer
                     .AllowCredentials();
             });
 
-            /*app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-
-                routes.MapSpaFallbackRoute(
-                    name: "spa-fallback",
-                    defaults: new {controller = "Home", action = "Index"});
-            });*/
+           
             app.UseMvc();
         }
     }

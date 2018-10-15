@@ -39,7 +39,7 @@ namespace Vakapay.UserBusiness
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public ReturnObject GetActionLog(string idUser, int offset , int limit)
+        public ReturnObject GetActionLog(string idUser, int offset, int limit)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace Vakapay.UserBusiness
                     {
                         {"UserId", idUser}
                     };
-                
+
                 var resultGetLog = logRepository.GetListLog(logRepository.QuerySearch(search), offset, limit);
 
                 return new ReturnObject
@@ -83,7 +83,7 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// save action log user
         /// </summary>
-        /// <param name="email"></param>
+        /// <param name="description"></param>
         /// <param name="idUser"></param>
         /// <param name="actionLog"></param>
         /// <param name="ip"></param>
@@ -116,6 +116,50 @@ namespace Vakapay.UserBusiness
                 var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
 
                 return logRepository.Insert(log);
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+
+        /// <summary>
+        /// save web session
+        /// </summary>
+        /// <param name="webSession"></param>
+        /// <returns></returns>
+        public ReturnObject SaveWebSession(WebSession webSession)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(webSession.UserId);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Can't User"
+                    };
+                }
+
+                var logRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+
+                if (string.IsNullOrEmpty(webSession.Id))
+                {
+                    webSession.Id = CommonHelper.GenerateUuid();
+                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                    return logRepository.Insert(webSession);
+                }
+                else
+                {
+                    webSession.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                    return logRepository.Update(webSession);
+                }
             }
             catch (Exception e)
             {
@@ -163,9 +207,7 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// created User and wallet when login first
         /// </summary>
-        /// <param name="email"></param>
-        /// <param name="phone"></param>
-        /// <param name="fullName"></param>
+        /// <param name="userModel"></param>
         /// <returns></returns>
         public ReturnObject Login(User userModel)
         {
@@ -257,7 +299,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var sendSmsRepository = vakapayRepositoryFactory.GetSendSmsRepository(ConnectionDb);
+                var sendSmsRepository = new SendSmsBusiness.SendSmsBusiness(vakapayRepositoryFactory, false);
 
                 var newSms = new SmsQueue
                 {
@@ -265,10 +307,10 @@ namespace Vakapay.UserBusiness
                     Status = Status.STATUS_PENDING,
                     To = user.PhoneNumber,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
-                    TextSend = "Vakaxa security code is: " + code,
+                    TextSend = "VaKaXaPay security code is: " + code,
                 };
 
-                var resultSms = sendSmsRepository.Insert(newSms);
+                var resultSms = sendSmsRepository.CreateSmsQueueAsync(newSms);
 
                 if (resultSms.Status == Status.STATUS_ERROR)
                 {
@@ -398,7 +440,7 @@ namespace Vakapay.UserBusiness
         }*/
 
         // find UserInfo by id
-        public User getUserByID(string id)
+        public User GetUserById(string id)
         {
             try
             {
@@ -419,7 +461,7 @@ namespace Vakapay.UserBusiness
         //{
         //    {"Email", email}
         //};
-        public User getUserInfo(Dictionary<string, string> search)
+        public User GetUserInfo(Dictionary<string, string> search)
         {
             try
             {
@@ -431,6 +473,57 @@ namespace Vakapay.UserBusiness
             {
                 Console.WriteLine(e.ToString());
                 return null;
+            }
+        }
+
+        // find WebSession
+        // new Dictionary<string, string>
+        //{
+        //    {"Ip", ip}
+        //};
+        public WebSession GetWebSession(Dictionary<string, string> search)
+        {
+            try
+            {
+                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+                var webSession = webSessionRepository.FindWhere(webSessionRepository.QuerySearch(search));
+                return webSession;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return null;
+            }
+        }
+
+        public ReturnObject GetListWebSession(string idUser, int offset, int limit)
+        {
+            try
+            {
+                var webSessionRepository = vakapayRepositoryFactory.GetWebSessionRepository(ConnectionDb);
+
+                var search =
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", idUser}
+                    };
+
+                var resultGetLog =
+                    webSessionRepository.GetListWebSession(webSessionRepository.QuerySearch(search), offset, limit);
+
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = JsonConvert.SerializeObject(resultGetLog)
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
             }
         }
     }

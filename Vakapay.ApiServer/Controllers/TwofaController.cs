@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
@@ -61,7 +62,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var query = new Dictionary<string, string> {{"Email", email}};
 
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -92,6 +93,10 @@ namespace Vakaxa.ApiServer.Controllers
 
                             userModel.Verification = (int) option;
 
+                            _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                                ActionLog.UpdateOptionVerification,
+                                HelpersApi.getIp(Request));
+
                             return _userBusiness.UpdateProfile(userModel).ToJson();
                         }
                     }
@@ -116,7 +121,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
@@ -142,6 +147,10 @@ namespace Vakaxa.ApiServer.Controllers
                     {
                         userModel.TwoFactor = true;
 
+                        _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                            ActionLog.TwofaEnable,
+                            HelpersApi.getIp(Request));
+
                         return _userBusiness.UpdateProfile(userModel).ToJson();
                     }
                 }
@@ -164,7 +173,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
 
                 if (userModel != null)
@@ -206,7 +215,7 @@ namespace Vakaxa.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-                var userModel = _userBusiness.getUserInfo(query);
+                var userModel = _userBusiness.GetUserInfo(query);
 
 
                 if (userModel != null)
