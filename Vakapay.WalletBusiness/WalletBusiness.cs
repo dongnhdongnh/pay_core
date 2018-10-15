@@ -833,7 +833,11 @@ namespace Vakapay.WalletBusiness
             return true;
         }
 
-        public async Task<ReturnObject> CreateWalletAsync()
+        /// <summary>
+        /// Create Address for wallet when wallet status is pending
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ReturnObject> CreateAddressAsync()
         {
             var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
             var pendingWallet = walletRepository.FindRowPending();
