@@ -62,7 +62,7 @@ namespace Vakapay.VakacoinBusiness
             try
             {
                 var account = DefaultApi.GetAccount(new GetAccountRequest() {AccountName = accountName}).Result;
-                return !account.AccountName.Equals("");
+                return !string.IsNullOrEmpty(account.AccountName);
             }
             catch (Exception e)
             {
@@ -357,6 +357,27 @@ namespace Vakapay.VakacoinBusiness
         public ReturnObject FindTransactionByHash(string hash)
         {
             throw new NotImplementedException();
+        }
+
+        public ReturnObject GetInfo()
+        {
+            try
+            {
+                var rest = DefaultApi.GetInfo().Result;
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = rest.ToString()
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
         }
     }
 }

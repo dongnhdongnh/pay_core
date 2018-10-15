@@ -1,14 +1,16 @@
-﻿namespace Vakapay.Models.Entities
+﻿using Vakapay.Models.Domains;
+
+namespace Vakapay.Models.Entities
 {
-    public class SmsQueue
+    public class SmsQueue : MultiThreadUpdateEntity
     {
-        public string Id { get; set; }
+//        public string Id { get; set; }
         public string TextSend { get; set; }
         public string To { get; set; }
-        public string Status { get; set; }
-        public int CreatedAt { get; set; }
-        public int UpdatedAt { get; set; }
-        public int Version { get; set; }
-        public int InProcess { get; set; }
+//        public string Status { get; set; }
+//        public int CreatedAt { get; set; }
+//        public int UpdatedAt { get; set; }
+//        public int Version { get; set; }
+//        public int InProcess { get; set; }
     }
 }

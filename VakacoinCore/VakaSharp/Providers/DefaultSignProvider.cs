@@ -1,10 +1,12 @@
 ﻿using Cryptography.ECDSA;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using VakaSharp.Helpers;
 using System;
+using VakaSharp.Api.v1;
 
 namespace VakaSharp
 {
@@ -58,7 +60,7 @@ namespace VakaSharp
             return Task.FromResult(Keys.Keys.AsEnumerable());
         }
 
-        public Task<IEnumerable<string>> Sign(string chainId, List<string> requiredKeys, byte[] signBytes)
+        public Task<IEnumerable<string>> Sign(string chainId, IEnumerable<string> requiredKeys, byte[] signBytes, IEnumerable<string> abiNames = null)
         {
             var data = new List<byte[]>()
             {

@@ -47,11 +47,25 @@ namespace Vakapay.BitcoinBusiness
             return GetHistory<BitcoinWithdrawTransaction>(withdrawRepo, offset, limit, orderBy);
         }
 
-        public override List<BlockchainTransaction> GetDepositHistory(int offset = -1, int limit = -1,
-            string[] orderBy = null)
+
+
+		//public override List<BlockchainTransaction> GetWithdrawHistory(int offset = -1, int limit = -1, string[] orderBy = null)
+		//{
+		//	var withdrawRepo = VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection);
+		//	return GetHistory<BitcoinWithdrawTransaction>(withdrawRepo, offset, limit, orderBy);
+		//}
+
+		public override List<BlockchainTransaction> GetDepositHistory(int offset = -1, int limit = -1, string[] orderBy = null)
+		{
+			var depositRepo = VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(DbConnection);
+			return GetHistory<BitcoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+		}
+
+        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string walletAdd,int offset = -1, int limit = -1, string[] orderBy = null)
         {
             var depositRepo = VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(DbConnection);
-            return GetHistory<BitcoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+            var withdrawRepo = VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection);
+            return GetAllHistory<BitcoinWithdrawTransaction,BitcoinDepositTransaction>(out numberData,walletAdd, withdrawRepo, depositRepo, offset, limit, orderBy);
         }
     }
 }

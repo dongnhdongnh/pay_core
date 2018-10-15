@@ -11,5 +11,15 @@ namespace Vakapay.Models.Entities
         public string OwnerPublicKey { get; set; }
         public string ActivePrivateKey { get; set; }
         public string ActivePublicKey { get; set; }
+        
+        public override string GetAddress()
+        {
+            return AccountName;
+        }
+
+        public override string GetSecret()
+        {
+            return ActivePrivateKey;
+        }
     }
 }
