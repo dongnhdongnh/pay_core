@@ -141,6 +141,8 @@ namespace Vakapay.WalletBusiness
 //                    Id = CommonHelper.GenerateUuid(),
 //                    Address = null, //Comment Id: NoAddressNeeded
                     Balance = 0,
+                    IsProcessing = 0,
+                    Status = Status.STATUS_PENDING,
                     Version = 0,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     Currency = blockchainNetwork,
