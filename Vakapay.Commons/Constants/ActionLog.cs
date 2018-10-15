@@ -9,6 +9,6 @@ namespace Vakapay.Commons.Constants
         public const string UPDATE_NOTIFICATION = "UpdateNotifications";
         public const string TwofaEnable = "TwofaEnable";
         public const string UpdateOptionVerification = "UpdateOptionVerification";
-        public const string CloseAccount = "CloseAccount";
+        public const string LockScreen = "LockScreen";
     }
 }

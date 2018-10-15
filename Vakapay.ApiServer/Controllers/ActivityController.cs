@@ -86,7 +86,7 @@ namespace Vakapay.ApiServer.Controllers
 
         // POST api/values
         [HttpGet("device-history/get-list")]
-        public string GetWebSession()
+        public string GetConfirmedDevices()
         {
             try
             {
@@ -94,7 +94,6 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return CreateDataError("Offset or limit not found");
-
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);

@@ -183,7 +183,7 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-
+                    
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
                 {
@@ -522,8 +522,7 @@ namespace Vakapay.UserBusiness
                     foreach (var log in resultGetLog)
                     {
                         if (log.Id.Equals(checkConfirmedDevices.Id))
-
-                            log.Current = true;
+                            log.Current = 1;
                     }
                 }
 

@@ -8,7 +8,7 @@ namespace Vakapay.Models.Entities
     public class ConfirmedDevices
     {
         public string Id { get; set; }
-        public bool Current { get; set; }
+        public int Current { get; set; }
         public string Browser { get; set; }
         public string Ip { get; set; }
         public string Location { get; set; }

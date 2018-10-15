@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -89,7 +90,7 @@ namespace Vakaxa.ApiServer.Controllers
         }
 
         // POST api/values
-        [HttpPost("close-account/update")]
+        [HttpPost("lock-screen/update")]
         public string UpdateCloseAccount([FromBody] JObject value)
         {
             try
@@ -107,33 +108,38 @@ namespace Vakaxa.ApiServer.Controllers
                 }
 
 
-                if (value.ContainsKey("code"))
+                if (value.ContainsKey("code") && value.ContainsKey("status") && value.ContainsKey("password"))
                 {
                     var code = value["code"].ToString();
+                    var status = value["status"];
+
+                    if (!int.TryParse((string) status, out int outStatus))
+                        return CreateDataError("Status invalid");
+
+                    var password = value["password"];
                     var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                    if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
                         return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.UpdateOptionVerification;
+                    var secret = secretAuthToken.LockScreen;
 
                     bool isok = authenticator.CheckCode(secret, code);
-
+                    Console.WriteLine(isok);
                     if (isok)
                     {
-                        if (value.ContainsKey("option"))
-                        {
-                            var option = value["option"];
+                        userModel.IsLockScreen = (int) status;
+                        userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
+                            ? CommonHelper.Md5(password.ToString())
+                            : "";
 
-                            userModel.Verification = (int) option;
+                        var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                            var resultUpdate = _userBusiness.UpdateProfile(userModel);
-                            // resultUpdate.Data = JsonHelper.SerializeObject(userModel);
-                            return _userBusiness.AddActionLog(email, userModel.Id, ActionLog.TwofaEnable,
-                                Request.Headers["X-Original-Forwarded-For"].FirstOrDefault()).ToJson();
-                        }
+                        return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                            ActionLog.LockScreen,
+                            HelpersApi.getIp(Request)).ToJson();
                     }
                 }
 
@@ -148,8 +154,8 @@ namespace Vakaxa.ApiServer.Controllers
 
 
         // POST api/values
-        [HttpPost("close-account/require-send-code-phone")]
-        public string SendCodeClose()
+        [HttpPost("lock-screen/require-send-code-phone")]
+        public string SendCodeLock()
         {
             try
             {
@@ -161,17 +167,24 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = CheckToken(userModel, ActionLog.CloseAccount);
+                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LockScreen);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
 
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+                    userModel.SecretAuthToken = checkSecret;
+                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.CloseAccount))
+                    if (resultUpdate.Status == Status.STATUS_ERROR)
                         return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.CloseAccount;
+
+                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
+                        return CreateDataError("Can't send code");
+
+                    var secret = secretAuthToken.LockScreen;
 
                     var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
                     var code = authenticator.GetCode(secret);
@@ -189,71 +202,6 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
-
-        private string CheckToken(User userModel, string action)
-        {
-            try
-            {
-                var newSecret = new ActionCode();
-
-                if (string.IsNullOrEmpty(userModel.SecretAuthToken))
-                {
-                    switch (action)
-                    {
-                        case ActionLog.TwofaEnable:
-                            newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                        case ActionLog.UpdateOptionVerification:
-                            newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                        case ActionLog.CloseAccount:
-                            newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                    }
-                }
-                else
-                {
-                    newSecret = ActionCode.FromJson(userModel.SecretAuthToken);
-
-                    switch (action)
-                    {
-                        case ActionLog.TwofaEnable:
-                            if (string.IsNullOrEmpty(newSecret.TwofaEnable))
-                            {
-                                newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                        case ActionLog.UpdateOptionVerification:
-                            if (string.IsNullOrEmpty(newSecret.UpdateOptionVerification))
-                            {
-                                newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                        case ActionLog.CloseAccount:
-                            if (string.IsNullOrEmpty(newSecret.CloseAccount))
-                            {
-                                newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                    }
-                }
-
-                userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
-                var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return null;
-
-                return JsonHelper.SerializeObject(newSecret);
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
 
         public string CreateDataError(string message)
         {

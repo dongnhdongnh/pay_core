@@ -178,10 +178,17 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = CheckToken(userModel, ActionLog.UpdateOptionVerification);
+                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UpdateOptionVerification);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
+
+                    userModel.SecretAuthToken = checkSecret;
+                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                    if (resultUpdate.Status == Status.STATUS_ERROR)
+                        return CreateDataError("Can't send code");
+
 
                     var secretAuthToken = ActionCode.FromJson(checkSecret);
 
@@ -220,10 +227,17 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = CheckToken(userModel, ActionLog.TwofaEnable);
+                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TwofaEnable);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
+
+                    userModel.SecretAuthToken = checkSecret;
+                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                    if (resultUpdate.Status == Status.STATUS_ERROR)
+                        return CreateDataError("Can't send code");
+
 
                     var secretAuthToken = ActionCode.FromJson(checkSecret);
 
@@ -248,71 +262,6 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
-
-        private string CheckToken(User userModel, string action)
-        {
-            try
-            {
-                var newSecret = new ActionCode();
-
-                if (string.IsNullOrEmpty(userModel.SecretAuthToken))
-                {
-                    switch (action)
-                    {
-                        case ActionLog.TwofaEnable:
-                            newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                        case ActionLog.UpdateOptionVerification:
-                            newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                        case "CloseAccount":
-                            newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                    }
-                }
-                else
-                {
-                    newSecret = ActionCode.FromJson(userModel.SecretAuthToken);
-
-                    switch (action)
-                    {
-                        case ActionLog.TwofaEnable:
-                            if (string.IsNullOrEmpty(newSecret.TwofaEnable))
-                            {
-                                newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                        case ActionLog.UpdateOptionVerification:
-                            if (string.IsNullOrEmpty(newSecret.UpdateOptionVerification))
-                            {
-                                newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                        case "CloseAccount":
-                            if (string.IsNullOrEmpty(newSecret.CloseAccount))
-                            {
-                                newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                    }
-                }
-
-                userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
-                var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return null;
-
-                return JsonHelper.SerializeObject(newSecret);
-            }
-            catch (Exception e)
-            {
-                return null;
-            }
-        }
 
         public string CreateDataError(string message)
         {
