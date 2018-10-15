@@ -54,7 +54,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                var sqlString = $"Select * from {TableName} where InProcess = 1";
+                var sqlString = $"Select * from {TableName} where IsProcessing = 1";
                 var result = Connection.Query<TEntity>(sqlString).ToList();
                 return result;
             }

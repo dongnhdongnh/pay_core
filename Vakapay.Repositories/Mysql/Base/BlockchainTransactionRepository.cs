@@ -277,7 +277,7 @@ namespace Vakapay.Repositories.Mysql
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
 				//Console.WriteLine("FIND TRANSACTION BY STATUS");
-				var sqlString = $"Select * from {TableName} where BlockNumber = @BlockNumber and InProcess = 0 and Status=@Status";
+				var sqlString = $"Select * from {TableName} where BlockNumber = @BlockNumber and IsProcessing = 0 and Status=@Status";
 				var result = Connection.Query<TTransaction>(sqlString, new { BlockNumber = 0, Status = Status.STATUS_COMPLETED })
 					.ToList();
 				return result;
