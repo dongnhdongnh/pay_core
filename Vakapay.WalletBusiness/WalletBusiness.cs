@@ -840,7 +840,7 @@ namespace Vakapay.WalletBusiness
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
-                    Message = "Pending sms not found"
+                    Message = "Pending wallet not found"
                 };
 
             if (ConnectionDb.State != ConnectionState.Open)
@@ -896,7 +896,7 @@ namespace Vakapay.WalletBusiness
                     return new ReturnObject
                     {
                         Status = Status.STATUS_ERROR,
-                        Message = "Cannot update sms status"
+                        Message = "Cannot update wallet status"
                     };
                 }
 
@@ -906,9 +906,9 @@ namespace Vakapay.WalletBusiness
             catch (Exception e)
             {
                 // release lock
+                transactionSend.Rollback();
                 var releaseResult = walletRepository.ReleaseLock(pendingWallet);
                 Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
-                transactionSend.Rollback();
                 throw;
             }
         }

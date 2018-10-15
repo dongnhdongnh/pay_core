@@ -83,7 +83,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                var sqlString = $"Select * from {TableName} where Status = @status and InProcess = 0";
+                var sqlString = $"Select * from {TableName} where Status = @status and IsProcessing = 0";
                 var result =
                     Connection.QueryFirstOrDefault<TEntity>(sqlString, new {status = status});
                 return result;
@@ -102,7 +102,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
                 //Console.WriteLine("FIND TRANSACTION BY STATUS");
-                var sqlString = $"Select * from {TableName} where Status = @status and InProcess = 0";
+                var sqlString = $"Select * from {TableName} where Status = @status and IsProcessing = 0";
                 var result = Connection.Query<TEntity>(sqlString, new {status = status})
                     .ToList();
                 return result;
