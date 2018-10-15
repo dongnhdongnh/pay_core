@@ -93,7 +93,7 @@ namespace Vakapay.UnitTest
 			Assert.IsNotNull(result);
 		}
 
-		[TestCase(1000)]
+		[TestCase(10)]
 		public void FakePendingTransaction(int numOfTrans)
 		{
 			var repositoryConfig = new RepositoryConfiguration
@@ -115,53 +115,77 @@ namespace Vakapay.UnitTest
 			Console.WriteLine(JsonHelper.SerializeObject(outPut));
 			Assert.IsNotNull(outPut);
 		}
-		//[Test]
-		//public void CreateNewTransactionMultirun()
-		//{
 
-		//}
+        [TestCase(10)]
+        public void FakeDeposite(int numOfTrans)
+        {
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = ETHBusinessTest.ConnectionString
+            };
 
-		//[Test]
-		//public void CreateNewTransaction()
-		//{
+            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
+            var _trans = new EthereumDepositTransaction()
+            {
+                ToAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
+                FromAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
+                Amount = 10
+            };
+            ReturnObject outPut = null;
+            for (int i = 0; i < numOfTrans; i++)
+                outPut = _ethBus.FakeDepositTransaction(_trans);
+            Console.WriteLine(JsonHelper.SerializeObject(outPut));
+            Assert.IsNotNull(outPut);
+        }
 
-		//	var repositoryConfig = new RepositoryConfiguration
-		//	{
-		//		ConnectionString = ETHBusinessTest.ConnectionString
-		//	};
+        //[Test]
+        //public void CreateNewTransactionMultirun()
+        //{
 
-		//	var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-		//	var _ethBus = new Vakapay.EthereumBusiness.EthereumBusinessOld(PersistenceFactory, true, RPCEndpoint);
-		//	var _trans = new EthereumWithdrawTransaction()
-		//	{
-		//		FromAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
-		//		ToAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
-		//		Amount = 10
-		//	};
-		//	var outPut = _ethBus.RunSendTransaction();
-		//	//var outPut = 1;
-		//	Console.WriteLine(JsonHelper.SerializeObject(outPut));
-		//	Assert.IsNotNull(outPut);
-		//}
+        //}
 
-		//[Test]
-		//public void TestScan()
-		//{
+        //[Test]
+        //public void CreateNewTransaction()
+        //{
 
-		//	var repositoryConfig = new RepositoryConfiguration
-		//	{
-		//		ConnectionString = ETHBusinessTest.ConnectionString
-		//	};
+        //	var repositoryConfig = new RepositoryConfiguration
+        //	{
+        //		ConnectionString = ETHBusinessTest.ConnectionString
+        //	};
 
-		//	var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-		//	var WalletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
-		//	_ethBus = new Vakapay.EthereumBusiness.EthereumBusinessOld(PersistenceFactory);
-		//	//	int block = _ethBus.ScanBlock(WalletBusiness);
+        //	var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+        //	var _ethBus = new Vakapay.EthereumBusiness.EthereumBusinessOld(PersistenceFactory, true, RPCEndpoint);
+        //	var _trans = new EthereumWithdrawTransaction()
+        //	{
+        //		FromAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
+        //		ToAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
+        //		Amount = 10
+        //	};
+        //	var outPut = _ethBus.RunSendTransaction();
+        //	//var outPut = 1;
+        //	Console.WriteLine(JsonHelper.SerializeObject(outPut));
+        //	Assert.IsNotNull(outPut);
+        //}
 
-		//	Assert.IsTrue(block > 0);
-		//}
+        //[Test]
+        //public void TestScan()
+        //{
+
+        //	var repositoryConfig = new RepositoryConfiguration
+        //	{
+        //		ConnectionString = ETHBusinessTest.ConnectionString
+        //	};
+
+        //	var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+        //	var WalletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+        //	_ethBus = new Vakapay.EthereumBusiness.EthereumBusinessOld(PersistenceFactory);
+        //	//	int block = _ethBus.ScanBlock(WalletBusiness);
+
+        //	Assert.IsTrue(block > 0);
+        //}
 
 
 
-	}
+    }
 }

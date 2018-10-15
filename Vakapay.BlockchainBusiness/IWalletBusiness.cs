@@ -12,5 +12,6 @@ namespace Vakapay.BlockchainBusiness
         bool CheckExistedAndUpdateByAddress(string to, decimal v1, string v2);
         ReturnObject MakeAllWalletForNewUser(User newUser);
         string FindEmailByAddressAndNetworkName(string addr, string networkName);
+     //   ReturnObject UpdateAddressForWallet(string walletId, string accountName);
     }
 }

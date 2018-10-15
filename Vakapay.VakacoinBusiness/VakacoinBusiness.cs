@@ -32,7 +32,7 @@ namespace Vakapay.VakacoinBusiness
         public void SetAccountRepositoryForRpc(VakacoinRPC rpc)
         {
             rpc.AccountRepository =
-                (VakacoinAccountRepository) VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
+                (VakacoinAccountRepository)VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
         }
 
         /// <summary>
@@ -62,9 +62,9 @@ namespace Vakapay.VakacoinBusiness
                     OwnerPublicKey = keyPair.PublicKey,
                     ActivePrivateKey = keyPair.PrivateKey,
                     ActivePublicKey = keyPair.PublicKey,
-                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     Id = CommonHelper.GenerateUuid(),
-                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId,
                 });
 
@@ -107,9 +107,9 @@ namespace Vakapay.VakacoinBusiness
                     OwnerPublicKey = ownerPublicKey,
                     ActivePrivateKey = activePrivateKey,
                     ActivePublicKey = activePublicKey,
-                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     Id = CommonHelper.GenerateUuid(),
-                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
+                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId
                 });
 
@@ -240,7 +240,7 @@ namespace Vakapay.VakacoinBusiness
                     };
 
                 VakacoinRPCObj = rpcClass as VakacoinRPC;
-                
+
                 var results = CreateNewAccount(walletId); // Create account and add account name to VakacoinAccount table
                 
                 if (results.Status == Status.STATUS_ERROR)
@@ -250,18 +250,17 @@ namespace Vakapay.VakacoinBusiness
 
                 //update address into wallet db
                 //wallet.WalletBusiness(VakapayRepositoryFactory);
-                //TODO check UpdateAddressForWallet
-//                var updateWallet =
-//                    wallet.UpdateAddressForWallet(walletId, accountName);
-//                
-//                if (updateWallet.Status == Status.StatusError)
-//                {
-//                    return new ReturnObject
-//                    {
-//                        Status = Status.StatusError,
-//                        Message = "Update address fail to WalletDB"
-//                    };
-//                }
+                //var updateWallet =
+                //    wallet.UpdateAddressForWallet(walletId, accountName);
+              
+                //if (updateWallet.Status == Status.STATUS_ERROR)
+                //{
+                //    return new ReturnObject
+                //    {
+                //        Status = Status.STATUS_ERROR,
+                //        Message = "Update address fail to WalletDB"
+                //    };
+                //}
 
                 return new ReturnObject
                 {
@@ -291,6 +290,13 @@ namespace Vakapay.VakacoinBusiness
         {
             var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
             return GetHistory<VakacoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+        }
+
+        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string walletAdress,int offset = -1, int limit = -1, string[] orderBy = null)
+        {
+            var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
+            var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
+            return GetAllHistory<VakacoinWithdrawTransaction,VakacoinDepositTransaction>(out numberData,walletAdress, withdrawRepo, depositRepo, offset, limit, orderBy);
         }
     }
 }

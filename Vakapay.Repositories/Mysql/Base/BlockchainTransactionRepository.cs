@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using Vakapay.Commons.Constants;
@@ -393,5 +394,62 @@ namespace Vakapay.Repositories.Mysql
 
 			throw new Exception(className + ": Transaction repository class name not contain \"Deposit\" or \"Withdraw\" keyword");
 		}
+
+
+		   public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string walletAdress, string TableNameWithdrawn, string TableNameDeposit, int offset, int limit, string[] orderByValue)
+        {
+            numberData = -1;
+            try
+            {
+                var _selectThing = "Id,FromAddress,ToAddress,CreatedAt,Amount,Status";
+                var output = $"Select * from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE FromAddress='{walletAdress}'" +
+                    $" UNION ALL " +
+                    $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE ToAddress='{walletAdress}') as t_uni ";
+                var output_count = $"Select count(*) from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE FromAddress='{walletAdress}'" +
+                   $" UNION ALL " +
+                   $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE ToAddress='{walletAdress}') as t_uni ";
+                numberData = ExcuteCount(output_count);
+                StringBuilder orderStr = new StringBuilder("");
+                int count = 0;
+                if (orderByValue != null)
+                {
+                    count = 0;
+                    foreach (var prop in orderByValue)
+                    {
+                        //if (prop.Value != null)
+                        {
+                            if (count > 0)
+                                orderStr.Append(",");
+                            orderStr.AppendFormat(" {0}", prop);
+                            count++;
+                        }
+                    }
+                    output += " ORDER BY " + orderStr.ToString();
+                }
+                if (limit > 0)
+                {
+                    output += " LIMIT " + limit;
+                }
+                if (offset > 0)
+                {
+                    output += " OFFSET " + offset;
+                }
+
+                return FindBySql(output).ToList<BlockchainTransaction>();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+                //	throw;
+            }
+
+        }
+
+        public string GetTableName()
+        {
+            return TableName;
+            // throw new NotImplementedException();
+        }
 	}
 }
