@@ -1,71 +1,57 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
-    <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-        <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-        <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="IdentityServer4.AccessTokenValidation">
-          <Version>2.7.0-preview1</Version>
-        </PackageReference>
-        <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
-        <PackageReference Include="TwoStepsAuthenticator">
-          <Version>1.3.1</Version>
-        </PackageReference>
-        <PackageReference Include="UAParser">
-          <Version>3.0.0</Version>
-        </PackageReference>
-    </ItemGroup>
-        
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
-    
-    <ItemGroup>
-        <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Vakapay.BitcoinBusiness\Vakapay.BitcoinBusiness.csproj" />
-      <ProjectReference Include="..\Vakapay.Configuration\Vakapay.Configuration.csproj" />
-      <ProjectReference Include="..\Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj" />
-      <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
-      <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
-      <ProjectReference Include="..\Vakapay.UserBusiness\Vakapay.UserBusiness.csproj" />
-      <ProjectReference Include="..\Vakapay.VakacoinBusiness\Vakapay.VakacoinBusiness.csproj" />
-      <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
-    </ItemGroup>
-
-    <Target Name="DebugRunWebpack" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('wwwroot\dist') ">
-        <!-- Ensure Node.js is installed -->
-        <Exec Command="node --version" ContinueOnError="true">
-            <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-        </Exec>
-        <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
-
-        <!-- In development, the dist files won't exist on the first run or when cloning to
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="IdentityServer4.AccessTokenValidation">
+      <Version>2.7.0-preview1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.7" />
+    <PackageReference Include="TwoStepsAuthenticator">
+      <Version>1.3.1</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vakapay.BitcoinBusiness\Vakapay.BitcoinBusiness.csproj" />
+    <ProjectReference Include="..\Vakapay.Configuration\Vakapay.Configuration.csproj" />
+    <ProjectReference Include="..\Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj" />
+    <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+    <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
+    <ProjectReference Include="..\Vakapay.UserBusiness\Vakapay.UserBusiness.csproj" />
+    <ProjectReference Include="..\Vakapay.VakacoinBusiness\Vakapay.VakacoinBusiness.csproj" />
+    <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
+  </ItemGroup>
+  <Target Name="DebugRunWebpack" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('wwwroot\dist') ">
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+    <!-- In development, the dist files won't exist on the first run or when cloning to
              a different machine, so rebuild them if not already present. -->
-        <Message Importance="high" Text="Performing first-run Webpack build..." />
-      
-    </Target>
-
-    <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-        <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-        <Exec Command="npm install" />
-        <Exec Command="node node_modules/webpack/bin/webpack.js --config webpack.config.vendor.js --env.prod" />
-        <Exec Command="node node_modules/webpack/bin/webpack.js --env.prod" />
-
-        <!-- Include the newly-built files in the publish output -->
-        <ItemGroup>
-            <DistFiles Include="wwwroot\dist\**" />
-            <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-                <RelativePath>%(DistFiles.Identity)</RelativePath>
-                <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-            </ResolvedFileToPublish>
-        </ItemGroup>
-    </Target>
-
+    <Message Importance="high" Text="Performing first-run Webpack build..." />
+  </Target>
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+    <Exec Command="npm install" />
+    <Exec Command="node node_modules/webpack/bin/webpack.js --config webpack.config.vendor.js --env.prod" />
+    <Exec Command="node node_modules/webpack/bin/webpack.js --env.prod" />
+    <!-- Include the newly-built files in the publish output -->
+    <ItemGroup>
+      <DistFiles Include="wwwroot\dist\**" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 </Project>

@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2019
@@ -78,6 +78,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendSmsbusiness", "SendSmsbusiness\SendSmsbusiness.csproj", "{A16964E7-8AF9-485D-AE05-6A3CA48A16A8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendSms", "SendSms\SendSms.csproj", "{68206D8D-5DF2-46ED-B85C-05D9E444C9D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ScanCoinmarket", "Vakapay.ScanCoinmarket\Vakapay.ScanCoinmarket.csproj", "{4CA76091-36A5-419D-B39E-E9444A48D6C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -213,6 +215,10 @@ Global
 		{68206D8D-5DF2-46ED-B85C-05D9E444C9D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68206D8D-5DF2-46ED-B85C-05D9E444C9D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68206D8D-5DF2-46ED-B85C-05D9E444C9D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CA76091-36A5-419D-B39E-E9444A48D6C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CA76091-36A5-419D-B39E-E9444A48D6C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CA76091-36A5-419D-B39E-E9444A48D6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CA76091-36A5-419D-B39E-E9444A48D6C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -247,6 +253,7 @@ Global
 		{E9038D8F-413D-4B8D-BCC7-0868471AF0BB} = {5CBC2126-CB82-4456-9714-A7E505F9D44D}
 		{A16964E7-8AF9-485D-AE05-6A3CA48A16A8} = {3AD83376-344D-4C86-A1C9-F1324F4C0541}
 		{68206D8D-5DF2-46ED-B85C-05D9E444C9D5} = {4E6A4058-F824-4EA9-B00B-F3F801881F0E}
+		{4CA76091-36A5-419D-B39E-E9444A48D6C3} = {4E6A4058-F824-4EA9-B00B-F3F801881F0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E31696F-3D55-4AE6-AEA3-DEA78FBC8971}
