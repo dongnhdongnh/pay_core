@@ -893,6 +893,7 @@ namespace Vakapay.WalletBusiness
                 var updateResult = await walletRepository.SafeUpdate(pendingWallet);
                 if (updateResult.Status == Status.STATUS_ERROR)
                 {
+                    transactionSend.Rollback();
                     return new ReturnObject
                     {
                         Status = Status.STATUS_ERROR,
