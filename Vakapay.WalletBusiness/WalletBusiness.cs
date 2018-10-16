@@ -230,6 +230,15 @@ namespace Vakapay.WalletBusiness
 
                 string fromAddress = GetSenderAddress(wallet, toAddress, amount);
 
+                if (string.IsNullOrEmpty(fromAddress))
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Can not get sender address!"
+                    };
+                }
+
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
                 var userRepository =
                     vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
@@ -286,14 +295,33 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
+//                var withdrawTrx = ConnectionDb.BeginTransaction();
+                /*
+                 * Should we BeginTransaction a transaction here and rollback if error happens?
+                 * But it is dangerous because if insert task is slow and user can double send their balance before
+                 * transaction being committed.
+                 */
+
                 // 5. Update Wallet Balance
                 var updateWallet = UpdateBalance(-(amount + free), wallet.Id, wallet.Version);
                 if (updateWallet == null || updateWallet.Status == Status.STATUS_ERROR)
                 {
+//                    withdrawTrx.Rollback();
                     return new ReturnObject()
                     {
                         Status = Status.STATUS_ERROR,
                         Message = "Fail update balance in walletDB"
+                    };
+                }
+
+                // double check balance of wallet is valid: check after update balance
+                walletById = walletRepository.FindById(wallet.Id);
+                if (walletById.Balance < 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = $"Balance in {walletById.Currency} wallet after UpdateBalance is smaller than 0!!"
                     };
                 }
 
@@ -320,6 +348,7 @@ namespace Vakapay.WalletBusiness
                     if (insertWithdraw == null ||
                         insertWithdraw.Status == Status.STATUS_ERROR)
                     {
+//                        withdrawTrx.Rollback();
                         return new ReturnObject()
                         {
                             Status = Status.STATUS_ERROR,
@@ -347,6 +376,7 @@ namespace Vakapay.WalletBusiness
                     if (insertWithdraw == null ||
                         insertWithdraw.Status == Status.STATUS_ERROR)
                     {
+//                        withdrawTrx.Rollback();
                         return new ReturnObject()
                         {
                             Status = Status.STATUS_ERROR,
@@ -374,6 +404,7 @@ namespace Vakapay.WalletBusiness
                     if (insertWithdraw == null ||
                         insertWithdraw.Status == Status.STATUS_ERROR)
                     {
+//                        withdrawTrx.Rollback();
                         return new ReturnObject()
                         {
                             Status = Status.STATUS_ERROR,
@@ -422,25 +453,42 @@ namespace Vakapay.WalletBusiness
 
                         getInfoResult = bitcoinRpc.GetInfo();
 
-                        if (getInfoResult.Status != Status.STATUS_SUCCESS)
+                        if (getInfoResult.Status == Status.STATUS_ERROR)
                         {
-                            return getInfoResult;
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Bitcoin network error: " + getInfoResult.Message
+                            };
                         }
-
                         break;
 
                     case CryptoCurrency.ETH:
-                        break; //TODO
+                        var ethRpc = new EthereumRpc(VakapayConfiguration.GetEthereumNode());
+                        var blockNumber = ethRpc.GetBlockNumber();
+
+                        if (blockNumber.Status == Status.STATUS_ERROR)
+                        {
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Ethereum network error: " + blockNumber.Message
+                            };
+                        }
+                        break;
 
                     case CryptoCurrency.VAKA:
                         var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
                         getInfoResult = vakacoinRpc.GetInfo();
 
-                        if (getInfoResult.Status != Status.STATUS_SUCCESS)
+                        if (getInfoResult.Status == Status.STATUS_ERROR)
                         {
-                            return getInfoResult;
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Vakacoin network error: " + getInfoResult.Message
+                            };
                         }
-
                         break;
                     default:
                         return new ReturnObject()

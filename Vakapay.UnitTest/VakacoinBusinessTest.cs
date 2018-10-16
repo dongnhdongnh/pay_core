@@ -1156,6 +1156,26 @@ namespace Vakapay.UnitTest
         }
 
         [TestCase(1024)]
+        public void Get1024AccountBalance(int numOfTrans)
+        {
+            ReturnObject outPut = null;
+            var rpc = new VakacoinRPC("http://127.0.0.1:8000");
+            for (int i = 0; i < numOfTrans; i++)
+            {
+                var x1 = (char) ('a' + i % 16);
+                var x2 = (char) ('a' + (i / 16) % 16);
+                var x3 = (char) ('a' + (i / 16 / 16) % 4);
+                var from = new string("useraaaaa") + x3 + x2 + x1;
+
+                outPut = rpc.GetBalance(from);
+                if (outPut.Data != "99.9900 VAKA")
+                {
+                    Console.WriteLine(from);
+                }
+            }
+        }
+
+        [TestCase(1024)]
         public void CheckResultSendingFake51200PeningTransaction1024MuiltiAddress(int numOfTrans)
         {
             ReturnObject outPut = null;
