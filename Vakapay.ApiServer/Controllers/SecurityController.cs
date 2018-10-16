@@ -168,13 +168,13 @@ namespace Vakaxa.ApiServer.Controllers
                 if (userModel != null)
                 {
                     var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LockScreen);
-
+                    
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
 
                     userModel.SecretAuthToken = checkSecret;
                     var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
+                    
                     if (resultUpdate.Status == Status.STATUS_ERROR)
                         return CreateDataError("Can't send code");
 

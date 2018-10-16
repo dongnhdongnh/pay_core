@@ -59,7 +59,7 @@ namespace Vakapay.ApiServer.Helpers
                             }
 
                             break;
-                        case "CloseAccount":
+                        case ActionLog.LockScreen:
                             if (string.IsNullOrEmpty(newSecret.LockScreen))
                             {
                                 newSecret.LockScreen = TwoStepsAuthenticator.Authenticator.GenerateKey();
