@@ -1,6 +1,7 @@
 ﻿using VakaSharp.Api.v1;
 using VakaSharp.Helpers;
 using VakaSharp.Providers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,11 @@ namespace VakaSharp
         /// <param name="config">Configures client parameters</param>
         public Vaka(VakaConfigurator config)
         {
-            VakaConfig = config ?? throw new ArgumentNullException("config");
+            VakaConfig = config;
+            if (VakaConfig == null)
+            {
+                throw new ArgumentNullException("config");
+            }
             Api = new VakaApi(VakaConfig);
             AbiSerializer = new AbiSerializationProvider(Api);
         }
@@ -61,6 +66,15 @@ namespace VakaSharp
             {
                 AccountName = accountName
             })).Abi;
+        }
+
+        public Task<GetRawAbiResponse> GetRawAbi(string accountName, string abiHash = null)
+        {
+            return Api.GetRawAbi(new GetRawAbiRequest()
+            {
+                AccountName = accountName,
+                AbiHash = abiHash
+            });
         }
 
         public Task<GetRawCodeAndAbiResponse> GetRawCodeAndAbi(string accountName)
@@ -312,7 +326,14 @@ namespace VakaSharp
             {
                 var availableKeys = await VakaConfig.SignProvider.GetAvailableKeys();
                 var requiredKeys = await GetRequiredKeys(availableKeys.ToList(), trx);
-                signatures = await VakaConfig.SignProvider.Sign(chainId, requiredKeys, packedTrx);                
+
+                IEnumerable<string> abis = null;
+
+                if (trx.Actions != null)
+                    abis = trx.Actions.Select(a => a.Account);
+
+
+                signatures = await VakaConfig.SignProvider.Sign(chainId, requiredKeys, packedTrx, abis);
             }
 
             var result = await Api.PushTransaction(new PushTransactionRequest()

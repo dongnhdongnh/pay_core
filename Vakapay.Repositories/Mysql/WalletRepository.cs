@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -11,7 +13,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class WalletRepository : MySqlBaseRepository<Wallet>, IWalletRepository
+	public class WalletRepository : MultiThreadUpdateEntityRepository<Wallet>, IWalletRepository
 	{
 //		const string TABLENAME = "wallet";
 		public WalletRepository(string connectionString) : base(connectionString)
@@ -113,7 +115,8 @@ namespace Vakapay.Repositories.Mysql
 			{
 				if (Connection.State != ConnectionState.Open)
 					Connection.Open();
-				Int32 unixTimestamp = (Int32)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+//				Int32 unixTimestamp = (Int32)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+				var unixTimestamp = (int)CommonHelper.GetUnixTimestamp();
 				string sQuery =
 					$"UPDATE {TableName} SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID AND Version = @VERSION";
 
@@ -130,29 +133,110 @@ namespace Vakapay.Repositories.Mysql
 				return new ReturnObject
 				{
 					Status = status,
-					Message = status == Status.STATUS_ERROR ? "Cannot insert" : "Insert Success"
+					Message = status == Status.STATUS_ERROR ? "Cannot update" : "Update Success"
 				};
 			}
 			catch (Exception e)
 			{
-				throw e;
+				throw;
 			}
 		}
 
-		public Wallet FindByAddress(string address)
+//		public Wallet FindByAddress(string address)
+//		{
+//			try
+//			{
+//				string query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
+//				List<Wallet> wallets = FindBySql(query);
+//				if (wallets == null || wallets.Count == 0)
+//					return null;
+//				return wallets[0];
+//			}
+//			catch (Exception e)
+//			{
+//				Console.WriteLine(e);
+//				return null;
+//			}
+//		}
+
+		public Wallet FindByAddressAndNetworkName(string address, string networkName)
 		{
 			try
 			{
-				string query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
-				List<Wallet> wallets = FindBySql(query);
-				if (wallets == null || wallets.Count == 0)
+				var walletId = "";
+				BlockchainAddress blockchainAddress = null;
+				switch (networkName)
+				{
+					case CryptoCurrency.BTC:
+						blockchainAddress = new BitcoinAddressRepository(Connection).FindByAddress(address);
+						break;
+
+					case CryptoCurrency.ETH:
+						blockchainAddress = new EthereumAddressRepository(Connection).FindByAddress(address);
+						break;
+
+					case CryptoCurrency.VKC:
+						blockchainAddress = new VakacoinAccountRepository(Connection).FindByAddress(address);
+						break;
+				}
+
+				if (blockchainAddress == null)
+				{
 					return null;
-				return wallets[0];
+				}
+
+				walletId = blockchainAddress.WalletId;
+
+				return FindById(walletId);
 			}
 			catch (Exception e)
 			{
 				Console.WriteLine(e);
-				return null;
+				throw;
+			}
+		}
+
+		public List<string> GetAddresses(string walletId, string networkName)
+		{
+			try
+			{
+				List<BlockchainAddress> blockchainAddresses = null;
+				switch (networkName)
+				{
+					case CryptoCurrency.BTC:
+						blockchainAddresses = new BitcoinAddressRepository(Connection).FindByWalletId(walletId)
+							.ToList<BlockchainAddress>();
+						break;
+
+					case CryptoCurrency.ETH:
+						blockchainAddresses = new EthereumAddressRepository(Connection).FindByWalletId(walletId)
+							.ToList<BlockchainAddress>();
+						break;
+
+					case CryptoCurrency.VKC:
+						blockchainAddresses = new VakacoinAccountRepository(Connection).FindByWalletId(walletId)
+							.ToList<BlockchainAddress>();
+						break;
+				}
+
+				if (blockchainAddresses == null)
+				{
+					return null;
+				}
+
+				var result = new List<string>();
+
+				foreach (var row in blockchainAddresses)
+				{
+					result.Add(row.GetAddress());
+				}
+
+				return result;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
 			}
 		}
 
@@ -174,50 +258,50 @@ namespace Vakapay.Repositories.Mysql
 		}
 
 
-		/// <summary>
-		/// Search wallet by address and nwName
-		/// </summary>
-		/// <param name="address">Null for null address</param>
-		/// <param name="networkName">Null for all networkName</param>
-		/// <returns></returns>
-		public List<Wallet> FindByAddressAndNetworkName(string address, string networkName)
-		{
-			try
-			{
-				string query;
-				if (networkName != null)
-				{
-					if (address == null)
-					{
-						query = $"SELECT * FROM {TableName} WHERE ISNULL(Address) AND NetworkName = '{networkName}'";
-					}
-					else
-					{
-						query = $"SELECT * FROM {TableName} WHERE Address = '{address}' AND NetworkName = '{networkName}'";
-					}
-				}
-				else
-				{
-					query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
-				}
-				List<Wallet> wallets = FindBySql(query);
-				if (wallets == null || wallets.Count <= 0)
-					return null;
-				return wallets;
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				return null;
-			}
-		}
+//		/// <summary>
+//		/// Search wallet by address and nwName
+//		/// </summary>
+//		/// <param name="address">Null for null address</param>
+//		/// <param name="networkName">Null for all networkName</param>
+//		/// <returns></returns>
+//		public List<Wallet> FindByAddressAndNetworkName(string address, string networkName)
+//		{
+//			try
+//			{
+//				string query;
+//				if (networkName != null)
+//				{
+//					if (address == null)
+//					{
+//						query = $"SELECT * FROM {TableName} WHERE ISNULL(Address) AND NetworkName = '{networkName}'";
+//					}
+//					else
+//					{
+//						query = $"SELECT * FROM {TableName} WHERE Address = '{address}' AND NetworkName = '{networkName}'";
+//					}
+//				}
+//				else
+//				{
+//					query = $"SELECT * FROM {TableName} WHERE Address = '{address}'";
+//				}
+//				List<Wallet> wallets = FindBySql(query);
+//				if (wallets == null || wallets.Count <= 0)
+//					return null;
+//				return wallets;
+//			}
+//			catch (Exception e)
+//			{
+//				Console.WriteLine(e);
+//				return null;
+//			}
+//		}
 
 
 		public List<Wallet> FindNullAddress()
 		{
 			try
 			{
-				string query = $"SELECT * FROM {TableName} WHERE ISNULL(Address)";
+				string query = $"SELECT * FROM {TableName} WHERE HasAddress='false'";
 				List<Wallet> wallets = FindBySql(query);
 				if (wallets == null || wallets.Count <= 0)
 					return null;
@@ -259,6 +343,11 @@ namespace Vakapay.Repositories.Mysql
 				Console.WriteLine(e);
 				return null;
 			}
+		}
+
+		public Task<ReturnObject> SafeUpdate(Wallet row)
+		{
+			return base.SafeUpdate(row, new[] {nameof(row.AddressCount)});
 		}
 	}
 }

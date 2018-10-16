@@ -27,6 +27,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Vakapay.Commons\Vakapay.Commons.csproj" />
+    <Compile Update="Api\v1\VakaApi.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VakaApi.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Api\v1\VakaTypes.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VakaTypes.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>
