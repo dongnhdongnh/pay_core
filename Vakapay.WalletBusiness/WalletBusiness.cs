@@ -333,6 +333,7 @@ namespace Vakapay.WalletBusiness
                 {
                     var etherWithdraw = new EthereumWithdrawTransaction()
                     {
+                        UserId = walletById.UserId,
                         Status = Status.STATUS_PENDING,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
@@ -361,6 +362,7 @@ namespace Vakapay.WalletBusiness
                 {
                     var btcWithdraw = new BitcoinWithdrawTransaction()
                     {
+                        UserId = walletById.UserId,
                         Status = Status.STATUS_PENDING,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
@@ -389,6 +391,7 @@ namespace Vakapay.WalletBusiness
                 {
                     var vakaWithdraw = new VakacoinWithdrawTransaction()
                     {
+                        UserId = walletById.UserId,
                         Status = Status.STATUS_PENDING,
                         FromAddress = fromAddress,
                         ToAddress = toAddress,
