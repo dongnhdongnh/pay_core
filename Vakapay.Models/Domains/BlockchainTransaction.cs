@@ -30,7 +30,7 @@ namespace Vakapay.Models.Domains
                 case nameof(VakacoinDepositTransaction):
                 case nameof(VakacoinWithdrawTransaction):
                 case nameof(VakacoinTransaction):
-                    return CryptoCurrency.VKC;
+                    return CryptoCurrency.VAKA;
                 default:
                     throw new NotImplementedException();
             }

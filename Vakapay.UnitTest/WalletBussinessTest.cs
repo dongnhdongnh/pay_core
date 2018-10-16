@@ -177,7 +177,7 @@ namespace Vakapay.UnitTest
             var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
             var wallet = walletRepository.FindByUserAndNetwork(
                 userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id,
-                CryptoCurrency.VKC);
+                CryptoCurrency.VAKA);
 
             var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
             Assert.AreEqual(res.Status, Status.STATUS_SUCCESS);

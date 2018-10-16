@@ -355,7 +355,7 @@ namespace Vakapay.WalletBusiness
                     }
                 }
 
-                if (walletById.Currency.Equals(CryptoCurrency.VKC))
+                if (walletById.Currency.Equals(CryptoCurrency.VAKA))
                 {
                     var vakaWithdraw = new VakacoinWithdrawTransaction()
                     {
@@ -432,7 +432,7 @@ namespace Vakapay.WalletBusiness
                     case CryptoCurrency.ETH:
                         break; //TODO
 
-                    case CryptoCurrency.VKC:
+                    case CryptoCurrency.VAKA:
                         var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
                         getInfoResult = vakacoinRpc.GetInfo();
 
@@ -472,7 +472,7 @@ namespace Vakapay.WalletBusiness
                     return (decimal) 0.0005;
                 case CryptoCurrency.ETH:
                     return (decimal) 0.0005;
-                case CryptoCurrency.VKC:
+                case CryptoCurrency.VAKA:
                     return 0;
                 default:
                     throw new Exception("Undefined network name!");
@@ -738,7 +738,7 @@ namespace Vakapay.WalletBusiness
 
                     // output = ethereumBussiness.GetAllHistory(out numberData, wallet.Address,offet, limit, orderBy);
                     break;
-                case CryptoCurrency.VKC:
+                case CryptoCurrency.VAKA:
                     // output = vakacoinBussiness.GetAllHistory(out numberData,wallet.Address,offet, limit, orderBy);
                     break;
                 case CryptoCurrency.BTC:
@@ -825,7 +825,7 @@ namespace Vakapay.WalletBusiness
                 case CryptoCurrency.ETH:
                     return BlockchainHeper.IsEthereumAddress(address);
 
-                case CryptoCurrency.VKC:
+                case CryptoCurrency.VAKA:
                     var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
                     return vakacoinRpc.CheckAccountExist(address);
             }
@@ -949,7 +949,7 @@ namespace Vakapay.WalletBusiness
                             pendingWallet.Id, pass).Result;
                         break;
 
-                    case CryptoCurrency.VKC:
+                    case CryptoCurrency.VAKA:
                         Console.WriteLine("make vaka");
                         var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory);
                         res = vakaBusiness.CreateAddressAsync(

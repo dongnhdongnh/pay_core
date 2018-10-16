@@ -231,7 +231,7 @@ namespace Vakapay.SendMailBusiness
                     }
 
                     break;
-                case CryptoCurrency.VKC:
+                case CryptoCurrency.VAKA:
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:
