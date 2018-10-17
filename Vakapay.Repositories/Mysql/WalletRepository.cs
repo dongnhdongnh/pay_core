@@ -196,7 +196,7 @@ namespace Vakapay.Repositories.Mysql
 			}
 		}
 
-		public List<string> GetAddresses(string walletId, string networkName)
+		public List<string> GetStringAddresses(string walletId, string networkName)
 		{
 			try
 			{
@@ -217,6 +217,9 @@ namespace Vakapay.Repositories.Mysql
 						blockchainAddresses = new VakacoinAccountRepository(Connection).FindByWalletId(walletId)
 							.ToList<BlockchainAddress>();
 						break;
+
+					default:
+						throw new Exception("Network name is not defined!");
 				}
 
 				if (blockchainAddresses == null)
@@ -232,6 +235,86 @@ namespace Vakapay.Repositories.Mysql
 				}
 
 				return result;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
+		public List<BlockchainAddress> GetAddresses(string walletId, string networkName)
+		{
+			try
+			{
+				List<BlockchainAddress> blockchainAddresses = null;
+				switch (networkName)
+				{
+					case CryptoCurrency.BTC:
+						blockchainAddresses = new BitcoinAddressRepository(Connection).FindByWalletId(walletId)
+							.ToList<BlockchainAddress>();
+						break;
+
+					case CryptoCurrency.ETH:
+						blockchainAddresses = new EthereumAddressRepository(Connection).FindByWalletId(walletId)
+							.ToList<BlockchainAddress>();
+						break;
+
+					case CryptoCurrency.VAKA:
+						blockchainAddresses = new VakacoinAccountRepository(Connection).FindByWalletId(walletId)
+							.ToList<BlockchainAddress>();
+						break;
+
+					default:
+						throw new Exception("Network name is not defined!");
+				}
+
+				return blockchainAddresses;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
+		public List<BlockchainAddress> GetAddressesByUserId(string userId)
+		{
+
+			try
+			{
+				var wallets = FindAllWalletByUserId(userId);
+
+				var blockchainAddresses = new List<BlockchainAddress>();
+
+				foreach (var wallet in wallets)
+				{
+					switch (wallet.Currency)
+					{
+						case CryptoCurrency.BTC:
+							blockchainAddresses.AddRange(new BitcoinAddressRepository(Connection)
+								.FindByWalletId(wallet.Id)
+								.ToList<BlockchainAddress>());
+							break;
+
+						case CryptoCurrency.ETH:
+							blockchainAddresses.AddRange(new EthereumAddressRepository(Connection)
+								.FindByWalletId(wallet.Id)
+								.ToList<BlockchainAddress>());
+							break;
+
+						case CryptoCurrency.VAKA:
+							blockchainAddresses.AddRange(new VakacoinAccountRepository(Connection)
+								.FindByWalletId(wallet.Id)
+								.ToList<BlockchainAddress>());
+							break;
+
+						default:
+							throw new Exception("Network name is not defined!");
+					}
+				}
+
+				return blockchainAddresses;
 			}
 			catch (Exception e)
 			{
@@ -330,7 +413,7 @@ namespace Vakapay.Repositories.Mysql
 				return null;
 			}
 		}
-		
+
 		public List<Wallet> FindAllWalletByUserId(string id)
 		{
 			try
