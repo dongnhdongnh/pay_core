@@ -6,11 +6,11 @@ using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiServer.Helpers
 {
-    public class HelpersApi
+    public static class HelpersApi
     {
-        public static string getIp(HttpRequest request)
+        public static string GetIp(HttpRequest request)
         {
-            string ip = request.Headers["X-Forwarded-For"].ToString();
+            var ip = request.Headers["X-Forwarded-For"].ToString();
 
             if (!string.IsNullOrEmpty(ip))
                 ip = request.Headers["X-Real-IP"].ToString();
@@ -83,6 +83,7 @@ namespace Vakapay.ApiServer.Helpers
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return null;
             }
         }

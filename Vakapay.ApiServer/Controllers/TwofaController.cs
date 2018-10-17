@@ -92,7 +92,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_NOTIFICATION,
-                    HelpersApi.getIp(Request));
+                    HelpersApi.GetIp(Request));
 
                 return _userBusiness.UpdateProfile(userModel).ToJson();
             }
@@ -140,7 +140,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.TWOFA_ENABLE,
-                    HelpersApi.getIp(Request));
+                    HelpersApi.GetIp(Request));
 
                 return _userBusiness.UpdateProfile(userModel).ToJson();
             }
@@ -188,7 +188,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.TWOFA_DISABLE,
-                    HelpersApi.getIp(Request));
+                    HelpersApi.GetIp(Request));
 
                 return _userBusiness.UpdateProfile(userModel).ToJson();
             }

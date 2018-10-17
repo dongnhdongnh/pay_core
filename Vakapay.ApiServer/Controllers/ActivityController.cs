@@ -96,7 +96,7 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
 
-                var ip = HelpersApi.getIp(Request);
+                var ip = HelpersApi.GetIp(Request);
 
                 var checkConfirmedDevices = new ConfirmedDevices();
 

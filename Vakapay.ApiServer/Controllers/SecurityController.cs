@@ -131,7 +131,7 @@ namespace Vakapay.ApiServer.Controllers
 
                     return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                         ActionLog.LOCK_SCREEN,
-                        HelpersApi.getIp(Request)).ToJson();
+                        HelpersApi.GetIp(Request)).ToJson();
                 }
 
 

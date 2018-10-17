@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 namespace Vakapay.ApiServer.Models
 {
     public class ActionCode

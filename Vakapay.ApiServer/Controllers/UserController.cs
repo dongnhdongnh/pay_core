@@ -125,7 +125,7 @@ namespace Vakapay.ApiServer.Controllers
                 //save action log
                 _userBusiness.AddActionLog(email, userCheck.Id,
                     ActionLog.AVATAR,
-                    HelpersApi.getIp(Request));
+                    HelpersApi.GetIp(Request));
 
                 return new ReturnObject
                 {
@@ -177,7 +177,7 @@ namespace Vakapay.ApiServer.Controllers
                     return _walletBusiness.MakeAllWalletForNewUser(userModel).ToJson();
                 }
 
-                var ip = HelpersApi.getIp(Request);
+                var ip = HelpersApi.GetIp(Request);
 
                 if (string.IsNullOrEmpty(ip))
                     return new ReturnObject
@@ -272,7 +272,7 @@ namespace Vakapay.ApiServer.Controllers
                 //save action log
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_PROFILE,
-                    HelpersApi.getIp(Request)).ToJson();
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -331,7 +331,7 @@ namespace Vakapay.ApiServer.Controllers
                 //save action log
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_PREFERENCES,
-                    HelpersApi.getIp(Request)).ToJson();
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -368,7 +368,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_NOTIFICATION,
-                    HelpersApi.getIp(Request)).ToJson();
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
