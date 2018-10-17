@@ -54,8 +54,8 @@ namespace Vakapay.ApiServer.Controllers
                     Balance = balances
                 };
 
-                return JsonHelper.SerializeObject(new ReturnObject()
-                    {Status = Status.STATUS_SUCCESS, Data = JsonHelper.SerializeObject(balanceResponse)});
+                return JsonHelper.SerializeObject(new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = balanceResponse});
             }
             catch (Exception e)
             {
@@ -95,13 +95,13 @@ namespace Vakapay.ApiServer.Controllers
 
                 var sortedTransactions = transactions.OrderByDescending(o=>o.UpdatedAt).ToList();
 
-                if ( limit != null && limit > 0 )
+                if ( limit != null && limit > 0 && limit < sortedTransactions.Count )
                 {
                     sortedTransactions = sortedTransactions.GetRange(0, (int) limit);
                 }
 
-                return JsonHelper.SerializeObject(new ReturnObject()
-                    {Status = Status.STATUS_SUCCESS, Data = JsonHelper.SerializeObject(sortedTransactions)});
+                return JsonHelper.SerializeObject(new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = sortedTransactions});
             }
             catch (Exception e)
             {

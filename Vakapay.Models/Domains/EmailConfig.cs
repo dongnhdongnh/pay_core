@@ -47,7 +47,7 @@ namespace Vakapay.Models.Domains
             long confirmation = 0;
             switch (networkName)
             {
-                case CryptoCurrency.VKC:
+                case CryptoCurrency.VAKA:
                     confirmation = EmailConfig.VakaConfirmations;
                     break;
                 case CryptoCurrency.ETH:

@@ -48,11 +48,11 @@ namespace Vakapay.ScanWallet
                 {
                     try
                     {
-                        Console.WriteLine("Start Scan Email...");
-                        var resultSend = business.CreateWalletAsync();
+                        Console.WriteLine("Start Scan wallet...");
+                        var resultSend = business.CreateAddressAsync();
                         Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
-                        Console.WriteLine("Send Vakacoin End...");
+                        Console.WriteLine("End Create Address...");
                         Thread.Sleep(100);
                     }
                     catch (Exception e)
