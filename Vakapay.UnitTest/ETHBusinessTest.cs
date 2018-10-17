@@ -104,6 +104,7 @@ namespace Vakapay.UnitTest
 			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
 			var _trans = new EthereumWithdrawTransaction()
 			{
+                UserId= "8377a95b-79b4-4dfb-8e1e-b4833443c306",
 				FromAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
 				ToAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
 				Amount = 10
@@ -127,6 +128,7 @@ namespace Vakapay.UnitTest
             _ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
             var _trans = new EthereumDepositTransaction()
             {
+                UserId = "8377a95b-79b4-4dfb-8e1e-b4833443c306",
                 ToAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
                 FromAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
                 Amount = 10

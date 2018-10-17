@@ -11,7 +11,7 @@ namespace Vakapay.Models.Entities
 
         public string GetStringAmount()
         {
-            return string.Format("{0:0.0000}", Amount) + nameof(CryptoCurrency.VAKA);
+            return string.Format("{0:0.0000}", Amount) + CryptoCurrency.GetSymbol(CryptoCurrency.VAKA);
         }
     }
     

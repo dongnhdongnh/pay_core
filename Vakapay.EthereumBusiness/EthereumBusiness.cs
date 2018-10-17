@@ -70,11 +70,11 @@ namespace Vakapay.EthereumBusiness
 		}
 
 
-        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string walletadd,int offset = -1, int limit = -1, string[] orderBy = null)
+        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,int offset = -1, int limit = -1, string[] orderBy = null)
         {
             var depositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
             var withdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-            return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData,walletadd, withdrawRepo, depositRepo, offset, limit, orderBy);
+            return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData, userID, withdrawRepo, depositRepo, offset, limit, orderBy);
         }
         //public override List<BlockchainTransaction> GetWithdrawHistory()
         //{
