@@ -144,6 +144,50 @@ namespace Vakapay.ApiServer.Controllers
         }
 
 
+        [HttpPost("lock-screen/unlock")]
+        public string VerifyPassword([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
+                if (userModel.IsLockScreen == 0)
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                    }.ToJson();
+
+
+                if (value.ContainsKey("password"))
+                {
+                    var password = value["password"].ToString();
+
+                    if (CommonHelper.Md5(password).Equals(userModel.SecondPassword))
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_SUCCESS,
+                        }.ToJson();
+                }
+
+
+                return CreateDataError("Password is incorrect");
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
         // POST api/values
         [HttpPost("lock-screen/require-send-code-phone")]
         public string SendCodeLock()
