@@ -1,5 +1,5 @@
 ﻿using System;
-using Vakapay.Commons.Helpers;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.BTC;
 

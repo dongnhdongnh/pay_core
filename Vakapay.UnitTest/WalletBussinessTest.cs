@@ -13,7 +13,6 @@ namespace Vakapay.UnitTest
     [TestFixture]
     class WalletBussinessTest
     {
-        //const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
         Vakapay.WalletBusiness.WalletBusiness _walletBusiness;
 
         Vakapay.WalletBusiness.WalletBusiness WalletBusiness
@@ -24,7 +23,7 @@ namespace Vakapay.UnitTest
                 {
                     var repositoryConfig = new RepositoryConfiguration()
                     {
-                        ConnectionString = VakapayConfig.ConnectionString
+                        ConnectionString = AppSettingHelper.GetDBConnection()
                     };
 
                     var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -45,7 +44,7 @@ namespace Vakapay.UnitTest
             get
             {
                 if (_rpcClass == null)
-                    _rpcClass = new EthereumRpc(VakapayConfig.RPCEndpoint);
+                    _rpcClass = new EthereumRpc(AppSettingHelper.GetEthereumNode());
                 return _rpcClass;
             }
         }
@@ -55,7 +54,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration()
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             _vakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -69,7 +68,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration()
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -98,7 +97,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -118,12 +117,9 @@ namespace Vakapay.UnitTest
         [Test]
         public void InitFakeAddressAndCoin()
         {
-//			var rpc = new EthereumRpc("http://localhost:8545");
-//			var a = rpc.CreateNewAddress("password");
-
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             //Create user active for test
@@ -216,7 +212,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration()
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -256,7 +252,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration()
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -280,7 +276,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -345,7 +341,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

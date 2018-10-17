@@ -4,10 +4,8 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using Vakapay.Commons.Helpers;
-using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
-using Vakapay.Models.Repositories.Base;
+ using Vakapay.Models.Domains;
+ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Repositories.Mysql.Base
 {

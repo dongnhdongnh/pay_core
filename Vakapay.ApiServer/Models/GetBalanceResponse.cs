@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Vakapay.Commons.Constants;
 
 namespace Vakapay.ApiServer.Models
 {
@@ -9,7 +10,7 @@ namespace Vakapay.ApiServer.Models
         public string Currency;
         
         [JsonProperty(PropertyName = "amount")]
-        public string Amount => Vakapay.Models.Domains.CryptoCurrency.GetAmount(Currency, AmountDecimal);
+        public string Amount => CryptoCurrency.GetAmount(Currency, AmountDecimal);
 
         [JsonIgnore]
         public decimal AmountDecimal { private get; set; }

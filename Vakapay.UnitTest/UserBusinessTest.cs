@@ -21,7 +21,7 @@ namespace Vakapay.UnitTest
                 {
                     var repositoryConfig = new RepositoryConfiguration
                     {
-                        ConnectionString = UserBusinessTest.ConnectionString
+                        ConnectionString = AppSettingHelper.GetDBConnection()
                     };
                     Console.WriteLine("New Connect");
                     _PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -32,9 +32,6 @@ namespace Vakapay.UnitTest
             set { this._PersistenceFactory = value; }
         }
 
-        const String ConnectionString =
-            "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
-
         UserBusiness.UserBusiness userBus;
 
         [Test]
@@ -43,7 +40,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = UserBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             Console.WriteLine("New Address");
@@ -65,7 +62,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = UserBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             Console.WriteLine("New Address");
@@ -91,7 +88,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = UserBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             Console.WriteLine("New Address");

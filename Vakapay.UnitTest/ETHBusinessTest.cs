@@ -32,7 +32,7 @@ namespace Vakapay.UnitTest
 				{
 					var repositoryConfig = new RepositoryConfiguration
 					{
-						ConnectionString = ETHBusinessTest.ConnectionString
+                        ConnectionString = AppSettingHelper.GetDBConnection()
 					};
 					Console.WriteLine("MAKE NEW");
 					_PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -46,7 +46,6 @@ namespace Vakapay.UnitTest
 			}
 		}
 		const String RPCEndpoint = "http://localhost:9900";
-		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 		Vakapay.EthereumBusiness.EthereumBusiness _ethBus;
 		[Test]
 		public async System.Threading.Tasks.Task CreateNewAddressAsync()
@@ -54,7 +53,7 @@ namespace Vakapay.UnitTest
 			Console.WriteLine("WTF");
 			var repositoryConfig = new RepositoryConfiguration
 			{
-				ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
 			};
 			Console.WriteLine("MAKE NEW");
 			PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -79,7 +78,7 @@ namespace Vakapay.UnitTest
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
-				ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
 			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -98,7 +97,7 @@ namespace Vakapay.UnitTest
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
-				ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
 			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -121,7 +120,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

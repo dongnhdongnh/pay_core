@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Newtonsoft.Json.Linq;
@@ -10,7 +9,6 @@ using Vakapay.BitcoinBusiness;
 using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Configuration;
 using Vakapay.Cryptography;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
@@ -449,10 +447,7 @@ namespace Vakapay.WalletBusiness
                 switch (walletNetworkName)
                 {
                     case CryptoCurrency.BTC:
-                        var bitcoinRpcAccount = VakapayConfiguration.GetBitcoinRpcAccount();
-                        var bitcoinRpc = new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(),
-                            bitcoinRpcAccount.Username,
-                            bitcoinRpcAccount.Password);
+                        var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
 
                         getInfoResult = bitcoinRpc.GetInfo();
 
@@ -467,7 +462,7 @@ namespace Vakapay.WalletBusiness
                         break;
 
                     case CryptoCurrency.ETH:
-                        var ethRpc = new EthereumRpc(VakapayConfiguration.GetEthereumNode());
+                        var ethRpc = new EthereumRpc(AppSettingHelper.GetEthereumNode());
                         var blockNumber = ethRpc.GetBlockNumber();
 
                         if (blockNumber.Status == Status.STATUS_ERROR)
@@ -481,7 +476,7 @@ namespace Vakapay.WalletBusiness
                         break;
 
                     case CryptoCurrency.VAKA:
-                        var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
+                        var vakacoinRpc = new VakacoinRPC(AppSettingHelper.GetVakacoinNode());
                         getInfoResult = vakacoinRpc.GetInfo();
 
                         if (getInfoResult.Status == Status.STATUS_ERROR)
@@ -866,9 +861,7 @@ namespace Vakapay.WalletBusiness
             switch (networkName)
             {
                 case CryptoCurrency.BTC:
-                    var bitcoinRpcAccount = VakapayConfiguration.GetBitcoinRpcAccount();
-                    var bitcoinRpc = new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(), bitcoinRpcAccount.Username,
-                        bitcoinRpcAccount.Password);
+                    var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
                     var result = bitcoinRpc.ValidateAddress(address);
                     var jsonResult = JObject.Parse(result.Data);
                     return jsonResult["isvalid"].Value<bool>();
@@ -877,7 +870,7 @@ namespace Vakapay.WalletBusiness
                     return BlockchainHeper.IsEthereumAddress(address);
 
                 case CryptoCurrency.VAKA:
-                    var vakacoinRpc = new VakacoinRPC(VakapayConfiguration.GetVakacoinNode());
+                    var vakacoinRpc = new VakacoinRPC(AppSettingHelper.GetVakacoinNode());
                     return vakacoinRpc.CheckAccountExist(address);
             }
 
@@ -984,19 +977,16 @@ namespace Vakapay.WalletBusiness
                         var ethereumBusiness = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory);
                         res = ethereumBusiness.CreateAddressAsync(
                             new EthereumAddressRepository(ConnectionDb),
-                            new EthereumRpc(VakapayConfiguration.GetEthereumNode()),
+                            new EthereumRpc(AppSettingHelper.GetEthereumNode()),
                             pendingWallet.Id, pass).Result;
                         break;
 
                     case CryptoCurrency.BTC:
                         Console.WriteLine("make btc");
                         var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(vakapayRepositoryFactory);
-                        var bitcoinRpcAccount = VakapayConfiguration.GetBitcoinRpcAccount();
                         res = bitcoinBusiness.CreateAddressAsync(
                             new BitcoinAddressRepository(ConnectionDb),
-                            new BitcoinRpc(VakapayConfiguration.GetBitcoinNode(),
-                                bitcoinRpcAccount.Username,
-                                bitcoinRpcAccount.Password),
+                            new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication()),
                             pendingWallet.Id, pass).Result;
                         break;
 
@@ -1005,7 +995,7 @@ namespace Vakapay.WalletBusiness
                         var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory);
                         res = vakaBusiness.CreateAddressAsync(
                             new VakacoinAccountRepository(ConnectionDb),
-                            new VakacoinRPC(VakapayConfiguration.GetVakacoinNode()),
+                            new VakacoinRPC(AppSettingHelper.GetVakacoinNode()),
                             pendingWallet.Id, pass).Result;
                         break;
                     default:

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using NLog;
 using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
@@ -25,7 +24,6 @@ namespace Vakapay.ScanVakaCoin
 
         public const String TRANSACTION_STATUS_EXECUTED = "executed";
         public const String TRANSACTION_ACTION_TRANSFER = "transfer";
-        public readonly static String[] TRANSACTION_SYMBOL_ARRAY = {"EOS", "VAKA"};
 
         public IBlockchainRPC RpcClient
         {
@@ -48,14 +46,18 @@ namespace Vakapay.ScanVakaCoin
 
         public IEnumerable<object> StreamBlock(uint startBlock = 0)
         {
-            if (CacheHelper.HaveKey(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, "VAKA")))
+            if (CacheHelper.HaveKey(
+                String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, nameof(CryptoCurrency.VAKA))
+            ))
                 uint.TryParse(
                     CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
-                        "VAKA")), out startBlock);
-            
+                        nameof(CryptoCurrency.VAKA))),
+                    out startBlock
+                );
+
             if (startBlock.Equals(0))
                 startBlock = _rpcClient.GetLastIrreversibleBlockNum().GetValueOrDefault();
-            
+
             while (true)
             {
                 uint lastIrreversibleBlock = _rpcClient.GetLastIrreversibleBlockNum().GetValueOrDefault();
@@ -93,7 +95,7 @@ namespace Vakapay.ScanVakaCoin
             TransferData transferData = JsonHelper.DeserializeObject<TransferData>(action.Data.ToString());
             if (String.IsNullOrEmpty(transferData.Quantity))
                 return;
-            if (TRANSACTION_SYMBOL_ARRAY.Contains(transferData.Symbol()))
+            if (transferData.Symbol() == nameof(CryptoCurrency.VAKA))
             {
                 // If receiver doesn't exist in wallet table then stop
                 if (!_walletBusiness.CheckExistedAndUpdateByAddress(transferData.To, transferData.Amount(),

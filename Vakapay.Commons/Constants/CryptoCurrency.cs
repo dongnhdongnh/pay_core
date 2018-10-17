@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Vakapay.Models.Domains
+namespace Vakapay.Commons.Constants
 {
     public static class CryptoCurrency
     {

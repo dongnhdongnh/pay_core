@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.BitcoinBusiness;
+using Vakapay.Commons.Helpers;
 
 namespace Vakapay.ApiService.Controllers
 {
@@ -7,7 +8,7 @@ namespace Vakapay.ApiService.Controllers
     [ApiController]
     public class BTCController : Controller
     {
-        BitcoinRpc _bitcoinRpcRpc = new BitcoinRpc("HELOO", "", "");
+        BitcoinRpc _bitcoinRpcRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)

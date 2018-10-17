@@ -4,9 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Cryptography.ECDSA;
 using Org.BouncyCastle.Crypto.Digests;
-using Vakapay.Models.Domains;
 
 namespace Vakapay.Cryptography
 {
