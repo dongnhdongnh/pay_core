@@ -7,12 +7,10 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UAParser;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
-using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -98,7 +96,7 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
 
-                string ip = HelpersApi.getIp(Request);
+                var ip = HelpersApi.getIp(Request);
 
                 var checkConfirmedDevices = new ConfirmedDevices();
 
@@ -108,7 +106,7 @@ namespace Vakapay.ApiServer.Controllers
 
                     var uaString = Request.Headers["User-Agent"].FirstOrDefault();
                     var uaParser = Parser.GetDefault();
-                    ClientInfo browser = uaParser.Parse(uaString);
+                    var browser = uaParser.Parse(uaString);
 
                     var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
 
@@ -141,12 +139,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                if (value.ContainsKey("Id"))
-                {
-                    return _userBusiness.DeleteConfirmedDevicesById(value["Id"].ToString()).ToJson();
-                }
-
-                return CreateDataError("ID Not exist.");
+                return value.ContainsKey("Id") ? _userBusiness.DeleteConfirmedDevicesById(value["Id"].ToString()).ToJson() : CreateDataError("ID Not exist.");
             }
             catch (Exception e)
             {
@@ -160,12 +153,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                if (value.ContainsKey("Id"))
-                {
-                    return _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson();
-                }
-
-                return CreateDataError("ID Not exist.");
+                return value.ContainsKey("Id") ? _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson() : CreateDataError("ID Not exist.");
             }
             catch (Exception e)
             {

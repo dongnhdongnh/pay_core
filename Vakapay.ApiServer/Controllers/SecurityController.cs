@@ -1,30 +1,22 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.UserBusiness;
-using Vakapay.WalletBusiness;
 
-namespace Vakaxa.ApiServer.Controllers
+namespace Vakapay.ApiServer.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -33,9 +25,8 @@ namespace Vakaxa.ApiServer.Controllers
     [Authorize]
     public class SecurityController : ControllerBase
     {
-        private readonly UserBusiness _userBusiness;
-        private WalletBusiness _walletBusiness;
-        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory { get; }
+        private readonly UserBusiness.UserBusiness _userBusiness;
+        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
         private IConfiguration Configuration { get; }
@@ -52,9 +43,9 @@ namespace Vakaxa.ApiServer.Controllers
                 ConnectionString = Configuration.GetConnectionString("DefaultConnection")
             };
 
-            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            _userBusiness = new UserBusiness(_persistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
         }
 
         [HttpGet("get-info")]
@@ -126,21 +117,21 @@ namespace Vakaxa.ApiServer.Controllers
 
                     var secret = secretAuthToken.LockScreen;
 
-                    bool isok = authenticator.CheckCode(secret, code);
+                    var isok = authenticator.CheckCode(secret, code, userModel);
                     Console.WriteLine(isok);
-                    if (isok)
-                    {
-                        userModel.IsLockScreen = (int) status;
-                        userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
-                            ? CommonHelper.Md5(password.ToString())
-                            : "";
 
-                        var resultUpdate = _userBusiness.UpdateProfile(userModel);
+                    if (!isok) return CreateDataError("Can't update options");
 
-                        return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                            ActionLog.LOCK_SCREEN,
-                            HelpersApi.getIp(Request)).ToJson();
-                    }
+                    userModel.IsLockScreen = outStatus;
+                    userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
+                        ? CommonHelper.Md5(password.ToString())
+                        : "";
+
+                    _userBusiness.UpdateProfile(userModel);
+
+                    return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                        ActionLog.LOCK_SCREEN,
+                        HelpersApi.getIp(Request)).ToJson();
                 }
 
 
@@ -168,13 +159,13 @@ namespace Vakaxa.ApiServer.Controllers
                 if (userModel != null)
                 {
                     var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
-                    
+
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
 
                     userModel.SecretAuthToken = checkSecret;
                     var resultUpdate = _userBusiness.UpdateProfile(userModel);
-                    
+
                     if (resultUpdate.Status == Status.STATUS_ERROR)
                         return CreateDataError("Can't send code");
 

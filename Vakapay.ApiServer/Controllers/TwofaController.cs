@@ -7,19 +7,15 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.UserBusiness;
-using Vakapay.WalletBusiness;
 
-namespace Vakaxa.ApiServer.Controllers
+namespace Vakapay.ApiServer.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -28,9 +24,8 @@ namespace Vakaxa.ApiServer.Controllers
     [Authorize]
     public class TwofaController : ControllerBase
     {
-        private readonly UserBusiness _userBusiness;
-        private WalletBusiness _walletBusiness;
-        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory { get; }
+        private readonly UserBusiness.UserBusiness _userBusiness;
+        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
         private IConfiguration Configuration { get; }
@@ -47,9 +42,9 @@ namespace Vakaxa.ApiServer.Controllers
                 ConnectionString = Configuration.GetConnectionString("DefaultConnection")
             };
 
-            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            _userBusiness = new UserBusiness(_persistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
         }
 
         // POST api/values
@@ -72,39 +67,34 @@ namespace Vakaxa.ApiServer.Controllers
                 }
 
 
-                if (value.ContainsKey("code"))
-                {
-                    var code = value["code"].ToString();
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                if (!value.ContainsKey("code")) return CreateDataError("Can't update options");
 
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                if (!value.ContainsKey("option")) return CreateDataError("Can't update options");
 
-                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return CreateDataError("Can't send code");
+                var code = value["code"].ToString();
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
-                    var secret = secretAuthToken.UpdateOptionVerification;
+                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    bool isok = authenticator.CheckCode(secret, code);
+                if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                    return CreateDataError("Can't send code");
 
-                    if (isok)
-                    {
-                        if (value.ContainsKey("option"))
-                        {
-                            var option = value["option"];
+                var secret = secretAuthToken.UpdateOptionVerification;
 
-                            userModel.Verification = (int) option;
+                var isok = authenticator.CheckCode(secret, code, userModel);
 
-                            _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                                ActionLog.UPDATE_NOTIFICATION,
-                                HelpersApi.getIp(Request));
-
-                            return _userBusiness.UpdateProfile(userModel).ToJson();
-                        }
-                    }
-                }
+                if (!isok) return CreateDataError("Can't update options");
 
 
-                return CreateDataError("Can't update options");
+                var option = value["option"];
+
+                userModel.Verification = (int) option;
+
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.UPDATE_NOTIFICATION,
+                    HelpersApi.getIp(Request));
+
+                return _userBusiness.UpdateProfile(userModel).ToJson();
             }
             catch (Exception e)
             {
@@ -131,33 +121,28 @@ namespace Vakaxa.ApiServer.Controllers
                     return CreateDataError("User not exist in DB");
                 }
 
-                if (value.ContainsKey("code"))
-                {
-                    var code = value["code"].ToString();
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                if (!value.ContainsKey("code")) return CreateDataError("Can't verify code");
 
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                var code = value["code"].ToString();
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
+                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    var secret = secretAuthToken.TwofaEnable;
+                if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
+                    return CreateDataError("Can't send code");
 
-                    bool isok = authenticator.CheckCode(secret, code);
+                var secret = secretAuthToken.TwofaEnable;
 
-                    if (isok)
-                    {
-                        userModel.TwoFactor = true;
+                var isok = authenticator.CheckCode(secret, code, userModel);
 
-                        _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                            ActionLog.TWOFA_ENABLE,
-                            HelpersApi.getIp(Request));
+                if (!isok) return CreateDataError("Can't verify code");
+                userModel.TwoFactor = true;
 
-                        return _userBusiness.UpdateProfile(userModel).ToJson();
-                    }
-                }
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.TWOFA_ENABLE,
+                    HelpersApi.getIp(Request));
 
-                return CreateDataError("Can't verify code");
+                return _userBusiness.UpdateProfile(userModel).ToJson();
             }
             catch (Exception e)
             {
@@ -184,33 +169,28 @@ namespace Vakaxa.ApiServer.Controllers
                     return CreateDataError("User not exist in DB");
                 }
 
-                if (value.ContainsKey("code"))
-                {
-                    var code = value["code"].ToString();
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                if (!value.ContainsKey("code")) return CreateDataError("Can't verify code");
 
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                var code = value["code"].ToString();
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaDisable))
-                        return CreateDataError("Can't send code");
+                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    var secret = secretAuthToken.TwofaDisable;
+                if (string.IsNullOrEmpty(secretAuthToken.TwofaDisable))
+                    return CreateDataError("Can't send code");
 
-                    bool isok = authenticator.CheckCode(secret, code);
+                var secret = secretAuthToken.TwofaDisable;
 
-                    if (isok)
-                    {
-                        userModel.TwoFactor = false;
+                var isok = authenticator.CheckCode(secret, code, userModel);
 
-                        _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                            ActionLog.TWOFA_DISABLE,
-                            HelpersApi.getIp(Request));
+                if (!isok) return CreateDataError("Can't verify code");
+                userModel.TwoFactor = false;
 
-                        return _userBusiness.UpdateProfile(userModel).ToJson();
-                    }
-                }
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.TWOFA_DISABLE,
+                    HelpersApi.getIp(Request));
 
-                return CreateDataError("Can't verify code");
+                return _userBusiness.UpdateProfile(userModel).ToJson();
             }
             catch (Exception e)
             {
@@ -233,36 +213,33 @@ namespace Vakaxa.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
 
-                if (userModel != null)
-                {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
+                if (userModel == null) return CreateDataError("Can't send code");
 
-                    if (checkSecret == null)
-                        return CreateDataError("Can't send code");
+                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
 
-                    userModel.SecretAuthToken = checkSecret;
-                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+                if (checkSecret == null)
+                    return CreateDataError("Can't send code");
 
-                    if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return CreateDataError("Can't send code");
+                userModel.SecretAuthToken = checkSecret;
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return CreateDataError("Can't send code");
 
 
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+                var secretAuthToken = ActionCode.FromJson(checkSecret);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return CreateDataError("Can't send code");
+                if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                    return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.UpdateOptionVerification;
+                var secret = secretAuthToken.UpdateOptionVerification;
 
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                var code = authenticator.GetCode(secret);
 
-                    Console.WriteLine(code);
+                Console.WriteLine(code);
 
-                    return _userBusiness.SendSms(userModel, code).ToJson();
-                }
-
-                return CreateDataError("Can't send code");
+                return _userBusiness.SendSms(userModel, code).ToJson();
             }
             catch (Exception e)
             {
@@ -284,36 +261,33 @@ namespace Vakaxa.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
 
-                if (userModel != null)
-                {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_DISABLE);
+                if (userModel == null) return CreateDataError("Can't send code");
 
-                    if (checkSecret == null)
-                        return CreateDataError("Can't send code");
+                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_DISABLE);
 
-                    userModel.SecretAuthToken = checkSecret;
-                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+                if (checkSecret == null)
+                    return CreateDataError("Can't send code");
 
-                    if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return CreateDataError("Can't send code");
+                userModel.SecretAuthToken = checkSecret;
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return CreateDataError("Can't send code");
 
 
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+                var secretAuthToken = ActionCode.FromJson(checkSecret);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaDisable))
-                        return CreateDataError("Can't send code");
+                if (string.IsNullOrEmpty(secretAuthToken.TwofaDisable))
+                    return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.TwofaDisable;
+                var secret = secretAuthToken.TwofaDisable;
 
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                var code = authenticator.GetCode(secret);
 
-                    Console.WriteLine(code);
+                Console.WriteLine(code);
 
-                    return _userBusiness.SendSms(userModel, code).ToJson();
-                }
-
-                return CreateDataError("Can't send code");
+                return _userBusiness.SendSms(userModel, code).ToJson();
             }
             catch (Exception e)
             {
@@ -333,36 +307,32 @@ namespace Vakaxa.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
 
-                if (userModel != null)
-                {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
+                if (userModel == null) return CreateDataError("Can't send code");
+                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
-                    if (checkSecret == null)
-                        return CreateDataError("Can't send code");
+                if (checkSecret == null)
+                    return CreateDataError("Can't send code");
 
-                    userModel.SecretAuthToken = checkSecret;
-                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+                userModel.SecretAuthToken = checkSecret;
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                    if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return CreateDataError("Can't send code");
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return CreateDataError("Can't send code");
 
 
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+                var secretAuthToken = ActionCode.FromJson(checkSecret);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
+                if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
+                    return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.TwofaEnable;
+                var secret = secretAuthToken.TwofaEnable;
 
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                var code = authenticator.GetCode(secret);
 
-                    Console.WriteLine(code);
+                Console.WriteLine(code);
 
-                    return _userBusiness.SendSms(userModel, code).ToJson();
-                }
-
-                return CreateDataError("Can't send code");
+                return _userBusiness.SendSms(userModel, code).ToJson();
             }
             catch (Exception e)
             {
