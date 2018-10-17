@@ -23,7 +23,8 @@ builder:
     - setup_docker
     - build builder
   only:
-    - branches
+    - master
+    - release
 
 sendbtc:
   stage: build_program
@@ -34,7 +35,8 @@ sendbtc:
     - setup_docker
     - build sendbtc
   only:
-    - branches
+    - master
+    - release
 
 review:
   stage: review
@@ -110,7 +112,7 @@ production:
   [[ "$TRACE" ]] && set -x
   export RELEASE_NAME="$CI_PROJECT_PATH_SLUG-$(echo ${CI_ENVIRONMENT_NAME/\//-} | tr -s  '[:upper:]'  '[:lower:]' )"
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE
-  export CI_APPLICATION_TAG=$CI_COMMIT_SHA
+  export CI_APPLICATION_TAG=${CI_COMMIT_SHA:0:8}
 
   function get_replicas() {
     track="${1:-stable}"

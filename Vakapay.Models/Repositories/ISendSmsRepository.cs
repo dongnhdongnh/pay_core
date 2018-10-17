@@ -5,11 +5,11 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface ISendSmsRepository : IRepositoryBase<SmsQueue>
+    public interface ISendSmsRepository : IRepositoryBase<SmsQueue>, IMultiThreadUpdateEntityRepository<SmsQueue>
     {
-        SmsQueue FindPendingSms();
-        Task<ReturnObject> LockForProcess(SmsQueue sms);
-        Task<ReturnObject> SafeUpdate(SmsQueue sms);
-        Task<ReturnObject> ReleaseLock(SmsQueue sms);
+//        SmsQueue FindPendingSms();
+//        Task<ReturnObject> LockForProcess(SmsQueue sms);
+//        Task<ReturnObject> SafeUpdate(SmsQueue sms);
+//        Task<ReturnObject> ReleaseLock(SmsQueue sms);
     }
 }

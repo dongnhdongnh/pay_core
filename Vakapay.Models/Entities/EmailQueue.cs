@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
@@ -8,9 +9,9 @@ namespace Vakapay.Models.Entities
     }
 
     [Table("EmailQueue")]
-    public class EmailQueue
+    public class EmailQueue : MultiThreadUpdateEntity
     {
-        public string Id { get; set; }
+//        public string Id { get; set; }
         public string ToEmail { get; set; }
         public string Subject { get; set; }
         public EmailTemplate Template { get; set; }
@@ -30,11 +31,11 @@ namespace Vakapay.Models.Entities
         //Verify email template
         public string VerifyUrl { get; set; }
 
-        public string Status { get; set; }
-        public long CreatedAt { get; set; }
-        public long UpdatedAt { get; set; }
-        public int InProcess { get; set; }
-        public int Version { get; set; }
+//        public string Status { get; set; }
+//        public long CreatedAt { get; set; }
+//        public long UpdatedAt { get; set; }
+//        public int InProcess { get; set; }
+//        public int Version { get; set; }
 
         public string GetAmount()
         {

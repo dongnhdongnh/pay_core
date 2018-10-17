@@ -23,11 +23,11 @@ namespace VakaSharp.Api.v1
 	public class Resource
     {
 		[JsonProperty("used")]
-		public Int32 Used { get; set; }
+		public Int64 Used { get; set; }
 		[JsonProperty("available")]
-		public Int32 Available { get; set; }
+		public Int64 Available { get; set; }
 		[JsonProperty("max")]
-		public Int32 Max { get; set; }
+		public Int64 Max { get; set; }
     }
 	[Serializable]
 	public class AuthorityKey
@@ -144,6 +144,8 @@ namespace VakaSharp.Api.v1
 		public List<string> ErrorMessages { get; set; }
 		[JsonProperty("abi_extensions")]
 		public List<Extension> AbiExtensions { get; set; }
+		[JsonProperty("variants")]
+		public List<Variant> Variants { get; set; }
     }
 	[Serializable]
 	public class AbiRicardianClause
@@ -214,6 +216,14 @@ namespace VakaSharp.Api.v1
 		public UInt16 Type { get; set; }
 		[JsonProperty("data")]
 		public byte[] Data { get; set; }
+    }
+	[Serializable]
+	public class Variant
+    {
+		[JsonProperty("name")]
+		public string Name { get; set; }
+		[JsonProperty("type")]
+		public List<string> Type { get; set; }
     }
 	[Serializable]
 	public class Action
@@ -490,11 +500,11 @@ namespace VakaSharp.Api.v1
 		[JsonProperty("created")]   
 		public DateTime? Created { get; set; }
 		[JsonProperty("ram_quota")]   
-		public Int32? RamQuota { get; set; }
+		public Int64? RamQuota { get; set; }
 		[JsonProperty("net_weight")]   
-		public Int32? NetWeight { get; set; }
+		public Int64? NetWeight { get; set; }
 		[JsonProperty("cpu_weight")]   
-		public Int32? CpuWeight { get; set; }
+		public Int64? CpuWeight { get; set; }
 		[JsonProperty("net_limit")]   
 		public Resource NetLimit { get; set; }
 		[JsonProperty("cpu_limit")]   
@@ -561,6 +571,26 @@ namespace VakaSharp.Api.v1
 		public string AccountName { get; set; }
 		[JsonProperty("wasm")]   
 		public string Wasm { get; set; }
+		[JsonProperty("abi")]   
+		public string Abi { get; set; }
+    }
+	[Serializable]
+    public class GetRawAbiRequest
+    {
+		[JsonProperty("account_name")]   
+		public string AccountName { get; set; }
+		[JsonProperty("abi_hash")]   
+		public string AbiHash { get; set; }
+    }
+	[Serializable]
+    public class GetRawAbiResponse
+    {
+		[JsonProperty("account_name")]   
+		public string AccountName { get; set; }
+		[JsonProperty("code_hash")]   
+		public string CodeHash { get; set; }
+		[JsonProperty("abi_hash")]   
+		public string AbiHash { get; set; }
 		[JsonProperty("abi")]   
 		public string Abi { get; set; }
     }
@@ -789,6 +819,8 @@ namespace VakaSharp.Api.v1
 		public string PackedContextFreeData { get; set; }
 		[JsonProperty("packed_trx")]   
 		public string PackedTrx { get; set; }
+		[JsonProperty("transaction")]   
+		public Transaction Transaction { get; set; }
     }
 	[Serializable]
     public class PushTransactionResponse

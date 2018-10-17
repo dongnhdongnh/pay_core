@@ -39,9 +39,9 @@
 				new Field() { Name = "privileged", Type = "bool?" },
 				new Field() { Name = "last_code_update", Type = "DateTime?" },
 				new Field() { Name = "created", Type = "DateTime?" },
-				new Field() { Name = "ram_quota", Type = "Int32?" },
-				new Field() { Name = "net_weight", Type = "Int32?" },
-				new Field() { Name = "cpu_weight", Type = "Int32?" },
+				new Field() { Name = "ram_quota", Type = "Int64?" },
+				new Field() { Name = "net_weight", Type = "Int64?" },
+				new Field() { Name = "cpu_weight", Type = "Int64?" },
 				new Field() { Name = "net_limit", Type = "Resource" },
 				new Field() { Name = "cpu_limit", Type = "Resource" }, 
 				new Field() { Name = "ram_usage", Type = "UInt32?" },
@@ -105,6 +105,27 @@
 				new Field() { Name = "abi",          Type = "string" }
 			}
 		},
+
+		new ApiMethod() 
+		{ 
+			Module = "chain", 
+			Name = "get_raw_abi",
+			IsCachable = true,
+			Request = new Field[] 
+			{
+				new Field() { Name = "account_name", Type = "string" },
+				new Field() { Name = "abi_hash", Type = "string" }
+			},
+			Response = new Field[] 
+			{
+				new Field() { Name = "account_name", Type = "string" },
+				new Field() { Name = "code_hash",         Type = "string" },
+				new Field() { Name = "abi_hash",          Type = "string" },
+				new Field() { Name = "abi",          Type = "string" }
+			}
+		},
+
+		
 
 		new ApiMethod() 
 		{ 
@@ -315,7 +336,8 @@
 				new Field() { Name = "signatures", Type = "string[]" },
 				new Field() { Name = "compression", Type = "UInt32?" },
 				new Field() { Name = "packed_context_free_data", Type = "string" },
-				new Field() { Name = "packed_trx", Type = "string" }
+				new Field() { Name = "packed_trx", Type = "string" },
+				new Field() { Name = "transaction", Type = "Transaction" }
 			},
 			Response = new Field[]
 			{

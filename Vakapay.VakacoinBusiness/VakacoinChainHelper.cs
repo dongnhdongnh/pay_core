@@ -157,7 +157,7 @@ namespace Vakapay.ScanVakaCoin
                 Status = Status.STATUS_PENDING,
                 CreatedAt = CommonHelper.GetUnixTimestamp(),
                 UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                InProcess = 0,
+                IsProcessing = 0,
                 Version = 0
             };
 
