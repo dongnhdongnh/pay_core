@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Data;
-using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -71,13 +70,13 @@ namespace Vakapay.SendSmsBusiness
                 _connectionDb.Open();
 
             //begin first sms
-            var transctionScope = _connectionDb.BeginTransaction();
+            var transactionScope = _connectionDb.BeginTransaction();
             try
             {
                 var lockResult = await sendSmsRepository.LockForProcess(pendingSms);
                 if (lockResult.Status == Status.STATUS_ERROR)
                 {
-                    transctionScope.Rollback();
+                    transactionScope.Rollback();
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
@@ -85,11 +84,11 @@ namespace Vakapay.SendSmsBusiness
                     };
                 }
 
-                transctionScope.Commit();
+                transactionScope.Commit();
             }
             catch (Exception e)
             {
-                transctionScope.Rollback();
+                transactionScope.Rollback();
                 return new ReturnObject
                 {
                     Status = Status.STATUS_ERROR,
@@ -137,6 +136,7 @@ namespace Vakapay.SendSmsBusiness
                 transactionSend.Rollback();
                 var releaseResult = sendSmsRepository.ReleaseLock(pendingSms);
                 Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+                _logger.Error(e);
                 throw;
             }
         }

@@ -1,13 +1,12 @@
-using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Vakapay.Commons.Helpers
 {
-    public class IPGeographicalLocation
+    public class IpGeographicalLocation
     {
-        [JsonProperty("ip")] public string IP { get; set; }
+        [JsonProperty("ip")] public string Ip { get; set; }
 
         [JsonProperty("country_code")] public string CountryCode { get; set; }
 
@@ -29,18 +28,18 @@ namespace Vakapay.Commons.Helpers
 
         [JsonProperty("metro_code")] public string MetroCode { get; set; }
 
-        private IPGeographicalLocation()
+        private IpGeographicalLocation()
         {
         }
 
-        public static async Task<IPGeographicalLocation> QueryGeographicalLocationAsync(string ipAddress)
+        public static async Task<IpGeographicalLocation> QueryGeographicalLocationAsync(string ipAddress)
         {
             HttpClient client = new HttpClient();
             string result =
                 await client.GetStringAsync("http://api.ipstack.com/" + ipAddress +
                                             "?access_key=aa7359fbf9db81bc6e7c96078784cb0c");
 
-            return JsonConvert.DeserializeObject<IPGeographicalLocation>(result);
+            return JsonConvert.DeserializeObject<IpGeographicalLocation>(result);
         }
     }
 }

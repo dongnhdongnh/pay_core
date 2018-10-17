@@ -20,7 +20,6 @@ using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using IPGeographicalLocation = Vakapay.Commons.Helpers.IPGeographicalLocation;
 
 namespace Vakapay.ApiServer.Controllers
 {
@@ -188,7 +187,7 @@ namespace Vakapay.ApiServer.Controllers
                 
                 //get location for ip
                 var location =
-                    await IPGeographicalLocation.QueryGeographicalLocationAsync(ip);
+                    await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
 
                 var uaString = Request.Headers["User-Agent"].FirstOrDefault();
                 var uaParser = Parser.GetDefault();

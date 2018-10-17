@@ -23,12 +23,10 @@ namespace Vakapay.SendSms
             return builder.Build();
         }
 
-        private static void Main(string[] args)
+        private static void Main()
         {
             var configuration = InitConfiguration();
             var apiKey = configuration["Elastic:api"];
-            var from = configuration["Elastic:email"];
-            var fromName = configuration["fromName"];
             var apiAddress = configuration["apiAddress"];
 
             var repositoryConfig = new RepositoryConfiguration

@@ -96,7 +96,7 @@ namespace Vakapay.UserBusiness
             {
                 //get location for ip
                 var location =
-                    IPGeographicalLocation.QueryGeographicalLocationAsync(ip);
+                    IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
 
                 var log = new UserActionLog
                 {
