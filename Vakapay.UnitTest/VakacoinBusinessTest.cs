@@ -45,7 +45,7 @@ namespace Vakapay.UnitTest
         {
             var walletReposity = _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection() ?? _vakapayRepositoryFactory.GetDbConnection());
             var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection() ?? _vakapayRepositoryFactory.GetDbConnection());
-            var wallet = walletReposity.FindByUserAndNetwork( userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id, CryptoCurrency.VKC);
+            var wallet = walletReposity.FindByUserAndNetwork( userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id, CryptoCurrency.VAKA);
             
             _vb.AddAccount(wallet.Id, "useraaaaaaaa", "5JtUScZK2XEp3g9gh7F8bwtPTRAkASmNrrftmx4AxDKD5K4zDnr", "VAKA69X3383RzBZj41k73CSjUNXM5MYGpnDxyPnWUKPEtYQmTBWz4D");
             _vb.AddAccount(wallet.Id, "useraaaaaaab", "5JUNYmkJ5wVmtVY8x9A1KKzYe9UWLZ4Fq1hzGZxfwfzJB8jkw6u", "VAKA7yBtksm8Kkg85r4in4uCbfN77uRwe82apM8jjbhFVDgEgz3w8S");
@@ -1152,6 +1152,26 @@ namespace Vakapay.UnitTest
                     ToAddress = "useraaaaaeel",
                     Amount = (decimal) 0.0001
                 });
+            }
+        }
+
+        [TestCase(1024)]
+        public void Get1024AccountBalance(int numOfTrans)
+        {
+            ReturnObject outPut = null;
+            var rpc = new VakacoinRPC("http://127.0.0.1:8000");
+            for (int i = 0; i < numOfTrans; i++)
+            {
+                var x1 = (char) ('a' + i % 16);
+                var x2 = (char) ('a' + (i / 16) % 16);
+                var x3 = (char) ('a' + (i / 16 / 16) % 4);
+                var from = new string("useraaaaa") + x3 + x2 + x1;
+
+                outPut = rpc.GetBalance(from);
+                if (outPut.Data != "99.9900 VAKA")
+                {
+                    Console.WriteLine(from);
+                }
             }
         }
 

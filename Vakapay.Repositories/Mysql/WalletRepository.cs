@@ -175,7 +175,7 @@ namespace Vakapay.Repositories.Mysql
 						blockchainAddress = new EthereumAddressRepository(Connection).FindByAddress(address);
 						break;
 
-					case CryptoCurrency.VKC:
+					case CryptoCurrency.VAKA:
 						blockchainAddress = new VakacoinAccountRepository(Connection).FindByAddress(address);
 						break;
 				}
@@ -213,7 +213,7 @@ namespace Vakapay.Repositories.Mysql
 							.ToList<BlockchainAddress>();
 						break;
 
-					case CryptoCurrency.VKC:
+					case CryptoCurrency.VAKA:
 						blockchainAddresses = new VakacoinAccountRepository(Connection).FindByWalletId(walletId)
 							.ToList<BlockchainAddress>();
 						break;
@@ -244,7 +244,7 @@ namespace Vakapay.Repositories.Mysql
 		{
 			try
 			{
-				string query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND NetworkName = '{networkName}'";
+				string query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND Currency = '{networkName}'";
 				List<Wallet> wallets = FindBySql(query);
 				if (wallets == null || wallets.Count == 0)
 					return null;

@@ -10,7 +10,7 @@ namespace Vakapay.Models.Entities
 
         public string GetStringAmount()
         {
-            return string.Format("{0:0.0000}", Amount) + nameof(CryptoCurrency.VKC);
+            return string.Format("{0:0.0000}", Amount) + nameof(CryptoCurrency.VAKA);
         }
     }
     
