@@ -1,4 +1,5 @@
 ﻿using System;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.VakacoinBusiness;
@@ -15,7 +16,7 @@ namespace Vakapay.TestWallet
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = "server=localhost;userid=root;password=Abcd@1234;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                    ConnectionString = AppSettingHelper.GetDBConnection()
                 };
 
                 var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

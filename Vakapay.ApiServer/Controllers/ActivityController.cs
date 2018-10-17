@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -36,7 +37,7 @@ namespace Vakapay.ApiServer.Controllers
 
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = Configuration.GetConnectionString("DefaultConnection")
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

@@ -13,8 +13,7 @@ namespace Vakapay.TestCreateTransaction
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString =
-                    "server=127.0.0.1;userid=root;password=Concuacang123!;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
 

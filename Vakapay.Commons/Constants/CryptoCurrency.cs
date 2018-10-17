@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Vakapay.Models.Domains
+namespace Vakapay.Commons.Constants
 {
     public static class CryptoCurrency
     {
@@ -9,21 +9,26 @@ namespace Vakapay.Models.Domains
         public const string VAKA = "Vakacoin";
         public const string BTC = "Bitcoin";
 
-        private static Dictionary<string, string> CurrencySymbol { get; } = new Dictionary<string, string>()
+        public static Dictionary<string, string> CurrencySymbol { get; } = new Dictionary<string, string>()
         {
             {ETH, "ETH"},
             {BTC, "BTC"},
             {VAKA, "VAKA"}
         };
+
+        public static string GetSymbol(string currency)
+        {
+            return CurrencySymbol[currency];
+        }
         
         public static string GetAmount(string currency, decimal amount)
         {
             if (currency == VAKA)
             {
-                return amount.ToString("N4") + " " + CurrencySymbol[currency];
+                return amount.ToString("N4") + " " + GetSymbol(currency);
             }
 
-            return amount + " " + CurrencySymbol[currency];
+            return amount + " " + GetSymbol(currency);
         }
     }
 }

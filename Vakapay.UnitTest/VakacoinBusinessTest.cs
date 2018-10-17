@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -14,14 +15,13 @@ namespace Vakapay.UnitTest
     {
         private VakacoinBusiness _vb;
         private VakapayRepositoryMysqlPersistenceFactory _vakapayRepositoryFactory;
-        const string ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
  
         [SetUp]
         public void Setup()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = VakacoinBusinessTest.ConnectionString// "server=127.0.0.1;userid=root;password=Concuacang123!;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             _vakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

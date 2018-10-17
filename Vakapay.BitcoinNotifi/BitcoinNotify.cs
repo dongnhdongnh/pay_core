@@ -23,21 +23,13 @@ namespace Vakapay.BitcoinNotifi
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString =
-                        "server=127.0.0.1;userid=root;password=Chelsea1992;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+                    ConnectionString = AppSettingHelper.GetDBConnection()
                 };
 
                 var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-                var bitcoinConnect = new BitcoinRPCConnect
-                {
-                    Host = "http://127.0.0.1:18443",
-                    UserName = "bitcoinrpc",
-                    Password = "wqfgewgewi"
-                };
-
 
                 var btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory);
-                var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
+                var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
 
                 var transaction = rpc.FindTransactionByHash(args[0]);
                 Logger.Debug("BitcoinNotify =>> BTCTransactionModel: " + transaction.Data);

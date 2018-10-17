@@ -1,12 +1,23 @@
 ﻿using System;
-using Vakapay.Commons.Helpers;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.BTC;
+using Dapper.Contrib.Extensions;
+using System.ComponentModel.DataAnnotations.Schema;
+using Vakapay.Commons.Helpers;
 
 namespace Vakapay.Models.Domains
 {
     public abstract class BlockchainTransaction : MultiThreadUpdateEntity
     {
+        public string Id
+        {
+            get
+            {
+                return CommonHelper.GenerateUuid();
+            }
+        }
+
         public string UserId { get; set; }
         public string Hash { get; set; }
         public int BlockNumber { get; set; }
@@ -14,6 +25,13 @@ namespace Vakapay.Models.Domains
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
         public decimal Fee { get; set; }
+
+
+        //[Write(false)]
+        //[Computed]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        //public int Type { get; set; }
+
 
         public string NetworkName()
         {
@@ -35,5 +53,15 @@ namespace Vakapay.Models.Domains
                     throw new NotImplementedException();
             }
         }
+
+        //public class PersonMapper : ClassMapper<BlockchainTransaction>
+        //{
+        //    public PersonMapper()
+        //    {
+        //      //  Table("Person");
+        //        Map(m => m.Type).Ignore();
+        //        AutoMap();
+        //    }
+        //}
     }
 }

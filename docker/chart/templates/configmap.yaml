@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "trackableappname" (dict "chart" . "suffix" "") }}
+  labels:
+    app: {{ template "applabel" . }}
+    track: "{{ $.Values.application.track }}"
+    chart: "{{ $.Chart.Name }}-{{ $.Chart.Version | replace "+" "_" }}"
+    release: {{ $.Release.Name }}
+    heritage: {{ $.Release.Service }}
+data:
+  appsettings.Production.json: |
+    {
+      "ConnectionStrings": {
+        "DefaultConnection": "server={{ $.Values.secret.mysql.host }};userid={{ $.Values.secret.mysql.user }};password={{ $.Values.secret.mysql.password }};database={{ $.Values.secret.mysql.db }};port={{ $.Values.secret.mysql.port }};Connection Timeout=120;SslMode=none;Max Pool Size=300"
+      },
+      "Chain": {
+        "BTC": {
+          "Url": "http://{{ $.Values.secret.btc.host }}:{{ $.Values.secret.btc.port }}",
+          "Username": "{{ $.Values.secret.btc.user }}",
+          "Password": "{{ $.Values.secret.btc.password }}"
+        },
+      },
+    }
