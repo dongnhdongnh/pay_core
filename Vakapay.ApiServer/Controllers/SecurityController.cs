@@ -138,7 +138,7 @@ namespace Vakaxa.ApiServer.Controllers
                         var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
                         return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                            ActionLog.LockScreen,
+                            ActionLog.LOCK_SCREEN,
                             HelpersApi.getIp(Request)).ToJson();
                     }
                 }
@@ -167,7 +167,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LockScreen);
+                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
                     
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");

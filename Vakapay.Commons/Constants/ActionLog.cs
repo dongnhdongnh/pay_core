@@ -7,8 +7,9 @@ namespace Vakapay.Commons.Constants
         public const string LOGIN = "Login";
         public const string UPDATE_PREFERENCES = "UpdatePreferences";
         public const string UPDATE_NOTIFICATION = "UpdateNotifications";
-        public const string TwofaEnable = "TwofaEnable";
-        public const string UpdateOptionVerification = "UpdateOptionVerification";
-        public const string LockScreen = "LockScreen";
+        public const string TWOFA_ENABLE = "TwofaEnable";
+        public const string TWOFA_DISABLE = "TwofaDisable";
+        public const string UPDATE_OPTION_VETIFY = "UpdateOptionVerify";
+        public const string LOCK_SCREEN = "LockScreen";
     }
 }

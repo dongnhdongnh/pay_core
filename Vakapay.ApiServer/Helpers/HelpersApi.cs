@@ -28,13 +28,16 @@ namespace Vakapay.ApiServer.Helpers
                 {
                     switch (action)
                     {
-                        case ActionLog.TwofaEnable:
+                        case ActionLog.TWOFA_ENABLE:
                             newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
-                        case ActionLog.UpdateOptionVerification:
+                        case ActionLog.TWOFA_DISABLE:
+                            newSecret.TwofaDisable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            break;
+                        case ActionLog.UPDATE_NOTIFICATION:
                             newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
-                        case ActionLog.LockScreen:
+                        case ActionLog.LOCK_SCREEN:
                             newSecret.LockScreen = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
                     }
@@ -45,21 +48,28 @@ namespace Vakapay.ApiServer.Helpers
 
                     switch (action)
                     {
-                        case ActionLog.TwofaEnable:
+                        case ActionLog.TWOFA_ENABLE:
                             if (string.IsNullOrEmpty(newSecret.TwofaEnable))
                             {
                                 newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             }
 
                             break;
-                        case ActionLog.UpdateOptionVerification:
+                        case ActionLog.TWOFA_DISABLE:
+                            if (string.IsNullOrEmpty(newSecret.TwofaDisable))
+                            {
+                                newSecret.TwofaDisable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            }
+
+                            break;
+                        case ActionLog.UPDATE_NOTIFICATION:
                             if (string.IsNullOrEmpty(newSecret.UpdateOptionVerification))
                             {
                                 newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             }
 
                             break;
-                        case ActionLog.LockScreen:
+                        case ActionLog.LOCK_SCREEN:
                             if (string.IsNullOrEmpty(newSecret.LockScreen))
                             {
                                 newSecret.LockScreen = TwoStepsAuthenticator.Authenticator.GenerateKey();

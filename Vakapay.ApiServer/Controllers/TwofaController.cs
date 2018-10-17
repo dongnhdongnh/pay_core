@@ -53,6 +53,7 @@ namespace Vakaxa.ApiServer.Controllers
         }
 
         // POST api/values
+        // verify code and update when update verify
         [HttpPost("option/update")]
         public string UpdateOption([FromBody] JObject value)
         {
@@ -94,7 +95,7 @@ namespace Vakaxa.ApiServer.Controllers
                             userModel.Verification = (int) option;
 
                             _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                                ActionLog.UpdateOptionVerification,
+                                ActionLog.UPDATE_NOTIFICATION,
                                 HelpersApi.getIp(Request));
 
                             return _userBusiness.UpdateProfile(userModel).ToJson();
@@ -113,8 +114,9 @@ namespace Vakaxa.ApiServer.Controllers
 
 
         // POST api/values
+        // verify code when enable twofa
         [HttpPost("enable/update")]
-        public string VerifyCode([FromBody] JObject value)
+        public string VerifyCodeEnable([FromBody] JObject value)
         {
             try
             {
@@ -148,7 +150,7 @@ namespace Vakaxa.ApiServer.Controllers
                         userModel.TwoFactor = true;
 
                         _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                            ActionLog.TwofaEnable,
+                            ActionLog.TWOFA_ENABLE,
                             HelpersApi.getIp(Request));
 
                         return _userBusiness.UpdateProfile(userModel).ToJson();
@@ -165,6 +167,61 @@ namespace Vakaxa.ApiServer.Controllers
 
 
         // POST api/values
+        // verify code when disable twofa
+        [HttpPost("disable/update")]
+        public string VerifyCodeDisable([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
+                if (value.ContainsKey("code"))
+                {
+                    var code = value["code"].ToString();
+                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.TwofaDisable))
+                        return CreateDataError("Can't send code");
+
+                    var secret = secretAuthToken.TwofaDisable;
+
+                    bool isok = authenticator.CheckCode(secret, code);
+
+                    if (isok)
+                    {
+                        userModel.TwoFactor = false;
+
+                        _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                            ActionLog.TWOFA_DISABLE,
+                            HelpersApi.getIp(Request));
+
+                        return _userBusiness.UpdateProfile(userModel).ToJson();
+                    }
+                }
+
+                return CreateDataError("Can't verify code");
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
+
+        /**
+         *  send code when update verify
+         */
         [HttpPost("option/require-send-code-phone")]
         public string SendCodeOption()
         {
@@ -178,7 +235,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UpdateOptionVerification);
+                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
@@ -213,6 +270,57 @@ namespace Vakaxa.ApiServer.Controllers
             }
         }
 
+        /**
+         *  send code when disable two
+         */
+        [HttpPost("disable/require-send-code-phone")]
+        public string SendCodeDisable()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+
+                if (userModel != null)
+                {
+                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_DISABLE);
+
+                    if (checkSecret == null)
+                        return CreateDataError("Can't send code");
+
+                    userModel.SecretAuthToken = checkSecret;
+                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                    if (resultUpdate.Status == Status.STATUS_ERROR)
+                        return CreateDataError("Can't send code");
+
+
+                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.TwofaDisable))
+                        return CreateDataError("Can't send code");
+
+                    var secret = secretAuthToken.TwofaDisable;
+
+                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                    var code = authenticator.GetCode(secret);
+
+                    Console.WriteLine(code);
+
+                    return _userBusiness.SendSms(userModel, code).ToJson();
+                }
+
+                return CreateDataError("Can't send code");
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
         // POST api/values
         [HttpPost("enable/require-send-code-phone")]
         public string SendCodeEnable()
@@ -227,7 +335,7 @@ namespace Vakaxa.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TwofaEnable);
+                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
                     if (checkSecret == null)
                         return CreateDataError("Can't send code");
