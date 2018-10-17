@@ -84,6 +84,32 @@ namespace Vakapay.ApiServer.Controllers
             //  return null;
         }
 
+        [HttpGet("AddressInfor")]
+        public ActionResult<ReturnObject> GetAddresses([FromQuery]string walletId, [FromQuery]string networkName)
+        {
+            try
+            {
+                var addresses = _walletBusiness.GetAddresses(walletId, networkName);
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_COMPLETED,
+                   // Data = numberData.ToString(),
+                    Message = JsonHelper.SerializeObject(addresses)
+                };
+            }
+            catch (Exception e)
+            {
+
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        
+            //  return null;
+        }
+
         [HttpPost("History")]
         public ActionResult<ReturnObject> GetWalletHistory([FromBody]HistorySearch walletSearch)
         {
