@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -144,6 +145,85 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
+        [HttpGet("{userId}/addresses/{addressIdOrAddress}/transactions")]
+        public ActionResult<string> GetAddressTransactions(string userId, string addressIdOrAddress)
+        {
+            try
+            {
+                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
+
+                var addresses = walletRepository.GetAddressesByUserId(userId);
+
+                if (addresses == null || addresses.Count == 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "No address found, userId is not existed!"
+                    }.ToJson();
+                }
+
+                BlockchainAddress address = null;
+
+                foreach (var blockchainAddress in addresses)
+                {
+                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.GetAddress() == addressIdOrAddress)
+                    {
+                        address = blockchainAddress;
+                        break;
+                    }
+                }
+
+                if (address == null)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "AddressId or regular blockchain address input is not found"
+                    }.ToJson();
+                }
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = address}.ToJson();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
+        [HttpPost("{userId}/transactions")]
+        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        {
+            try
+            {
+                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
+
+                try
+                {
+                    var to = value["to"].ToString();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    return new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = "Recipient not exist"}.ToJson();
+                }
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = ""}.ToJson();
+                throw new NotImplementedException();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
         [HttpGet]
         [Route("{userId}/transactions/{limit:int?}")]
         public ActionResult<string> GetTransactions(string userId, int? limit = null)
@@ -189,8 +269,6 @@ namespace Vakapay.ApiServer.Controllers
                     {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
             }
         }
-        
-        
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)

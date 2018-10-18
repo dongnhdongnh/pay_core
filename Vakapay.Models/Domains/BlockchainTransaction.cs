@@ -9,13 +9,7 @@ namespace Vakapay.Models.Domains
 {
     public abstract class BlockchainTransaction : MultiThreadUpdateEntity
     {
-        public string Id
-        {
-            get
-            {
-                return CommonHelper.GenerateUuid();
-            }
-        }
+//        public string Id => CommonHelper.GenerateUuid(); //existed in MultiThreadUpdateEntity
 
         public string UserId { get; set; }
         public string Hash { get; set; }

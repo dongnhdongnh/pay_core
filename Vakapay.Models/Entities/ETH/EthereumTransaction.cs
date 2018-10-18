@@ -15,5 +15,6 @@ namespace Vakapay.Models.Entities
     [Table("EthereumWithdrawTransaction")]
     public class EthereumWithdrawTransaction : EthereumTransaction
     {
+        public string Idem { get; set; }
     }
 }
