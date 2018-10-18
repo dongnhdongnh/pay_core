@@ -15,7 +15,7 @@ data:
         "DefaultConnection": "server={{ $.Values.secret.mysql.host }};userid={{ $.Values.secret.mysql.user }};password={{ $.Values.secret.mysql.password }};database={{ $.Values.secret.mysql.db }};port={{ $.Values.secret.mysql.port }};Connection Timeout=120;SslMode=none;Max Pool Size=300"
       },
       "Chain": {
-        "BTC": {
+        "Bitcoin": {
           "Url": "http://{{ $.Values.secret.btc.host }}:{{ $.Values.secret.btc.port }}",
           "Username": "{{ $.Values.secret.btc.user }}",
           "Password": "{{ $.Values.secret.btc.password }}"
