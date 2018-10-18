@@ -403,10 +403,10 @@ namespace Vakapay.Repositories.Mysql
             numberData = -1;
             try
             {
-                var _selectThing = "Id,UserId,FromAddress,ToAddress,CreatedAt,Amount,Status";
-                var output = $"Select * from ( SELECT {_selectThing},'withdrawn' AS TYPE FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
+                var _selectThing = "Id,UserId,FromAddress,ToAddress,CreatedAt,Status";
+                var output = $"Select * from ( SELECT {_selectThing},-Amount AS Amount FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
                     $" UNION ALL " +
-                    $" SELECT {_selectThing},'deposit' AS TYPE FROM {TableNameDeposit} WHERE UserId='{userID}') as t_uni ";
+                    $" SELECT {_selectThing},Amount FROM {TableNameDeposit} WHERE UserId='{userID}') as t_uni ";
                 var output_count = $"Select count(*) from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
                    $" UNION ALL " +
                    $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE UserId='{userID}') as t_uni ";
