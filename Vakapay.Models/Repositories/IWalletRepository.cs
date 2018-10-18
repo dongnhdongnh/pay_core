@@ -14,6 +14,6 @@ namespace Vakapay.Models.Repositories
 		Wallet FindByUserAndNetwork(string userId, string networkName);
 		List<Wallet> FindNullAddress();
 		Wallet FindByAddressAndNetworkName(string address, string networkName);
-		List<string> GetAddresses(string walletId, string networkName);
+		List<string> GetStringAddresses(string walletId, string networkName);
 	}
 }

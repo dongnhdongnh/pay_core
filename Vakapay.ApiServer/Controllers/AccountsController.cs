@@ -54,14 +54,35 @@ namespace Vakapay.ApiServer.Controllers
                     Balance = balances
                 };
 
-                return JsonHelper.SerializeObject(new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = balanceResponse});
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = balanceResponse}.ToJson();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return JsonHelper.SerializeObject(new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message});
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
+        [HttpGet("{userId}/addresses")]
+        public ActionResult<string> GetAddresses(string userId)
+        {
+            try
+            {
+
+                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
+
+                var address = walletRepository.GetAddressesByUserId(userId);
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = address}.ToJson();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
             }
         }
 
@@ -100,14 +121,14 @@ namespace Vakapay.ApiServer.Controllers
                     sortedTransactions = sortedTransactions.GetRange(0, (int) limit);
                 }
 
-                return JsonHelper.SerializeObject(new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = sortedTransactions});
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = sortedTransactions}.ToJson();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return JsonHelper.SerializeObject(new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message});
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
             }
         }
         
