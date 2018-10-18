@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Http;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiServer.Helpers
@@ -16,6 +17,15 @@ namespace Vakapay.ApiServer.Helpers
                 ip = request.Headers["X-Real-IP"].ToString();
 
             return ip;
+        }
+
+        public static bool CheckCodeGoogle(string secret, string token)
+        {
+            var google = new GoogleAuthen.TwoFactorAuthenticator();
+
+            var valid = google.ValidateTwoFactorPIN(secret, token);        
+
+            return valid;
         }
 
         public static string CheckToken(User userModel, string action)

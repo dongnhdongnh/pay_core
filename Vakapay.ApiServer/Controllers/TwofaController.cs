@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
@@ -103,10 +104,46 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
+        [HttpPost("enable/update")]
+        public string VerifyCodeEnableGoogle([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return CreateDataError("User not exist in DB");
+                }
+
+                if (!value.ContainsKey("token")) return CreateDataError("Can't verify token");
+
+                var token = value["token"].ToString();
+                if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, token))
+                    return CreateDataError("Verify false");
+
+                userModel.TwoFactor = true;
+
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.TWOFA_ENABLE,
+                    HelpersApi.GetIp(Request));
+
+                return _userBusiness.UpdateProfile(userModel).ToJson();
+            }
+            catch (Exception e)
+            {
+                return CreateDataError(e.Message);
+            }
+        }
+
 
         // POST api/values
         // verify code when enable twofa
-        [HttpPost("enable/update")]
+        [HttpPost("enable/verify-code-sms")]
         public string VerifyCodeEnable([FromBody] JObject value)
         {
             try
@@ -137,13 +174,26 @@ namespace Vakapay.ApiServer.Controllers
                 var isok = authenticator.CheckCode(secret, code, userModel);
 
                 if (!isok) return CreateDataError("Can't verify code");
-                userModel.TwoFactor = true;
 
-                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.TWOFA_ENABLE,
-                    HelpersApi.GetIp(Request));
+                var google = new GoogleAuthen.TwoFactorAuthenticator();
 
-                return _userBusiness.UpdateProfile(userModel).ToJson();
+                var secretKey = CommonHelper.RandomString(32);
+
+                var startSetup = google.GenerateSetupCode(userModel.Email, secretKey, 300, 300);
+
+
+                userModel.TwoFactorSecret = secretKey;
+
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return resultUpdate.ToJson();
+
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = startSetup.ManualEntryKey
+                }.ToJson();
             }
             catch (Exception e)
             {
@@ -311,20 +361,22 @@ namespace Vakapay.ApiServer.Controllers
                 if (userModel == null) return CreateDataError("Can't send code");
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
+                Console.WriteLine(checkSecret);
+
                 if (checkSecret == null)
-                    return CreateDataError("Can't send code");
+                    return CreateDataError("Can't send code1");
 
                 userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
                 if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return CreateDataError("Can't send code");
+                    return resultUpdate.ToJson();
 
 
                 var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return CreateDataError("Can't send code");
+                    return CreateDataError("Can't send code3");
 
                 var secret = secretAuthToken.TwofaEnable;
 
