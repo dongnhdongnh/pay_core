@@ -1,7 +1,4 @@
-﻿using VakaSharp.Api.v1;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace VakaSharp

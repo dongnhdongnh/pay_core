@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.WalletBusiness;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Domains;
-using Vakapay.UserBusiness;
 using Vakapay.Commons.Constants;
 
 namespace Vakapay.ApiServer.Controllers
@@ -25,7 +20,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
@@ -85,17 +80,17 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("History")]
-        public ActionResult<ReturnObject> GetWalletHistory([FromBody]WalletSearch walletSearch)
+        public ActionResult<ReturnObject> GetWalletHistory([FromBody]HistorySearch walletSearch)
         {
             try
             {
                 //  var _history = _walletBusiness.GetHistory(walletSearch.wallet, 1, 3, new string[] { nameof(BlockchainTransaction.CreatedAt) });
                 int numberData = 0;
-                var _history = _walletBusiness.GetHistory(out numberData,walletSearch.wallet, walletSearch.offset, walletSearch.limit, walletSearch.orderBy);
+                var _history = _walletBusiness.GetHistory(out numberData, walletSearch.userID, walletSearch.networkName, walletSearch.offset, walletSearch.limit, walletSearch.orderBy);
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
-                    Data=numberData.ToString(),
+                    Data = numberData.ToString(),
                     Message = JsonHelper.SerializeObject(_history)
                 };
             }
@@ -112,9 +107,10 @@ namespace Vakapay.ApiServer.Controllers
 
             //  return null;
         }
-        public class WalletSearch
+        public class HistorySearch
         {
-            public Wallet wallet;
+            public string userID;
+            public string networkName;
             public int offset = -1;
             public int limit = -1;
             public string[] orderBy = null;

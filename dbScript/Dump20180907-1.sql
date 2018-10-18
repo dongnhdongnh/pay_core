@@ -46,12 +46,13 @@ CREATE TABLE `wallet` (
 --
 -- Table structure for table `ethereumwithdrawtransaction`
 --
-
+DROP TABLE IF EXISTS `ethereumwithdrawtransaction`;
 CREATE TABLE `ethereumwithdrawtransaction` (
   `Id`          varchar(200)   NOT NULL,
+  `UserId`          varchar(200)   NOT NULL,
   `Hash`        varchar(200) DEFAULT NULL,
   `BlockNumber` varchar(200) DEFAULT NULL,
-  `NetworkName` varchar(200) DEFAULT NULL,
+  `Currency` varchar(200) DEFAULT NULL,
   `Amount`      decimal(20, 8) NOT NULL,
   `FromAddress` varchar(200)   NOT NULL,
   `ToAddress`   varchar(200)   NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE `ethereumwithdrawtransaction` (
   `Status`      varchar(200) DEFAULT NULL,
   `CreatedAt`   int(11)        NOT NULL,
   `UpdatedAt`   int(11)        NOT NULL,
-  `InProcess`   int(11)        NOT NULL,
+  `IsProcessing`   int(11)        NOT NULL,
   `Version`     int(11)        NOT NULL,
   PRIMARY KEY (`Id`)
 )
@@ -69,6 +70,29 @@ CREATE TABLE `ethereumwithdrawtransaction` (
 --
 -- Dumping data for table `ethereumwithdrawtransaction`
 --
+
+DROP TABLE IF EXISTS `EthereumDepositTransaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `EthereumDepositTransaction` (
+  `Id` varchar(200) NOT NULL,
+  `UserId`          varchar(200)   NOT NULL,
+  `TrxId` varchar(100) DEFAULT NULL,
+  `Hash` varchar(100) DEFAULT NULL,
+  `BlockNumber` int(11) DEFAULT NULL,
+  `Currency` varchar(20) DEFAULT NULL,
+  `Amount` decimal(16,8) DEFAULT NULL,
+  `FromAddress` varchar(45) DEFAULT NULL,
+  `ToAddress` varchar(45) DEFAULT NULL,
+  `Fee` decimal(16,8) DEFAULT NULL,
+  `Status` varchar(10) DEFAULT NULL,
+  `CreatedAt` int(11) DEFAULT NULL,
+  `UpdatedAt` int(11) DEFAULT NULL,
+  `IsProcessing` int(11) DEFAULT NULL,
+  `Version` int(11) DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `ethereumaddress`

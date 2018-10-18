@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.Models.Domains
@@ -47,7 +48,7 @@ namespace Vakapay.Models.Domains
             long confirmation = 0;
             switch (networkName)
             {
-                case CryptoCurrency.VKC:
+                case CryptoCurrency.VAKA:
                     confirmation = EmailConfig.VakaConfirmations;
                     break;
                 case CryptoCurrency.ETH:

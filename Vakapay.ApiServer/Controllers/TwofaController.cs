@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -39,7 +40,7 @@ namespace Vakapay.ApiServer.Controllers
 
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = Configuration.GetConnectionString("DefaultConnection")
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

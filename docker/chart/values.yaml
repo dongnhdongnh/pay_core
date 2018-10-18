@@ -21,12 +21,13 @@ resources:
       #cpu: 100m
       #memory: 128Mi
 secret:
-  sendBTC: |-
-    {
-      "ConnectionStrings": "server=$MYSQL_HOST;userid=$MYSQL_USER;password=$MYSQL_PASSWORD;database=$MYSQL_DB;port=3306;Connection Timeout=120;SslMode=none",
-      "Chain": {
-        "URL": "http://$BITCOIN_HOST:$BITCOIN_RPC_PORT",
-        "User": "$BITCOIN_RPC_USER",
-        "Password": "$BITCOIN_RPC_PASSWORD"
-      }
-    }
+  mysql:
+    host: $MYSQL_HOST
+    user: $MYSQL_USER
+    password: $MYSQL_PASSWORD
+    db: $MYSQL_DB
+  btc:
+    host: $BITCOIN_HOST
+    port: $BITCOIN_PORT
+    user: $BITCOIN_RPC_USER
+    password: $BITCOIN_RPC_PASSWORD

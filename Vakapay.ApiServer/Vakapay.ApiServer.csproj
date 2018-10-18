@@ -8,6 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Dapper" Version="1.50.5" />
+        <PackageReference Include="Dapper.Extension" Version="1.0.0.1" />
+        <PackageReference Include="DapperExtensions" Version="1.6.3" />
         <PackageReference Include="IdentityServer4.AccessTokenValidation">
           <Version>2.7.0-preview1</Version>
         </PackageReference>
@@ -30,7 +33,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Vakapay.BitcoinBusiness\Vakapay.BitcoinBusiness.csproj" />
-      <ProjectReference Include="..\Vakapay.Configuration\Vakapay.Configuration.csproj" />
       <ProjectReference Include="..\Vakapay.EthereumBusiness\Vakapay.EthereumBusiness.csproj" />
       <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
       <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />

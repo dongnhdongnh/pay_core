@@ -3,7 +3,6 @@ using NUnit.Framework;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -20,7 +19,7 @@ namespace Vakapay.UnitTest
             get
             {
                 if (btcRpc == null)
-                    btcRpc = new BitcoinRpc(RPCEndpoint, RpcUser, RpcPassword);
+                    btcRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
                 return btcRpc;
             }
         }
@@ -35,7 +34,7 @@ namespace Vakapay.UnitTest
                 {
                     var repositoryConfig = new RepositoryConfiguration
                     {
-                        ConnectionString = BTCBusinessTest.ConnectionString
+                        ConnectionString = AppSettingHelper.GetDBConnection()
                     };
                     Console.WriteLine("New Connect");
                     _PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -46,13 +45,6 @@ namespace Vakapay.UnitTest
             set { this._PersistenceFactory = value; }
         }
 
-        const String RPCEndpoint = "http://localhost:18443";
-        const String RpcUser = "bitcoinrpc";
-        const String RpcPassword = "7bLjxV1CKhNJmdxTUMxTpF4vEemWCp49kMX9CwvZabYi";
-
-        const String ConnectionString =
-            "server=localhost;userid=root;password=huan@123;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
-
         Vakapay.BitcoinBusiness.BitcoinBusiness btcBus;
 
         [Test]
@@ -61,7 +53,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = BTCBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
             Console.WriteLine("New Address");
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -81,7 +73,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = BTCBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -103,7 +95,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = BTCBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -125,7 +117,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = BTCBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -147,7 +139,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = BTCBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

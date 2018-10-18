@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Repositories.Base
@@ -19,7 +18,7 @@ namespace Vakapay.Models.Repositories.Base
 		List<BlockchainTransaction> FindTransactionHistory(int offset, int limit, string[] orderBy);
 
 
-        List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData,string walletAdress,string TableNameWithdrawn,string TableNameDeposit,int offset, int limit, string[] orderBy);
+        List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData,string userID,string TableNameWithdrawn,string TableNameDeposit,int offset, int limit, string[] orderBy);
         string GetTableName();
       //  List<BlockchainTransaction> FindAllTransactionHistory(string table,int offset, int limit, string[] orderBy);
 

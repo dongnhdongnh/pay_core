@@ -7,6 +7,7 @@ using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using NLog;
 using Vakapay.BitcoinBusiness;
+using Vakapay.Commons.Helpers;
 
 namespace Vakapay.SendBitcoin
 {
@@ -18,32 +19,14 @@ namespace Vakapay.SendBitcoin
         {
             try
             {
-                var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
-
-                if (string.IsNullOrWhiteSpace(environment))
-                    environment = "Development";
-
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false)
-                    .AddJsonFile($"appsettings.{environment}.json", optional: true);
-                IConfiguration Configuration = builder.Build();
-
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = Configuration["ConnectionStrings"]
-                };
-
-                var bitcoinConnect = new BitcoinRPCConnect
-                {
-                    Host = Configuration["Chain:URL"],
-                    UserName = Configuration["Chain:User"],
-                    Password = Configuration["Chain:Password"]
+                    ConnectionString = AppSettingHelper.GetDBConnection()
                 };
 
                 for (var i = 0; i < 10; i++)
                 {
-                    var ts = new Thread(() => RunSend(repositoryConfig, bitcoinConnect));
+                    var ts = new Thread(() => RunSend(repositoryConfig));
                     ts.Start();
                 }
             }
@@ -53,7 +36,7 @@ namespace Vakapay.SendBitcoin
             }
         }
 
-        private static void RunSend(RepositoryConfiguration repositoryConfig, BitcoinRPCConnect bitcoinConnect)
+        private static void RunSend(RepositoryConfiguration repositoryConfig)
         {
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
@@ -64,7 +47,7 @@ namespace Vakapay.SendBitcoin
                 while (true)
                 {
                     Console.WriteLine("Start Send Bitcoin....");
-                    var rpc = new BitcoinRpc(bitcoinConnect.Host, bitcoinConnect.UserName, bitcoinConnect.Password);
+                    var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
 
                     var bitcoinRepo = repoFactory.GetBitcoinWithdrawTransactionRepository(connection);
                     var resultSend = bitcoinBusiness.SendTransactionAsync(bitcoinRepo, rpc, "");

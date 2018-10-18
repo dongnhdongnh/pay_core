@@ -53,8 +53,7 @@ namespace Vakapay.SendSmsBusiness
             }
         }
 
-        public virtual async Task<ReturnObject> SendSmsAsync(string apikey,
-            string apiAddress)
+        public virtual async Task<ReturnObject> SendSmsAsync(string apiUrl, string apiKey)
         {
             var sendSmsRepository = _vakapayRepositoryFactory.GetSendSmsRepository(_connectionDb);
             var pendingSms = sendSmsRepository.FindRowPending();
@@ -102,7 +101,7 @@ namespace Vakapay.SendSmsBusiness
             var transactionSend = _connectionDb.BeginTransaction();
             try
             {
-                var sendResult = await SendSms(pendingSms, apikey, apiAddress);
+                var sendResult = await SendSms(pendingSms, apiUrl, apiKey);
                 if (sendResult.Status == Status.STATUS_ERROR)
                 {
                     return new ReturnObject
@@ -141,26 +140,22 @@ namespace Vakapay.SendSmsBusiness
             }
         }
 
-        public async Task<ReturnObject> SendSms(SmsQueue model, string apikey,
-            string apiAddress)
+        public async Task<ReturnObject> SendSms(SmsQueue model, string apiUrl, string apiKey)
         {
             var values = new NameValueCollection
             {
-                {"apikey", apikey},
+                {"apikey", apiKey},
                 {"fromName", "Vakapay"},
                 {"to", model.To},
                 {"body", model.TextSend},
                 {"isTransactional", "true"}
             };
 
-
-            var address = apiAddress;
-
             using (var client = new WebClient())
             {
                 try
                 {
-                    byte[] apiResponse = client.UploadValues(address, values);
+                    byte[] apiResponse = client.UploadValues(apiUrl, values);
 
                     var result = JsonConvert.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
