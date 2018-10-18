@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.Models.Domains
@@ -19,11 +20,11 @@ namespace Vakapay.Models.Domains
 			switch (this.GetType().Name)
 			{
 				case nameof(BitcoinAddress):
-					return "bitcoin";
+					return CryptoCurrency.BTC;
 				case nameof(EthereumAddress):
-					return "ethereum";
+					return CryptoCurrency.ETH;
 				case nameof(VakacoinAccount):
-					return "vakacoin";
+					return CryptoCurrency.VAKA;
 				default:
 					throw new Exception("Network not defined!");
 			}
