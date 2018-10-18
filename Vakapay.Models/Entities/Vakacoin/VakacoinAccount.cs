@@ -20,7 +20,12 @@ namespace Vakapay.Models.Entities
 
         [JsonIgnore]
         public string ActivePublicKey { get; set; }
-        
+
+        public override bool ShouldSerializeAddress()
+        {
+            return false;
+        }
+
         public override string GetAddress()
         {
             return AccountName;

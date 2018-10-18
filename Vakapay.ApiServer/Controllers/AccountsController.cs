@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -201,19 +202,21 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
 
-                try
-                {
-                    var to = value["to"].ToString();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    return new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = "Recipient not exist"}.ToJson();
-                }
+//                try
+//                {
+//                    var to = value["to"].ToString();
+//                }
+//                catch (Exception e)
+//                {
+//                    Console.WriteLine(e);
+//                    return new ReturnObject()
+//                        {Status = Status.STATUS_ERROR, Message = "Recipient not exist"}.ToJson();
+//                }
+
+                var request = value.ToObject<SendCoinRequest>();
 
                 return new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = ""}.ToJson();
+                    {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
                 throw new NotImplementedException();
             }
             catch (Exception e)

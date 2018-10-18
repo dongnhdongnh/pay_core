@@ -14,8 +14,8 @@ namespace Vakapay.Models.Entities
         public static BitcoinDepositTransaction FromJson(string json) =>
             JsonHelper.DeserializeObject<BitcoinDepositTransaction>(json, JsonHelper.ConvertSettings);
 
-        public string ToJson() =>
-            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
+//        public string ToJson() =>
+//            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
     }
     
     [Table("BitcoinWithdrawTransaction")]
