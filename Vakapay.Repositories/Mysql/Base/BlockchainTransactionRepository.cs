@@ -395,18 +395,21 @@ namespace Vakapay.Repositories.Mysql
 			throw new Exception(className + ": Transaction repository class name not contain \"Deposit\" or \"Withdraw\" keyword");
 		}
 
-		   public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string walletAdress, string TableNameWithdrawn, string TableNameDeposit, int offset, int limit, string[] orderByValue)
+
+
+		   public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userID, string TableNameWithdrawn, string TableNameDeposit, int offset, int limit, string[] orderByValue)
+
         {
             numberData = -1;
             try
             {
-                var _selectThing = "Id,FromAddress,ToAddress,CreatedAt,Amount,Status";
-                var output = $"Select * from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE FromAddress='{walletAdress}'" +
+                var _selectThing = "Id,UserId,FromAddress,ToAddress,CreatedAt,Amount,Status";
+                var output = $"Select * from ( SELECT {_selectThing},'withdrawn' AS TYPE FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
                     $" UNION ALL " +
-                    $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE ToAddress='{walletAdress}') as t_uni ";
-                var output_count = $"Select count(*) from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE FromAddress='{walletAdress}'" +
+                    $" SELECT {_selectThing},'deposit' AS TYPE FROM {TableNameDeposit} WHERE UserId='{userID}') as t_uni ";
+                var output_count = $"Select count(*) from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
                    $" UNION ALL " +
-                   $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE ToAddress='{walletAdress}') as t_uni ";
+                   $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE UserId='{userID}') as t_uni ";
                 numberData = ExcuteCount(output_count);
                 StringBuilder orderStr = new StringBuilder("");
                 int count = 0;

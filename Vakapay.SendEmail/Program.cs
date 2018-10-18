@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using Microsoft.Extensions.Configuration;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -9,33 +10,13 @@ namespace Vakapay.SendEmail
 {
     internal static class Program
     {
-        private static IConfiguration InitConfiguration()
-        {
-            var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
-
-            if (string.IsNullOrWhiteSpace(environment))
-                environment = "Development";
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("Configs.json", optional: true)
-                .AddJsonFile($"Configs.{environment}.json", optional: false);
-            
-            return builder.Build();
-        }
-
         private static void Main(string[] args)
         {
-            var configuration = InitConfiguration();
-            var apiKey = configuration["Elastic:api"];
-            var from = configuration["Elastic:email"];
-            var fromName = configuration["fromName"];
-            var apiAddress = configuration["apiAddress"];
-
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = configuration["ConnectionStrings"]
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
-            
+
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             var sendMailBusiness = new SendMailBusiness.SendMailBusiness(persistenceFactory);
 
@@ -43,7 +24,9 @@ namespace Vakapay.SendEmail
             {
                 try
                 {
-                    var result = sendMailBusiness.SendEmailAsync(apiKey, from, fromName, apiAddress);
+                    var result = sendMailBusiness.SendEmailAsync(AppSettingHelper.GetElasticMailUrl(),
+                        AppSettingHelper.GetElasticApiKey(), AppSettingHelper.GetElasticFromAddress(),
+                        AppSettingHelper.GetElasticFromName());
                     Console.WriteLine(JsonHelper.SerializeObject(result.Result));
                 }
                 catch (Exception e)
@@ -51,6 +34,7 @@ namespace Vakapay.SendEmail
                     Console.WriteLine(e);
                     throw;
                 }
+
                 Thread.Sleep(1000);
             }
         }

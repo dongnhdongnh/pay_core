@@ -9,7 +9,7 @@ namespace Vakapay.Commons.Helpers
 		{
 			CacheHelper.lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
 			{
-				return ConnectionMultiplexer.Connect("127.0.0.1:6379");
+				return ConnectionMultiplexer.Connect($"{AppSettingHelper.GetRedisConfig()}");
 			});
 		}
 

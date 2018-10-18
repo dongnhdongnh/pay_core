@@ -1,4 +1,3 @@
-using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories.Base;
 

@@ -1,7 +1,6 @@
 ﻿using VakaSharp.Api.v1;
 using VakaSharp.Helpers;
 using VakaSharp.Providers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;

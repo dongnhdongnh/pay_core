@@ -32,7 +32,7 @@ namespace Vakapay.UnitTest
 				{
 					var repositoryConfig = new RepositoryConfiguration
 					{
-						ConnectionString = ETHBusinessTest.ConnectionString
+                        ConnectionString = AppSettingHelper.GetDBConnection()
 					};
 					Console.WriteLine("MAKE NEW");
 					_PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -46,7 +46,6 @@ namespace Vakapay.UnitTest
 			}
 		}
 		const String RPCEndpoint = "http://localhost:9900";
-		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 		Vakapay.EthereumBusiness.EthereumBusiness _ethBus;
 		[Test]
 		public async System.Threading.Tasks.Task CreateNewAddressAsync()
@@ -54,7 +53,7 @@ namespace Vakapay.UnitTest
 			Console.WriteLine("WTF");
 			var repositoryConfig = new RepositoryConfiguration
 			{
-				ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
 			};
 			Console.WriteLine("MAKE NEW");
 			PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -79,7 +78,7 @@ namespace Vakapay.UnitTest
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
-				ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
 			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -98,13 +97,14 @@ namespace Vakapay.UnitTest
 		{
 			var repositoryConfig = new RepositoryConfiguration
 			{
-				ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
 			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 			_ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
 			var _trans = new EthereumWithdrawTransaction()
 			{
+                UserId= "8377a95b-79b4-4dfb-8e1e-b4833443c306",
 				FromAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
 				ToAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
 				Amount = 10
@@ -121,13 +121,14 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = ETHBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
             var _trans = new EthereumDepositTransaction()
             {
+                UserId = "8377a95b-79b4-4dfb-8e1e-b4833443c306",
                 ToAddress = "0x12890d2cce102216644c59dae5baed380d84830c",
                 FromAddress = "0x3a2e25cfb83d633c184f6e4de1066552c5bf4517",
                 Amount = 10

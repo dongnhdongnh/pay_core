@@ -12,7 +12,7 @@ namespace Vakapay.ApiServer
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseUrls("https://0.0.0.0:5001")
+                .UseUrls("http://0.0.0.0:5001")
                 .UseStartup<Startup>()
                 .Build();
     }

@@ -21,7 +21,7 @@ namespace Vakapay.UnitTest
                 {
                     var repositoryConfig = new RepositoryConfiguration
                     {
-                        ConnectionString = UserBusinessTest.ConnectionString
+                        ConnectionString = AppSettingHelper.GetDBConnection()
                     };
                     Console.WriteLine("New Connect");
                     _PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -32,9 +32,6 @@ namespace Vakapay.UnitTest
             set { this._PersistenceFactory = value; }
         }
 
-        const String ConnectionString =
-            "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
-
         UserBusiness.UserBusiness userBus;
 
         [Test]
@@ -43,7 +40,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = UserBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             Console.WriteLine("New Address");
@@ -65,7 +62,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = UserBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             Console.WriteLine("New Address");
@@ -91,15 +88,18 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = UserBusinessTest.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             Console.WriteLine("New Address");
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             var userBus = new UserBusiness.UserBusiness(PersistenceFactory);
             var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+            var userRepo = PersistenceFactory.GetUserRepository(PersistenceFactory.GetOldConnection());
+
             var resultCreated = userBus.Login(
                 new User {Email = "ngochuan2212@gmail.com", PhoneNumber = "+84988478266", FullName = "Ngo Ngoc Huan"});
+            var resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindBySql("select * from User where Email='ngochuan2212@gmail.com'")[0]);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
 
@@ -108,6 +108,7 @@ namespace Vakapay.UnitTest
                 {
                     Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"
                 });
+            resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0]);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }

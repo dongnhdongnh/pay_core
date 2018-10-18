@@ -4,9 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Cryptography.ECDSA;
 using Org.BouncyCastle.Crypto.Digests;
-using Vakapay.Models.Domains;
 
 namespace Vakapay.Cryptography
 {
@@ -51,7 +49,7 @@ namespace Vakapay.Cryptography
         }
         
         public static bool IsEthereumAddress(string address) {
-            if (new Regex("!/^(0x)?[0-9a-f]{40}$/i").IsMatch(address)) {
+            if (! new Regex("^(0x|0X)?[0-9a-fA-F]{40}$").IsMatch(address)) {
                 // check if it has the basic requirements of an address
                 return false;
             } else if (new Regex("^(0x)?[0-9a-f]{40}$").IsMatch(address) || new Regex("^(0x|0X)?[0-9A-F]{40}$").IsMatch(address)) {

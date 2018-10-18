@@ -1,12 +1,10 @@
 ﻿using Cryptography.ECDSA;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using VakaSharp.Helpers;
 using System;
-using VakaSharp.Api.v1;
 
 namespace VakaSharp
 {
