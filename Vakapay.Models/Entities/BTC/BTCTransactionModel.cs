@@ -1,4 +1,4 @@
-namespace Vakapay.Models.Entities.BTC
+namespace Vakapay.Models.Entities
 {
     using Newtonsoft.Json;
 

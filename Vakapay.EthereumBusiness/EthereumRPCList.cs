@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Vakapay.Models.Entities.ETH;
+using Vakapay.Models.Entities;
 namespace Vakapay.EthereumBussiness
 {
 

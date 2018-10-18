@@ -25,7 +25,7 @@ namespace Vakapay.Models.Domains
 				case nameof(VakacoinAccount):
 					return "vakacoin";
 				default:
-					throw new Exception("Network not define");
+					throw new Exception("Network not defined!");
 			}
 		} }
 

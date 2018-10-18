@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities.ETH;
+using Vakapay.Models.Entities;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBussiness;
 

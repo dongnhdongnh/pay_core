@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities.BTC;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 

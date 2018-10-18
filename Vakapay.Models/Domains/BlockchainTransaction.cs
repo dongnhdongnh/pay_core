@@ -1,7 +1,6 @@
 ﻿using System;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities;
-using Vakapay.Models.Entities.BTC;
 using Dapper.Contrib.Extensions;
 using System.ComponentModel.DataAnnotations.Schema;
 using Vakapay.Commons.Helpers;

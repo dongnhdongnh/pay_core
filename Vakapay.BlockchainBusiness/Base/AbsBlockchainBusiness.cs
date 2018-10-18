@@ -7,7 +7,6 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
-using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
 
