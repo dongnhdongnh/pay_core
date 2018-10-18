@@ -1,4 +1,5 @@
 ﻿using System;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -6,13 +7,12 @@ namespace Vakapay.UnitTest
 {
 	class ETHRunTest
 	{
-		const String ConnectionString = "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
 		static void Main(string[] args)
 		{
 			Console.WriteLine("start auto scan");
 			var repositoryConfig = new RepositoryConfiguration
 			{
-				ConnectionString = ETHRunTest.ConnectionString
+				ConnectionString = AppSettingHelper.GetDBConnection()
 			};
 
 			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

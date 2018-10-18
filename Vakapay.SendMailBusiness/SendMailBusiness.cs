@@ -5,7 +5,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
 using Vakapay.Commons.Constants;
@@ -54,8 +53,8 @@ namespace Vakapay.SendMailBusiness
             }
         }
 
-        public virtual async Task<ReturnObject> SendEmailAsync(string apikey, string from, string fromName,
-            string apiAddress)
+        public virtual async Task<ReturnObject> SendEmailAsync(string apiUrl, string apiKey, string from,
+            string fromName)
         {
             var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb);
             var pendingEmail = sendEmailRepository.FindRowPending();
@@ -103,7 +102,7 @@ namespace Vakapay.SendMailBusiness
             var transactionSend = _connectionDb.BeginTransaction();
             try
             {
-                var sendResult = await SendEmail(pendingEmail, apikey, from, fromName, apiAddress);
+                var sendResult = await SendEmail(pendingEmail, apiUrl, apiKey, from, fromName);
                 if (sendResult.Status == Status.STATUS_ERROR)
                 {
                     return new ReturnObject
@@ -141,8 +140,8 @@ namespace Vakapay.SendMailBusiness
             }
         }
 
-        public async Task<ReturnObject> SendEmail(EmailQueue emailQueue, string apikey, string from, string fromName,
-            string apiAddress)
+        public async Task<ReturnObject> SendEmail(EmailQueue emailQueue, string apiUrl, string apiKey, string from,
+            string fromName)
         {
             string emailBody = CreateEmailBody(emailQueue);
             if (emailBody == null)
@@ -153,7 +152,7 @@ namespace Vakapay.SendMailBusiness
                 };
             var values = new NameValueCollection
             {
-                {"apikey", apikey},
+                {"apikey", apiKey},
                 {"from", from},
                 {"fromName", fromName},
                 {"to", emailQueue.ToEmail},
@@ -162,13 +161,11 @@ namespace Vakapay.SendMailBusiness
                 {"isTransactional", "true"}
             };
 
-            var address = apiAddress;
-
             using (var client = new WebClient())
             {
                 try
                 {
-                    byte[] apiResponse = client.UploadValues(address, values);
+                    byte[] apiResponse = client.UploadValues(apiUrl, values);
 
                     var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
@@ -231,7 +228,7 @@ namespace Vakapay.SendMailBusiness
                     }
 
                     break;
-                case CryptoCurrency.VKC:
+                case CryptoCurrency.VAKA:
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:

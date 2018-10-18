@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
 
 public class JsonHelper
 {
@@ -20,6 +19,7 @@ public class JsonHelper
     {
         MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
         DateParseHandling = DateParseHandling.None,
+        NullValueHandling = NullValueHandling.Ignore,
         Converters = {
             new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
         }

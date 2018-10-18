@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
+﻿using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories

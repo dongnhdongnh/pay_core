@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.WalletBusiness;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Domains;
-using Vakapay.UserBusiness;
 using Vakapay.Commons.Constants;
 
 namespace Vakapay.ApiServer.Controllers
@@ -25,7 +20,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = VakapayConfig.ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
             var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =

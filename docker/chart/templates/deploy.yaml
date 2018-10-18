@@ -44,7 +44,7 @@ spec:
 {{ end }}
       volumes:
       - name: setting
-        secret:
-          secretName: {{ template "trackableappname" (dict "chart" $ "suffix" $i) }}
+        configMap:
+          name: {{ template "trackableappname" (dict "chart" $ "suffix" "") }}
 ---
 {{- end -}}

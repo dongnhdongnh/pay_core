@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Vakapay.Commons.Helpers;
 using Vakapay.VakacoinBusiness;
 
 namespace Vakapay.ApiServer.Controllers
@@ -7,7 +8,7 @@ namespace Vakapay.ApiServer.Controllers
     [ApiController]
     public class VAKAController : Controller
     {
-        VakacoinRPC _vakacoinRpc = new VakacoinRPC("HELOO");
+        VakacoinRPC _vakacoinRpc = new VakacoinRPC(AppSettingHelper.GetVakacoinNode());
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)

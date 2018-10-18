@@ -1,9 +1,10 @@
 ﻿using System;
-using Vakapay.Commons.Helpers;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.BTC;
 using Dapper.Contrib.Extensions;
 using System.ComponentModel.DataAnnotations.Schema;
+using Vakapay.Commons.Helpers;
 
 namespace Vakapay.Models.Domains
 {
@@ -47,7 +48,7 @@ namespace Vakapay.Models.Domains
                 case nameof(VakacoinDepositTransaction):
                 case nameof(VakacoinWithdrawTransaction):
                 case nameof(VakacoinTransaction):
-                    return CryptoCurrency.VKC;
+                    return CryptoCurrency.VAKA;
                 default:
                     throw new NotImplementedException();
             }

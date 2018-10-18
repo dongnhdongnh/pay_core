@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 
 namespace Vakapay.ApiService.Controllers
@@ -7,7 +8,7 @@ namespace Vakapay.ApiService.Controllers
     [ApiController]
     public class ETHController : Controller
     {
-        EthereumRpc _etheRpc = new EthereumRpc("HELOO");
+        EthereumRpc _etheRpc = new EthereumRpc(AppSettingHelper.GetEthereumNode());
 
         [HttpGet("Block/{id}")]
         public ActionResult<string> GetBlock(int id)
