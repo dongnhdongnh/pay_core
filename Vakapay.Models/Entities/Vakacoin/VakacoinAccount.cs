@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
@@ -7,9 +8,17 @@ namespace Vakapay.Models.Entities
     public class VakacoinAccount : BlockchainAddress
     {
         public string AccountName { get; set; }
+
+        [JsonIgnore]
         public string OwnerPrivateKey { get; set; }
+
+        [JsonIgnore]
         public string OwnerPublicKey { get; set; }
+
+        [JsonIgnore]
         public string ActivePrivateKey { get; set; }
+
+        [JsonIgnore]
         public string ActivePublicKey { get; set; }
         
         public override string GetAddress()

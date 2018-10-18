@@ -1,4 +1,8 @@
-﻿namespace Vakapay.Models.Domains
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using Vakapay.Models.Entities;
+
+namespace Vakapay.Models.Domains
 {
 	public abstract class BlockchainAddress
 	{
@@ -8,6 +12,22 @@
 		public string Status { get; set; }
 		public int CreatedAt { get; set; }
 		public int UpdatedAt { get; set; }
+
+		[NotMapped] //database attribute define
+		public string Network { get
+		{
+			switch (this.GetType().Name)
+			{
+				case nameof(BitcoinAddress):
+					return "bitcoin";
+				case nameof(EthereumAddress):
+					return "ethereum";
+				case nameof(VakacoinAccount):
+					return "vakacoin";
+				default:
+					throw new Exception("Network not define");
+			}
+		} }
 
 		public abstract string GetAddress();
 		public abstract string GetSecret();
