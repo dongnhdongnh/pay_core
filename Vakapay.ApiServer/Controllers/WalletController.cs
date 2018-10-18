@@ -79,6 +79,62 @@ namespace Vakapay.ApiServer.Controllers
             //  return null;
         }
 
+        [HttpGet("AddressInfor")]
+        public ActionResult<ReturnObject> GetAddresses([FromQuery]string walletId, [FromQuery]string networkName)
+        {
+            try
+            {
+                var addresses = _walletBusiness.GetAddresses(walletId, networkName);
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_COMPLETED,
+                    // Data = numberData.ToString(),
+                    Message = JsonHelper.SerializeObject(addresses)
+                };
+            }
+            catch (Exception e)
+            {
+
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+
+            //  return null;
+        }
+
+        [HttpGet("CheckSendCoin")]
+        public ActionResult<ReturnObject> CheckSendCoin([FromQuery]string fromAddress, [FromQuery]string toAddress, [FromQuery]string networkName, [FromQuery]string amount)
+        {
+            try
+            {
+                //  var addresses = _walletBusiness.GetAddresses(walletId, networkName);
+                float vakapayfee = -1.0f;
+                float minerfee = -1.0f;
+                float total = vakapayfee + minerfee + float.Parse(amount);
+                var _feeObject= new { vakapayfee = vakapayfee, minerfee =minerfee,total=total };  
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_COMPLETED,
+                    // Data = numberData.ToString(),
+                    Message = JsonHelper.SerializeObject(_feeObject)
+                };
+            }
+            catch (Exception e)
+            {
+
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+
+            //  return null;
+        }
+
         [HttpPost("History")]
         public ActionResult<ReturnObject> GetWalletHistory([FromBody]HistorySearch walletSearch)
         {
