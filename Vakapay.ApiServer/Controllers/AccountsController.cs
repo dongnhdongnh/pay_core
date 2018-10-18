@@ -73,7 +73,65 @@ namespace Vakapay.ApiServer.Controllers
 
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
 
-                var address = walletRepository.GetAddressesByUserId(userId);
+                var addresses = walletRepository.GetAddressesByUserId(userId);
+
+                if (addresses == null || addresses.Count == 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "No address found, userId is not existed!"
+                    }.ToJson();
+                }
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = addresses}.ToJson();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
+        [HttpGet("{userId}/addresses/{addressIdOrAddress}")]
+        public ActionResult<string> ShowAddress(string userId, string addressIdOrAddress)
+        {
+            try
+            {
+                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
+
+                var addresses = walletRepository.GetAddressesByUserId(userId);
+
+                if (addresses == null || addresses.Count == 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "No address found, userId is not existed!"
+                    }.ToJson();
+                }
+
+                BlockchainAddress address = null;
+
+                foreach (var blockchainAddress in addresses)
+                {
+                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.GetAddress() == addressIdOrAddress)
+                    {
+                        address = blockchainAddress;
+                        break;
+                    }
+                }
+
+                if (address == null)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "AddressId or regular blockchain address input is not found"
+                    }.ToJson();
+                }
 
                 return new ReturnDataObject()
                     {Status = Status.STATUS_SUCCESS, Data = address}.ToJson();
