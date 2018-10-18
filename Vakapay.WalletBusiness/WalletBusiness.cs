@@ -700,7 +700,7 @@ namespace Vakapay.WalletBusiness
                 if (ConnectionDb.State != ConnectionState.Open)
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                return walletRepository.GetAddresses(walletId, networkName);
+                return walletRepository.GetStringAddresses(walletId, networkName);
             }
             catch (Exception e)
             {
