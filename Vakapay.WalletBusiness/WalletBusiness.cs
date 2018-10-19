@@ -39,11 +39,11 @@ namespace Vakapay.WalletBusiness
                 ? vakapayRepositoryFactory.GetDbConnection()
                 : vakapayRepositoryFactory.GetOldConnection();
 
-            ethereumBussiness = new EthereumBusiness.EthereumBusiness(_vakapayRepositoryFactory);
-            bitcoinBussiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory);
-            vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory);
-            sendMailBusiness = new SendMailBusiness.SendMailBusiness(vakapayRepositoryFactory);
-            userBusiness = new UserBusiness.UserBusiness(vakapayRepositoryFactory);
+            ethereumBussiness = new EthereumBusiness.EthereumBusiness(_vakapayRepositoryFactory, false);
+            bitcoinBussiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory, false);
+            vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory, false);
+            sendMailBusiness = new SendMailBusiness.SendMailBusiness(vakapayRepositoryFactory, false);
+            userBusiness = new UserBusiness.UserBusiness(vakapayRepositoryFactory, false);
         }
 
         /// <summary>
@@ -972,7 +972,7 @@ namespace Vakapay.WalletBusiness
                 {
                     case CryptoCurrency.ETH:
                         Console.WriteLine("make eth");
-                        var ethereumBusiness = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory);
+                        var ethereumBusiness = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory, false);
                         res = ethereumBusiness.CreateAddressAsync(
                             new EthereumAddressRepository(ConnectionDb),
                             new EthereumRpc(AppSettingHelper.GetEthereumNode()),
@@ -981,7 +981,7 @@ namespace Vakapay.WalletBusiness
 
                     case CryptoCurrency.BTC:
                         Console.WriteLine("make btc");
-                        var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(vakapayRepositoryFactory);
+                        var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(vakapayRepositoryFactory, false);
                         res = bitcoinBusiness.CreateAddressAsync(
                             new BitcoinAddressRepository(ConnectionDb),
                             new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication()),
@@ -990,7 +990,7 @@ namespace Vakapay.WalletBusiness
 
                     case CryptoCurrency.VAKA:
                         Console.WriteLine("make vaka");
-                        var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory);
+                        var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
                         res = vakaBusiness.CreateAddressAsync(
                             new VakacoinAccountRepository(ConnectionDb),
                             new VakacoinRPC(AppSettingHelper.GetVakacoinNode()),

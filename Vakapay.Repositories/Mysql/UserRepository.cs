@@ -144,6 +144,7 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
+                Logger.Error("UserRepository =>> FindByEmailAddress fail: " + e.Message);
                 throw;
             }
         }
