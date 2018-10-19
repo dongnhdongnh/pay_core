@@ -128,5 +128,24 @@ namespace Vakapay.Repositories.Mysql
                 return null;
             }
         }
+
+        public User FindByEmailAddress(string emailAddress)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var sQuery = $"SELECT * FROM {TableName} WHERE {nameof(User.Email)} = @Email";
+
+                var result = Connection.QuerySingleOrDefault<User>(sQuery, new { Email = emailAddress });
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
     }
 }

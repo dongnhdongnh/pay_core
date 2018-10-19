@@ -8,6 +8,7 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -201,19 +202,15 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
-
-//                try
-//                {
-//                    var to = value["to"].ToString();
-//                }
-//                catch (Exception e)
-//                {
-//                    Console.WriteLine(e);
-//                    return new ReturnObject()
-//                        {Status = Status.STATUS_ERROR, Message = "Recipient not exist"}.ToJson();
-//                }
+                var userRepository = new UserRepository(VakapayRepositoryFactory.GetOldConnection());
 
                 var request = value.ToObject<SendCoinRequest>();
+                User user = null;
+
+                if (CommonHelper.IsValidEmail(request.To))
+                {
+                    user = userRepository.FindByEmailAddress(request.To);
+                }
 
                 return new ReturnDataObject()
                     {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();

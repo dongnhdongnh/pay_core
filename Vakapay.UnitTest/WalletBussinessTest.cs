@@ -172,7 +172,7 @@ namespace Vakapay.UnitTest
                 _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection());
             var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
             var wallet = walletRepository.FindByUserAndNetwork(
-                userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id,
+                userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.VAKA);
 
             var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
@@ -186,7 +186,7 @@ namespace Vakapay.UnitTest
                 _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection());
             var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
             var wallet = walletRepository.FindByUserAndNetwork(
-                userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id,
+                userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.BTC);
 
             var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
@@ -200,7 +200,7 @@ namespace Vakapay.UnitTest
                 _vakapayRepositoryFactory.GetWalletRepository(_vakapayRepositoryFactory.GetOldConnection());
             var userRepo = _vakapayRepositoryFactory.GetUserRepository(_vakapayRepositoryFactory.GetOldConnection());
             var wallet = walletRepository.FindByUserAndNetwork(
-                userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0].Id,
+                userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.ETH);
 
             var res = _walletBusiness.Withdraw(wallet, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", (decimal) 0.0001);
