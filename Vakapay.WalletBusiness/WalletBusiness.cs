@@ -564,7 +564,7 @@ namespace Vakapay.WalletBusiness
 //            }
 //        }
 
-        public ReturnObject UpdateBalance(string toAddress, decimal addedBlance, string networkName)
+        public ReturnObject UpdateBalanceDeposit(string toAddress, decimal addedBalance, string networkName)
         {
             try
             {
@@ -590,7 +590,7 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                wallet.Balance += addedBlance;
+                wallet.Balance += addedBalance;
                 wallet.Version += 1;
                 wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                 var result = walletRepository.Update(wallet);
@@ -610,14 +610,14 @@ namespace Vakapay.WalletBusiness
                             Id = CommonHelper.GenerateUuid(),
                             ToEmail = user.Email,
                             NetworkName = wallet.Currency,
-                            Amount = addedBlance,
+                            Amount = addedBalance,
                             Template = EmailTemplate.Received,
                             Subject = EmailConfig.Subject_SentOrReceived,
                             CreatedAt = currentTime,
                             UpdatedAt = currentTime
                             //							Content = networkName + "+" + addedBlance
                         };
-                        sendMailBusiness.CreateEmailQueueAsync(_email);
+                        result = sendMailBusiness.CreateEmailQueueAsync(_email).Result;
                     }
                 }
 
@@ -641,10 +641,7 @@ namespace Vakapay.WalletBusiness
                     ConnectionDb.Open();
                 var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
                 var wallet = walletRepository.FindById(id);
-                if (wallet != null)
-                    return wallet;
-
-                return null;
+                return wallet;
             }
             catch (Exception e)
             {
@@ -801,9 +798,6 @@ namespace Vakapay.WalletBusiness
             var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
             var wallets = walletRepository.FindByAddressAndNetworkName(addr, networkName);
 
-            if (wallets == null)
-                return null;
-
             return wallets;
         }
 
@@ -854,7 +848,7 @@ namespace Vakapay.WalletBusiness
 //            }
 //        }
 
-        public bool ValidateAddress(string address, string networkName)
+        public static bool ValidateAddress(string address, string networkName)
         {
             switch (networkName)
             {
@@ -870,6 +864,8 @@ namespace Vakapay.WalletBusiness
                 case CryptoCurrency.VAKA:
                     var vakacoinRpc = new VakacoinRPC(AppSettingHelper.GetVakacoinNode());
                     return vakacoinRpc.CheckAccountExist(address);
+                default:
+                    throw new Exception("Network name not define!");
             }
 
             return true;
@@ -894,14 +890,13 @@ namespace Vakapay.WalletBusiness
             if (ConnectionDb.State != ConnectionState.Open)
                 ConnectionDb.Open();
 
-            //begin first sms
-            var transctionScope = ConnectionDb.BeginTransaction();
+            var dbTransaction = ConnectionDb.BeginTransaction();
             try
             {
                 var lockResult = await walletRepository.LockForProcess(pendingWallet);
                 if (lockResult.Status == Status.STATUS_ERROR)
                 {
-                    transctionScope.Rollback();
+                    dbTransaction.Rollback();
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
@@ -909,11 +904,11 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                transctionScope.Commit();
+                dbTransaction.Commit();
             }
             catch (Exception e)
             {
-                transctionScope.Rollback();
+                dbTransaction.Rollback();
                 return new ReturnObject
                 {
                     Status = Status.STATUS_ERROR,
@@ -928,10 +923,10 @@ namespace Vakapay.WalletBusiness
             try
             {
                 var sendResult = await CreateAddressForWallet(pendingWallet);
-                if (sendResult.Status == Status.STATUS_ERROR)
-                {
-                    return sendResult;
-                }
+//                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
+//                {
+//                    return sendResult;
+//                }
 
                 pendingWallet.Status = sendResult.Status;
                 pendingWallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();

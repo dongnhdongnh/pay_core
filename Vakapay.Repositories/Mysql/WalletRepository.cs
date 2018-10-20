@@ -427,7 +427,7 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public Task<ReturnObject> SafeUpdate(Wallet row)
+        public override Task<ReturnObject> SafeUpdate(Wallet row)
         {
             return base.SafeUpdate(row, new[] {nameof(row.AddressCount)});
         }

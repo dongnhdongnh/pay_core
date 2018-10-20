@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NLog;
 using Vakapay.Commons.Constants;
@@ -111,11 +112,6 @@ namespace Vakapay.UserSendTransactionBusiness
                 Amount = sendTransaction.Amount,
                 Currency = sendTransaction.Currency,
                 Idem = sendTransaction.Idem,
-                IsProcessing = 0,
-                Version = 0,
-                Status = Status.STATUS_PENDING,
-                CreatedAt = CommonHelper.GetUnixTimestamp(),
-                UpdatedAt = CommonHelper.GetUnixTimestamp(),
             });
 
             if (insertRes.Status == Status.STATUS_ERROR)
@@ -130,6 +126,141 @@ namespace Vakapay.UserSendTransactionBusiness
                 Status = Status.STATUS_SUCCESS,
                 Message = "Inserted to transaction database!"
             };
+        }
+
+        public async Task<ReturnObject> SendInternalTransaction()
+        {
+            var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
+            var rowPending = internalTransactionsRepository.FindRowPending();
+
+            if (rowPending?.Id == null)
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Message = "Pending internal transaction not found"
+                };
+
+            if (_connectionDb.State != ConnectionState.Open)
+                _connectionDb.Open();
+
+            var dbTransaction = _connectionDb.BeginTransaction();
+            try
+            {
+                var lockResult = await internalTransactionsRepository.LockForProcess(rowPending);
+                if (lockResult.Status == Status.STATUS_ERROR)
+                {
+                    dbTransaction.Rollback();
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Message = "Cannot Lock For Process"
+                    };
+                }
+
+                dbTransaction.Commit();
+            }
+            catch (Exception e)
+            {
+                dbTransaction.Rollback();
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.ToString()
+                };
+            }
+
+            //update Version to Model
+            rowPending.Version += 1;
+
+            var transactionSend = _connectionDb.BeginTransaction();
+            try
+            {
+                var sendResult = SendInternalTransaction(rowPending);
+
+                rowPending.Status = sendResult.Status;
+                rowPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                rowPending.IsProcessing = 0;
+
+                var updateResult = await internalTransactionsRepository.SafeUpdate(rowPending);
+                if (updateResult.Status == Status.STATUS_ERROR)
+                {
+                    transactionSend.Rollback();
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Cannot update wallet status"
+                    };
+                }
+
+                transactionSend.Commit();
+                return updateResult;
+            }
+            catch (Exception e)
+            {
+                // release lock
+                transactionSend.Rollback();
+                var releaseResult = internalTransactionsRepository.ReleaseLock(rowPending);
+                Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+                throw;
+            }
+        }
+
+        private ReturnObject SendInternalTransaction(InternalWithdrawTransaction transaction)
+        {
+            try
+            {
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
+                var walletBusiness = new WalletBusiness.WalletBusiness(_vakapayRepositoryFactory,false);
+
+                var senderWallet = walletRepository.FindByUserAndNetwork(transaction.SenderUserId, transaction.Currency);
+                var receiverWallet = walletRepository.FindByUserAndNetwork(transaction.ReceiverUserId, transaction.Currency);
+
+                if (senderWallet == null )
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Cannot find sender wallet"
+                    };
+                }
+
+                if (receiverWallet == null)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Cannot find receiver wallet"
+                    };
+                }
+
+                if (senderWallet.Balance < transaction.Amount)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "sender balance is smaller than transaction amount"
+                    };
+                }
+
+//                senderWallet.Balance -= transaction.Amount;
+//                receiverWallet.Balance += transaction.Amount;
+                walletRepository.UpdateBalanceWallet(-transaction.Amount, senderWallet.Id, senderWallet.Version); //TODO dangerous code
+                walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, senderWallet.Version);
+
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_SUCCESS
+                };
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
         }
     }
 }

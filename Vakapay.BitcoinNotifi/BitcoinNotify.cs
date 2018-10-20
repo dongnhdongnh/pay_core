@@ -146,7 +146,7 @@ namespace Vakapay.BitcoinNotifi
                     }
 
                     // update balance 
-                    WalletBusiness?.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
+                    WalletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address, transactionModelDetail.Amount,
                         "Bitcoin");
 
                     //insert new email data

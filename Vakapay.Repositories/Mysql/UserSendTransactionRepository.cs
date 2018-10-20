@@ -7,7 +7,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class UserSendTransactionRepository : MultiThreadUpdateEntityRepository<UserSendTransaction>
+    public class UserSendTransactionRepository : MySqlBaseRepository<UserSendTransaction>
     {
         public UserSendTransactionRepository(string connectionString) : base(connectionString)
         {

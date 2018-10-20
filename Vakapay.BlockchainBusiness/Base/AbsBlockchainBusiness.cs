@@ -360,7 +360,7 @@ namespace Vakapay.BlockchainBusiness.Base
                             int _transaValue = 0;
                             if (_trans.Value.HexToInt(out _transaValue))
                             {
-                                wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, networkName);
+                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
                             }
                         }
                     }

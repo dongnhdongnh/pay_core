@@ -347,7 +347,7 @@ namespace Vakapay.UnitTest
             _walletBusiness =
                 new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
 
-            Assert.AreEqual(result, _walletBusiness.ValidateAddress(address, networkName));
+            Assert.AreEqual(result, Vakapay.WalletBusiness.WalletBusiness.ValidateAddress(address, networkName));
         }
     }
 }

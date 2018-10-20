@@ -79,7 +79,7 @@ namespace Vakapay.Repositories.Mysql
 //            _updateQuery.Add(nameof(sms.InProcess), "1");
 //            return ExcuteSQL(SqlHelper.Query_Update(TableName, _setQuery, _updateQuery));
 //        }
-        public Task<ReturnObject> SafeUpdate(SmsQueue row)
+        public override Task<ReturnObject> SafeUpdate(SmsQueue row)
         {
             return base.SafeUpdate(row, new List<string>());
         }

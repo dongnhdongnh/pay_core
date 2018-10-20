@@ -453,7 +453,7 @@ namespace Vakapay.Repositories.Mysql
             return TableName;
             // throw new NotImplementedException();
         }
-		public Task<ReturnObject> SafeUpdate(TTransaction row)
+		public override Task<ReturnObject> SafeUpdate(TTransaction row)
 		{
 			return base.SafeUpdate(row, new[] {nameof(row.Hash)});
 		}

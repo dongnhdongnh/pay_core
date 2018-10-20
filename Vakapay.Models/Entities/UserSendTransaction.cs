@@ -4,7 +4,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Entities
 {
-    public class UserSendTransaction : MultiThreadUpdateEntity
+    public class UserSendTransaction : BaseEntity
     {
         public string UserId { get; set; }
 
