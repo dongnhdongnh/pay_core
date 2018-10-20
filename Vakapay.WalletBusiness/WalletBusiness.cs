@@ -300,7 +300,7 @@ namespace Vakapay.WalletBusiness
                  */
 
                 // 5. Update Wallet Balance
-                var updateWallet = UpdateBalance(-(amount + free), wallet.Id, wallet.Version);
+                var updateWallet = UpdateBalance(-(amount + free), wallet.Id, wallet.Version); // TODO dangerous code
                 if (updateWallet == null || updateWallet.Status == Status.STATUS_ERROR)
                 {
 //                    withdrawTrx.Rollback();
