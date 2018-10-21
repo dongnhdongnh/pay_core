@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Vakapay.BitcoinBusiness;
+using Vakapay.Commons.Helpers;
 
 namespace Vakapay.UnitTest
 {
@@ -10,7 +11,7 @@ namespace Vakapay.UnitTest
         [SetUp]
         public void Setup()
         {
-            btcRpc = new BitcoinRpc("HELOO", "", "");
+            btcRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
         }
 
         [Test]

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
+using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
@@ -11,14 +12,11 @@ namespace Vakapay.ScanEthereum
 {
     internal static class Program
     {
-        private const string ConnectionString =
-            "server=localhost;userid=root;password=admin;database=vakapay;port=3306;Connection Timeout=120;SslMode=none";
-
         private static void Main(string[] args)
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = ConnectionString
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
             RunScan(repositoryConfig);
         }

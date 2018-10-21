@@ -3,7 +3,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
@@ -15,12 +14,12 @@ namespace Vakapay.BitcoinBusiness
     {
         private readonly Uri Url;
 
-        private readonly ICredentials Credentials;
+        private readonly ICredentials Credential;
 
-        public BitcoinRpc(string aSUri, string userName, string password)
+        public BitcoinRpc(string endPointUrl, NetworkCredential credential)
         {
-            Url = new Uri(aSUri);
-            Credentials = new NetworkCredential(userName, password);
+            Url = new Uri(endPointUrl);
+            Credential = credential;
         }
 
         private IBlockchainRPC _blockchainRpcImplementation;
@@ -31,8 +30,8 @@ namespace Vakapay.BitcoinBusiness
             {
                 HttpWebRequest webRequest = (HttpWebRequest) WebRequest.Create(Url);
 
-                webRequest.Credentials = Credentials;
-                webRequest.ContentType = "application/json-RPCClient";
+                webRequest.Credentials = Credential;
+                webRequest.ContentType = "application/json-rpc";
                 webRequest.Method = "POST";
 
                 JObject joe = new JObject();

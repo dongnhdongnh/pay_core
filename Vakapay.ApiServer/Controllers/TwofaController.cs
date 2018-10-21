@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -44,7 +44,7 @@ namespace Vakaxa.ApiServer.Controllers
 
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = Configuration.GetConnectionString("DefaultConnection")
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
             _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

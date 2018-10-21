@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using Newtonsoft.Json;
 using NLog;
-using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;

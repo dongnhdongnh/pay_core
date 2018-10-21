@@ -63,11 +63,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.ScanWallet", "Vakap
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.SendMailBusiness", "Vakapay.SendMailBusiness\Vakapay.SendMailBusiness.csproj", "{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.TestTransactionsWithdraw", "Vakapay.TestTransactionsWithdraw\Vakapay.TestTransactionsWithdraw.csproj", "{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ApiServer", "Vakapay.ApiServer\Vakapay.ApiServer.csproj", "{8C67EB8E-1090-41F4-A0A2-2593152635A1}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.Configuration", "Vakapay.Configuration\Vakapay.Configuration.csproj", "{E9038D8F-413D-4B8D-BCC7-0868471AF0BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.SendSms", "Vakapay.SendSms\Vakapay.SendSms.csproj", "{DE2FD7E4-14A3-4C61-BE22-2A9B5920D135}"
 EndProject
@@ -181,10 +177,6 @@ Global
 		{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC6F9B0C-17C2-4318-B586-461CC0DBBFCD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1CE35A99-0962-4C16-877D-BB4D6C30DBB5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8C67EB8E-1090-41F4-A0A2-2593152635A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8C67EB8E-1090-41F4-A0A2-2593152635A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C67EB8E-1090-41F4-A0A2-2593152635A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -206,6 +198,7 @@ Global
 		{4CA76091-36A5-419D-B39E-E9444A48D6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CA76091-36A5-419D-B39E-E9444A48D6C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE2FD7E4-14A3-4C61-BE22-2A9B5920`D135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE2FD7E4-14A3-4C61-BE22-2A9B5920D135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE2FD7E4-14A3-4C61-BE22-2A9B5920D135}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE2FD7E4-14A3-4C61-BE22-2A9B5920D135}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE2FD7E4-14A3-4C61-BE22-2A9B5920D135}.Release|Any CPU.Build.0 = Release|Any CPU

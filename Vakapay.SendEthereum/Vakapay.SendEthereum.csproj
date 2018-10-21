@@ -26,10 +26,4 @@
     <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="setting.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

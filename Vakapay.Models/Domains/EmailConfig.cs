@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.Models.Domains

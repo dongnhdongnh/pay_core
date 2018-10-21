@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
@@ -18,7 +19,7 @@ namespace Vakapay.Models.Entities
         
         public string GetAmount()
         {
-            return Domains.CryptoCurrency.GetAmount(Currency, Balance);
+            return CryptoCurrency.GetAmount(Currency, Balance);
         }
     }
 }

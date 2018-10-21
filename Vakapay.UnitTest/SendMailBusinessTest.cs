@@ -16,7 +16,7 @@ namespace Vakapay.UnitTest
         {
             var repsitoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = "server=localhost;userid=root;password=Abcd@1234;database=vakapay;port=3306;Connection Timeout=120;SslMode=none"
+				ConnectionString = AppSettingHelper.GetDBConnection()
             };
             
             VakapayRepositoryMysqlPersistenceFactory persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repsitoryConfig);
