@@ -10,11 +10,6 @@ namespace Vakapay.Models.Entities
         [JsonIgnore]
         public string Password { get; set; }
 
-        public override string GetAddress()
-        {
-            return Address;
-        }
-
         public override string GetSecret()
         {
             return Password;

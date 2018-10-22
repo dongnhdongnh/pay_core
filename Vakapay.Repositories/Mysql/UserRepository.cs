@@ -86,7 +86,7 @@ namespace Vakapay.Repositories.Mysql
 
                 if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
                 {
-                    sQuery += $"WHERE t3.{nameof(VakacoinAccount.AccountName)} = @Address;";
+                    sQuery += $"WHERE t3.{nameof(VakacoinAccount.Address)} = @Address;";
                 }
                 else
                 {

@@ -231,7 +231,7 @@ namespace Vakapay.Repositories.Mysql
 
                 foreach (var row in blockchainAddresses)
                 {
-                    result.Add(row.GetAddress());
+                    result.Add(row.Address);
                 }
 
                 return result;

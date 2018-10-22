@@ -35,7 +35,7 @@ namespace Vakapay.Repositories.Mysql
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
-                var sQuery = "SELECT * FROM " + TableName + " WHERE AccountName = @AC";
+                var sQuery = $"SELECT * FROM {TableName} WHERE {nameof(VakacoinAccount.Address)} = @AC";
                 var result = Connection.QuerySingleOrDefault<VakacoinAccount>(sQuery, new {AC = accountName});
 
                 return result;

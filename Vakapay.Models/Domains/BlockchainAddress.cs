@@ -30,12 +30,6 @@ namespace Vakapay.Models.Domains
 			}
 		} }
 
-		public virtual bool ShouldSerializeAddress()
-		{
-			return true;
-		}
-
-		public abstract string GetAddress();
 		public abstract string GetSecret();
 	}
 }

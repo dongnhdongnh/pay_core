@@ -120,7 +120,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 foreach (var blockchainAddress in addresses)
                 {
-                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.GetAddress() == addressIdOrAddress)
+                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.Address == addressIdOrAddress)
                     {
                         address = blockchainAddress;
                         break;
@@ -169,7 +169,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 foreach (var blockchainAddress in addresses)
                 {
-                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.GetAddress() == addressIdOrAddress)
+                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.Address == addressIdOrAddress)
                     {
                         address = blockchainAddress;
                         break;
