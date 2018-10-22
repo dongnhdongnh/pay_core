@@ -48,11 +48,11 @@ namespace Vakapay.ScanVakaCoin
         {
             if (CacheHelper.HaveKey(
                 String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
-                    CryptoCurrency.GetSymbol(CryptoCurrency.VAKA))
+                    CryptoCurrency.VAKA)
             ))
                 uint.TryParse(
                     CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
-                        CryptoCurrency.GetSymbol(CryptoCurrency.VAKA))),
+                        CryptoCurrency.VAKA)),
                     out startBlock
                 );
 
@@ -96,7 +96,7 @@ namespace Vakapay.ScanVakaCoin
             TransferData transferData = JsonHelper.DeserializeObject<TransferData>(action.Data.ToString());
             if (String.IsNullOrEmpty(transferData.Quantity))
                 return;
-            if (transferData.Symbol() == CryptoCurrency.GetSymbol(CryptoCurrency.VAKA))
+            if (transferData.Symbol() == CryptoCurrency.VAKA)
             {
                 // If receiver doesn't exist in wallet table then stop
                 if (!_walletBusiness.CheckExistedAndUpdateByAddress(transferData.To, transferData.Amount(),
