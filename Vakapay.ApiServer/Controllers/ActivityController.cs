@@ -59,7 +59,7 @@ namespace Vakapay.ApiServer.Controllers
                 var queryStringValue = Request.Query;
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return CreateDataError("Offset or limit not found");
+                    return HelpersApi.CreateDataError("Offset or limit not found");
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
@@ -75,11 +75,11 @@ namespace Vakapay.ApiServer.Controllers
                         Convert.ToInt32(limit)).ToJson();
                 }
 
-                return CreateDataError("Can't get list account activity");
+                return HelpersApi.CreateDataError("Can't get list account activity");
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
@@ -92,7 +92,7 @@ namespace Vakapay.ApiServer.Controllers
                 var queryStringValue = Request.Query;
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return CreateDataError("Offset or limit not found");
+                    return HelpersApi.CreateDataError("Offset or limit not found");
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
@@ -126,11 +126,11 @@ namespace Vakapay.ApiServer.Controllers
                         Convert.ToInt32(limit), checkConfirmedDevices).ToJson();
                 }
 
-                return CreateDataError("Can't get list Confirm Devices activity");
+                return HelpersApi.CreateDataError("Can't get list Confirm Devices activity");
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
@@ -140,11 +140,11 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                return value.ContainsKey("Id") ? _userBusiness.DeleteConfirmedDevicesById(value["Id"].ToString()).ToJson() : CreateDataError("ID Not exist.");
+                return value.ContainsKey("Id") ? _userBusiness.DeleteConfirmedDevicesById(value["Id"].ToString()).ToJson() : HelpersApi.CreateDataError("ID Not exist.");
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
@@ -154,22 +154,15 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                return value.ContainsKey("Id") ? _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson() : CreateDataError("ID Not exist.");
+                return value.ContainsKey("Id") ? _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson() : HelpersApi.CreateDataError("ID Not exist.");
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
 
-        public string CreateDataError(string message)
-        {
-            return new ReturnObject
-            {
-                Status = Status.STATUS_ERROR,
-                Message = message
-            }.ToJson();
-        }
+      
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiServer.Helpers
@@ -114,6 +115,15 @@ namespace Vakapay.ApiServer.Helpers
                 Console.WriteLine(e.Message);
                 return null;
             }
+        }
+        
+        public static string CreateDataError(string message)
+        {
+            return new ReturnObject
+            {
+                Status = Status.STATUS_ERROR,
+                Message = message
+            }.ToJson();
         }
     }
 }

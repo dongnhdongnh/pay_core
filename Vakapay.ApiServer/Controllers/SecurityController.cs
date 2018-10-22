@@ -29,15 +29,11 @@ namespace Vakapay.ApiServer.Controllers
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
-        private IConfiguration Configuration { get; }
-
         public SecurityController(
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
         )
         {
-            Configuration = configuration;
-
             var repositoryConfig = new RepositoryConfiguration
             {
                 ConnectionString = AppSettingHelper.GetDBConnection()
@@ -56,12 +52,11 @@ namespace Vakapay.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
                 {
-                    return CreateDataError("Can't User");
+                    return HelpersApi.CreateDataError("Can't User");
                 }
 
                 return new ReturnObject
@@ -76,7 +71,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
@@ -89,15 +84,10 @@ namespace Vakapay.ApiServer.Controllers
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
                 var query = new Dictionary<string, string> {{"Email", email}};
 
-
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
-                {
-                    //return error
-                    return CreateDataError("User not exist in DB");
-                }
-
+                    return HelpersApi.CreateDataError("User not exist in DB");
 
                 if (value.ContainsKey("code") && value.ContainsKey("status") && value.ContainsKey("password"))
                 {
@@ -105,7 +95,7 @@ namespace Vakapay.ApiServer.Controllers
                     var status = value["status"];
 
                     if (!int.TryParse((string) status, out int outStatus))
-                        return CreateDataError("Status invalid");
+                        return HelpersApi.CreateDataError("Status invalid");
 
                     var password = value["password"];
                     var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
@@ -113,14 +103,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                        return CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError("Can't send code");
 
                     var secret = secretAuthToken.LockScreen;
 
                     var isok = authenticator.CheckCode(secret, code, userModel);
                     Console.WriteLine(isok);
 
-                    if (!isok) return CreateDataError("Can't update options");
+                    if (!isok) return HelpersApi.CreateDataError("Can't update options");
 
                     userModel.IsLockScreen = outStatus;
                     userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
@@ -134,15 +124,13 @@ namespace Vakapay.ApiServer.Controllers
                         HelpersApi.GetIp(Request)).ToJson();
                 }
 
-
-                return CreateDataError("Can't update options");
+                return HelpersApi.CreateDataError("Can't update options");
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
-
 
         [HttpPost("lock-screen/unlock")]
         public string VerifyPassword([FromBody] JObject value)
@@ -156,10 +144,7 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
-                {
-                    //return error
-                    return CreateDataError("User not exist in DB");
-                }
+                    return HelpersApi.CreateDataError("User not exist in DB");
 
                 if (userModel.IsLockScreen == 0)
                     return new ReturnObject
@@ -180,11 +165,11 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
 
-                return CreateDataError("Password is incorrect");
+                return HelpersApi.CreateDataError("Password is incorrect");
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
@@ -204,39 +189,29 @@ namespace Vakapay.ApiServer.Controllers
                     var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
 
                     if (checkSecret == null)
-                        return CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError("Can't send code");
 
                     userModel.SecretAuthToken = checkSecret;
                     var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
                     if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError("Can't send code");
 
                     var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                     if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                        return CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError("Can't send code");
 
                     return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.LockScreen))
                         .ToJson();
                 }
 
-                return CreateDataError("Can't send code");
+                return HelpersApi.CreateDataError("Can't send code");
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
-        }
-
-
-        public string CreateDataError(string message)
-        {
-            return new ReturnObject
-            {
-                Status = Status.STATUS_ERROR,
-                Message = message
-            }.ToJson();
         }
     }
 }
