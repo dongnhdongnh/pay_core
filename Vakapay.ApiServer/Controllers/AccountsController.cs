@@ -217,7 +217,6 @@ namespace Vakapay.ApiServer.Controllers
 
                 return new ReturnDataObject()
                     {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
-                throw new NotImplementedException();
             }
             catch (Exception e)
             {
