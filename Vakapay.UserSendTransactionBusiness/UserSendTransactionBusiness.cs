@@ -73,6 +73,14 @@ namespace Vakapay.UserSendTransactionBusiness
                 new WalletBusiness.WalletBusiness(_vakapayRepositoryFactory, false);
 
             var wallet = walletRepository.FindByUserAndNetwork(sendTransaction.UserId, sendTransaction.Currency);
+            if (wallet == null)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = $"UserId {sendTransaction.UserId} with {sendTransaction.Currency} wallet is not found!"
+                };
+            }
             var res = walletBusiness.Withdraw(wallet, sendTransaction.To, sendTransaction.Amount);
             return res;
         }

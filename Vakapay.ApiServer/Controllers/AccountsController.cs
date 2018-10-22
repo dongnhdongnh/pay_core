@@ -201,16 +201,13 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
-                var userRepository = new UserRepository(VakapayRepositoryFactory.GetOldConnection());
+                var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
 
-                var request = value.ToObject<SendCoinRequest>();
-                User user = null;
+                var request = value.ToObject<UserSendTransaction>();
 
-                if (CommonHelper.IsValidEmail(request.To))
-                {
-                    user = userRepository.FindByEmailAddress(request.To);
-                }
+                request.UserId = userId;
+
+                var res = sendTransactionBusiness.AddSendTransaction(request);
 
                 return new ReturnDataObject()
                     {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();

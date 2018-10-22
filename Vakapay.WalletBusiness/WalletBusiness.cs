@@ -220,6 +220,15 @@ namespace Vakapay.WalletBusiness
 
             try
             {
+                if (wallet == null)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Wallet not existed!"
+                    };
+                }
+
                 if (ConnectionDb.State != ConnectionState.Open)
                 {
                     ConnectionDb.Open();
@@ -763,27 +772,31 @@ namespace Vakapay.WalletBusiness
         /// <summary>
         /// Get history of wallet
         /// </summary>
-        /// <param name="wallet">Get from DB</param>
-        /// <param name="offet">-1 for not config</param>
-        /// <param name="limit">-1 for not config</param>
-        /// <param name="orderBy">null for not config</param>
-        public List<BlockchainTransaction> GetHistory(out int numberData,string userID,string CurrencyName, int offet = -1, int limit = -1, string[] orderBy = null)
+        /// <param name="numberData"></param>
+        /// <param name="userId"></param>
+        /// <param name="currencyName"></param>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        public List<BlockchainTransaction> GetHistory(out int numberData, string userId, string currencyName,
+            int offset = -1, int limit = -1, string[] orderBy = null)
         {
             numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
            // Console.WriteLine(wallet.Currency);
            
-            switch (CurrencyName)
+            switch (currencyName)
             {
                 case CryptoCurrency.ETH:
                     
-                   output = ethereumBussiness.GetAllHistory(out numberData,userID,offet, limit, orderBy);
+                   output = ethereumBussiness.GetAllHistory(out numberData,userId,offset, limit, orderBy);
                     break;
                 case CryptoCurrency.VAKA:
-                   output = vakacoinBussiness.GetAllHistory(out numberData, userID, offet, limit, orderBy);
+                   output = vakacoinBussiness.GetAllHistory(out numberData, userId, offset, limit, orderBy);
                     break;
                 case CryptoCurrency.BTC:
-                   output = bitcoinBussiness.GetAllHistory(out numberData, userID, offet, limit, orderBy);
+                   output = bitcoinBussiness.GetAllHistory(out numberData, userId, offset, limit, orderBy);
                     break;
                 default:
                     break;
