@@ -105,6 +105,33 @@ namespace Vakapay.ApiServer.Controllers
             //  return null;
         }
 
+        [HttpGet("GetExchangeRate")]
+        public ActionResult<ReturnObject> GetExchangeRate([FromQuery]string networkName)
+        {
+            try
+            {
+                //  var addresses = _walletBusiness.GetAddresses(walletId, networkName);
+                float rate = 1000.001f;
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_COMPLETED,
+                    // Data = numberData.ToString(),
+                    Message = rate.ToString()
+                };
+            }
+            catch (Exception e)
+            {
+
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+
+            //  return null;
+        }
+
         [HttpGet("CheckSendCoin")]
         public ActionResult<ReturnObject> CheckSendCoin([FromQuery]string fromAddress, [FromQuery]string toAddress, [FromQuery]string networkName, [FromQuery]string amount)
         {
