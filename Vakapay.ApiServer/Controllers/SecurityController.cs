@@ -199,7 +199,6 @@ namespace Vakapay.ApiServer.Controllers
 
                 var userModel = _userBusiness.GetUserInfo(query);
 
-
                 if (userModel != null)
                 {
                     var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
@@ -213,20 +212,13 @@ namespace Vakapay.ApiServer.Controllers
                     if (resultUpdate.Status == Status.STATUS_ERROR)
                         return CreateDataError("Can't send code");
 
-
                     var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                     if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
                         return CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.LockScreen;
-
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
-
-                    Console.WriteLine(code);
-
-                    return _userBusiness.SendSms(userModel, code).ToJson();
+                    return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.LockScreen))
+                        .ToJson();
                 }
 
                 return CreateDataError("Can't send code");

@@ -28,6 +28,14 @@ namespace Vakapay.ApiServer.Helpers
             return valid;
         }
 
+        public static string SendCodeSms(string secret)
+        {
+            var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+            var code = authenticator.GetCode(secret);
+            Console.WriteLine(code);
+            return code;
+        }
+
         public static string CheckToken(User userModel, string action)
         {
             try

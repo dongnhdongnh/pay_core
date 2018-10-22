@@ -171,9 +171,6 @@ namespace Vakapay.ApiServer.Controllers
 
                 var secret = secretAuthToken.TwofaEnable;
 
-                Console.WriteLine(secret);
-                Console.WriteLine(code);
-
                 var isok = authenticator.CheckCode(secret, code, userModel);
 
                 if (!isok) return CreateDataError("Can't verify code2");
@@ -183,7 +180,6 @@ namespace Vakapay.ApiServer.Controllers
                 var secretKey = CommonHelper.RandomString(32);
 
                 var startSetup = google.GenerateSetupCode(userModel.Email, secretKey, 300, 300);
-
 
                 userModel.TwoFactorSecret = secretKey;
 
@@ -226,18 +222,9 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("code")) return CreateDataError("Can't verify code");
 
                 var code = value["code"].ToString();
-                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
+                    return CreateDataError("Verify false");
 
-                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
-
-                if (string.IsNullOrEmpty(secretAuthToken.TwofaDisable))
-                    return CreateDataError("Can't send code");
-
-                var secret = secretAuthToken.TwofaDisable;
-
-                var isok = authenticator.CheckCode(secret, code, userModel);
-
-                if (!isok) return CreateDataError("Can't verify code");
                 userModel.TwoFactor = false;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
@@ -274,8 +261,6 @@ namespace Vakapay.ApiServer.Controllers
 
 
                 if (!value.ContainsKey("code")) return CreateDataError("Can't update options");
-
-                // if (!value.ContainsKey("option")) return CreateDataError("Can't update options");
 
                 var code = value["code"].ToString();
                 var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
@@ -343,14 +328,8 @@ namespace Vakapay.ApiServer.Controllers
                 if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
                     return CreateDataError("Can't send code");
 
-                var secret = secretAuthToken.SendTransaction;
-
-                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                var code = authenticator.GetCode(secret);
-
-                Console.WriteLine(code);
-
-                return _userBusiness.SendSms(userModel, code).ToJson();
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.SendTransaction))
+                    .ToJson();
             }
             catch (Exception e)
             {
@@ -391,14 +370,8 @@ namespace Vakapay.ApiServer.Controllers
                 if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
                     return CreateDataError("Can't send code");
 
-                var secret = secretAuthToken.UpdateOptionVerification;
-
-                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                var code = authenticator.GetCode(secret);
-
-                Console.WriteLine(code);
-
-                return _userBusiness.SendSms(userModel, code).ToJson();
+                return _userBusiness
+                    .SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.UpdateOptionVerification)).ToJson();
             }
             catch (Exception e)
             {
@@ -419,14 +392,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var userModel = _userBusiness.GetUserInfo(query);
 
-
                 if (userModel == null) return CreateDataError("Can't send code");
-
-                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_DISABLE);
-
-                if (checkSecret == null)
-                    return CreateDataError("Can't send code");
-
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -459,8 +425,6 @@ namespace Vakapay.ApiServer.Controllers
                 if (userModel == null) return CreateDataError("Can't send code");
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
-                Console.WriteLine(checkSecret);
-
                 if (checkSecret == null)
                     return CreateDataError("Can't send code1");
 
@@ -476,15 +440,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
                     return CreateDataError("Can't send code3");
 
-                var secret = secretAuthToken.TwofaEnable;
-
-                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                var code = authenticator.GetCode(secret);
-
-                Console.WriteLine(code);
-                Console.WriteLine(secret);
-
-                return _userBusiness.SendSms(userModel, code).ToJson();
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.TwofaEnable)).ToJson();
             }
             catch (Exception e)
             {
