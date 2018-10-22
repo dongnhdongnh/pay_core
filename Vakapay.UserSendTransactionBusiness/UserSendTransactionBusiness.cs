@@ -110,17 +110,20 @@ namespace Vakapay.UserSendTransactionBusiness
 
             if (insertRes.Status == Status.STATUS_ERROR)
             {
+                insertTrx.Rollback();
                 return insertRes;
             }
 
-            insertRes = internalTransactionsRepository.Insert(new InternalWithdrawTransaction()
+            var internalTransactions = new InternalWithdrawTransaction()
             {
                 SenderUserId = sendTransaction.UserId,
                 ReceiverUserId = receiver.Id,
                 Amount = sendTransaction.Amount,
                 Currency = sendTransaction.Currency,
                 Idem = sendTransaction.Idem,
-            });
+            };
+
+            insertRes = internalTransactionsRepository.Insert(internalTransactions);
 
             if (insertRes.Status == Status.STATUS_ERROR)
             {
@@ -129,89 +132,116 @@ namespace Vakapay.UserSendTransactionBusiness
             }
             insertTrx.Commit();
 
+            var sendTrx = _connectionDb.BeginTransaction();
+            var senRes = SendInternalTransaction(internalTransactions);
+            if (senRes.Status == Status.STATUS_ERROR )
+            {
+                sendTrx.Rollback();
+                internalTransactionsRepository.Update(internalTransactions);
+                return senRes;
+            }
+
+            var updateRes = internalTransactionsRepository.Update(internalTransactions);
+
+
+            if (updateRes.Status == Status.STATUS_ERROR)
+            {
+                sendTrx.Rollback();
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Fail to update send status"
+                };
+            }
+
+
+
+
+            sendTrx.Commit();
+
             return new ReturnObject()
             {
                 Status = Status.STATUS_SUCCESS,
-                Message = "Inserted to transaction database!"
+                Message = "Transaction Sent!"
             };
         }
 
-        public async Task<ReturnObject> SendInternalTransaction()
-        {
-            var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
-            var rowPending = internalTransactionsRepository.FindRowPending();
-
-            if (rowPending?.Id == null)
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Message = "Pending internal transaction not found"
-                };
-
-            if (_connectionDb.State != ConnectionState.Open)
-                _connectionDb.Open();
-
-            var dbTransaction = _connectionDb.BeginTransaction();
-            try
-            {
-                var lockResult = await internalTransactionsRepository.LockForProcess(rowPending);
-                if (lockResult.Status == Status.STATUS_ERROR)
-                {
-                    dbTransaction.Rollback();
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_SUCCESS,
-                        Message = "Cannot Lock For Process"
-                    };
-                }
-
-                dbTransaction.Commit();
-            }
-            catch (Exception e)
-            {
-                dbTransaction.Rollback();
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_ERROR,
-                    Message = e.ToString()
-                };
-            }
-
-            //update Version to Model
-            rowPending.Version += 1;
-
-            var transactionSend = _connectionDb.BeginTransaction();
-            try
-            {
-                var sendResult = SendInternalTransaction(rowPending);
-
-                rowPending.Status = sendResult.Status;
-                rowPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
-                rowPending.IsProcessing = 0;
-
-                var updateResult = await internalTransactionsRepository.SafeUpdate(rowPending);
-                if (updateResult.Status == Status.STATUS_ERROR)
-                {
-                    transactionSend.Rollback();
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Cannot update wallet status"
-                    };
-                }
-
-                transactionSend.Commit();
-                return updateResult;
-            }
-            catch (Exception e)
-            {
-                // release lock
-                transactionSend.Rollback();
-                var releaseResult = internalTransactionsRepository.ReleaseLock(rowPending);
-                Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
-                throw;
-            }
-        }
+//        public async Task<ReturnObject> SendInternalTransaction()
+//        {
+//            var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
+//            var rowPending = internalTransactionsRepository.FindRowPending();
+//
+//            if (rowPending?.Id == null)
+//                return new ReturnObject
+//                {
+//                    Status = Status.STATUS_SUCCESS,
+//                    Message = "Pending internal transaction not found"
+//                };
+//
+//            if (_connectionDb.State != ConnectionState.Open)
+//                _connectionDb.Open();
+//
+//            var dbTransaction = _connectionDb.BeginTransaction();
+//            try
+//            {
+//                var lockResult = await internalTransactionsRepository.LockForProcess(rowPending);
+//                if (lockResult.Status == Status.STATUS_ERROR)
+//                {
+//                    dbTransaction.Rollback();
+//                    return new ReturnObject
+//                    {
+//                        Status = Status.STATUS_SUCCESS,
+//                        Message = "Cannot Lock For Process"
+//                    };
+//                }
+//
+//                dbTransaction.Commit();
+//            }
+//            catch (Exception e)
+//            {
+//                dbTransaction.Rollback();
+//                return new ReturnObject
+//                {
+//                    Status = Status.STATUS_ERROR,
+//                    Message = e.ToString()
+//                };
+//            }
+//
+//            //update Version to Model
+//            rowPending.Version += 1;
+//
+//            var transactionSend = _connectionDb.BeginTransaction();
+//            try
+//            {
+//                var sendResult = SendInternalTransaction(rowPending);
+//
+//                rowPending.Status = sendResult.Status;
+//                rowPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+//                rowPending.IsProcessing = 0;
+//
+//                var updateResult = await internalTransactionsRepository.SafeUpdate(rowPending);
+//                if (updateResult.Status == Status.STATUS_ERROR)
+//                {
+//                    transactionSend.Rollback();
+//                    return new ReturnObject
+//                    {
+//                        Status = Status.STATUS_ERROR,
+//                        Message = "Cannot update wallet status"
+//                    };
+//                }
+//
+//                transactionSend.Commit();
+//                return updateResult;
+//            }
+//            catch (Exception e)
+//            {
+//                // release lock
+//                transactionSend.Rollback();
+//                var releaseResult = internalTransactionsRepository.ReleaseLock(rowPending);
+//                Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+//                throw;
+//            }
+//        }
 
         private ReturnObject SendInternalTransaction(InternalWithdrawTransaction transaction)
         {
@@ -225,6 +255,7 @@ namespace Vakapay.UserSendTransactionBusiness
 
                 if (senderWallet == null )
                 {
+                    transaction.Status = Status.STATUS_ERROR;
                     return new ReturnObject()
                     {
                         Status = Status.STATUS_ERROR,
@@ -234,6 +265,7 @@ namespace Vakapay.UserSendTransactionBusiness
 
                 if (receiverWallet == null)
                 {
+                    transaction.Status = Status.STATUS_ERROR;
                     return new ReturnObject()
                     {
                         Status = Status.STATUS_ERROR,
@@ -243,6 +275,7 @@ namespace Vakapay.UserSendTransactionBusiness
 
                 if (senderWallet.Balance < transaction.Amount)
                 {
+                    transaction.Status = Status.STATUS_ERROR;
                     return new ReturnObject()
                     {
                         Status = Status.STATUS_ERROR,
@@ -252,8 +285,26 @@ namespace Vakapay.UserSendTransactionBusiness
 
 //                senderWallet.Balance -= transaction.Amount;
 //                receiverWallet.Balance += transaction.Amount;
-                walletRepository.UpdateBalanceWallet(-transaction.Amount, senderWallet.Id, senderWallet.Version); //TODO dangerous code
-                walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, senderWallet.Version);
+
+                var updateBalanceRes =
+                    walletRepository.UpdateBalanceWallet(-transaction.Amount, senderWallet.Id,
+                        senderWallet.Version); //TODO dangerous code
+
+                if (updateBalanceRes.Status == Status.STATUS_ERROR)
+                {
+                    transaction.Status = Status.STATUS_ERROR;
+                    return updateBalanceRes;
+                }
+                
+                updateBalanceRes = walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, senderWallet.Version);
+
+                if (updateBalanceRes.Status == Status.STATUS_ERROR)
+                {
+                    transaction.Status = Status.STATUS_ERROR;
+                    return updateBalanceRes;
+                }
+
+                transaction.Status = Status.STATUS_SUCCESS;
 
                 return new ReturnObject()
                 {
@@ -263,6 +314,7 @@ namespace Vakapay.UserSendTransactionBusiness
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                transaction.Status = Status.STATUS_ERROR;
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_ERROR,

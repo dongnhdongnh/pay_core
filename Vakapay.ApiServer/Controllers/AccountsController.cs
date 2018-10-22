@@ -209,6 +209,12 @@ namespace Vakapay.ApiServer.Controllers
 
                 var res = sendTransactionBusiness.AddSendTransaction(request);
 
+                if (res.Status == Status.STATUS_ERROR)
+                {
+                    return new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = res.Message}.ToJson();
+                }
+
                 return new ReturnDataObject()
                     {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
                 throw new NotImplementedException();
