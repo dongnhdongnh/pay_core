@@ -11,5 +11,6 @@ namespace Vakapay.Commons.Constants
         public const string TWOFA_DISABLE = "TwofaDisable";
         public const string UPDATE_OPTION_VETIFY = "UpdateOptionVerify";
         public const string LOCK_SCREEN = "LockScreen";
+        public const string SEND_TRSANSACTION = "SendTransaction";
     }
 }

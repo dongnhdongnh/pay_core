@@ -23,7 +23,7 @@ namespace Vakapay.ApiServer.Helpers
         {
             var google = new GoogleAuthen.TwoFactorAuthenticator();
 
-            var valid = google.ValidateTwoFactorPIN(secret, token);        
+            var valid = google.ValidateTwoFactorPIN(secret, token);
 
             return valid;
         }
@@ -40,6 +40,9 @@ namespace Vakapay.ApiServer.Helpers
                     {
                         case ActionLog.TWOFA_ENABLE:
                             newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            break;
+                        case ActionLog.SEND_TRSANSACTION:
+                            newSecret.SendTransaction = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
                         case ActionLog.TWOFA_DISABLE:
                             newSecret.TwofaDisable = TwoStepsAuthenticator.Authenticator.GenerateKey();
@@ -62,6 +65,13 @@ namespace Vakapay.ApiServer.Helpers
                             if (string.IsNullOrEmpty(newSecret.TwofaEnable))
                             {
                                 newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            }
+
+                            break;
+                        case ActionLog.SEND_TRSANSACTION:
+                            if (string.IsNullOrEmpty(newSecret.SendTransaction))
+                            {
+                                newSecret.SendTransaction = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             }
 
                             break;
