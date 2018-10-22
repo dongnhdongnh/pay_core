@@ -155,7 +155,7 @@ namespace Vakapay.ApiServer.Controllers
                     return HelpersApi.CreateDataError("User not exist in DB");
                 }
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("Can't verify code1");
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("code is required");
 
                 var code = value["code"].ToString();
                 var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
@@ -163,13 +163,13 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError("Can't send code");
+                    return HelpersApi.CreateDataError("Can't secretAuthToken TwofaEnable");
 
                 var secret = secretAuthToken.TwofaEnable;
 
                 var isok = authenticator.CheckCode(secret, code, userModel);
 
-                if (!isok) return HelpersApi.CreateDataError("Can't verify code2");
+                if (!isok) return HelpersApi.CreateDataError("Can't verify code");
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -262,7 +262,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var isok = authenticator.CheckCode(secret, code, userModel);
 
-                if (!isok) return HelpersApi.CreateDataError("Can't update options");
+                if (!isok) return HelpersApi.CreateDataError("Can't verify code");
 
                 // var option = value["option"];
 

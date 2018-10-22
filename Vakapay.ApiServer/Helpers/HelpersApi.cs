@@ -50,6 +50,9 @@ namespace Vakapay.ApiServer.Helpers
                         case ActionLog.TWOFA_ENABLE:
                             newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
+                        case ActionLog.API_ACCESS:
+                            newSecret.ApiAccess = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            break;
                         case ActionLog.SEND_TRSANSACTION:
                             newSecret.SendTransaction = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             break;
@@ -74,6 +77,13 @@ namespace Vakapay.ApiServer.Helpers
                             if (string.IsNullOrEmpty(newSecret.TwofaEnable))
                             {
                                 newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            }
+
+                            break;
+                        case ActionLog.API_ACCESS:
+                            if (string.IsNullOrEmpty(newSecret.ApiAccess))
+                            {
+                                newSecret.ApiAccess = TwoStepsAuthenticator.Authenticator.GenerateKey();
                             }
 
                             break;
@@ -116,7 +126,7 @@ namespace Vakapay.ApiServer.Helpers
                 return null;
             }
         }
-        
+
         public static string CreateDataError(string message)
         {
             return new ReturnObject

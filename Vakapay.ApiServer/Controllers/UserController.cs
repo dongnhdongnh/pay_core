@@ -177,6 +177,7 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
                 var ip = HelpersApi.GetIp(Request);
+                
 
                 if (string.IsNullOrEmpty(ip))
                     return new ReturnObject
