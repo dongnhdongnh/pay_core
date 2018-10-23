@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Vakapay.Models.Domains;
 
-namespace Vakapay.Models.Entities.BTC
+namespace Vakapay.Models.Entities
 {
     public class BitcoinTransaction : BlockchainTransaction
     {
@@ -14,8 +14,8 @@ namespace Vakapay.Models.Entities.BTC
         public static BitcoinDepositTransaction FromJson(string json) =>
             JsonHelper.DeserializeObject<BitcoinDepositTransaction>(json, JsonHelper.ConvertSettings);
 
-        public string ToJson() =>
-            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
+//        public string ToJson() =>
+//            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
     }
     
     [Table("BitcoinWithdrawTransaction")]

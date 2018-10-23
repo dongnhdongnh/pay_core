@@ -175,10 +175,11 @@ namespace Vakaxa.ApiServer.Controllers
                     return _walletBusiness.MakeAllWalletForNewUser(userModel).ToJson();
                 }
 
-                return new ReturnObject
+                return new ReturnDataObject()
                 {
                     Status = Status.STATUS_SUCCESS,
-                    Data = Vakapay.Models.Entities.User.ToJson(userModel)
+//                    Data = Vakapay.Models.Entities.User.ToJson(userModel)
+                    Data = userModel
                 }.ToJson();
             }
             catch (Exception e)

@@ -11,7 +11,7 @@ namespace Vakapay.ApiServer.Models
         public static ActionCode FromJson(string json) =>
             JsonHelper.DeserializeObject<ActionCode>(json);
 
-        public static string ToJson(ActionCode self) =>
-            JsonHelper.SerializeObject(self);
+//        public static string ToJson(ActionCode self) =>
+//            JsonHelper.SerializeObject(self);
     }
 }

@@ -19,32 +19,9 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        public new VakacoinAccount FindByAddress(string address) //FindByAccountName
-        {
-            return FindByAccountName(address);
-        }
-
         public override Task<ReturnObject> InsertAddress(string address, string walletId, string other)
         {
             throw new NotImplementedException();
-        }
-
-        public VakacoinAccount FindByAccountName(string accountName)
-        {
-            try
-            {
-                if (Connection.State != ConnectionState.Open)
-                    Connection.Open();
-                var sQuery = "SELECT * FROM " + TableName + " WHERE AccountName = @AC";
-                var result = Connection.QuerySingleOrDefault<VakacoinAccount>(sQuery, new {AC = accountName});
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                Logger.Error("Find Vakacoin Account by AccountName Fail =>> fail: " + e.Message);
-                throw;
-            }
         }
     }
 }

@@ -13,8 +13,8 @@ namespace Vakapay.Models.Domains
         [JsonProperty(Order = 3)]
         public string Data { get; set; }
 
-        public string ToJson() =>
-            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
+//        public string ToJson() =>
+//            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
 
         public static ReturnObject FromJson(string json) =>
             JsonHelper.DeserializeObject<ReturnObject>(json, JsonHelper.ConvertSettings);

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vakapay.Models.Entities.ETH
+namespace Vakapay.Models.Entities
 {
 	public class EthRPCJson
 	{

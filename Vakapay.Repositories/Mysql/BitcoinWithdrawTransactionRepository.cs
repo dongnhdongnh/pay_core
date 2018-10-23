@@ -7,7 +7,7 @@ using Dapper;
 using NLog;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities.BTC;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 
 namespace Vakapay.Repositories.Mysql
