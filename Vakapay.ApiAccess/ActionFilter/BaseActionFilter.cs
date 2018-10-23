@@ -1,4 +1,3 @@
-using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -25,7 +24,7 @@ namespace Vakapay.ApiAccess.ActionFilter
                 base.OnActionExecuted(actionExecutedContext);
             }
         }
-        
+
         /// <summary>
         /// CreateDataError
         /// </summary>
@@ -42,6 +41,7 @@ namespace Vakapay.ApiAccess.ActionFilter
 
         private static bool IsValidApiKey(IHeaderDictionary headers)
         {
+            
             if (headers.ContainsKey(Requests.HeaderApiKey))
             {
                 //check

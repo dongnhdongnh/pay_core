@@ -14,6 +14,7 @@ using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -255,9 +256,9 @@ namespace Vakapay.ApiServer.Controllers
                 if (userModel == null)
                     return HelpersApi.CreateDataError("User not exist in DB");
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("Can't update options");
+                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError("SMScode is required");
 
-                var code = value["code"].ToString();
+                var code = value["SMScode"].ToString();
 
                 bool isVerify;
 
@@ -277,9 +278,7 @@ namespace Vakapay.ApiServer.Controllers
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                if (!isVerify) return HelpersApi.CreateDataError("Can't verify code");
-
-                // var option = value["option"];
+                //if (!isVerify) return HelpersApi.CreateDataError("Can't verify code");
 
                 // userModel.Verification = (int) option;
 
