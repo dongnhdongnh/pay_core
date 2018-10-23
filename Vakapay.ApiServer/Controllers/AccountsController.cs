@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -73,10 +76,147 @@ namespace Vakapay.ApiServer.Controllers
 
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
 
-                var address = walletRepository.GetAddressesByUserId(userId);
+                var addresses = walletRepository.GetAddressesByUserId(userId);
+
+                if (addresses == null || addresses.Count == 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "No address found, userId is not existed!"
+                    }.ToJson();
+                }
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = addresses}.ToJson();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
+        [HttpGet("{userId}/addresses/{addressIdOrAddress}")]
+        public ActionResult<string> ShowAddress(string userId, string addressIdOrAddress)
+        {
+            try
+            {
+                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
+
+                var addresses = walletRepository.GetAddressesByUserId(userId);
+
+                if (addresses == null || addresses.Count == 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "No address found, userId is not existed!"
+                    }.ToJson();
+                }
+
+                BlockchainAddress address = null;
+
+                foreach (var blockchainAddress in addresses)
+                {
+                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.Address == addressIdOrAddress)
+                    {
+                        address = blockchainAddress;
+                        break;
+                    }
+                }
+
+                if (address == null)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "AddressId or regular blockchain address input is not found"
+                    }.ToJson();
+                }
 
                 return new ReturnDataObject()
                     {Status = Status.STATUS_SUCCESS, Data = address}.ToJson();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
+        [HttpGet("{userId}/addresses/{addressIdOrAddress}/transactions")]
+        public ActionResult<string> GetAddressTransactions(string userId, string addressIdOrAddress)
+        {
+            try
+            {
+                var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
+
+                var addresses = walletRepository.GetAddressesByUserId(userId);
+
+                if (addresses == null || addresses.Count == 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "No address found, userId is not existed!"
+                    }.ToJson();
+                }
+
+                BlockchainAddress address = null;
+
+                foreach (var blockchainAddress in addresses)
+                {
+                    if (blockchainAddress.Id == addressIdOrAddress || blockchainAddress.Address == addressIdOrAddress)
+                    {
+                        address = blockchainAddress;
+                        break;
+                    }
+                }
+
+                if (address == null)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "AddressId or regular blockchain address input is not found"
+                    }.ToJson();
+                }
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = address}.ToJson();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
+        [HttpPost("{userId}/transactions")]
+        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        {
+            try
+            {
+                var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+
+                var request = value.ToObject<UserSendTransaction>();
+
+                request.UserId = userId;
+
+                var res = sendTransactionBusiness.AddSendTransaction(request);
+
+                if (res.Status == Status.STATUS_ERROR)
+                {
+                    return new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = res.Message}.ToJson();
+                }
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
             }
             catch (Exception e)
             {
@@ -131,8 +271,6 @@ namespace Vakapay.ApiServer.Controllers
                     {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
             }
         }
-        
-        
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)

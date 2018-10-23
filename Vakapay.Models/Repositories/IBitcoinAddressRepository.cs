@@ -1,4 +1,4 @@
-using Vakapay.Models.Entities.BTC;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories

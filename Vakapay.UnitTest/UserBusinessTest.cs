@@ -99,7 +99,7 @@ namespace Vakapay.UnitTest
 
             var resultCreated = userBus.Login(
                 new User {Email = "ngochuan2212@gmail.com", PhoneNumber = "+84988478266", FullName = "Ngo Ngoc Huan"});
-            var resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindBySql("select * from User where Email='ngochuan2212@gmail.com'")[0]);
+            var resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindByEmailAddress("ngochuan2212@gmail.com"));
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
 
@@ -108,7 +108,7 @@ namespace Vakapay.UnitTest
                 {
                     Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"
                 });
-            resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindBySql("select * from User where Email='tieuthanhliem@gmail.com'")[0]);
+            resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindByEmailAddress("tieuthanhliem@gmail.com"));
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }
