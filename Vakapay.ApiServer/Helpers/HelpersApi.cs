@@ -29,6 +29,12 @@ namespace Vakapay.ApiServer.Helpers
             return valid;
         }
 
+        public static bool CheckCodeSms(string secret, string token, User model)
+        {
+            var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+            return authenticator.CheckCode(secret, token, model);
+        }
+
         public static bool CheckUrlValid(string source)
         {
             return Uri.TryCreate(source, UriKind.Absolute, out var uriResult) && uriResult.Scheme == Uri.UriSchemeHttp;
