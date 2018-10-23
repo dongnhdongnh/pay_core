@@ -300,7 +300,8 @@ namespace Vakaxa.ApiServer.Controllers
                     }
                 }
 
-                userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
+//                userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
+                userModel.SecretAuthToken = newSecret.ToJson();
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
                 if (resultUpdate.Status == Status.STATUS_ERROR)

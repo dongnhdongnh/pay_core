@@ -4,7 +4,6 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Entities;
-using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 

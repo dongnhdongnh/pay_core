@@ -231,7 +231,7 @@ namespace Vakapay.Repositories.Mysql
 
                 foreach (var row in blockchainAddresses)
                 {
-                    result.Add(row.GetAddress());
+                    result.Add(row.Address);
                 }
 
                 return result;
@@ -427,7 +427,7 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public Task<ReturnObject> SafeUpdate(Wallet row)
+        public override Task<ReturnObject> SafeUpdate(Wallet row)
         {
             return base.SafeUpdate(row, new[] {nameof(row.AddressCount)});
         }
