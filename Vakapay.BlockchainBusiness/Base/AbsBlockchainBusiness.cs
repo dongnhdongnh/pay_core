@@ -392,8 +392,8 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
         /// <returns></returns>
-        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string userID,
-       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, int offset = -1, int limit = -1,
+        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string userID,string currency,
+       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, string TableInternalWihdrawnName, int offset = -1, int limit = -1,
        string[] orderBy = null)
         {
             try
@@ -402,7 +402,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 //WithdrawnrepoQuery.GetTableName();
                 //DepositrepoQuery.GetTableName();
                 //   WithdrawnrepoQuery.FindBySql();
-                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), offset, limit, orderBy);
+                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID,currency, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), TableInternalWihdrawnName, offset, limit, orderBy);
             }
             catch (Exception e)
             {
@@ -450,7 +450,7 @@ namespace Vakapay.BlockchainBusiness.Base
             return null;
         }
 
-        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string walletAdress, int offset = -1, int limit = -1,
+        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency, int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
             numberData = -1;

@@ -109,5 +109,10 @@ namespace Vakapay.Repositories.Mysql
         {
             return new SendSmsRepository(dbConnection);
         }
+
+        public IInternalTransactionRepository GetInternalTransactionRepository(IDbConnection dbConnection)
+        {
+            return new InternalTransactionsRepository(dbConnection);
+        }
     }
 }

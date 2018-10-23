@@ -790,13 +790,13 @@ namespace Vakapay.WalletBusiness
             {
                 case CryptoCurrency.ETH:
                     
-                   output = ethereumBussiness.GetAllHistory(out numberData,userId,offset, limit, orderBy);
+                   output = ethereumBussiness.GetAllHistory(out numberData,userId, currencyName, offset, limit, orderBy);
                     break;
                 case CryptoCurrency.VAKA:
-                   output = vakacoinBussiness.GetAllHistory(out numberData, userId, offset, limit, orderBy);
+                   output = vakacoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit, orderBy);
                     break;
                 case CryptoCurrency.BTC:
-                   output = bitcoinBussiness.GetAllHistory(out numberData, userId, offset, limit, orderBy);
+                   output = bitcoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit, orderBy);
                     break;
                 default:
                     break;

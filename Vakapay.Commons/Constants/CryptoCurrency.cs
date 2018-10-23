@@ -5,7 +5,7 @@ namespace Vakapay.Commons.Constants
     public static class CryptoCurrency
     {
         public static readonly IEnumerable<string> AllNetwork = new string[] { ETH, VAKA, BTC };
-        public const string ETH = "ETH";
+        public const string ETH = "Ethereum";
         public const string VAKA = "VAKA";
         public const string BTC = "BTC";
 

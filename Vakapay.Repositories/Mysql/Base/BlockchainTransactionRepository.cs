@@ -397,19 +397,27 @@ namespace Vakapay.Repositories.Mysql
 
 
 
-		   public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userID, string TableNameWithdrawn, string TableNameDeposit, int offset, int limit, string[] orderByValue)
+		   public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userID,string currency, string TableNameWithdrawn, string TableNameDeposit,string internalWithdrawnTable, int offset, int limit, string[] orderByValue)
 
         {
             numberData = -1;
             try
             {
+                internalWithdrawnTable= internalWithdrawnTable.Replace("`",string.Empty);
+                var _selectInternal= $"SELECT {internalWithdrawnTable}.Id,SenderUserId as UserId,SenderUserId as FromAddress,Email as ToAddress,{internalWithdrawnTable}.CreatedAt,{internalWithdrawnTable}.Status,-Amount as Amount " +
+                    $"FROM {internalWithdrawnTable} left join user on ReceiverUserId=user.Id" +
+                    $" where SenderUserId = '{userID}'and Currency = '{currency}' " +
+                    $"UNION ALL " +
+                    $"SELECT {internalWithdrawnTable}.Id,ReceiverUserId as UserId,Email as FromAddress,ReceiverUserId as ToAddress,{internalWithdrawnTable}.CreatedAt,{internalWithdrawnTable}.Status,Amount as Amount " +
+                    $"FROM {internalWithdrawnTable} left join user on SenderUserId=user.Id" +
+                    $" where ReceiverUserId = '{userID}'and Currency = '{currency}'";
                 var _selectThing = "Id,UserId,FromAddress,ToAddress,CreatedAt,Status";
                 var output = $"Select * from ( SELECT {_selectThing},-Amount AS Amount FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
                     $" UNION ALL " +
-                    $" SELECT {_selectThing},Amount FROM {TableNameDeposit} WHERE UserId='{userID}') as t_uni ";
-                var output_count = $"Select count(*) from ( SELECT {_selectThing} FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
-                   $" UNION ALL " +
-                   $" SELECT {_selectThing} FROM {TableNameDeposit} WHERE UserId='{userID}') as t_uni ";
+                    $" SELECT {_selectThing},Amount FROM {TableNameDeposit} WHERE UserId='{userID}' UNION ALL {_selectInternal}) as t_uni ";
+                var output_count = $"Select count(*) from ( SELECT {_selectThing},-Amount AS Amount FROM {TableNameWithdrawn} WHERE UserId='{userID}'" +
+                    $" UNION ALL " +
+                    $" SELECT {_selectThing},Amount FROM {TableNameDeposit} WHERE UserId='{userID}' UNION ALL {_selectInternal}) as t_uni ";
                 numberData = ExcuteCount(output_count);
                 StringBuilder orderStr = new StringBuilder("");
                 int count = 0;

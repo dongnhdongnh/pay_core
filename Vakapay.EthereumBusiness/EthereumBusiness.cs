@@ -6,6 +6,7 @@ using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
+using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.EthereumBusiness
 {
@@ -69,12 +70,14 @@ namespace Vakapay.EthereumBusiness
 			return GetHistory<EthereumDepositTransaction>(ethereumDepositRepo, offset, limit, orderBy);
 		}
 
-
-        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,int offset = -1, int limit = -1, string[] orderBy = null)
+       
+        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency,int offset = -1, int limit = -1, string[] orderBy = null)
         {
             var depositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
+          
             var withdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-            return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData, userID, withdrawRepo, depositRepo, offset, limit, orderBy);
+            var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection);
+            return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData, userID,currency, withdrawRepo, depositRepo,inter.GetTableName(), offset, limit, orderBy);
         }
         //public override List<BlockchainTransaction> GetWithdrawHistory()
         //{

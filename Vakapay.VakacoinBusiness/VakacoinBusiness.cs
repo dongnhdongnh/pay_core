@@ -278,11 +278,12 @@ namespace Vakapay.VakacoinBusiness
             return GetHistory<VakacoinDepositTransaction>(depositRepo, offset, limit, orderBy);
         }
 
-        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,int offset = -1, int limit = -1, string[] orderBy = null)
+        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency,int offset = -1, int limit = -1, string[] orderBy = null)
         {
             var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
             var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
-            return GetAllHistory<VakacoinWithdrawTransaction,VakacoinDepositTransaction>(out numberData, userID, withdrawRepo, depositRepo, offset, limit, orderBy);
+            var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection);
+            return GetAllHistory<VakacoinWithdrawTransaction,VakacoinDepositTransaction>(out numberData, userID,currency, withdrawRepo, depositRepo,inter.GetTableName(), offset, limit, orderBy);
         }
     }
 }
