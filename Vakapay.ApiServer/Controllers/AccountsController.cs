@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -208,6 +209,44 @@ namespace Vakapay.ApiServer.Controllers
                 request.UserId = userId;
 
                 var res = sendTransactionBusiness.AddSendTransaction(request);
+
+                if (res.Status == Status.STATUS_ERROR)
+                {
+                    return new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = res.Message}.ToJson();
+                }
+
+                return new ReturnDataObject()
+                    {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+            }
+        }
+
+        [HttpPost("{userId}/transactions2")]
+        public ActionResult<string> SendTransactions2(string userId, [FromBody] JObject value)
+        {
+            try
+            {
+                var request = value.ToObject<SendTransaction>();
+
+                var userRequest = new UserSendTransaction()
+                {
+                    UserId = userId,
+                    Type = "send",
+                    To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
+                    Amount = request.Detail.VkcAmount,
+                    Currency = request.SortName,
+                    Description = request.Detail.VkcNote,
+                    Fee = request.CheckObject.MinerFee.ToString(CultureInfo.CurrentCulture)
+                };
+
+                var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+                var res = sendTransactionBusiness.AddSendTransaction(userRequest);
 
                 if (res.Status == Status.STATUS_ERROR)
                 {
