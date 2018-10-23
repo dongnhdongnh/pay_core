@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Helpers;
 
-namespace ScanCoinmarket
+namespace Vakapay.ScanCoinmarket
 {
     class Program
     {
@@ -195,7 +195,7 @@ namespace ScanCoinmarket
             return price;
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var configuration = InitConfiguration();
             client.BaseAddress = new Uri(configuration["coinmarketUrl"]);
