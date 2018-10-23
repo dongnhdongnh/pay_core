@@ -4,7 +4,6 @@ using System.Data;
 using Dapper;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
-using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql.Base;
 
@@ -87,7 +86,7 @@ namespace Vakapay.Repositories.Mysql
 
                 if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
                 {
-                    sQuery += $"WHERE t3.{nameof(VakacoinAccount.AccountName)} = @Address;";
+                    sQuery += $"WHERE t3.{nameof(VakacoinAccount.Address)} = @Address;";
                 }
                 else
                 {
@@ -127,6 +126,26 @@ namespace Vakapay.Repositories.Mysql
             {
                 Logger.Error("UserRepository =>> FindEmailByAddressOfWallet fail: " + e.Message);
                 return null;
+            }
+        }
+
+        public User FindByEmailAddress(string emailAddress)
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var sQuery = $"SELECT * FROM {TableName} WHERE {nameof(User.Email)} = @Email";
+
+                var result = Connection.QuerySingleOrDefault<User>(sQuery, new { Email = emailAddress });
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("UserRepository =>> FindByEmailAddress fail: " + e.Message);
+                throw;
             }
         }
     }

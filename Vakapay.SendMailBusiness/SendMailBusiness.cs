@@ -103,14 +103,14 @@ namespace Vakapay.SendMailBusiness
             try
             {
                 var sendResult = await SendEmail(pendingEmail, apiUrl, apiKey, from, fromName);
-                if (sendResult.Status == Status.STATUS_ERROR)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Cannot Send email"
-                    };
-                }
+//                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
+//                {
+//                    return new ReturnObject
+//                    {
+//                        Status = Status.STATUS_ERROR,
+//                        Message = "Cannot Send email"
+//                    };
+//                }
 
                 pendingEmail.Status = sendResult.Status;
                 pendingEmail.UpdatedAt = CommonHelper.GetUnixTimestamp();

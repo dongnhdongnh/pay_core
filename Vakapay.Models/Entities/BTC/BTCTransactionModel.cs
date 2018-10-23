@@ -1,4 +1,4 @@
-namespace Vakapay.Models.Entities.BTC
+namespace Vakapay.Models.Entities
 {
     using Newtonsoft.Json;
 
@@ -31,8 +31,8 @@ namespace Vakapay.Models.Entities.BTC
         public static BtcTransactionModel FromJson(string json) =>
             JsonHelper.DeserializeObject<BtcTransactionModel>(json, JsonHelper.ConvertSettings);
 
-        public string ToJson() =>
-            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
+//        public string ToJson() =>
+//            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);
     }
 
     public class BtcTransactionDetailModel

@@ -10,7 +10,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Repositories.Mysql.Base
 {
-    public class MultiThreadUpdateEntityRepository<TEntity> : MySqlBaseRepository<TEntity>
+    public abstract class MultiThreadUpdateEntityRepository<TEntity> : MySqlBaseRepository<TEntity>
         where TEntity : MultiThreadUpdateEntity
     {
         public MultiThreadUpdateEntityRepository(string connectionString) : base(connectionString)
@@ -210,6 +210,8 @@ namespace Vakapay.Repositories.Mysql.Base
             //	throw;
             //}
         }
+
+        public abstract Task<ReturnObject> SafeUpdate(TEntity row);
 
         public async Task<ReturnObject> SafeUpdate(TEntity row, IEnumerable<string> updatePropStrings)
         {
