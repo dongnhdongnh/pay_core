@@ -24,6 +24,5 @@ namespace Vakapay.Models.Entities
     [Table("VakacoinWithdrawTransaction")]
     public class VakacoinWithdrawTransaction : VakacoinTransaction
     {
-        public string Idem { get; set; }
     }
 }
