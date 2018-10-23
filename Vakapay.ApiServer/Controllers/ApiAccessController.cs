@@ -15,6 +15,7 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -46,7 +47,36 @@ namespace Vakapay.ApiServer.Controllers
             _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
         }
 
-        [HttpGet("api-access/get-list")]
+        [HttpGet("api-access/get-list-api")]
+        public string GetListApi()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel != null)
+                {
+                    var list = Constants.listApiAccess;
+
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonConvert.SerializeObject(list)
+                    }.ToJson();
+                }
+
+                return HelpersApi.CreateDataError("Can't get list api access");
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+        
+        [HttpGet("api-access/get-list-api-access")]
         public string GetListApiAccess()
         {
             try
@@ -68,6 +98,71 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
                 return HelpersApi.CreateDataError("Can't get list api access");
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        // POST api/values
+        // verify code and update when update verify
+        [HttpPost("api-access/add")]
+        public string AddApiAccess([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null)
+                    return HelpersApi.CreateDataError("User not exist in DB");
+
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("code is required");
+
+                //  if (!value.ContainsKey("option")) return HelpersApi.CreateDataError("option is required");
+
+                var code = value["code"].ToString();
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+
+                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                    return HelpersApi.CreateDataError("Can't send code");
+
+                var secret = secretAuthToken.ApiAccess;
+
+                var isok = authenticator.CheckCode(secret, code, userModel);
+
+                //  if (!isok) return HelpersApi.CreateDataError("Code is fail");
+
+                //update api permissions
+                var modelApi = new ApiKey();
+
+                modelApi.UserId = userModel.Id;
+                modelApi.UserId = userModel.Id;
+
+                if (value.ContainsKey("notifyUrl"))
+                {
+                    modelApi.CallbackUrl = value["notifyUrl"].ToString();
+
+                    if (!HelpersApi.CheckUrlValid(modelApi.CallbackUrl))
+                        HelpersApi.CreateDataError("notifyUrl is invalid");
+                }
+
+                if (value.ContainsKey("apiAllow"))
+                {
+                    modelApi.ApiAllow = value["apiAllow"].ToString();
+                }
+
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.API_ACCESS,
+                    HelpersApi.GetIp(Request));
+
+                return _userBusiness.SaveApiKey(modelApi).ToJson();
             }
             catch (Exception e)
             {

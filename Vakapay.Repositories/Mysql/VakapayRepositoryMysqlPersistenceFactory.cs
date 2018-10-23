@@ -51,6 +51,11 @@ namespace Vakapay.Repositories.Mysql
             return new WebSessionRepository(dbConnection);
         }
 
+        public IApiKeyRepository GetApiKeyRepository(IDbConnection dbConnection)
+        {
+            return new ApiKeyRepository(dbConnection);
+        }
+
         public IConfirmedDevicesRepository GetConfirmedDevicesRepository(IDbConnection dbConnection)
         {
             return new ConfirmedDevicesRepository(dbConnection);

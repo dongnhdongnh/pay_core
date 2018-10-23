@@ -10,24 +10,9 @@ namespace Vakapay.SendSms
 {
     internal static class Program
     {
-        private static IConfiguration InitConfiguration()
-        {
-            var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
-
-            if (string.IsNullOrWhiteSpace(environment))
-                environment = "Development";
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("Configs.json", optional: true)
-                .AddJsonFile($"Configs.{environment}.json", optional: false);
-
-            return builder.Build();
-        }
-
         private static void Main()
         {
-            var configuration = InitConfiguration();
-            var apiKey =  AppSettingHelper.Get("Elastic:ApiKey");
+            var apiKey = AppSettingHelper.Get("Elastic:ApiKey");
             var apiAddress = AppSettingHelper.Get("Elastic:SmsUrl");
 
 

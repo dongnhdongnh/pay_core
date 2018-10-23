@@ -81,7 +81,7 @@ namespace Vakapay.UserBusiness
         }
 
         /// <summary>
-        /// save action log user
+        /// get action log user
         /// </summary>
         /// <param name="description"></param>
         /// <param name="idUser"></param>
@@ -137,6 +137,107 @@ namespace Vakapay.UserBusiness
         }
 
         /// <summary>
+        /// Get Api key
+        /// </summary>
+        /// <param name="idUser"></param>
+        /// <param name="offset"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public ReturnObject GetApiKey(string idUser, int offset, int limit)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(idUser);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Can't User"
+                    };
+                }
+
+                var apiRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+
+                var search =
+                    new Dictionary<string, string>
+                    {
+                        {"UserId", idUser}
+                    };
+
+                var resultGetLog = apiRepository.GetListApiKey(apiRepository.QuerySearch(search), offset, limit);
+
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = JsonHelper.SerializeObject(resultGetLog)
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+        
+        
+        //save apikey
+        public ReturnObject SaveApiKey(ApiKey model)
+        {
+            try
+            {
+                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userCheck = userRepository.FindById(model.UserId);
+                var apirRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+                if (userCheck == null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Can't User"
+                    };
+                }
+
+                if (string.IsNullOrEmpty(model.Id))
+                {
+                    model.Id = CommonHelper.GenerateUuid();
+                    model.Key = CommonHelper.RandomString(16);
+                    model.Secret = CommonHelper.RandomString(32);
+                    model.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    var resultAdd = apirRepository.Insert(model);
+
+                    return new ReturnObject
+                    {
+                        Status = resultAdd.Status,
+                        Data = JsonHelper.SerializeObject(model),
+                        Message = resultAdd.Message
+                    };
+                }
+                else
+                {
+                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    var resultEdit = apirRepository.Insert(model);
+
+                    return new ReturnObject
+                    {
+                        Status = resultEdit.Status,
+                        Data = JsonHelper.SerializeObject(model),
+                        Message = resultEdit.Message
+                    };
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// save web session
         /// </summary>
         /// <param name="confirmedDevices"></param>
@@ -182,7 +283,7 @@ namespace Vakapay.UserBusiness
             try
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
-                    
+
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
                 {
@@ -338,107 +439,6 @@ namespace Vakapay.UserBusiness
                 };
             }
         }
-
-        /*// Send code when do action, chua dung den
-        public ReturnObject SendCode(User user, string action)
-        {
-            try
-            {
-                var userTokenRepository = vakapayRepositoryFactory.GetUserTokenRepository(ConnectionDb);
-                var sendSmsRepository = vakapayRepositoryFactory.GetSendSmsRepository(ConnectionDb);
-
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"UserId", user.Id},
-                        {"Action", action},
-                        {"status", Status.StatusPending}
-                    };
-
-                var tokenCheck = userTokenRepository.FindWhere(userTokenRepository.QuerySearch(search));
-
-                if (tokenCheck != null)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusSuccess,
-                        Message = "Success"
-                    };
-                }
-
-                var transactionScope = ConnectionDb.BeginTransaction();
-                try
-                {
-                    //save token
-                    var newToken = new UserToken
-                    {
-                        Id = CommonHelper.GenerateUuid(),
-                        Status = Status.StatusPending,
-                        Action = action,
-                        CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
-                        UserId = user.Id,
-                        Token = CommonHelper.RandomNumber(6)
-                    };
-
-                    var resultAdd = userTokenRepository.Insert(newToken);
-
-                    if (resultAdd.Status == Status.StatusError)
-                    {
-                        transactionScope.Rollback();
-                        return new ReturnObject
-                        {
-                            Status = Status.StatusError,
-                            Message = "Fail insert to userTokenRepository"
-                        };
-                    }
-
-                    var newSms = new SmsQueue
-                    {
-                        Id = CommonHelper.GenerateUuid(),
-                        Status = Status.StatusPending,
-                        To = user.PhoneNumber,
-                        CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
-                        TextSend = "Vakaxa security code is: " + newToken.Token,
-                    };
-
-                    var resultSms = sendSmsRepository.Insert(newSms);
-
-                    if (resultSms.Status == Status.StatusError)
-                    {
-                        transactionScope.Rollback();
-                        return new ReturnObject
-                        {
-                            Status = Status.StatusError,
-                            Message = "Fail insert to sendSms " + resultSms.Message
-                        };
-                    }
-                }
-                catch (Exception e)
-                {
-                    transactionScope.Rollback();
-                    return new ReturnObject
-                    {
-                        Status = Status.StatusError,
-                        Message = e.Message
-                    };
-                }
-
-                transactionScope.Commit();
-                return new ReturnObject
-                {
-                    Status = Status.StatusSuccess,
-                    Message = "Success"
-                };
-            }
-            catch (Exception e)
-            {
-                return new ReturnObject
-                {
-                    Status = Status.StatusError,
-                    Message = e.Message
-                };
-            }
-        }*/
 
         // find UserInfo by id
         public User GetUserById(string id)
