@@ -6,5 +6,6 @@ namespace Vakapay.ApiAccess.Constants
         public const string DataNotFound = "Data not found";
         public const string ApiKeyInvalid = "Header error(Api key invalid)";
         public const string ApiSecretInvalid = "Header error(Api Secret invalid)";
+        public const string HeaderApiInvalid = "Header error(ApiSecret or ApiKey invalid)";
     }
 }
