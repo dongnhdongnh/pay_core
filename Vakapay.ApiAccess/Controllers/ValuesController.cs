@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Vakapay.ApiAccess.ActionFilter;
 
 namespace Vakapay.ApiAccess.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [BaseActionFilter]
     public class ValuesController : ControllerBase
     {
         // GET api/values
