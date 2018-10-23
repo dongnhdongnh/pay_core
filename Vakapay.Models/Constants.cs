@@ -838,16 +838,36 @@ namespace Vakapay.Models
         public static Dictionary<string, string> listApiAccess = new Dictionary<string, string>
         {
             {
-                "CREATED_ACCOUNT",
-                "wallet:accounts:create"
+                "CREATED_ADDRESSES",
+                "wallet:addresses:create"
             },
             {
-                "READ_ACCOUNT",
-                "wallet:accounts:read"
+                "READ_ADDRESSES",
+                "wallet:addresses:read"
             },
             {
-                "UPDATED_ACCOUNT",
-                "wallet:accounts:update"
+                "READ_DEPOSITS",
+                "wallet:deposits:read"
+            },
+            {
+                "CREATED_DEPOSITS",
+                "wallet:deposits:create"
+            },
+            {
+                "READ_TRANSACTIONS",
+                "wallet:transactions:read"
+            },
+            {
+                "SEND_TRANSACTIONS",
+                "wallet:transactions:send"
+            },
+            {
+                "USER_MAIL",
+                "wallet:user:email"
+            },
+            {
+                "USER_READ",
+                "wallet:user:read"
             }
         };
     }
