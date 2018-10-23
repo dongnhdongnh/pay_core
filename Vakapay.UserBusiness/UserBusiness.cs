@@ -183,8 +183,35 @@ namespace Vakapay.UserBusiness
                 };
             }
         }
-        
-        
+
+        /// <summary>
+        /// Get Api key
+        /// </summary>
+        /// <param name="apiKey"></param>
+        /// <param name="secret"></param>
+        /// <returns></returns>
+        public ApiKey GetApiKeyByKey(string apiKey, string secret)
+        {
+            try
+            {
+                var apiRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+
+                var search =
+                    new Dictionary<string, string>
+                    {
+                        {"Key", apiKey},
+                        {"Secret", secret}
+                    };
+
+                return apiRepository.FindWhere(apiRepository.QuerySearch(search));
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+
         //save apikey
         public ReturnObject SaveApiKey(ApiKey model)
         {
