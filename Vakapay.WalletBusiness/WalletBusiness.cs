@@ -967,5 +967,19 @@ namespace Vakapay.WalletBusiness
                  };
             }
         }
+
+        public List<string> DistinctUserId()
+        {
+            try
+            {
+                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                return walletRepo.DistinctUserId();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
     }
 }

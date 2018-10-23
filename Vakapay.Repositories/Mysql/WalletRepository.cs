@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Dapper;
 using Vakapay.Commons.Constants;
@@ -348,6 +349,23 @@ namespace Vakapay.Repositories.Mysql
 		public Task<ReturnObject> SafeUpdate(Wallet row)
 		{
 			return base.SafeUpdate(row, new[] {nameof(row.AddressCount)});
+		}
+
+		public List<string> DistinctUserId()
+		{
+			var queryString = "SELECT DISTINCT UserId FROM Wallet";
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.Query<string>(queryString);
+				return result.ToList();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
 		}
 	}
 }

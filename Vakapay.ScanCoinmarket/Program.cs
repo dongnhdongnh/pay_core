@@ -56,6 +56,37 @@ namespace ScanCoinmarket
             var currentTime = UnixTimestamp.GetCurrentEpoch();
             try
             {
+                //get vakacoin
+                string vakacoinByDay = await GetAsyncByTimeStamp(CoinmarketConfiguration.EOS,
+                    currentTime - 24 * 60 * 60, currentTime);
+                string vakacoinByWeek = await GetAsyncByTimeStamp(CoinmarketConfiguration.EOS,
+                    currentTime - 7 * 24 * 60 * 60, currentTime);
+                string vakacoinByMonth = await GetAsyncByTimeStamp(CoinmarketConfiguration.EOS,
+                    currentTime - 30 * 24 * 60 * 60, currentTime);
+                string vakacoinByYear = await GetAsyncByTimeStamp(CoinmarketConfiguration.EOS,
+                    currentTime - 365 * 24 * 60 * 60, currentTime);
+                string vakacoinAll = await GetAsyncByTimeStamp(CoinmarketConfiguration.EOS,
+                    currentTime - 5 * 365 * 24 * 60 * 60, currentTime);
+                
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.VAKACOIN,
+                        CoinmarketConfiguration.DAY), vakacoinByDay);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.VAKACOIN,
+                        CoinmarketConfiguration.WEEK), vakacoinByWeek);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.VAKACOIN,
+                        CoinmarketConfiguration.MONTH), vakacoinByMonth);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.VAKACOIN,
+                        CoinmarketConfiguration.YEAR), vakacoinByYear);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.VAKACOIN,
+                        CoinmarketConfiguration.ALL), vakacoinAll);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.VAKACOIN,
+                        CoinmarketConfiguration.CURRENT), GetCurrentPrice(vakacoinByDay));
+                
                 // get bitcoin
                 string bitcoinByDay = await GetAsyncByTimeStamp(CoinmarketConfiguration.BITCOIN,
                     currentTime - 24 * 60 * 60, currentTime);
@@ -67,7 +98,7 @@ namespace ScanCoinmarket
                     currentTime - 365 * 24 * 60 * 60, currentTime);
                 string bitcoinAll = await GetAsyncByTimeStamp(CoinmarketConfiguration.BITCOIN,
                     currentTime - 5 * 365 * 24 * 60 * 60, currentTime);
-
+                
                 CacheHelper.SetCacheString(
                     String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.BITCOIN,
                         CoinmarketConfiguration.DAY), bitcoinByDay);
@@ -83,6 +114,9 @@ namespace ScanCoinmarket
                 CacheHelper.SetCacheString(
                     String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.BITCOIN,
                         CoinmarketConfiguration.ALL), bitcoinAll);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.BITCOIN,
+                        CoinmarketConfiguration.CURRENT), GetCurrentPrice(bitcoinByDay));
 
                 //get ethereum
                 string ethereumByDay = await GetAsyncByTimeStamp(CoinmarketConfiguration.ETHEREUM,
@@ -111,6 +145,9 @@ namespace ScanCoinmarket
                 CacheHelper.SetCacheString(
                     String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.ETHEREUM,
                         CoinmarketConfiguration.ALL), ethereumAll);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.ETHEREUM,
+                        CoinmarketConfiguration.CURRENT), GetCurrentPrice(ethereumByDay));
 
                 //get eos
                 string eosByDay = await GetAsyncByTimeStamp(CoinmarketConfiguration.EOS, currentTime - 24 * 60 * 60,
@@ -139,12 +176,24 @@ namespace ScanCoinmarket
                 CacheHelper.SetCacheString(
                     String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.EOS,
                         CoinmarketConfiguration.ALL), eosAll);
+                CacheHelper.SetCacheString(
+                    String.Format(CoinmarketConfiguration.COINMARKET_PRICE_CACHEKEY, CoinmarketConfiguration.EOS,
+                        CoinmarketConfiguration.CURRENT), GetCurrentPrice(eosByDay));
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        //arrPrice ~ [[1540134840000,6545.53],...,[1540135140000,6545.53]]
+        private static string GetCurrentPrice(string arrPrice)
+        {
+            var split = arrPrice.Split(",");
+            var lastElement = split[split.Length - 1];
+            var price = lastElement.Substring(0, lastElement.Length - 2);
+            return price;
         }
 
         static void Main(string[] args)
