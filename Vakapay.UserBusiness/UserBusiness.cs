@@ -199,7 +199,7 @@ namespace Vakapay.UserBusiness
                 var search =
                     new Dictionary<string, string>
                     {
-                        {"Key", apiKey},
+                        {"KeyApi", apiKey},
                         {"Secret", secret}
                     };
 
@@ -232,7 +232,7 @@ namespace Vakapay.UserBusiness
                 if (string.IsNullOrEmpty(model.Id))
                 {
                     model.Id = CommonHelper.GenerateUuid();
-                    model.Key = CommonHelper.RandomString(16);
+                    model.KeyApi = CommonHelper.RandomString(16);
                     model.Secret = CommonHelper.RandomString(32);
                     model.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
                     model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();

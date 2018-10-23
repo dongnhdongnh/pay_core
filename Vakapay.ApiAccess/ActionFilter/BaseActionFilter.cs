@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Newtonsoft.Json;
 using Vakapay.ApiAccess.Constants;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -28,12 +29,13 @@ namespace Vakapay.ApiAccess.ActionFilter
         {
             try
             {
-                var headers = actionExecutedContext.HttpContext.Response.Headers;
+                var headers = actionExecutedContext.HttpContext.Request.Headers;
+                Console.WriteLine(JsonConvert.SerializeObject(headers));
                 if (!headers.ContainsKey(Requests.HeaderApiKey))
                 {
                     actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.ApiKeyInvalid));
                 }
-                else if (headers.ContainsKey(Requests.HeaderApiSecret))
+                else if (!headers.ContainsKey(Requests.HeaderApiSecret))
                 {
                     actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.ApiSecretInvalid));
                 }
@@ -43,16 +45,19 @@ namespace Vakapay.ApiAccess.ActionFilter
                     string apiKey = headers[Requests.HeaderApiKey];
                     string apiSecret = headers[Requests.HeaderApiSecret];
                     var apiKeyModel = userBusiness.GetApiKeyByKey(apiKey, apiSecret);
-                    if (string.Equals(apiKeyModel.Key, apiKey) && string.Equals(apiKeyModel.Secret, apiSecret))
+                    if (string.Equals(apiKeyModel.KeyApi, apiKey) && string.Equals(apiKeyModel.Secret, apiSecret))
                     {
                         base.OnActionExecuted(actionExecutedContext);
                     }
-
-                    actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.HeaderApiInvalid));
+                    else
+                    {
+                        actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.HeaderApiInvalid));
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.HeaderApiInvalid));
             }
         }

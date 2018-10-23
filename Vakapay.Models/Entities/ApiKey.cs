@@ -5,7 +5,7 @@
         public string Id { get; set; }
         public string UserId { get; set; }
         public string Secret { get; set; }
-        public string Key { get; set; }
+        public string KeyApi { get; set; }
         public string CallbackUrl { get; set; }
         public string ApiAllow { get; set; }
         public string Permissions { get; set; }
