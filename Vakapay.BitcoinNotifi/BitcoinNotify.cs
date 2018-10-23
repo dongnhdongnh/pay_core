@@ -6,7 +6,6 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
-using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -147,7 +146,7 @@ namespace Vakapay.BitcoinNotifi
                     }
 
                     // update balance 
-                    WalletBusiness?.UpdateBalance(transactionModelDetail.Address, transactionModelDetail.Amount,
+                    WalletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address, transactionModelDetail.Amount,
                         "Bitcoin");
 
                     //insert new email data

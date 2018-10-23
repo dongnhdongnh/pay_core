@@ -102,14 +102,14 @@ namespace Vakapay.SendSmsBusiness
             try
             {
                 var sendResult = await SendSms(pendingSms, apiUrl, apiKey);
-                if (sendResult.Status == Status.STATUS_ERROR)
-                {
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Cannot Send sms"
-                    };
-                }
+//                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
+//                {
+//                    return new ReturnObject
+//                    {
+//                        Status = Status.STATUS_ERROR,
+//                        Message = "Cannot Send sms"
+//                    };
+//                }
 
                 pendingSms.Status = sendResult.Status;
                 pendingSms.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();

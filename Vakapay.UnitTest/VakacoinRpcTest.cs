@@ -16,6 +16,7 @@ namespace Vakapay.UnitTest
         }
         
         [TestCase("vaka", true)]
+        [TestCase("ajajajajajaj", false)]
         [TestCase("vaka.n.exist", false)]
         [TestCase("ERROR", false)]
         [TestCase("vaka.no.exist.account.name.too.long", false)]
