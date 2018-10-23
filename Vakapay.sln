@@ -71,6 +71,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.SendSmsBusiness", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ScanCoinmarket", "Vakapay.ScanCoinmarket\Vakapay.ScanCoinmarket.csproj", "{4CA76091-36A5-419D-B39E-E9444A48D6C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.UserSendTransactionBusiness", "Vakapay.UserSendTransactionBusiness\Vakapay.UserSendTransactionBusiness.csproj", "{8A973A07-3268-465F-B575-5991965B63A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -206,6 +208,10 @@ Global
 		{8BC19405-0838-4E48-BE93-E5C007D3BC67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BC19405-0838-4E48-BE93-E5C007D3BC67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BC19405-0838-4E48-BE93-E5C007D3BC67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A973A07-3268-465F-B575-5991965B63A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A973A07-3268-465F-B575-5991965B63A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A973A07-3268-465F-B575-5991965B63A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A973A07-3268-465F-B575-5991965B63A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -243,6 +249,7 @@ Global
 		{4CA76091-36A5-419D-B39E-E9444A48D6C3} = {4E6A4058-F824-4EA9-B00B-F3F801881F0E}
 		{DE2FD7E4-14A3-4C61-BE22-2A9B5920D135} = {4E6A4058-F824-4EA9-B00B-F3F801881F0E}
 		{8BC19405-0838-4E48-BE93-E5C007D3BC67} = {3AD83376-344D-4C86-A1C9-F1324F4C0541}
+		{8A973A07-3268-465F-B575-5991965B63A7} = {3AD83376-344D-4C86-A1C9-F1324F4C0541}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E31696F-3D55-4AE6-AEA3-DEA78FBC8971}

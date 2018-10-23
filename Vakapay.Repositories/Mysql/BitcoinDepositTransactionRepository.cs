@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
-using Vakapay.Models.Entities.BTC;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 
 namespace Vakapay.Repositories.Mysql

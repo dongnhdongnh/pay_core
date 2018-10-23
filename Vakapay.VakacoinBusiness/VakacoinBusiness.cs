@@ -57,7 +57,7 @@ namespace Vakapay.VakacoinBusiness
                 var returnDb = repo.Insert(new VakacoinAccount
                 {
                     Status = Status.STATUS_ACTIVE,
-                    AccountName = resultRpc.Data,
+                    Address = resultRpc.Data,
                     OwnerPrivateKey = keyPair.PrivateKey,
                     OwnerPublicKey = keyPair.PublicKey,
                     ActivePrivateKey = keyPair.PrivateKey,
@@ -102,7 +102,7 @@ namespace Vakapay.VakacoinBusiness
                 var returnObject = repo.Insert(new VakacoinAccount
                 {
                     Status = Status.STATUS_ACTIVE,
-                    AccountName = accountName,
+                    Address = accountName,
                     OwnerPrivateKey = ownerPrivateKey,
                     OwnerPublicKey = ownerPublicKey,
                     ActivePrivateKey = activePrivateKey,

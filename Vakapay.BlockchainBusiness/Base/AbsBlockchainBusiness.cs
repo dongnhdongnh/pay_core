@@ -7,7 +7,6 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
-using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
 
@@ -361,7 +360,7 @@ namespace Vakapay.BlockchainBusiness.Base
                             int _transaValue = 0;
                             if (_trans.Value.HexToInt(out _transaValue))
                             {
-                                wallet.UpdateBalance(_toAddress, (Decimal)_transaValue, networkName);
+                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
                             }
                         }
                     }

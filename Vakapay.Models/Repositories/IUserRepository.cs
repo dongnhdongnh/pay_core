@@ -11,5 +11,6 @@ namespace Vakapay.Models.Repositories
         string QuerySearch(Dictionary<string, string> models);
         User FindWhere(string sql);
         string FindEmailBySendTransaction(BlockchainTransaction transaction);
+        User FindByEmailAddress(string emailAddress);
     }
 }
