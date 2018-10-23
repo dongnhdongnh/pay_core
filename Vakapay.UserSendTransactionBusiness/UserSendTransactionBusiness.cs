@@ -304,7 +304,7 @@ namespace Vakapay.UserSendTransactionBusiness
                     return updateBalanceRes;
                 }
 
-                transaction.Status = Status.STATUS_SUCCESS;
+                transaction.Status = Status.STATUS_COMPLETED;
 
                 return new ReturnObject()
                 {
