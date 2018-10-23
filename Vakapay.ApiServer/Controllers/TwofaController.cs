@@ -70,19 +70,26 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("option")) return HelpersApi.CreateDataError("option is required");
 
                 var code = value["code"].ToString();
-                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
-                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                bool isVerify;
 
-                if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                    return HelpersApi.CreateDataError("Can't send code");
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                var secret = secretAuthToken.UpdateOptionVerification;
+                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                        return HelpersApi.CreateDataError("Can't send code");
 
-                var isok = authenticator.CheckCode(secret, code, userModel);
+                    var secret = secretAuthToken.UpdateOptionVerification;
 
-                if (!isok) return HelpersApi.CreateDataError("Can't update options");
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                }
 
+                if (!isVerify) return HelpersApi.CreateDataError("Code is fail");
 
                 var option = value["option"];
 
@@ -251,18 +258,26 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("Can't update options");
 
                 var code = value["code"].ToString();
-                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
-                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                bool isVerify;
 
-                if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                    return HelpersApi.CreateDataError("Can't send code");
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                var secret = secretAuthToken.SendTransaction;
+                    if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
+                        return HelpersApi.CreateDataError("Can't send code");
 
-                var isok = authenticator.CheckCode(secret, code, userModel);
+                    var secret = secretAuthToken.SendTransaction;
 
-                if (!isok) return HelpersApi.CreateDataError("Can't verify code");
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                }
+
+                if (!isVerify) return HelpersApi.CreateDataError("Can't verify code");
 
                 // var option = value["option"];
 

@@ -131,7 +131,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var code = value["code"].ToString();
 
-                bool isVerify = false;
+                bool isVerify;
 
                 if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
                 {
@@ -148,7 +148,6 @@ namespace Vakapay.ApiServer.Controllers
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
-
 
                 if (!isVerify) return HelpersApi.CreateDataError("Code is fail");
 

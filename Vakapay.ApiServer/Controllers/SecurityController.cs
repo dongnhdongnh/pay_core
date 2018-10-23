@@ -98,19 +98,25 @@ namespace Vakapay.ApiServer.Controllers
                         return HelpersApi.CreateDataError("Status invalid");
 
                     var password = value["password"];
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                    bool isVerify;
 
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                    {
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                    }
+                    else
+                    {
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                        return HelpersApi.CreateDataError("Can't send code");
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                            return HelpersApi.CreateDataError("Can't send code");
 
-                    var secret = secretAuthToken.LockScreen;
+                        var secret = secretAuthToken.ApiAccess;
 
-                    var isok = authenticator.CheckCode(secret, code, userModel);
-                    Console.WriteLine(isok);
+                        isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    }
 
-                    if (!isok) return HelpersApi.CreateDataError("Can't update options");
+                    if (!isVerify) return HelpersApi.CreateDataError("Code is fail");
 
                     userModel.IsLockScreen = outStatus;
                     userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
