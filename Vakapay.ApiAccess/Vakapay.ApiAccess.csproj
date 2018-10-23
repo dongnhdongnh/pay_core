@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
+      <ProjectReference Include="..\Vakapay.UserBusiness\Vakapay.UserBusiness.csproj" />
     </ItemGroup>
 
 </Project>

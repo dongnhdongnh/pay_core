@@ -1,31 +1,62 @@
 using System;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Vakapay.ApiAccess.Constants;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.ApiAccess.ActionFilter
 {
     public class BaseActionFilter : ActionFilterAttribute
     {
+        private readonly VakapayRepositoryMysqlPersistenceFactory _repositoryFactory;
+
+        public BaseActionFilter()
+        {
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = AppSettingHelper.GetDBConnection()
+            };
+
+            _repositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+        }
+
         public override void OnActionExecuted(ActionExecutedContext actionExecutedContext)
         {
-            if (!IsValidApiKey(actionExecutedContext.HttpContext.Response.Headers))
+            try
             {
-                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.ApiKeyInvalid));
+                var headers = actionExecutedContext.HttpContext.Response.Headers;
+                if (!headers.ContainsKey(Requests.HeaderApiKey))
+                {
+                    actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.ApiKeyInvalid));
+                }
+                else if (headers.ContainsKey(Requests.HeaderApiSecret))
+                {
+                    actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.ApiSecretInvalid));
+                }
+                else
+                {
+                    var userBusiness = new UserBusiness.UserBusiness(_repositoryFactory);
+                    string apiKey = headers[Requests.HeaderApiKey];
+                    string apiSecret = headers[Requests.HeaderApiSecret];
+                    var apiKeyModel = userBusiness.GetApiKeyByKey(apiKey, apiSecret);
+                    if (string.Equals(apiKeyModel.Key, apiKey) && string.Equals(apiKeyModel.Secret, apiSecret))
+                    {
+                        base.OnActionExecuted(actionExecutedContext);
+                    }
+
+                    actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.HeaderApiInvalid));
+                }
             }
-            else if (IsValidApiSecret(actionExecutedContext.HttpContext.Response.Headers))
+            catch (Exception)
             {
-                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.ApiSecretInvalid));
-            }
-            else
-            {
-                base.OnActionExecuted(actionExecutedContext);
+                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.HeaderApiInvalid));
             }
         }
-        
+
         /// <summary>
         /// CreateDataError
         /// </summary>
@@ -38,25 +69,6 @@ namespace Vakapay.ApiAccess.ActionFilter
                 Status = Status.STATUS_ERROR,
                 Message = message
             };
-        }
-
-        private static bool IsValidApiKey(IHeaderDictionary headers)
-        {
-            if (headers.ContainsKey(Requests.HeaderApiKey))
-            {
-                //check
-            }
-            else
-            {
-                return false;
-            }
-
-            return false;
-        }
-
-        private static bool IsValidApiSecret(IHeaderDictionary headers)
-        {
-            return false;
         }
     }
 }

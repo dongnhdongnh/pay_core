@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Vakapay.ApiAccess.ActionFilter;
@@ -41,26 +40,6 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var headers = Request.Headers;
-
-                if (headers.ContainsKey(Requests.HeaderApiSecret))
-                {
-                    
-                }
-                else
-                {
-                    return CreateDataError(MessageError.ApiSecretInvalid);
-                }
-
-                if (!IsValidApiKey(headers))
-                {
-                    return  CreateDataError(MessageError.ApiKeyInvalid);
-                }
-                if (!IsValidApiSecret())
-                {
-                    return  CreateDataError(MessageError.ApiSecretInvalid);
-                }
-                
                 if (string.IsNullOrEmpty(idAddress) || string.IsNullOrEmpty(currency))
                 {
                     return CreateDataError(MessageError.ParamInvalid);
@@ -97,23 +76,6 @@ namespace Vakapay.ApiAccess.Controllers
                 Console.WriteLine(e);
                 return CreateDataError(MessageError.DataNotFound);
             }
-        }
-
-        private static bool IsValidApiKey(IHeaderDictionary headers)
-        {
-            if (headers.ContainsKey(Requests.HeaderApiKey))
-            {
-                    //check
-            }
-            else
-            {
-                return false;
-            }
-            return false;
-        }
-        private static bool IsValidApiSecret()
-        {
-            return false;
         }
 
         /// <summary>
