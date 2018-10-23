@@ -23,11 +23,12 @@ resources:
 secret:
   mysql:
     host: $MYSQL_HOST
+    port: $MYSQL_PORT
     user: $MYSQL_USER
     password: $MYSQL_PASSWORD
     db: $MYSQL_DB
   btc:
-    host: $BITCOIN_HOST
-    port: $BITCOIN_PORT
+    host: $BITCOIN_RPC_HOST
+    port: $BITCOIN_RPC_PORT
     user: $BITCOIN_RPC_USER
     password: $BITCOIN_RPC_PASSWORD
