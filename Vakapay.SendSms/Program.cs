@@ -27,10 +27,9 @@ namespace Vakapay.SendSms
         private static void Main()
         {
             var configuration = InitConfiguration();
-            var apiKey = configuration["Elastic:ApiKey"];
-            var apiAddress = configuration["Elastic:SmsUrl"];
+            var apiKey =  AppSettingHelper.Get("Elastic:ApiKey");
+            var apiAddress = AppSettingHelper.Get("Elastic:SmsUrl");
 
-            Console.WriteLine(configuration["ConnectionStrings"]);
 
             var repositoryConfig = new RepositoryConfiguration
             {
