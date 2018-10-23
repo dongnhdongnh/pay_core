@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
@@ -10,17 +11,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using UAParser;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.UserBusiness;
-using Vakapay.WalletBusiness;
 
-namespace Vakaxa.ApiServer.Controllers
+namespace Vakapay.ApiServer.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -29,8 +30,8 @@ namespace Vakaxa.ApiServer.Controllers
     [Authorize]
     public class UserController : ControllerBase
     {
-        private UserBusiness _userBusiness;
-        private WalletBusiness _walletBusiness;
+        private UserBusiness.UserBusiness _userBusiness;
+        private WalletBusiness.WalletBusiness _walletBusiness;
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
         private IConfiguration Configuration { get; }
@@ -123,7 +124,7 @@ namespace Vakaxa.ApiServer.Controllers
                 //save action log
                 _userBusiness.AddActionLog(email, userCheck.Id,
                     ActionLog.AVATAR,
-                    HelpersApi.getIp(Request));
+                    HelpersApi.GetIp(Request));
 
                 return new ReturnObject
                 {
@@ -139,7 +140,7 @@ namespace Vakaxa.ApiServer.Controllers
         }
 
         [HttpGet("get-info")]
-        public string GetCurrentUser()
+        public async Task<string> GetCurrentUser()
         {
             try
             {
@@ -175,11 +176,48 @@ namespace Vakaxa.ApiServer.Controllers
                     return _walletBusiness.MakeAllWalletForNewUser(userModel).ToJson();
                 }
 
-                return new ReturnDataObject()
+                var ip = HelpersApi.GetIp(Request);
+                
+
+                if (string.IsNullOrEmpty(ip))
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = Vakapay.Models.Entities.User.ToJson(userModel)
+                    }.ToJson();
+                
+                //get location for ip
+                var location =
+                    await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
+
+                var uaString = Request.Headers["User-Agent"].FirstOrDefault();
+                var uaParser = Parser.GetDefault();
+                var browser = uaParser.Parse(uaString);
+
+                var confirmedDevices = new ConfirmedDevices
+                {
+                    Browser = browser.ToString(),
+                    Ip = ip,
+                    Location = !string.IsNullOrEmpty(location.CountryName)
+                        ? location.City + "," + location.CountryName
+                        : "localhost",
+                    UserId = userModel.Id
+                };
+
+                var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
+
+
+                //save devices
+                var checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
+                if (checkConfirmedDevices == null)
+                {
+                    _userBusiness.SaveConfirmedDevices(confirmedDevices);
+                }
+
+                return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
-//                    Data = Vakapay.Models.Entities.User.ToJson(userModel)
-                    Data = userModel
+                    Data = Vakapay.Models.Entities.User.ToJson(userModel)
                 }.ToJson();
             }
             catch (Exception e)
@@ -229,12 +267,12 @@ namespace Vakaxa.ApiServer.Controllers
                     userModel.PostalCode = value["postalCode"].ToString();
                 }
 
-                var result = _userBusiness.UpdateProfile(userModel);
+                _userBusiness.UpdateProfile(userModel);
 
                 //save action log
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_PROFILE,
-                    HelpersApi.getIp(Request)).ToJson();
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -288,12 +326,12 @@ namespace Vakaxa.ApiServer.Controllers
                     }
                 }
 
-                var result = _userBusiness.UpdateProfile(userModel);
+                _userBusiness.UpdateProfile(userModel);
 
                 //save action log
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_PREFERENCES,
-                    HelpersApi.getIp(Request)).ToJson();
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -326,11 +364,11 @@ namespace Vakaxa.ApiServer.Controllers
                     userModel.CurrencyKey = value["notifications"].ToString();
                 }
 
-                var result = _userBusiness.UpdateProfile(userModel);
+                _userBusiness.UpdateProfile(userModel);
 
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_NOTIFICATION,
-                    HelpersApi.getIp(Request)).ToJson();
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -345,7 +383,7 @@ namespace Vakaxa.ApiServer.Controllers
                 CreateVakapayRepositoryMysqlPersistenceFactory();
             }
 
-            _userBusiness = new UserBusiness(_persistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(_persistenceFactory);
         }
 
         private void CreateWalletBusiness()
@@ -355,7 +393,7 @@ namespace Vakaxa.ApiServer.Controllers
                 CreateVakapayRepositoryMysqlPersistenceFactory();
             }
 
-            _walletBusiness = new WalletBusiness(_persistenceFactory);
+            _walletBusiness = new WalletBusiness.WalletBusiness(_persistenceFactory);
         }
 
         private void CreateVakapayRepositoryMysqlPersistenceFactory()

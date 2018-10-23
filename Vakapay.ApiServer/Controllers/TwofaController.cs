@@ -7,19 +7,17 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.UserBusiness;
-using Vakapay.WalletBusiness;
 
-namespace Vakaxa.ApiServer.Controllers
+namespace Vakapay.ApiServer.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
@@ -28,9 +26,8 @@ namespace Vakaxa.ApiServer.Controllers
     [Authorize]
     public class TwofaController : ControllerBase
     {
-        private readonly UserBusiness _userBusiness;
-        private WalletBusiness _walletBusiness;
-        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory { get; }
+        private readonly UserBusiness.UserBusiness _userBusiness;
+        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
         private IConfiguration Configuration { get; }
@@ -47,12 +44,13 @@ namespace Vakaxa.ApiServer.Controllers
                 ConnectionString = AppSettingHelper.GetDBConnection()
             };
 
-            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
-            _userBusiness = new UserBusiness(_persistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
         }
 
         // POST api/values
+        // verify code and update when update verify
         [HttpPost("option/update")]
         public string UpdateOption([FromBody] JObject value)
         {
@@ -65,56 +63,52 @@ namespace Vakaxa.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
+                    return HelpersApi.CreateDataError("User not exist in DB");
+
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("code is required");
+
+                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError("option is required");
+
+                var code = value["code"].ToString();
+
+                bool isVerify;
+
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
                 {
-                    //return error
-                    return CreateDataError("User not exist in DB");
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
                 }
-
-
-                if (value.ContainsKey("code"))
+                else
                 {
-                    var code = value["code"].ToString();
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError("Can't send code");
 
                     var secret = secretAuthToken.UpdateOptionVerification;
 
-                    bool isok = authenticator.CheckCode(secret, code);
-
-                    if (isok)
-                    {
-                        if (value.ContainsKey("option"))
-                        {
-                            var option = value["option"];
-
-                            userModel.Verification = (int) option;
-
-                            _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                                ActionLog.UpdateOptionVerification,
-                                HelpersApi.getIp(Request));
-
-                            return _userBusiness.UpdateProfile(userModel).ToJson();
-                        }
-                    }
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
+                if (!isVerify) return HelpersApi.CreateDataError("Code is fail");
 
-                return CreateDataError("Can't update options");
+                var option = value["option"];
+
+                userModel.Verification = (int) option;
+
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.UPDATE_NOTIFICATION,
+                    HelpersApi.GetIp(Request));
+
+                return _userBusiness.UpdateProfile(userModel).ToJson();
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
-
-        // POST api/values
         [HttpPost("enable/update")]
-        public string VerifyCode([FromBody] JObject value)
+        public string VerifyCodeEnableGoogle([FromBody] JObject value)
         {
             try
             {
@@ -126,45 +120,225 @@ namespace Vakaxa.ApiServer.Controllers
                 if (userModel == null)
                 {
                     //return error
-                    return CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError("User not exist in DB");
                 }
 
-                if (value.ContainsKey("code"))
-                {
-                    var code = value["code"].ToString();
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError("Can't verify token");
 
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                var token = value["token"].ToString();
+                if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, token))
+                    return HelpersApi.CreateDataError("Verify false");
 
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
+                userModel.TwoFactor = true;
 
-                    var secret = secretAuthToken.TwofaEnable;
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.TWOFA_ENABLE,
+                    HelpersApi.GetIp(Request));
 
-                    bool isok = authenticator.CheckCode(secret, code);
-
-                    if (isok)
-                    {
-                        userModel.TwoFactor = true;
-
-                        _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                            ActionLog.TwofaEnable,
-                            HelpersApi.getIp(Request));
-
-                        return _userBusiness.UpdateProfile(userModel).ToJson();
-                    }
-                }
-
-                return CreateDataError("Can't verify code");
+                return _userBusiness.UpdateProfile(userModel).ToJson();
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
 
         // POST api/values
+        // verify code when enable twofa
+        [HttpPost("enable/verify-code-sms")]
+        public string VerifyCodeEnable([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null)
+                {
+                    //return error
+                    return HelpersApi.CreateDataError("User not exist in DB");
+                }
+
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("code is required");
+
+                var code = value["code"].ToString();
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+
+                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
+                    return HelpersApi.CreateDataError("Can't secretAuthToken TwofaEnable");
+
+                var secret = secretAuthToken.TwofaEnable;
+
+                var isok = authenticator.CheckCode(secret, code, userModel);
+
+                if (!isok) return HelpersApi.CreateDataError("Can't verify code");
+
+                var google = new GoogleAuthen.TwoFactorAuthenticator();
+
+                var secretKey = CommonHelper.RandomString(32);
+
+                var startSetup = google.GenerateSetupCode(userModel.Email, secretKey, 300, 300);
+
+                userModel.TwoFactorSecret = secretKey;
+
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return resultUpdate.ToJson();
+
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = startSetup.ManualEntryKey
+                }.ToJson();
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+
+        // POST api/values
+        // verify code when disable twofa
+        [HttpPost("disable/update")]
+        public string VerifyCodeDisable([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null)
+                    return HelpersApi.CreateDataError("User not exist in DB");
+
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("Can't verify code");
+
+                var code = value["code"].ToString();
+                if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
+                    return HelpersApi.CreateDataError("Verify false");
+
+                userModel.TwoFactor = false;
+
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.TWOFA_DISABLE,
+                    HelpersApi.GetIp(Request));
+
+                return _userBusiness.UpdateProfile(userModel).ToJson();
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+
+        // POST api/values
+        // verify code and update when update verify
+        [HttpPost("transaction/verify-code")]
+        public string VerifyCodeTransaction([FromBody] JObject value)
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null)
+                    return HelpersApi.CreateDataError("User not exist in DB");
+
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("Can't update options");
+
+                var code = value["code"].ToString();
+
+                bool isVerify;
+
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
+                        return HelpersApi.CreateDataError("Can't send code");
+
+                    var secret = secretAuthToken.SendTransaction;
+
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                }
+
+                if (!isVerify) return HelpersApi.CreateDataError("Can't verify code");
+
+                // var option = value["option"];
+
+                // userModel.Verification = (int) option;
+
+                // su ly data gui len
+                //to do
+
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.UPDATE_NOTIFICATION,
+                    HelpersApi.GetIp(Request)).ToJson();
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        /**
+        *  send code when update verify
+        */
+        [HttpPost("transaction/require-send-code-phone")]
+        public string SendCodeTransaction()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
+
+                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.SEND_TRSANSACTION);
+
+                if (checkSecret == null)
+                    return HelpersApi.CreateDataError("Can't send code");
+
+                userModel.SecretAuthToken = checkSecret;
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
+
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return resultUpdate.ToJson();
+
+                var secretAuthToken = ActionCode.FromJson(checkSecret);
+
+                if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
+                    return HelpersApi.CreateDataError("Can't send code");
+
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.SendTransaction))
+                    .ToJson();
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        /**
+         *  send code when update verify
+         */
         [HttpPost("option/require-send-code-phone")]
         public string SendCodeOption()
         {
@@ -176,33 +350,61 @@ namespace Vakaxa.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
 
-                if (userModel != null)
-                {
-                    var checkSecret = CheckToken(userModel, ActionLog.UpdateOptionVerification);
+                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
 
-                    if (checkSecret == null)
-                        return CreateDataError("Can't send code");
+                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
 
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+                if (checkSecret == null)
+                    return HelpersApi.CreateDataError("Can't send code");
 
-                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return CreateDataError("Can't send code");
+                userModel.SecretAuthToken = checkSecret;
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                    var secret = secretAuthToken.UpdateOptionVerification;
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return resultUpdate.ToJson();
 
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
+                var secretAuthToken = ActionCode.FromJson(checkSecret);
 
-                    Console.WriteLine(code);
+                if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                    return HelpersApi.CreateDataError("Can't send code");
 
-                    return _userBusiness.SendSms(userModel, code).ToJson();
-                }
-
-                return CreateDataError("Can't send code");
+                return _userBusiness
+                    .SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.UpdateOptionVerification)).ToJson();
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        /**
+         *  send code when disable two
+         */
+        [HttpPost("disable/require-send-code-phone")]
+        public string SendCodeDisable()
+        {
+            try
+            {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+                var query = new Dictionary<string, string> {{"Email", email}};
+
+                var userModel = _userBusiness.GetUserInfo(query);
+
+                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
+
+                var google = new GoogleAuthen.TwoFactorAuthenticator();
+
+                var startSetup = google.GenerateSetupCode(userModel.Email, userModel.TwoFactorSecret, 300, 300);
+
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = startSetup.ManualEntryKey
+                }.ToJson();
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
@@ -217,111 +419,29 @@ namespace Vakaxa.ApiServer.Controllers
 
                 var userModel = _userBusiness.GetUserInfo(query);
 
+                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
+                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
-                if (userModel != null)
-                {
-                    var checkSecret = CheckToken(userModel, ActionLog.TwofaEnable);
+                if (checkSecret == null)
+                    return HelpersApi.CreateDataError("Can't send code : not checkSecret");
 
-                    if (checkSecret == null)
-                        return CreateDataError("Can't send code");
-
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                        return CreateDataError("Can't send code");
-
-                    var secret = secretAuthToken.TwofaEnable;
-
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
-                    var code = authenticator.GetCode(secret);
-
-                    Console.WriteLine(code);
-
-                    return _userBusiness.SendSms(userModel, code).ToJson();
-                }
-
-                return CreateDataError("Can't send code");
-            }
-            catch (Exception e)
-            {
-                return CreateDataError(e.Message);
-            }
-        }
-
-
-        private string CheckToken(User userModel, string action)
-        {
-            try
-            {
-                var newSecret = new ActionCode();
-
-                if (string.IsNullOrEmpty(userModel.SecretAuthToken))
-                {
-                    switch (action)
-                    {
-                        case ActionLog.TwofaEnable:
-                            newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                        case ActionLog.UpdateOptionVerification:
-                            newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                        case "CloseAccount":
-                            newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            break;
-                    }
-                }
-                else
-                {
-                    newSecret = ActionCode.FromJson(userModel.SecretAuthToken);
-
-                    switch (action)
-                    {
-                        case ActionLog.TwofaEnable:
-                            if (string.IsNullOrEmpty(newSecret.TwofaEnable))
-                            {
-                                newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                        case ActionLog.UpdateOptionVerification:
-                            if (string.IsNullOrEmpty(newSecret.UpdateOptionVerification))
-                            {
-                                newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                        case "CloseAccount":
-                            if (string.IsNullOrEmpty(newSecret.CloseAccount))
-                            {
-                                newSecret.CloseAccount = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
-                            break;
-                    }
-                }
-
-//                userModel.SecretAuthToken = ActionCode.ToJson(newSecret);
-                userModel.SecretAuthToken = newSecret.ToJson();
+                userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
                 if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return null;
+                    return resultUpdate.ToJson();
 
-                return JsonHelper.SerializeObject(newSecret);
+                var secretAuthToken = ActionCode.FromJson(checkSecret);
+
+                if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
+                    return HelpersApi.CreateDataError("Can't secretAuthToken TwofaEnable");
+
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.TwofaEnable)).ToJson();
             }
             catch (Exception e)
             {
-                return null;
+                return HelpersApi.CreateDataError(e.Message);
             }
-        }
-
-        public string CreateDataError(string message)
-        {
-            return new ReturnObject
-            {
-                Status = Status.STATUS_ERROR,
-                Message = message
-            }.ToJson();
         }
     }
 }
