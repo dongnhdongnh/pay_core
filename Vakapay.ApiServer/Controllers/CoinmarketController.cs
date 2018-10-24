@@ -21,8 +21,8 @@ namespace Vakapay.ApiServer.Controllers
             return null;
         }
 
-        [HttpGet("eos/{condition}")]
-        public ReturnObject EOSPrice(string condition)
+        [HttpGet("vakacoin/{condition}")]
+        public ReturnObject VKCPrice(string condition)
         {
             switch (condition)
             {
@@ -47,6 +47,35 @@ namespace Vakapay.ApiServer.Controllers
                             Status = Status.STATUS_ERROR,
                             Message = "Can't find by "+condition
                         };
+            }
+        }
+        
+        [HttpGet("eos/{condition}")]
+        public ReturnObject EOSPrice(string condition)
+        {
+            switch (condition)
+            {
+                case "day":
+                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
+                        DashboardConfig.EOS, DashboardConfig.DAY));
+                case "week":
+                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
+                        DashboardConfig.EOS, DashboardConfig.WEEK));
+                case "month":
+                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
+                        DashboardConfig.EOS, DashboardConfig.MONTH));
+                case "year":
+                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
+                        DashboardConfig.EOS, DashboardConfig.YEAR));
+                case "all":
+                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
+                        DashboardConfig.EOS, DashboardConfig.ALL));
+                default:
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Can't find by "+condition
+                    };
             }
         }
         

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
-using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -24,6 +22,7 @@ namespace Vakapay.PortfolioHistory
                 var lsUserId = GetDistinctUserId(walletBusiness);
                 foreach (var userId in lsUserId)
                 {
+                    Console.WriteLine("Scanned UserId = "+userId + " at "+ CommonHelper.GetUnixTimestamp());
                     portfolioHistoryBusiness.InsertWithPrice(userId);
                 }
                 Thread.Sleep(minutes*60*1000);

@@ -23,7 +23,7 @@ namespace Vakapay.Repositories.Mysql
         {
         }
 
-        public List<PortfolioHistory> FindByUserId(string userId, int from, int to)
+        public List<PortfolioHistory> FindByUserId(string userId, long from, long to)
         {
             var query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND Timestamp > {from} AND Timestamp < {to}";
             try

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 
 namespace Vakapay.PortfolioHistoryBusiness
@@ -35,6 +37,11 @@ namespace Vakapay.PortfolioHistoryBusiness
                 DashboardConfig.CURRENT));
             
             return Repository.InsertWithPrice(userId, vkcPrice, btcPrice, ethPrice, eosPrice);
+        }
+
+        public List<PortfolioHistory> FindByUserId(string userId, long from, long to)
+        {
+            return Repository.FindByUserId(userId, from, to);
         }
     }
 }
