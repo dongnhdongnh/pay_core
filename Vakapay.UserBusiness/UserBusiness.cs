@@ -188,9 +188,8 @@ namespace Vakapay.UserBusiness
         /// Get Api key
         /// </summary>
         /// <param name="apiKey"></param>
-        /// <param name="secret"></param>
         /// <returns></returns>
-        public ApiKey GetApiKeyByKey(string apiKey, string secret)
+        public ApiKey GetApiKeyByKey(string apiKey)
         {
             try
             {
@@ -199,8 +198,7 @@ namespace Vakapay.UserBusiness
                 var search =
                     new Dictionary<string, string>
                     {
-                        {"KeyApi", apiKey},
-                        {"Secret", secret}
+                        {"KeyApi", apiKey}
                     };
 
                 return apiRepository.FindWhere(apiRepository.QuerySearch(search));
