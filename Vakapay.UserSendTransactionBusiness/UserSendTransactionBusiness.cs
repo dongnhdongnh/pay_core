@@ -94,6 +94,16 @@ namespace Vakapay.UserSendTransactionBusiness
 
             var userRepository = new UserRepository(_connectionDb);
             var receiver = userRepository.FindByEmailAddress(sendTransaction.To);
+            var sender = userRepository.FindById(sendTransaction.UserId);
+
+            if (sender == null)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Sender UserID not found in Vakapay system"
+                };
+            }
 
             if (receiver == null)
             {
@@ -154,10 +164,17 @@ namespace Vakapay.UserSendTransactionBusiness
                 };
             }
 
-
-
-
             sendTrx.Commit();
+
+
+            var email = sender.Email;
+            if (email != null)
+            {
+                var res = SendMailBusiness.SendMailBusiness.CreateDataEmail("Notify send " + sendTransaction.Currency,
+                    email, sendTransaction.Amount, internalTransactions.Id,
+                    EmailTemplate.Sent, sendTransaction.Currency, _vakapayRepositoryFactory);
+                res.Wait();
+            }
 
             return new ReturnObject()
             {

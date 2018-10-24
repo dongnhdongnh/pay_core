@@ -31,7 +31,7 @@ namespace Vakapay.SendMailBusiness
                 : vakapayRepositoryFactory.GetOldConnection();
         }
 
-        public virtual async Task<ReturnObject> CreateEmailQueueAsync(EmailQueue emailQueue)
+        public async Task<ReturnObject> CreateEmailQueueAsync(EmailQueue emailQueue)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace Vakapay.SendMailBusiness
             }
         }
 
-        public virtual async Task<ReturnObject> SendEmailAsync(string apiUrl, string apiKey, string from,
+        public async Task<ReturnObject> SendEmailAsync(string apiUrl, string apiKey, string from,
             string fromName)
         {
             var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb);
@@ -317,6 +317,51 @@ namespace Vakapay.SendMailBusiness
             {
                 Console.WriteLine(e);
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// CreateDataEmail
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="email"></param>
+        /// <param name="amount"></param>
+        /// <param name="transactionId"></param>
+        /// <param name="template"></param>
+        /// <param name="networkName"></param>
+        /// <param name="vakapayRepositoryFactory"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
+        //            string networkName, string sendOrReceiver)
+        public static async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
+            EmailTemplate template, string networkName, IVakapayRepositoryFactory vakapayRepositoryFactory)
+        {
+            try
+            {
+                var currentTime = CommonHelper.GetUnixTimestamp();
+                var sendMailBusiness = new SendMailBusiness(vakapayRepositoryFactory, false);
+
+                if (email == null) return;
+                var emailQueue = new EmailQueue
+                {
+                    Id = CommonHelper.GenerateUuid(),
+                    ToEmail = email,
+                    Template = template,
+                    Subject = subject,
+                    NetworkName = networkName,
+                    //                    SentOrReceived = sendOrReceiver,
+                    Amount = amount,
+                    TransactionId = transactionId,
+                    Status = Status.STATUS_PENDING,
+                    CreatedAt = currentTime,
+                    UpdatedAt = currentTime
+                };
+                await sendMailBusiness.CreateEmailQueueAsync(emailQueue);
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
     }

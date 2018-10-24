@@ -11,18 +11,18 @@ namespace Vakapay.Repositories.Mysql
 {
     public class UserRepository : MySqlBaseRepository<User>, IUserRepository
     {
-        private string TableNameWallet { get; }
+        private string WalletTableName { get; }
         private string TableNameBitcoinAddress { get; }
 
         public UserRepository(string connectionString) : base(connectionString)
         {
-            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
+            WalletTableName = SimpleCRUD.GetTableName(typeof(Wallet));
             TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
         public UserRepository(IDbConnection dbConnection) : base(dbConnection)
         {
-            TableNameWallet = SimpleCRUD.GetTableName(typeof(Wallet));
+            WalletTableName = SimpleCRUD.GetTableName(typeof(Wallet));
             TableNameBitcoinAddress = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
         }
 
@@ -81,18 +81,9 @@ namespace Vakapay.Repositories.Mysql
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                var sQuery = $"SELECT Email FROM {TableName} t1 INNER JOIN {TableNameWallet} t2 ON t1.Id = t2.UserId "
-                             + $"INNER JOIN {blockchainAddressTableName} t3 ON t2.Id = t3.WalletId ";
-
-                if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
-                {
-                    sQuery += $"WHERE t3.{nameof(VakacoinAccount.Address)} = @Address;";
-                }
-                else
-                {
-                    sQuery += $"WHERE t3.{nameof(BlockchainAddress.Address)} = @Address;";
-                }
-
+                var sQuery = $"SELECT Email FROM {TableName} t1 INNER JOIN {WalletTableName} t2 ON t1.Id = t2.UserId "
+                             + $"INNER JOIN {blockchainAddressTableName} t3 ON t2.Id = t3.WalletId "
+                             + $"WHERE t3.{nameof(BlockchainAddress.Address)} = @Address;";
 
                 var result = Connection.QueryFirstOrDefault<string>(sQuery, new {Address = transaction.FromAddress});
                 Logger.Debug("UserRepository =>> FindEmailByAddressOfWallet result: " + result);
@@ -113,7 +104,7 @@ namespace Vakapay.Repositories.Mysql
                     Connection.Open();
 
                 var sQuery = "SELECT Email FROM " + TableName +
-                             " t1 INNER JOIN " + TableNameWallet + " t2 ON t1.Id = t2.UserId INNER JOIN " +
+                             " t1 INNER JOIN " + WalletTableName + " t2 ON t1.Id = t2.UserId INNER JOIN " +
                              TableNameBitcoinAddress + " t3 ON t2.Id = t3.WalletId " +
                              "WHERE t3.Address = @BitcoinAddress;";
 

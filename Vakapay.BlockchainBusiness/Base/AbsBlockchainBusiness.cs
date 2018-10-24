@@ -131,9 +131,9 @@ namespace Vakapay.BlockchainBusiness.Base
                         //                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
                         //                            email, pendingTransaction.Amount,
                         //                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
-                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
+                        await SendMailBusiness.SendMailBusiness.CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
                             email, pendingTransaction.Amount, pendingTransaction.Id,
-                            EmailTemplate.Sent, pendingTransaction.NetworkName());
+                            EmailTemplate.Sent, pendingTransaction.NetworkName(), VakapayRepositoryFactory);
                     }
                 }
 
@@ -456,50 +456,6 @@ namespace Vakapay.BlockchainBusiness.Base
             numberData = -1;
             Console.WriteLine("Not override");
             return null;
-        }
-
-        /// <summary>
-        /// CreateDataEmail
-        /// </summary>
-        /// <param name="subject"></param>
-        /// <param name="email"></param>
-        /// <param name="amount"></param>
-        /// <param name="transactionId"></param>
-        /// <param name="template"></param>
-        /// <param name="networkName"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
-        //            string networkName, string sendOrReceiver)
-        public async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
-            EmailTemplate template, string networkName)
-        {
-            try
-            {
-                var currentTime = CommonHelper.GetUnixTimestamp();
-                var sendMailBusiness = new SendMailBusiness.SendMailBusiness(VakapayRepositoryFactory, false);
-
-                if (email == null) return;
-                var emailQueue = new EmailQueue
-                {
-                    Id = CommonHelper.GenerateUuid(),
-                    ToEmail = email,
-                    Template = template,
-                    Subject = subject,
-                    NetworkName = networkName,
-                    //                    SentOrReceived = sendOrReceiver,
-                    Amount = amount,
-                    TransactionId = transactionId,
-                    Status = Status.STATUS_PENDING,
-                    CreatedAt = currentTime,
-                    UpdatedAt = currentTime
-                };
-                await sendMailBusiness.CreateEmailQueueAsync(emailQueue);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
         }
 
         /// <summary>
