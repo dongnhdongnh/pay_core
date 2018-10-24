@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
 using Vakapay.ApiAccess.Constants;
 using Vakapay.ApiAccess.Model;
+using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -43,18 +45,21 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(currency))
+                if (string.IsNullOrEmpty(currency) || string.IsNullOrEmpty(id))
                 {
-                    return CreateDataError(MessageError.ParamInvalid);
+                    return ApiAccessHelper.CreateDataError(MessageError.ParamInvalid);
                 }
+
+                if (!ApiAccessHelper.ValidateId(id))
+                    return ApiAccessHelper.CreateDataError(MessageError.ParamInvalid);
 
                 var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
-                    return CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
 
                 if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
-                    return CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
 
                 var userInfo = (User) RouteData.Values["UserModel"];
 
@@ -64,12 +69,12 @@ namespace Vakapay.ApiAccess.Controllers
                 {
                     if (!userInfo.Id.Equals(dataWithdraw.UserId))
                     {
-                        return CreateDataError(MessageError.DataNotFound);
+                        return ApiAccessHelper.CreateDataError(MessageError.DataNotFound);
                     }
                 }
                 else
                 {
-                    return CreateDataError(MessageError.DataNotFound);
+                    return ApiAccessHelper.CreateDataError(MessageError.DataNotFound);
                 }
 
                 return new ReturnObject
@@ -96,16 +101,16 @@ namespace Vakapay.ApiAccess.Controllers
             {
                 if (string.IsNullOrEmpty(currency))
                 {
-                    return CreateDataError(MessageError.ParamInvalid);
+                    return ApiAccessHelper.CreateDataError(MessageError.ParamInvalid);
                 }
 
                 var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
-                    return CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
 
                 if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
-                    return CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
 
                 int numberData = 0;
                 var withdraws = walletBusiness.GetHistory(out numberData, apiKeyModel.UserId, currency,
@@ -131,20 +136,6 @@ namespace Vakapay.ApiAccess.Controllers
                     Message = e.Message
                 }.ToJson();
             }
-        }
-
-        /// <summary>
-        /// CreateDataError
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns>string</returns>
-        public string CreateDataError(string message)
-        {
-            return new ReturnObject
-            {
-                Status = Status.STATUS_ERROR,
-                Message = message
-            }.ToJson();
         }
     }
 }
