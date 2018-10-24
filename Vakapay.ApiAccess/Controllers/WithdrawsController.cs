@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Vakapay.ApiAccess.Model;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -35,9 +37,59 @@ namespace Vakapay.ApiAccess.Controllers
                 new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
         }
 
+        [HttpGet("get-withdraw/{currency}/{id}")]
+        //wallet:withdrawals:read
+        public ActionResult<string> GetWithdraw(string currency, string id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(currency))
+                {
+                    return CreateDataError(MessageError.ParamInvalid);
+                }
+
+                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+
+                if (string.IsNullOrEmpty(apiKeyModel.Permissions))
+                    return CreateDataError(MessageError.UserPermissions);
+
+                if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
+                    return CreateDataError(MessageError.UserPermissions);
+
+                var userInfo = (User) RouteData.Values["UserModel"];
+
+                var dataWithdraw = userBusiness.GetWithdraw(id, currency);
+
+                if (dataWithdraw != null)
+                {
+                    if (!userInfo.Id.Equals(dataWithdraw.UserId))
+                    {
+                        return CreateDataError(MessageError.DataNotFound);
+                    }
+                }
+                else
+                {
+                    return CreateDataError(MessageError.DataNotFound);
+                }
+
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = JsonHelper.SerializeObject(dataWithdraw)
+                }.ToJson();
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                }.ToJson();
+            }
+        }
+
         [HttpGet("list-withdraws/{currency}/{offset:int?}/{limit:int?}")]
-        //wallet:user:read
-        //wallet:user:email
+        //wallet:withdrawals:read
         public ActionResult<string> GetListWithdraws(string currency, int offset = 0, int limit = 8)
         {
             try
@@ -47,28 +99,16 @@ namespace Vakapay.ApiAccess.Controllers
                     return CreateDataError(MessageError.ParamInvalid);
                 }
 
-
-                var headers = Request.Headers;
-                string token = headers[Requests.HeaderTokenKey];
-                var key = Encoding.UTF8.GetString(Convert.FromBase64String(token));
-                var parts = key.Split(new[] {':'});
-                if (parts.Length != 3)
-                    return CreateDataError(MessageError.TokenInvalid);
-                var apiKey = parts[1];
-
-                var apiKeyModel = userBusiness.GetApiKeyByKey(apiKey);
+                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return CreateDataError(MessageError.UserPermissions);
 
-                if (!apiKeyModel.Permissions.Contains(Permissions.USER_READ) ||
-                    !apiKeyModel.Permissions.Contains(Permissions.USER_MAIL))
+                if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
                     return CreateDataError(MessageError.UserPermissions);
 
-                var userInfo = userBusiness.GetUserById(apiKeyModel.UserId);
-
                 int numberData = 0;
-                var withdraws = walletBusiness.GetHistory(out numberData, userInfo.Id, currency,
+                var withdraws = walletBusiness.GetHistory(out numberData, apiKeyModel.UserId, currency,
                     offset, limit);
 
                 var data = new ListWithdraws

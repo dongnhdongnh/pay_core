@@ -71,8 +71,6 @@ namespace Vakapay.ApiAccess.ActionFilter
         private static FilterModel GetMessageTokenInvalid(IHeaderDictionary headers, string path,
             IVakapayRepositoryFactory repositoryFactory)
         {
-            Console.WriteLine("GenerateTokenKey: " + GenerateTokenKey("wk961j2jewxaz0zy",
-                                  "cjon3tnigdvuosipgxm1hlu3fd6umtbm", "1540372506277", path));
             var filterModel = new FilterModel
             {
                 Message = MessageError.TokenInvalid,

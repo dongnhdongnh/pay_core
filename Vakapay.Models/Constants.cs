@@ -863,7 +863,7 @@ namespace Vakapay.Models
             },
             {
                 "READ_WITHDRAWS",
-                "wallet:transactions:read"
+                "wallet:withdrawals:read"
             },
             {
                 "CREATE_WITHDRAWS",

@@ -4,6 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NLog;
+using StackExchange.Redis;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -181,6 +182,46 @@ namespace Vakapay.UserBusiness
                     Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
+            }
+        }
+
+        /// <summary>
+        /// Get Api key
+        /// </summary>
+        /// <param name="apiKey"></param>
+        /// <returns></returns>
+        public BlockchainTransaction GetWithdraw(string id, string currency)
+        {
+            try
+            {
+                BlockchainTransaction output = null;
+                switch (currency)
+                {
+                    case CryptoCurrency.ETH:
+                        var ethereumRepo =
+                            vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
+                        output = ethereumRepo.FindById(id);
+
+                        break;
+                    case CryptoCurrency.VAKA:
+                        var vakaRepo =
+                            vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
+                        output = vakaRepo.FindById(id);
+                        break;
+                    case CryptoCurrency.BTC:
+                        var bitcoinRepo =
+                            vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(ConnectionDb);
+                        output = bitcoinRepo.FindById(id);
+                        break;
+                    default:
+                        break;
+                }
+
+                return output;
+            }
+            catch (Exception e)
+            {
+                return null;
             }
         }
 

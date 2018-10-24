@@ -8,6 +8,7 @@ using Vakapay.ApiAccess.Model;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -39,15 +40,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var headers = Request.Headers;
-                string token = headers[Requests.HeaderTokenKey];
-                var key = Encoding.UTF8.GetString(Convert.FromBase64String(token));
-                var parts = key.Split(new[] {':'});
-                if (parts.Length != 3)
-                    return CreateDataError("User Info is not permission");
-                var apiKey = parts[1];
-
-                var apiKeyModel = userBusiness.GetApiKeyByKey(apiKey);
+                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return CreateDataError("User Info is not permission");
@@ -56,24 +49,20 @@ namespace Vakapay.ApiAccess.Controllers
                     !apiKeyModel.Permissions.Contains(Permissions.USER_MAIL))
                     return CreateDataError("User Info is not permission");
 
-                var userInfo = userBusiness.GetUserById(apiKeyModel.UserId);
-                var status = userInfo == null ? Status.STATUS_ERROR : Status.STATUS_SUCCESS;
+                var userInfo = (User) RouteData.Values["UserModel"];
 
-
-                if (userInfo != null)
-                    return new ReturnObject
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = new UserCurrent
                     {
-                        Status = status,
-                        Data = new UserCurrent
-                        {
-                            Id = userInfo.Id,
-                            Resource = "User",
-                            FullName = userInfo.FullName,
-                            AvatarUrl = userInfo.Avatar,
-                            UserName = userInfo.Email,
-                        }.ToJson()
-                    }.ToJson();
-                return CreateDataError("User Info is fail");
+                        Id = userInfo.Id,
+                        Resource = "User",
+                        FullName = userInfo.FullName,
+                        AvatarUrl = userInfo.Avatar,
+                        UserName = userInfo.Email,
+                    }.ToJson()
+                }.ToJson();
             }
             catch (Exception e)
             {
