@@ -22,7 +22,7 @@ using Vakapay.Repositories.Mysql;
 namespace Vakapay.ApiServer.Controllers
 {
     [Produces("application/json")]
-    [Route("api/[controller]")]
+    [Route("api")]
     [EnableCors]
     [ApiController]
     [Authorize]
@@ -61,14 +61,10 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var data = new InfoApi();
-
-                    data.listWallet = _walletBusiness.LoadAllWalletByUser(userModel);
-
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
-                        Data = JsonConvert.SerializeObject(data)
+                        Data = JsonConvert.SerializeObject(new InfoApi())
                     }.ToJson();
                 }
 
@@ -92,13 +88,8 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (userModel != null)
                 {
-                    var list = Constants.listApiAccess;
+                    return _userBusiness.GetApiKeys(userModel.Id).ToJson();
 
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_SUCCESS,
-                        Data = JsonConvert.SerializeObject(list)
-                    }.ToJson();
                 }
 
                 return HelpersApi.CreateDataError("Can't get list api access");
@@ -127,7 +118,8 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("code is required");
 
-                //  if (!value.ContainsKey("option")) return HelpersApi.CreateDataError("option is required");
+                if (!value.ContainsKey("apis")) return HelpersApi.CreateDataError("apis is required");
+                if (!value.ContainsKey("wallets")) return HelpersApi.CreateDataError("wallets is required");
 
                 var code = value["code"].ToString();
 
@@ -142,7 +134,7 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                        return HelpersApi.CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError("Can't secretAuthToken  ApiAccess");
 
                     var secret = secretAuthToken.ApiAccess;
 
@@ -155,20 +147,23 @@ namespace Vakapay.ApiServer.Controllers
                 var modelApi = new ApiKey();
 
                 modelApi.UserId = userModel.Id;
-                modelApi.UserId = userModel.Id;
 
-                if (value.ContainsKey("notifyUrl"))
+                if (value.ContainsKey("notificationUrl"))
                 {
-                    modelApi.CallbackUrl = value["notifyUrl"].ToString();
+                    modelApi.CallbackUrl = value["notificationUrl"].ToString();
 
                     if (!HelpersApi.CheckUrlValid(modelApi.CallbackUrl))
-                        HelpersApi.CreateDataError("notifyUrl is invalid");
+                        HelpersApi.CreateDataError("notificationUrl is invalid");
                 }
 
-                if (value.ContainsKey("apiAllow"))
+                if (value.ContainsKey("allowedIp"))
                 {
-                    modelApi.ApiAllow = value["apiAllow"].ToString();
+                    modelApi.ApiAllow = value["allowedIp"].ToString();
                 }
+
+                modelApi.Permissions = value["apis"].ToString();
+                modelApi.Wallets = value["wallets"].ToString();
+
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.API_ACCESS,

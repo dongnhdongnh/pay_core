@@ -143,7 +143,7 @@ namespace Vakapay.UserBusiness
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public ReturnObject GetApiKey(string idUser, int offset, int limit)
+        public ReturnObject GetApiKeys(string idUser, int offset = 0, int limit = 5)
         {
             try
             {
@@ -479,7 +479,6 @@ namespace Vakapay.UserBusiness
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
                 return null;
             }
         }
