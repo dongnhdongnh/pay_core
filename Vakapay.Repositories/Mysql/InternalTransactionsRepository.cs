@@ -27,6 +27,11 @@ namespace Vakapay.Repositories.Mysql
             throw new System.NotImplementedException();
         }
 
+        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userID, string currencyName, string TableNameWithdrawn, string TableNameDeposit, string TableInternalWithdrawn, int offset, int limit, string[] orderBy, string whereValue)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public List<BlockchainTransaction> FindTransactionsByUserId(string userId)
         {
             throw new System.NotImplementedException();

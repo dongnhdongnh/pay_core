@@ -18,7 +18,7 @@ namespace Vakapay.Models.Repositories.Base
 		List<BlockchainTransaction> FindTransactionHistory(int offset, int limit, string[] orderBy);
 
 
-        List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData,string userID,string currencyName,string TableNameWithdrawn,string TableNameDeposit,string TableInternalWithdrawn,int offset, int limit, string[] orderBy);
+        List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData,string userID,string currencyName,string TableNameWithdrawn,string TableNameDeposit,string TableInternalWithdrawn,int offset, int limit, string[] orderBy, string whereValue);
         string GetTableName();
       //  List<BlockchainTransaction> FindAllTransactionHistory(string table,int offset, int limit, string[] orderBy);
 
