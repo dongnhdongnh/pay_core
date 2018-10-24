@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
+using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiAccess.Controllers
 {
@@ -16,6 +15,10 @@ namespace Vakapay.ApiAccess.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
+            var userModel = (User) RouteData.Values["UserModel"];
+            var apiKey = (ApiKey) RouteData.Values["ApiKeyModel"];
+            Console.WriteLine("ValuesController ==>> userModel: " + userModel.Id + " ==>> ApiKeyModel: " + apiKey.Id);
+
             return new string[] {"value1", "value2"};
         }
 

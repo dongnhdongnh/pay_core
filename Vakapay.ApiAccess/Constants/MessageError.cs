@@ -7,7 +7,7 @@ namespace Vakapay.ApiAccess.Constants
         public const string UserPermissions = "Use is not permisssions";
         public const string TokenInvalid = "Header error(Token invalid)";
         public const string TokenExpider = "Token expired";
-        public const string ApiSecretInvalid = "Header error(Api Secret invalid)";
+        public const string UserNotExit = "User not exit";
         public const string ApiTimeStampInvalid = "Header error(Api TimeStamp invalid)";
         public const string HeaderApiInvalid = "Header error(ApiSecret or ApiKey invalid)";
     }
