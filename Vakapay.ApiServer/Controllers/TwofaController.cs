@@ -64,11 +64,11 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
-                    return HelpersApi.CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("code is required");
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
-                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError("option is required");
+                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 var code = value["code"].ToString();
 
@@ -83,14 +83,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return HelpersApi.CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                     var secret = secretAuthToken.UpdateOptionVerification;
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                if (!isVerify) return HelpersApi.CreateDataError("Code is fail");
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                 var option = value["option"];
 
@@ -121,14 +121,14 @@ namespace Vakapay.ApiServer.Controllers
                 if (userModel == null)
                 {
                     //return error
-                    return HelpersApi.CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
                 }
 
-                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError("Can't verify token");
+                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 var token = value["token"].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, token))
-                    return HelpersApi.CreateDataError("Verify false");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                 userModel.TwoFactor = true;
 
@@ -160,10 +160,10 @@ namespace Vakapay.ApiServer.Controllers
                 if (userModel == null)
                 {
                     //return error
-                    return HelpersApi.CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
                 }
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("code is required");
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 var code = value["code"].ToString();
                 var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
@@ -171,13 +171,13 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError("Can't secretAuthToken TwofaEnable");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                 var secret = secretAuthToken.TwofaEnable;
 
                 var isok = authenticator.CheckCode(secret, code, userModel);
 
-                if (!isok) return HelpersApi.CreateDataError("Can't verify code");
+                if (!isok) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -218,13 +218,13 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
-                    return HelpersApi.CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError("Can't verify code");
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 var code = value["code"].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
-                    return HelpersApi.CreateDataError("Verify false");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                 userModel.TwoFactor = false;
 
@@ -254,9 +254,9 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
-                    return HelpersApi.CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
-                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError("SMScode is required");
+                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 var code = value["SMScode"].ToString();
 
@@ -271,14 +271,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                        return HelpersApi.CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                     var secret = secretAuthToken.SendTransaction;
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                //if (!isVerify) return HelpersApi.CreateDataError("Can't verify code");
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                 // userModel.Verification = (int) option;
 
@@ -308,12 +308,12 @@ namespace Vakapay.ApiServer.Controllers
 
                 var userModel = _userBusiness.GetUserInfo(query);
 
-                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
+                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.SEND_TRSANSACTION);
 
                 if (checkSecret == null)
-                    return HelpersApi.CreateDataError("Can't send code");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                 userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
@@ -324,7 +324,7 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                 if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                    return HelpersApi.CreateDataError("Can't send code");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                 return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.SendTransaction))
                     .ToJson();
@@ -349,12 +349,12 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
 
-                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
+                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
 
                 if (checkSecret == null)
-                    return HelpersApi.CreateDataError("Can't send code");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                 userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
@@ -365,7 +365,7 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                 if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                    return HelpersApi.CreateDataError("Can't send code");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                 return _userBusiness
                     .SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.UpdateOptionVerification)).ToJson();
@@ -389,7 +389,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var userModel = _userBusiness.GetUserInfo(query);
 
-                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
+                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -418,11 +418,11 @@ namespace Vakapay.ApiServer.Controllers
 
                 var userModel = _userBusiness.GetUserInfo(query);
 
-                if (userModel == null) return HelpersApi.CreateDataError("Can't send code");
+                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
                 if (checkSecret == null)
-                    return HelpersApi.CreateDataError("Can't send code : not checkSecret");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                 userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
@@ -433,7 +433,7 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError("Can't secretAuthToken TwofaEnable");
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                 return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.TwofaEnable)).ToJson();
             }

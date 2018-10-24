@@ -56,7 +56,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (userModel == null)
                 {
-                    return HelpersApi.CreateDataError("Can't User");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
                 }
 
                 return new ReturnObject
@@ -87,7 +87,7 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
-                    return HelpersApi.CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
                 if (value.ContainsKey("code") && value.ContainsKey("status") && value.ContainsKey("password"))
                 {
@@ -95,7 +95,7 @@ namespace Vakapay.ApiServer.Controllers
                     var status = value["status"];
 
                     if (!int.TryParse((string) status, out int outStatus))
-                        return HelpersApi.CreateDataError("Status invalid");
+                        return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                     var password = value["password"];
                     bool isVerify;
@@ -109,14 +109,14 @@ namespace Vakapay.ApiServer.Controllers
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                         if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                            return HelpersApi.CreateDataError("Can't send code");
+                            return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                         var secret = secretAuthToken.ApiAccess;
 
                         isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                     }
 
-                    if (!isVerify) return HelpersApi.CreateDataError("Code is fail");
+                    if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
 
                     userModel.IsLockScreen = outStatus;
                     userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
@@ -130,7 +130,7 @@ namespace Vakapay.ApiServer.Controllers
                         HelpersApi.GetIp(Request)).ToJson();
                 }
 
-                return HelpersApi.CreateDataError("Can't update options");
+                return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
             }
             catch (Exception e)
             {
@@ -150,7 +150,7 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel == null)
-                    return HelpersApi.CreateDataError("User not exist in DB");
+                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
 
                 if (userModel.IsLockScreen == 0)
                     return new ReturnObject
@@ -171,7 +171,7 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
 
-                return HelpersApi.CreateDataError("Password is incorrect");
+                return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
             }
             catch (Exception e)
             {
@@ -195,24 +195,24 @@ namespace Vakapay.ApiServer.Controllers
                     var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
 
                     if (checkSecret == null)
-                        return HelpersApi.CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                     userModel.SecretAuthToken = checkSecret;
                     var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
                     if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return HelpersApi.CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                     var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                     if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                        return HelpersApi.CreateDataError("Can't send code");
+                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
                     return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.LockScreen))
                         .ToJson();
                 }
 
-                return HelpersApi.CreateDataError("Can't send code");
+                return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
             }
             catch (Exception e)
             {

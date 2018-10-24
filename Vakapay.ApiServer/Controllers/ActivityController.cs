@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using UAParser;
 using Vakapay.ApiServer.Helpers;
+using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -59,7 +60,7 @@ namespace Vakapay.ApiServer.Controllers
                 var queryStringValue = Request.Query;
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return HelpersApi.CreateDataError("Offset or limit not found");
+                    return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
@@ -75,7 +76,7 @@ namespace Vakapay.ApiServer.Controllers
                         Convert.ToInt32(limit)).ToJson();
                 }
 
-                return HelpersApi.CreateDataError("Can't get list account activity");
+                return HelpersApi.CreateDataError(MessageApiError.DataNotFound);
             }
             catch (Exception e)
             {
@@ -92,7 +93,7 @@ namespace Vakapay.ApiServer.Controllers
                 var queryStringValue = Request.Query;
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return HelpersApi.CreateDataError("Offset or limit not found");
+                    return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
@@ -126,7 +127,7 @@ namespace Vakapay.ApiServer.Controllers
                         Convert.ToInt32(limit), checkConfirmedDevices).ToJson();
                 }
 
-                return HelpersApi.CreateDataError("Can't get list Confirm Devices activity");
+                return HelpersApi.CreateDataError(MessageApiError.DataNotFound);
             }
             catch (Exception e)
             {
