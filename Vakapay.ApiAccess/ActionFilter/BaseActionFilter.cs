@@ -4,8 +4,8 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Newtonsoft.Json;
 using Vakapay.ApiAccess.Constants;
+using Vakapay.ApiAccess.Model;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -17,7 +17,7 @@ namespace Vakapay.ApiAccess.ActionFilter
     public class BaseActionFilter : ActionFilterAttribute
     {
         private readonly VakapayRepositoryMysqlPersistenceFactory _repositoryFactory;
-        private const int ExpirationMinutes = 10*60*1000;
+        private const int ExpirationMinutes = 100 * 10 * 60 * 1000;
 
         public BaseActionFilter()
         {
@@ -29,7 +29,7 @@ namespace Vakapay.ApiAccess.ActionFilter
             _repositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
         }
 
-        public override void OnActionExecuted(ActionExecutedContext actionExecutedContext)
+        public override void OnActionExecuting(ActionExecutingContext actionExecutedContext)
         {
             try
             {
@@ -42,14 +42,16 @@ namespace Vakapay.ApiAccess.ActionFilter
                 }
                 else
                 {
-                    var message = GetMessageTokenInvalid(headers, request.Path, _repositoryFactory);
-                    if (string.IsNullOrEmpty(message))
+                    var filterModel = GetMessageTokenInvalid(headers, request.Path, _repositoryFactory);
+                    if (filterModel.Status)
                     {
-                        base.OnActionExecuted(actionExecutedContext);
-                        return;
+                        actionExecutedContext.RouteData.Values.Add("UserModel", filterModel.UserModel);
+                        actionExecutedContext.RouteData.Values.Add("ApiKeyModel", filterModel.ApiKeyModel);
                     }
-
-                    actionExecutedContext.Result = new JsonResult(CreateDataError(message));
+                    else
+                    {
+                        actionExecutedContext.Result = new JsonResult(CreateDataError(filterModel.Message));
+                    }
                 }
             }
             catch (Exception e)
@@ -66,37 +68,50 @@ namespace Vakapay.ApiAccess.ActionFilter
         /// <param name="path"></param>
         /// <param name="repositoryFactory"></param>
         /// <returns></returns>
-        private static string GetMessageTokenInvalid(IHeaderDictionary headers, string path,
+        private static FilterModel GetMessageTokenInvalid(IHeaderDictionary headers, string path,
             IVakapayRepositoryFactory repositoryFactory)
         {
-            var message = MessageError.TokenInvalid;
+            Console.WriteLine("GenerateTokenKey: " + GenerateTokenKey("wk961j2jewxaz0zy",
+                                  "cjon3tnigdvuosipgxm1hlu3fd6umtbm", "1540372506277", path));
+            var filterModel = new FilterModel
+            {
+                Message = MessageError.TokenInvalid,
+                Status = false
+            };
             string clientToken = headers[Requests.HeaderTokenKey];
             var key = Encoding.UTF8.GetString(Convert.FromBase64String(clientToken));
             var parts = key.Split(new[] {':'});
-            if (parts.Length != 3) return message;
+            if (parts.Length != 3) return filterModel;
             var apiKey = parts[1];
             var timeStamp = parts[2];
             var userBusiness = new UserBusiness.UserBusiness(repositoryFactory);
             var apiKeyModel = userBusiness.GetApiKeyByKey(apiKey);
-            if (apiKeyModel == null || !string.Equals(apiKeyModel.KeyApi, apiKey)) return message;
-            var serverToken = GenerateTokenKey(apiKeyModel.KeyApi, apiKeyModel.Secret,
-                timeStamp, path);
-            
+            if (apiKeyModel == null || string.IsNullOrEmpty(apiKeyModel.UserId)) return filterModel;
+            var userModel = userBusiness.GetUserById(apiKeyModel.UserId);
+            if (userModel == null)
+            {
+                filterModel.Message = MessageError.UserNotExit;
+                return filterModel;
+            }
+
+            var serverToken = GenerateTokenKey(apiKeyModel.KeyApi, apiKeyModel.Secret, timeStamp, path);
+
             Console.WriteLine(serverToken);
-            
+
             if (!IsTokenExpired(timeStamp))
             {
-                if (string.Equals(clientToken, serverToken))
-                {
-                    message = null;
-                }
+                if (!string.Equals(clientToken, serverToken)) return filterModel;
+                filterModel.Message = null;
+                filterModel.Status = true;
+                filterModel.ApiKeyModel = apiKeyModel;
+                filterModel.UserModel = userModel;
             }
             else
             {
-                message = MessageError.TokenExpider;
+                filterModel.Message = MessageError.TokenExpider;
             }
 
-            return message;
+            return filterModel;
         }
 
         /// <summary>
