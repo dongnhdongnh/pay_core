@@ -177,8 +177,8 @@ namespace Vakapay.BitcoinNotifi
                     const string title = "Notify receiver Bitcoin";
 //                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
 //                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
-                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount, "", //TODO add transaction Id
-                        EmailTemplate.Received, CryptoCurrency.BTC);
+                    var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount, "", //TODO add transaction Id
+                        EmailTemplate.Received, CryptoCurrency.BTC, btcBusiness.VakapayRepositoryFactory);
                 }
                 else
                 {
