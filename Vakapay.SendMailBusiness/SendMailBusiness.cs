@@ -12,6 +12,7 @@ using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.SendMailBusiness
 {
@@ -255,7 +256,13 @@ namespace Vakapay.SendMailBusiness
         {
             try
             {
-                return GetTransaction(emailQueue).ToAddress;
+                if (emailQueue.IsInnerTransaction == false) return GetTransaction(emailQueue).ToAddress;
+
+                var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
+                var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
+                var userRepository = new UserRepository(_connectionDb);
+                var user = userRepository.FindById(transaction.ReceiverUserId);
+                return user.Email;
             }
             catch (Exception e)
             {
@@ -330,12 +337,13 @@ namespace Vakapay.SendMailBusiness
         /// <param name="template"></param>
         /// <param name="networkName"></param>
         /// <param name="vakapayRepositoryFactory"></param>
+        /// <param name="isInnerTransaction"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
         //            string networkName, string sendOrReceiver)
         public static async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
-            EmailTemplate template, string networkName, IVakapayRepositoryFactory vakapayRepositoryFactory)
+            EmailTemplate template, string networkName, IVakapayRepositoryFactory vakapayRepositoryFactory, bool isInnerTransaction)
         {
             try
             {
@@ -351,6 +359,7 @@ namespace Vakapay.SendMailBusiness
                     Subject = subject,
                     NetworkName = networkName,
                     //                    SentOrReceived = sendOrReceiver,
+                    IsInnerTransaction = isInnerTransaction,
                     Amount = amount,
                     TransactionId = transactionId,
                     Status = Status.STATUS_PENDING,

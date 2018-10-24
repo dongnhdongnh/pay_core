@@ -172,7 +172,7 @@ namespace Vakapay.UserSendTransactionBusiness
             {
                 var res = SendMailBusiness.SendMailBusiness.CreateDataEmail("Notify send " + sendTransaction.Currency,
                     email, sendTransaction.Amount, internalTransactions.Id,
-                    EmailTemplate.Sent, sendTransaction.Currency, _vakapayRepositoryFactory);
+                    EmailTemplate.Sent, sendTransaction.Currency, _vakapayRepositoryFactory, true);
                 res.Wait();
             }
 
