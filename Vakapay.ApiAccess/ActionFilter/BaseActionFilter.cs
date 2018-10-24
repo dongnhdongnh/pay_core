@@ -35,10 +35,7 @@ namespace Vakapay.ApiAccess.ActionFilter
             {
                 var request = actionExecutedContext.HttpContext.Request;
                 var headers = request.Headers;
-//                Console.WriteLine(JsonConvert.SerializeObject(headers));
-//                Console.WriteLine("GenerateTokenKey: " + GenerateTokenKey("wk961j2jewxaz0zy", "cjon3tnigdvuosipgxm1hlu3fd6umtbm",
-//                                      "1540363139699",
-//                                      actionExecutedContext.HttpContext.Request.Path));
+
                 if (!headers.ContainsKey(Requests.HeaderTokenKey))
                 {
                     actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.TokenInvalid));
@@ -84,6 +81,9 @@ namespace Vakapay.ApiAccess.ActionFilter
             if (apiKeyModel == null || !string.Equals(apiKeyModel.KeyApi, apiKey)) return message;
             var serverToken = GenerateTokenKey(apiKeyModel.KeyApi, apiKeyModel.Secret,
                 timeStamp, path);
+            
+            Console.WriteLine(serverToken);
+            
             if (!IsTokenExpired(timeStamp))
             {
                 if (string.Equals(clientToken, serverToken))
@@ -106,7 +106,7 @@ namespace Vakapay.ApiAccess.ActionFilter
         /// <returns></returns>
         private static bool IsTokenExpired(string timeStamp)
         {
-            var ticks = long.Parse("1540362485441");
+            var ticks = long.Parse(timeStamp);
             var serverCurrentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var expired = (serverCurrentTime - ticks) > ExpirationMinutes;
             return expired;

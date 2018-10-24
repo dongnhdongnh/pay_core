@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
@@ -39,13 +40,18 @@ namespace Vakapay.ApiAccess.Controllers
             try
             {
                 var headers = Request.Headers;
-                string apiKey = headers[Requests.HeaderApiKey];
-                string apiSecret = headers[Requests.HeaderApiSecret];
-                var apiKeyModel = userBusiness.GetApiKeyByKey(apiKey, apiSecret);
+                string token = headers[Requests.HeaderTokenKey];
+                var key = Encoding.UTF8.GetString(Convert.FromBase64String(token));
+                var parts = key.Split(new[] {':'});
+                if (parts.Length != 3)
+                    return CreateDataError("User Info is not permission");
+                var apiKey = parts[1];
+
+                var apiKeyModel = userBusiness.GetApiKeyByKey(apiKey);
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return CreateDataError("User Info is not permission");
-                
+
                 if (!apiKeyModel.Permissions.Contains(Permissions.USER_READ) ||
                     !apiKeyModel.Permissions.Contains(Permissions.USER_MAIL))
                     return CreateDataError("User Info is not permission");
