@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
@@ -9,11 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using UAParser;
+using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
-using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -25,6 +23,7 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
+    [BaseActionFilter]
     public class ActivityController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
@@ -58,6 +57,7 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var queryStringValue = Request.Query;
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
@@ -65,10 +65,6 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
 
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel != null)
                 {
@@ -116,18 +112,11 @@ namespace Vakapay.ApiServer.Controllers
                     checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
                 }
 
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
+                var userModel = (User) RouteData.Values["UserModel"];
 
-                var userModel = _userBusiness.GetUserInfo(query);
 
-                if (userModel != null)
-                {
-                    return _userBusiness.GetListConfirmedDevices(userModel.Id, Convert.ToInt32(offset),
-                        Convert.ToInt32(limit), checkConfirmedDevices).ToJson();
-                }
-
-                return HelpersApi.CreateDataError(MessageApiError.DataNotFound);
+                return _userBusiness.GetListConfirmedDevices(userModel.Id, Convert.ToInt32(offset),
+                    Convert.ToInt32(limit), checkConfirmedDevices).ToJson();
             }
             catch (Exception e)
             {
@@ -141,7 +130,9 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                return value.ContainsKey("Id") ? _userBusiness.DeleteConfirmedDevicesById(value["Id"].ToString()).ToJson() : HelpersApi.CreateDataError("ID Not exist.");
+                return value.ContainsKey("Id")
+                    ? _userBusiness.DeleteConfirmedDevicesById(value["Id"].ToString()).ToJson()
+                    : HelpersApi.CreateDataError("ID Not exist.");
             }
             catch (Exception e)
             {
@@ -155,15 +146,14 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                return value.ContainsKey("Id") ? _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson() : HelpersApi.CreateDataError("ID Not exist.");
+                return value.ContainsKey("Id")
+                    ? _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson()
+                    : HelpersApi.CreateDataError("ID Not exist.");
             }
             catch (Exception e)
             {
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
-
-
-      
     }
 }

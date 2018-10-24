@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using UAParser;
+using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -48,25 +49,20 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("upload-avatar"), DisableRequestSizeLimit]
+        [BaseActionFilter]
         public string UploadFile()
         {
             try
             {
                 var file = Request.Form.Files[0];
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+
 
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
                 }
 
-                var userCheck = _userBusiness.GetUserInfo(new Dictionary<string, string>
-                {
-                    {"Email", email}
-                });
-
-                if (userCheck == null)
-                    return CreateDataError("Can't User");
+                var userCheck = (User) RouteData.Values["UserModel"];
 
                 if (file.Length > 2097152)
                     return CreateDataError("File max size 2Mb");
@@ -122,7 +118,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (updateUser.Status != Status.STATUS_SUCCESS) return CreateDataError("Can't update image");
                 //save action log
-                _userBusiness.AddActionLog(email, userCheck.Id,
+                _userBusiness.AddActionLog(userCheck.Email, userCheck.Id,
                     ActionLog.AVATAR,
                     HelpersApi.GetIp(Request));
 
@@ -144,15 +140,12 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.GetUserInfo(query);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (userModel == null)
                 {
@@ -177,7 +170,7 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
                 var ip = HelpersApi.GetIp(Request);
-                
+
 
                 if (string.IsNullOrEmpty(ip))
                     return new ReturnObject
@@ -185,7 +178,7 @@ namespace Vakapay.ApiServer.Controllers
                         Status = Status.STATUS_SUCCESS,
                         Data = Vakapay.Models.Entities.User.ToJson(userModel)
                     }.ToJson();
-                
+
                 //get location for ip
                 var location =
                     await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
@@ -228,24 +221,17 @@ namespace Vakapay.ApiServer.Controllers
 
         // POST api/values
         [HttpPost("update-profile")]
+        [BaseActionFilter]
         public string UpdateUserProfile([FromBody] JObject value)
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                {
-                    //return error
-                    return CreateDataError("User not exist in DB");
-                }
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("streetAddress1"))
                 {
@@ -281,24 +267,17 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("update-preferences")]
+        [BaseActionFilter]
         public string UpdatePreferences([FromBody] JObject value)
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                {
-                    //return error
-                    return CreateDataError("User not exist in DB");
-                }
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("currencyKey"))
                 {
@@ -340,24 +319,17 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("update-notifications")]
+        [BaseActionFilter]
         public string UpdateNotifications([FromBody] JObject value)
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
                 }
 
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                {
-                    //return error
-                    return CreateDataError("User not exist in DB");
-                }
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("notifications"))
                 {

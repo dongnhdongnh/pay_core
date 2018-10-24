@@ -8,11 +8,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -23,6 +25,7 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
+    [BaseActionFilter]
     public class SecurityController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
@@ -49,15 +52,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                {
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
-                }
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 return new ReturnObject
                 {
@@ -81,13 +76,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("code") && value.ContainsKey("status") && value.ContainsKey("password"))
                 {
@@ -143,14 +132,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (userModel.IsLockScreen == 0)
                     return new ReturnObject
@@ -185,34 +167,27 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
+                var userModel = (User) RouteData.Values["UserModel"];
 
-                var userModel = _userBusiness.GetUserInfo(query);
 
-                if (userModel != null)
-                {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
+                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
 
-                    if (checkSecret == null)
-                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                if (checkSecret == null)
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
-                    userModel.SecretAuthToken = checkSecret;
-                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
+                userModel.SecretAuthToken = checkSecret;
+                var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                    if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                if (resultUpdate.Status == Status.STATUS_ERROR)
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
+                var secretAuthToken = ActionCode.FromJson(checkSecret);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
+                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
 
-                    return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.LockScreen))
-                        .ToJson();
-                }
-
-                return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.LockScreen))
+                    .ToJson();
             }
             catch (Exception e)
             {

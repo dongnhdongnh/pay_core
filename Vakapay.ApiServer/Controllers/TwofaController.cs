@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
@@ -25,6 +26,7 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
+    [BaseActionFilter]
     public class TwofaController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
@@ -57,15 +59,8 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
-
+                var userModel = (User) RouteData.Values["UserModel"];
+                
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
                 if (!value.ContainsKey("option")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
@@ -113,16 +108,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                {
-                    //return error
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
-                }
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
@@ -152,16 +138,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                {
-                    //return error
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
-                }
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
@@ -212,13 +189,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
@@ -248,13 +219,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
@@ -303,12 +268,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.SEND_TRSANSACTION);
 
@@ -343,13 +303,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-
-                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
 
@@ -384,12 +338,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -413,12 +362,8 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
+                var userModel = (User) RouteData.Values["UserModel"];
 
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
                 if (checkSecret == null)
