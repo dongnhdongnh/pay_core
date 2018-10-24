@@ -10,5 +10,7 @@ namespace Vakapay.ApiAccess.Model
         public const string SEND_TRANSACTIONS = "SEND_TRANSACTIONS";
         public const string USER_MAIL = "USER_MAIL";
         public const string USER_READ = "USER_READ";
+        public const string READ_WITHDRAWS = "READ_WITHDRAWS";
+        public const string CREATE_WITHDRAWS = "CREATE_WITHDRAWS";
     }
 }

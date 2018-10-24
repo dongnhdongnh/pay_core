@@ -102,7 +102,7 @@ namespace Vakapay.ApiServer.Controllers
 
         // POST api/values
         // verify code and update when update verify
-        [HttpPost("api-access/add")]
+        [HttpPost("api-access/create")]
         public string AddApiAccess([FromBody] JObject value)
         {
             try

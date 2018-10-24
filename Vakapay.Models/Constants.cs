@@ -862,6 +862,14 @@ namespace Vakapay.Models
                 "wallet:transactions:send"
             },
             {
+                "READ_WITHDRAWS",
+                "wallet:transactions:read"
+            },
+            {
+                "CREATE_WITHDRAWS",
+                "wallet:withdrawals:create"
+            },
+            {
                 "USER_MAIL",
                 "wallet:user:email"
             },

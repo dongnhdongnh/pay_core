@@ -4,6 +4,7 @@ namespace Vakapay.ApiAccess.Constants
     {
         public const string ParamInvalid = "Param is invalid";
         public const string DataNotFound = "Data not found";
+        public const string UserPermissions = "Use is not permisssions";
         public const string TokenInvalid = "Header error(Token invalid)";
         public const string TokenExpider = "Token expired";
         public const string ApiSecretInvalid = "Header error(Api Secret invalid)";
