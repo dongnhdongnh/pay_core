@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
@@ -20,6 +21,12 @@ namespace Vakapay.ApiServer.Helpers
             return ip;
         }
 
+        public static bool ValidateId(string id)
+        {
+            const string pattern = "^([0-9a-k]{8}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{12})$";
+            return Regex.IsMatch(id, pattern);
+        }
+        
         public static bool CheckCodeGoogle(string secret, string token)
         {
             var google = new GoogleAuthen.TwoFactorAuthenticator();

@@ -144,7 +144,7 @@ namespace Vakapay.UserBusiness
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public ReturnObject GetApiKeys(string idUser, int offset = 0, int limit = 5)
+        public ReturnObject GetApiKeys(string idUser, int offset = 0, int limit = 8)
         {
             try
             {
@@ -271,6 +271,7 @@ namespace Vakapay.UserBusiness
                 if (string.IsNullOrEmpty(model.Id))
                 {
                     model.Id = CommonHelper.GenerateUuid();
+                    model.Status = 1;
                     model.KeyApi = CommonHelper.RandomString(16);
                     model.Secret = CommonHelper.RandomString(32);
                     model.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
@@ -649,6 +650,45 @@ namespace Vakapay.UserBusiness
                     Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
+            }
+        }
+
+        /// <summary>
+        /// DeleteApiKeyById
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ReturnObject DeleteApikeyById(string id)
+        {
+            try
+            {
+                var apiKeyRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+                var resultObject = apiKeyRepository.Delete(id);
+                return resultObject;
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+        }
+
+        // find ApiKey by id
+        public ApiKey GetApiKeyById(string id)
+        {
+            try
+            {
+                var apiKeyRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+
+                var apiKey = apiKeyRepository.FindById(id);
+                return apiKey;
+            }
+            catch (Exception e)
+            {
+                return null;
             }
         }
     }

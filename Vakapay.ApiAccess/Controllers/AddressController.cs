@@ -42,7 +42,7 @@ namespace Vakapay.ApiAccess.Controllers
             {
                 if (string.IsNullOrEmpty(idAddress) || string.IsNullOrEmpty(currency))
                 {
-                    return CreateDataError(MessageError.ParamInvalid);
+                    return CreateDataError(MessageError.PARAM_INVALID);
                 }
 
                 BlockchainAddress blockChainAddress;
@@ -64,17 +64,17 @@ namespace Vakapay.ApiAccess.Controllers
                         blockChainAddress = vaKaCoinAccountRepository.FindByAddress(idAddress);
                         break;
                     default:
-                        return CreateDataError(MessageError.ParamInvalid);
+                        return CreateDataError(MessageError.PARAM_INVALID);
                 }
 
                 return blockChainAddress != null
                     ? CreateDataSuccess(JsonConvert.SerializeObject(blockChainAddress))
-                    : CreateDataError(MessageError.DataNotFound);
+                    : CreateDataError(MessageError.DATA_NOT_FOUND);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return CreateDataError(MessageError.DataNotFound);
+                return CreateDataError(MessageError.DATA_NOT_FOUND);
             }
         }
 

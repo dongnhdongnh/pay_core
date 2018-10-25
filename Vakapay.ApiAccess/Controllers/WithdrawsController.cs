@@ -47,19 +47,19 @@ namespace Vakapay.ApiAccess.Controllers
             {
                 if (string.IsNullOrEmpty(currency) || string.IsNullOrEmpty(id))
                 {
-                    return ApiAccessHelper.CreateDataError(MessageError.ParamInvalid);
+                    return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
                 }
 
                 if (!ApiAccessHelper.ValidateId(id))
-                    return ApiAccessHelper.CreateDataError(MessageError.ParamInvalid);
+                    return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
 
                 var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
-                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
 
                 if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
-                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
 
                 var userInfo = (User) RouteData.Values["UserModel"];
 
@@ -69,12 +69,12 @@ namespace Vakapay.ApiAccess.Controllers
                 {
                     if (!userInfo.Id.Equals(dataWithdraw.UserId))
                     {
-                        return ApiAccessHelper.CreateDataError(MessageError.DataNotFound);
+                        return ApiAccessHelper.CreateDataError(MessageError.DATA_NOT_FOUND);
                     }
                 }
                 else
                 {
-                    return ApiAccessHelper.CreateDataError(MessageError.DataNotFound);
+                    return ApiAccessHelper.CreateDataError(MessageError.DATA_NOT_FOUND);
                 }
 
                 return new ReturnObject
@@ -101,16 +101,16 @@ namespace Vakapay.ApiAccess.Controllers
             {
                 if (string.IsNullOrEmpty(currency))
                 {
-                    return ApiAccessHelper.CreateDataError(MessageError.ParamInvalid);
+                    return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
                 }
 
                 var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
-                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
 
                 if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
-                    return ApiAccessHelper.CreateDataError(MessageError.UserPermissions);
+                    return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
 
                 int numberData = 0;
                 var withdraws = walletBusiness.GetHistory(out numberData, apiKeyModel.UserId, currency,
