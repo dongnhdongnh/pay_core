@@ -21,11 +21,6 @@ namespace Vakapay.ApiServer.Helpers
             return ip;
         }
 
-        public static bool ValidateId(string id)
-        {
-            const string pattern = "^([0-9a-k]{8}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{12})$";
-            return Regex.IsMatch(id, pattern);
-        }
         
         public static bool CheckCodeGoogle(string secret, string token)
         {

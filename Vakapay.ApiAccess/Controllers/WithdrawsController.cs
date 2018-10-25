@@ -50,7 +50,7 @@ namespace Vakapay.ApiAccess.Controllers
                     return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
                 }
 
-                if (!ApiAccessHelper.ValidateId(id))
+                if (!CommonHelper.ValidateId(id))
                     return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
 
                 var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];

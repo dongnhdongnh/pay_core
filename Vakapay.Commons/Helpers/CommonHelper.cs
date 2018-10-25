@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Vakapay.Commons.Helpers
 {
@@ -18,6 +19,12 @@ namespace Vakapay.Commons.Helpers
 			return UnixTimestamp.ToUnixTimestamp(DateTime.UtcNow);
 		}
 
+		
+		public static bool ValidateId(string id)
+		{
+			const string pattern = "^([0-9a-k]{8}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{12})$";
+			return Regex.IsMatch(id, pattern);
+		}
 		
 		/// <summary>
 		/// Generate Token Key
@@ -120,5 +127,7 @@ namespace Vakapay.Commons.Helpers
 				return false;
 			}
 		}
+		
+		
 	}
 }

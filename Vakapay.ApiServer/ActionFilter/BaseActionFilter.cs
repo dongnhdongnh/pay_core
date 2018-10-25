@@ -53,12 +53,12 @@ namespace Vakapay.ApiServer.ActionFilter
                 }
                 
 
-                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageApiError.UserNotFound));
+                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageApiError.USER_NOT_EXIT));
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageApiError.UserNotFound));
+                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageApiError.USER_NOT_EXIT));
             }
         }
 

@@ -61,9 +61,9 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
                 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
 
@@ -78,14 +78,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                     var secret = secretAuthToken.UpdateOptionVerification;
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 var option = value["option"];
 
@@ -110,11 +110,11 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var token = value["token"].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, token))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 userModel.TwoFactor = true;
 
@@ -140,7 +140,7 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
                 var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
@@ -148,13 +148,13 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 var secret = secretAuthToken.TwofaEnable;
 
                 var isok = authenticator.CheckCode(secret, code, userModel);
 
-                if (!isok) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                if (!isok) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -191,11 +191,11 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 userModel.TwoFactor = false;
 
@@ -221,7 +221,7 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["SMScode"].ToString();
 
@@ -236,14 +236,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                     var secret = secretAuthToken.SendTransaction;
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 // userModel.Verification = (int) option;
 
@@ -273,7 +273,7 @@ namespace Vakapay.ApiServer.Controllers
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.SEND_TRSANSACTION);
 
                 if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                 userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
@@ -284,7 +284,7 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                 if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                 return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.SendTransaction))
                     .ToJson();
@@ -308,7 +308,7 @@ namespace Vakapay.ApiServer.Controllers
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
 
                 if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                 userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
@@ -319,7 +319,7 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                 if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                 return _userBusiness
                     .SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.UpdateOptionVerification)).ToJson();
@@ -367,7 +367,7 @@ namespace Vakapay.ApiServer.Controllers
                 var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
 
                 if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                 userModel.SecretAuthToken = checkSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
@@ -378,7 +378,7 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(checkSecret);
 
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                 return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.TwofaEnable)).ToJson();
             }

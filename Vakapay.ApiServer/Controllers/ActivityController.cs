@@ -60,7 +60,7 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
@@ -72,7 +72,7 @@ namespace Vakapay.ApiServer.Controllers
                         Convert.ToInt32(limit)).ToJson();
                 }
 
-                return HelpersApi.CreateDataError(MessageApiError.DataNotFound);
+                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
             }
             catch (Exception e)
             {
@@ -89,7 +89,7 @@ namespace Vakapay.ApiServer.Controllers
                 var queryStringValue = Request.Query;
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
