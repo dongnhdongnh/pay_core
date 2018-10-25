@@ -16,7 +16,7 @@ namespace Vakapay.ApiAccess.ActionFilter
     public class BaseActionFilter : ActionFilterAttribute
     {
         private readonly VakapayRepositoryMysqlPersistenceFactory _repositoryFactory;
-        private const int ExpirationMinutes = 100 * 10 * 60 * 1000;
+        private const int ExpirationMinutes = 1000 * 10 * 60 * 1000;
 
         public BaseActionFilter()
         {
