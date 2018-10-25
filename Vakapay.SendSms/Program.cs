@@ -10,7 +10,7 @@ namespace Vakapay.SendSms
 {
     internal static class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
@@ -24,7 +24,8 @@ namespace Vakapay.SendSms
             {
                 try
                 {
-                    var result = sendSmsBusiness.SendSmsAsync(AppSettingHelper.GetElasticSmsUrl(), AppSettingHelper.GetElasticApiKey());
+                    var result = sendSmsBusiness.SendSmsAsync(AppSettingHelper.GetElasticSmsUrl(),
+                        AppSettingHelper.GetElasticApiKey());
                     Console.WriteLine(JsonHelper.SerializeObject(result.Result));
                 }
                 catch (Exception e)

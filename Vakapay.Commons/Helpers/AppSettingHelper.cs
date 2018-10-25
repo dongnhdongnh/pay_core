@@ -92,5 +92,15 @@ namespace Vakapay.Commons.Helpers
         {
             return Get($"{Setting.SECTION_KEY_ELASTIC}:{Setting.SECTION_KEY_FROM_NAME}");
         }
+
+        public static string GetCoinMarketUrl()
+        {
+            return Get($"{Setting.SECTION_KEY_COIN_MARKET}:{Setting.SECTION_KEY_URL}");
+        }
+
+        public static int GetCoinMarketInterval()
+        {
+            return Int32.Parse(Get($"{Setting.SECTION_KEY_COIN_MARKET}:{Setting.SECTION_KEY_GET_PRICE_INTERVAL}"));
+        }
     }
 }

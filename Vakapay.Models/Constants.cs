@@ -4,7 +4,6 @@ namespace Vakapay.Models
 {
     public class Constants
     {
-
         public static Dictionary<string, string> listTimeZone = new Dictionary<string, string>
         {
             {"American Samoa", "(GMT-11:00) American Samoa"},
@@ -833,6 +832,50 @@ namespace Vakapay.Models
             {
                 "ZWL",
                 "Zimbabwean Dollar (ZWL)"
+            }
+        };
+
+        public static Dictionary<string, string> listApiAccess = new Dictionary<string, string>
+        {
+            {
+                "CREATED_ADDRESSES",
+                "wallet:addresses:create"
+            },
+            {
+                "READ_ADDRESSES",
+                "wallet:addresses:read"
+            },
+            {
+                "READ_DEPOSITS",
+                "wallet:deposits:read"
+            },
+            {
+                "CREATED_DEPOSITS",
+                "wallet:deposits:create"
+            },
+            {
+                "READ_TRANSACTIONS",
+                "wallet:transactions:read"
+            },
+            {
+                "SEND_TRANSACTIONS",
+                "wallet:transactions:send"
+            },
+            {
+                "READ_WITHDRAWS",
+                "wallet:withdrawals:read"
+            },
+            {
+                "CREATE_WITHDRAWS",
+                "wallet:withdrawals:create"
+            },
+            {
+                "USER_MAIL",
+                "wallet:user:email"
+            },
+            {
+                "USER_READ",
+                "wallet:user:read"
             }
         };
     }

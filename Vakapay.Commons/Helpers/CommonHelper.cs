@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Vakapay.Commons.Helpers
 {
@@ -18,6 +19,44 @@ namespace Vakapay.Commons.Helpers
 			return UnixTimestamp.ToUnixTimestamp(DateTime.UtcNow);
 		}
 
+		
+		public static bool ValidateId(string id)
+		{
+			const string pattern = "^([0-9a-k]{8}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{4}[-][0-9a-k]{12})$";
+			return Regex.IsMatch(id, pattern);
+		}
+		
+		/// <summary>
+		/// Generate Token Key
+		/// </summary>
+		/// <param name="apiKey"></param>
+		/// <param name="apiSecret"></param>
+		/// <param name="timeStamp"></param>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public static string GenerateTokenKey(string apiKey, string apiSecret, string timeStamp, string path)
+		{
+			try
+			{
+				string hashLeft;
+				string hashRight;
+				var key = string.Join(":", apiSecret, apiKey, timeStamp, path);
+				using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
+				{
+					hmac.ComputeHash(Encoding.UTF8.GetBytes(string.Join(":", apiSecret, key)));
+					hashLeft = Convert.ToBase64String(hmac.Hash);
+					hashRight = string.Join(":", apiKey, timeStamp);
+				}
+
+				return Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Join(":", hashLeft, hashRight)));
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+		
 		public static string Md5(string input)
 		{
 			// step 1, calculate MD5 hash from input
@@ -88,5 +127,7 @@ namespace Vakapay.Commons.Helpers
 				return false;
 			}
 		}
+		
+		
 	}
 }

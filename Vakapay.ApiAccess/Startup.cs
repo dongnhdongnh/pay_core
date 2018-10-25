@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SpaServices.Webpack;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Vakapay.ApiServer
+namespace Vakapay.ApiAccess
 {
     public class Startup
     {
@@ -18,20 +18,10 @@ namespace Vakapay.ApiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-         
-            services.AddMvcCore().AddRazorViewEngine()
-                .AddAuthorization()
-                .AddJsonFormatters();
-
             services.AddCors();
 
-            services.AddAuthentication("Bearer")
-                .AddIdentityServerAuthentication(options =>
-                {
-                    options.Authority = "https://vakaid.vakaxalab.com";
-                    options.RequireHttpsMetadata = true;
-                    options.ApiName = "api1";
-                });
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,21 +30,12 @@ namespace Vakapay.ApiServer
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-
-                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = true
-                });
-
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
-            app.UseAuthentication();
-            app.UseStaticFiles();
             app.UseCors(builder =>
             {
                 builder.AllowAnyOrigin()
@@ -62,7 +43,7 @@ namespace Vakapay.ApiServer
                     .AllowAnyMethod()
                     .AllowCredentials();
             });
-
+            app.UseHttpsRedirection();
             app.UseMvc();
         }
     }

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Folder Include="wwwroot\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+      <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
+      <ProjectReference Include="..\Vakapay.UserBusiness\Vakapay.UserBusiness.csproj" />
+      <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
+    </ItemGroup>
+
+</Project>

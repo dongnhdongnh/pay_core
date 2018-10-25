@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Vakapay.Commons.Constants;
+using Newtonsoft.Json.Linq;
+using UAParser;
+using Vakapay.ApiServer.ActionFilter;
+using Vakapay.ApiServer.Helpers;
+using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Domains;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -20,6 +23,7 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
+    [BaseActionFilter]
     public class ActivityController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
@@ -53,17 +57,14 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var queryStringValue = Request.Query;
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return CreateDataError("Offset or limit not found");
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
 
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
 
                 if (userModel != null)
                 {
@@ -71,55 +72,88 @@ namespace Vakapay.ApiServer.Controllers
                         Convert.ToInt32(limit)).ToJson();
                 }
 
-                return CreateDataError("Can't get list account activity");
+                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
         // POST api/values
-        [HttpGet("web-session/get-list/")]
-        public string GetWebSession()
+        [HttpGet("device-history/get-list")]
+        public string GetConfirmedDevices()
         {
             try
             {
                 var queryStringValue = Request.Query;
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
-                    return CreateDataError("Offset or limit not found");
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
 
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
+                var ip = HelpersApi.GetIp(Request);
 
-                var userModel = _userBusiness.GetUserInfo(query);
+                var checkConfirmedDevices = new ConfirmedDevices();
 
-                if (userModel != null)
+                if (!string.IsNullOrEmpty(ip))
                 {
-                    return _userBusiness.GetListWebSession(userModel.Id, Convert.ToInt32(offset),
-                        Convert.ToInt32(limit)).ToJson();
+                    //get location for ip
+
+                    var uaString = Request.Headers["User-Agent"].FirstOrDefault();
+                    var uaParser = Parser.GetDefault();
+                    var browser = uaParser.Parse(uaString);
+
+                    var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
+
+                    //save web session
+                    checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
                 }
 
-                return CreateDataError("Can't get list Web Session activity");
+                var userModel = (User) RouteData.Values["UserModel"];
+
+
+                return _userBusiness.GetListConfirmedDevices(userModel.Id, Convert.ToInt32(offset),
+                    Convert.ToInt32(limit), checkConfirmedDevices).ToJson();
             }
             catch (Exception e)
             {
-                return CreateDataError(e.Message);
+                return HelpersApi.CreateDataError(e.Message);
             }
         }
 
-
-        public string CreateDataError(string message)
+        // POST api/values
+        [HttpPost("device-history/delete")]
+        public string DeleteConfirmedDevicesById([FromBody] JObject value)
         {
-            return new ReturnObject
+            try
             {
-                Status = Status.STATUS_ERROR,
-                Message = message
-            }.ToJson();
+                return value.ContainsKey("Id")
+                    ? _userBusiness.DeleteConfirmedDevicesById(value["Id"].ToString()).ToJson()
+                    : HelpersApi.CreateDataError("ID Not exist.");
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        // POST api/values
+        [HttpPost("account-activity/delete")]
+        public string DeleteUserActivityById([FromBody] JObject value)
+        {
+            try
+            {
+                return value.ContainsKey("Id")
+                    ? _userBusiness.DeleteActivityById(value["Id"].ToString()).ToJson()
+                    : HelpersApi.CreateDataError("ID Not exist.");
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
         }
     }
 }
