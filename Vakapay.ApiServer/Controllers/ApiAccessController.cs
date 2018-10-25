@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
@@ -26,6 +28,7 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
+    [BaseActionFilter]
     public class ApiAccessController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
@@ -54,10 +57,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (userModel != null)
                 {
@@ -68,7 +68,7 @@ namespace Vakapay.ApiServer.Controllers
                     }.ToJson();
                 }
 
-                return HelpersApi.CreateDataError(MessageApiError.DataNotFound);
+                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
             }
             catch (Exception e)
             {
@@ -81,17 +81,40 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
+                var queryStringValue = Request.Query;
 
-                var userModel = _userBusiness.GetUserInfo(query);
 
-                if (userModel != null)
+                if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                queryStringValue.TryGetValue("offset", out var offset);
+                queryStringValue.TryGetValue("limit", out var limit);
+
+                var userModel = (User) RouteData.Values["UserModel"];
+
+                var dataApiKeys =
+                    _userBusiness.GetApiKeys(userModel.Id, Convert.ToInt32(offset), Convert.ToInt32(limit));
+
+                if (dataApiKeys.Status == Status.STATUS_SUCCESS)
                 {
-                    return _userBusiness.GetApiKeys(userModel.Id).ToJson();
+                    var listApiKeys = JsonHelper.DeserializeObject<List<ResultApiAccess>>(dataApiKeys.Data);
+                    if (listApiKeys.Count > 0)
+                    {
+                        foreach (var listApiKey in listApiKeys)
+                        {
+                            listApiKey.KeyApi = listApiKey.KeyApi.Substring(0, 10) + "...";
+                        }
+                    }
+
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonHelper.SerializeObject(listApiKeys)
+                    }.ToJson();
                 }
 
-                return HelpersApi.CreateDataError(MessageApiError.DataNotFound);
+
+                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
             }
             catch (Exception e)
             {
@@ -106,17 +129,10 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("apis") || !value.ContainsKey("wallets"))
-                    return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
 
@@ -131,14 +147,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                     var secret = secretAuthToken.ApiAccess;
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 //update api permissions
                 var modelApi = new ApiKey();
@@ -150,7 +166,7 @@ namespace Vakapay.ApiServer.Controllers
                     modelApi.CallbackUrl = value["notificationUrl"].ToString();
 
                     if (!HelpersApi.CheckUrlValid(modelApi.CallbackUrl))
-                        HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                        HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 }
 
                 if (value.ContainsKey("allowedIp"))
@@ -160,6 +176,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 modelApi.Permissions = value["apis"].ToString();
                 modelApi.Wallets = value["wallets"].ToString();
+                modelApi.Status = 1;
 
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
@@ -174,6 +191,223 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
+
+        // POST api/values
+        // delete api key
+        [HttpPost("api-key/delete")]
+        public string DeleteApiAccess([FromBody] JObject value)
+        {
+            try
+            {
+                var userModel = (User) RouteData.Values["UserModel"];
+
+                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var code = value["code"].ToString();
+
+                bool isVerify;
+
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                    var secret = secretAuthToken.ApiAccess;
+
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                }
+
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                var id = value["id"].ToString();
+                if (!CommonHelper.ValidateId(id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.API_ACCESS_DELETE,
+                    HelpersApi.GetIp(Request));
+
+                return _userBusiness.DeleteApikeyById(id).ToJson();
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+
+        // POST api/values
+        // disable api key
+        [HttpPost("api-key/disable")]
+        public string DisableApiAccess([FromBody] JObject value)
+        {
+            try
+            {
+                var userModel = (User) RouteData.Values["UserModel"];
+
+                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var code = value["code"].ToString();
+
+                bool isVerify;
+
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                    var secret = secretAuthToken.ApiAccess;
+
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                }
+
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                var id = value["id"].ToString();
+                if (!CommonHelper.ValidateId(id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var apiKey = _userBusiness.GetApiKeyById(id);
+
+                if (apiKey != null)
+                {
+                    apiKey.Status = 0;
+                    return _userBusiness.SaveApiKey(apiKey).ToJson();
+                }
+
+                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        // POST api/values
+        // enable api key
+        [HttpPost("api-key/enable")]
+        public string EnableApiAccess([FromBody] JObject value)
+        {
+            try
+            {
+                var userModel = (User) RouteData.Values["UserModel"];
+
+                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var code = value["code"].ToString();
+
+                bool isVerify;
+
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                    var secret = secretAuthToken.ApiAccess;
+
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                }
+
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                var id = value["id"].ToString();
+                if (!CommonHelper.ValidateId(id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var apiKey = _userBusiness.GetApiKeyById(id);
+
+                if (apiKey != null)
+                {
+                    apiKey.Status = 1;
+                    return _userBusiness.SaveApiKey(apiKey).ToJson();
+                }
+
+                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        // POST api/values
+        // delete api key
+        [HttpPost("api-key/get")]
+        public string GetApiAccess([FromBody] JObject value)
+        {
+            try
+            {
+                var userModel = (User) RouteData.Values["UserModel"];
+
+                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var code = value["code"].ToString();
+
+                bool isVerify;
+
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                    var secret = secretAuthToken.ApiAccess;
+
+                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                }
+
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                var id = value["id"].ToString();
+                if (!CommonHelper.ValidateId(id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var dataApi = _userBusiness.GetApiKeyById(id);
+
+                if (dataApi != null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonHelper.SerializeObject(dataApi)
+                    }.ToJson();
+                }
+
+                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
         // POST api/values
         //verify code when add api access
         [HttpPost("api-access/verify-code-sms")]
@@ -181,13 +415,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("code"))
                 {
@@ -198,14 +426,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                     var secret = secretAuthToken.ApiAccess;
 
 
                     var isok = authenticator.CheckCode(secret, code, userModel);
 
-                    if (!isok) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    if (!isok) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                     return new ReturnObject
                     {
@@ -214,52 +442,7 @@ namespace Vakapay.ApiServer.Controllers
                     }.ToJson();
                 }
 
-                return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
-
-        // POST api/values
-        // then code when add api access
-        [HttpPost("api-access/require-send-code-phone")]
-        public string SendCodeAdd()
-        {
-            try
-            {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel != null)
-                {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.API_ACCESS);
-
-                    if (checkSecret == null)
-                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                    userModel.SecretAuthToken = checkSecret;
-                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                    if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return resultUpdate.ToJson();
-
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, 120);
-                    var code = authenticator.GetCode(secretAuthToken.ApiAccess);
-
-                    return _userBusiness.SendSms(userModel, code)
-                        .ToJson();
-                }
-
-                return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
             }
             catch (Exception e)
             {
@@ -276,21 +459,16 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
+                var userModel = (User) RouteData.Values["UserModel"];
 
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.UserNotFound);
-
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 if (!userModel.TwoFactor || string.IsNullOrEmpty(userModel.TwoFactorSecret))
-                    return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 return new ReturnObject
                 {

@@ -84,7 +84,7 @@ namespace Vakapay.ApiServer.Controllers
                     var status = value["status"];
 
                     if (!int.TryParse((string) status, out int outStatus))
-                        return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                     var password = value["password"];
                     bool isVerify;
@@ -98,14 +98,14 @@ namespace Vakapay.ApiServer.Controllers
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                         if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                            return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                         var secret = secretAuthToken.ApiAccess;
 
                         isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                     }
 
-                    if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                     userModel.IsLockScreen = outStatus;
                     userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
@@ -119,7 +119,7 @@ namespace Vakapay.ApiServer.Controllers
                         HelpersApi.GetIp(Request)).ToJson();
                 }
 
-                return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
             }
             catch (Exception e)
             {
@@ -153,41 +153,7 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
 
-                return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
-
-        // POST api/values
-        [HttpPost("lock-screen/require-send-code-phone")]
-        public string SendCodeLock()
-        {
-            try
-            {
-                var userModel = (User) RouteData.Values["UserModel"];
-
-
-                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
-
-                if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                userModel.SecretAuthToken = checkSecret;
-                var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.LockScreen))
-                    .ToJson();
+                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
             }
             catch (Exception e)
             {

@@ -60,10 +60,10 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var userModel = (User) RouteData.Values["UserModel"];
-                
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
 
-                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
 
@@ -78,14 +78,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
                     var secret = secretAuthToken.UpdateOptionVerification;
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 var option = value["option"];
 
@@ -110,11 +110,11 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var token = value["token"].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, token))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 userModel.TwoFactor = true;
 
@@ -140,7 +140,7 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
                 var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
@@ -148,13 +148,13 @@ namespace Vakapay.ApiServer.Controllers
                 var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 var secret = secretAuthToken.TwofaEnable;
 
                 var isok = authenticator.CheckCode(secret, code, userModel);
 
-                if (!isok) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                if (!isok) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -191,11 +191,11 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 userModel.TwoFactor = false;
 
@@ -221,7 +221,7 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.ParamInvalid);
+                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["SMScode"].ToString();
 
@@ -236,14 +236,14 @@ namespace Vakapay.ApiServer.Controllers
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
                     if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                        return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                     var secret = secretAuthToken.SendTransaction;
 
                     isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
                 }
 
-                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SmsVerifyError);
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 // userModel.Verification = (int) option;
 
@@ -260,75 +260,6 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        /**
-        *  send code when update verify
-        */
-        [HttpPost("transaction/require-send-code-phone")]
-        public string SendCodeTransaction()
-        {
-            try
-            {
-                var userModel = (User) RouteData.Values["UserModel"];
-
-                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.SEND_TRSANSACTION);
-
-                if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                userModel.SecretAuthToken = checkSecret;
-                var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return resultUpdate.ToJson();
-
-                var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.SendTransaction))
-                    .ToJson();
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
-
-        /**
-         *  send code when update verify
-         */
-        [HttpPost("option/require-send-code-phone")]
-        public string SendCodeOption()
-        {
-            try
-            {
-                var userModel = (User) RouteData.Values["UserModel"];
-
-                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.UPDATE_NOTIFICATION);
-
-                if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                userModel.SecretAuthToken = checkSecret;
-                var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return resultUpdate.ToJson();
-
-                var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                return _userBusiness
-                    .SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.UpdateOptionVerification)).ToJson();
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
 
         /**
          *  send code when disable two
@@ -356,31 +287,75 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        // POST api/values
-        [HttpPost("enable/require-send-code-phone")]
-        public string SendCodeEnable()
+
+        [HttpPost("require-send-code-phone")]
+        public string SendCode([FromBody] JObject value)
         {
             try
             {
+                if (!value.ContainsKey("action"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var action = value["action"].ToString();
+                string secret = null;
+
+                switch (action)
+                {
+                    case ActionLog.TWOFA_ENABLE:
+                        secret = ActionLog.TWOFA_ENABLE;
+                        break;
+                    case ActionLog.AVATAR:
+                        secret = ActionLog.AVATAR;
+                        break;
+                    case ActionLog.UPDATE_PREFERENCES:
+                        secret = ActionLog.UPDATE_PREFERENCES;
+                        break;
+                    case ActionLog.UPDATE_NOTIFICATION:
+                        secret = ActionLog.UPDATE_NOTIFICATION;
+                        break;
+                    case ActionLog.UPDATE_PROFILE:
+                        secret = ActionLog.UPDATE_PROFILE;
+                        break;
+                    case ActionLog.TWOFA_DISABLE:
+                        secret = ActionLog.TWOFA_DISABLE;
+                        break;
+                    case ActionLog.LOCK_SCREEN:
+                        secret = ActionLog.LOCK_SCREEN;
+                        break;
+                    case ActionLog.SEND_TRSANSACTION:
+                        secret = ActionLog.SEND_TRSANSACTION;
+                        break;
+                    case ActionLog.API_ACCESS:
+                        secret = ActionLog.API_ACCESS;
+                        break;
+                    case ActionLog.API_ACCESS_DELETE:
+                        secret = ActionLog.API_ACCESS_DELETE;
+                        break;
+                    default:
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                }
+
+
                 var userModel = (User) RouteData.Values["UserModel"];
 
-                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.TWOFA_ENABLE);
+                var checkSecret = HelpersApi.CheckToken(userModel, secret);
 
                 if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
-                userModel.SecretAuthToken = checkSecret;
+                if (checkSecret.NewSecret == null)
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
+
+                if (checkSecret.Secret == null)
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
+
+                userModel.SecretAuthToken = checkSecret.NewSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
                 if (resultUpdate.Status == Status.STATUS_ERROR)
                     return resultUpdate.ToJson();
 
-                var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError(MessageApiError.SmsError);
-
-                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.TwofaEnable)).ToJson();
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(checkSecret.Secret)).ToJson();
             }
             catch (Exception e)
             {

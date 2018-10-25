@@ -36,9 +36,9 @@ namespace Vakapay.ApiAccess.ActionFilter
                 var request = actionExecutedContext.HttpContext.Request;
                 var headers = request.Headers;
 
-                if (!headers.ContainsKey(Requests.HeaderTokenKey))
+                if (!headers.ContainsKey(Requests.HEADER_TOKEN_KEY))
                 {
-                    actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.TokenInvalid));
+                    actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.TOKEN_INVALID));
                 }
                 else
                 {
@@ -57,7 +57,7 @@ namespace Vakapay.ApiAccess.ActionFilter
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.TokenInvalid));
+                actionExecutedContext.Result = new JsonResult(CreateDataError(MessageError.TOKEN_INVALID));
             }
         }
 
@@ -71,12 +71,14 @@ namespace Vakapay.ApiAccess.ActionFilter
         private static FilterModel GetMessageTokenInvalid(IHeaderDictionary headers, string path,
             IVakapayRepositoryFactory repositoryFactory)
         {
+            Console.WriteLine("GenerateTokenKey: " + CommonHelper.GenerateTokenKey("jm1ule1uvhp1s827",
+                                  "f6lyadz0qb7pdf6rrfjocq7adv4e151m", "1540372506277", path));
             var filterModel = new FilterModel
             {
-                Message = MessageError.TokenInvalid,
+                Message = MessageError.TOKEN_INVALID,
                 Status = false
             };
-            string clientToken = headers[Requests.HeaderTokenKey];
+            string clientToken = headers[Requests.HEADER_TOKEN_KEY];
             var key = Encoding.UTF8.GetString(Convert.FromBase64String(clientToken));
             var parts = key.Split(new[] {':'});
             if (parts.Length != 3) return filterModel;
@@ -88,11 +90,11 @@ namespace Vakapay.ApiAccess.ActionFilter
             var userModel = userBusiness.GetUserById(apiKeyModel.UserId);
             if (userModel == null)
             {
-                filterModel.Message = MessageError.UserNotExit;
+                filterModel.Message = MessageError.USER_NOT_EXIT;
                 return filterModel;
             }
 
-            var serverToken = GenerateTokenKey(apiKeyModel.KeyApi, apiKeyModel.Secret, timeStamp, path);
+            var serverToken = CommonHelper.GenerateTokenKey(apiKeyModel.KeyApi, apiKeyModel.Secret, timeStamp, path);
 
             Console.WriteLine(serverToken);
 
@@ -106,7 +108,7 @@ namespace Vakapay.ApiAccess.ActionFilter
             }
             else
             {
-                filterModel.Message = MessageError.TokenExpider;
+                filterModel.Message = MessageError.TOKEN_EXPIDER;
             }
 
             return filterModel;
@@ -120,41 +122,12 @@ namespace Vakapay.ApiAccess.ActionFilter
         private static bool IsTokenExpired(string timeStamp)
         {
             var ticks = long.Parse(timeStamp);
-            var serverCurrentTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var serverCurrentTime = UnixTimestamp.ConvertToMiliseconds(CommonHelper.GetUnixTimestamp());
+
             var expired = (serverCurrentTime - ticks) > ExpirationMinutes;
             return expired;
         }
 
-        /// <summary>
-        /// Generate Token Key
-        /// </summary>
-        /// <param name="apiKey"></param>
-        /// <param name="apiSecret"></param>
-        /// <param name="timeStamp"></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private static string GenerateTokenKey(string apiKey, string apiSecret, string timeStamp, string path)
-        {
-            try
-            {
-                string hashLeft;
-                string hashRight;
-                var key = string.Join(":", apiSecret, apiKey, timeStamp, path);
-                using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key)))
-                {
-                    hmac.ComputeHash(Encoding.UTF8.GetBytes(string.Join(":", apiSecret, key)));
-                    hashLeft = Convert.ToBase64String(hmac.Hash);
-                    hashRight = string.Join(":", apiKey, timeStamp);
-                }
-
-                return Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Join(":", hashLeft, hashRight)));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
 
         /// <summary>
         /// CreateDataError
