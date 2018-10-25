@@ -56,37 +56,16 @@ namespace Vakapay.ApiServer.Controllers
             }
 
             var userid = userModel.Id;
-            
-            switch (condition)
+            var currentTime = CommonHelper.GetUnixTimestamp();
+            if (Time.SECOND_COUNT_IN_PERIOD.ContainsKey(condition))
             {
-                    case "hour":
-                        return Result(userid, CommonHelper.GetUnixTimestamp() - 60 * 60, CommonHelper.GetUnixTimestamp());
-                    
-                    case "day":
-                        return Result(userid, CommonHelper.GetUnixTimestamp() - 24 * 60 * 60, CommonHelper.GetUnixTimestamp());
-                    
-                    case "week":
-                        return Result(userid, CommonHelper.GetUnixTimestamp() - 7 * 24 * 60 * 60, CommonHelper.GetUnixTimestamp());
-                    
-                    case "month":
-                        return Result(userid, CommonHelper.GetUnixTimestamp() - 30 * 24 * 60 * 60, CommonHelper.GetUnixTimestamp());
-                    
-                    case "year":
-                        return Result(userid, CommonHelper.GetUnixTimestamp() - 365 * 24 * 60 * 60, CommonHelper.GetUnixTimestamp());
-                    
-                    case "all":
-                        return Result(userid, CommonHelper.GetUnixTimestamp() - 5 * 365 * 24 * 60 * 60, CommonHelper.GetUnixTimestamp());
-                    
-                    case "current":
-                        return Result(userid, CommonHelper.GetUnixTimestamp() - 60 * 60, CommonHelper.GetUnixTimestamp(), condition);
-                    
-                    default:
-                        return new ReturnObject
-                        {
-                            Status = Status.STATUS_ERROR,
-                            Message = "Data not found with condition " + condition
-                        };
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Data not found with condition " + condition
+                };
             }
+            return Result(userid, currentTime - Time.SECOND_COUNT_IN_PERIOD[condition], currentTime, condition == DashboardConfig.CURRENT ? condition : null);
         }
 
         private ReturnObject Result(string userId, long from, long to, string time = null)
@@ -101,7 +80,7 @@ namespace Vakapay.ApiServer.Controllers
                         Message = "Data not found!"
                     };
 
-                if (time != null && time.Equals("current"))
+                if (time != null && time.Equals(DashboardConfig.CURRENT))
                 {
                     return new ReturnObject
                     {

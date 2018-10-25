@@ -25,17 +25,17 @@ namespace Vakapay.PortfolioHistoryBusiness
         public ReturnObject InsertWithPrice(string userId)
         {
             string vkcPrice = CacheHelper.GetCacheString(String.Format(
-                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.VAKACOIN,
-                RedisCacheKey.CURRENT));
+                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
+                DashboardConfig.CURRENT));
             string btcPrice = CacheHelper.GetCacheString(String.Format(
-                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.BITCOIN,
-                RedisCacheKey.CURRENT));
+                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.BITCOIN,
+                DashboardConfig.CURRENT));
             string ethPrice = CacheHelper.GetCacheString(String.Format(
-                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.ETHEREUM,
-                RedisCacheKey.CURRENT));
+                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
+                DashboardConfig.CURRENT));
             string eosPrice = CacheHelper.GetCacheString(String.Format(
-                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.EOS,
-                RedisCacheKey.CURRENT));
+                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
+                DashboardConfig.CURRENT));
             
             return Repository.InsertWithPrice(userId, vkcPrice, btcPrice, ethPrice, eosPrice);
         }

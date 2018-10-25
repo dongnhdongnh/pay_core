@@ -24,123 +24,38 @@ namespace Vakapay.ApiServer.Controllers
         [HttpGet("vakacoin/{condition}")]
         public ReturnObject VKCPrice(string condition)
         {
-            switch (condition)
-            {
-                    case "day":
-                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                            RedisCacheKey.EOS, RedisCacheKey.DAY));
-                    case "week":
-                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                            RedisCacheKey.EOS, RedisCacheKey.WEEK));
-                    case "month":
-                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                            RedisCacheKey.EOS, RedisCacheKey.MONTH));
-                    case "year":
-                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                            RedisCacheKey.EOS, RedisCacheKey.YEAR));
-                    case "all":
-                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                            RedisCacheKey.EOS, RedisCacheKey.ALL));
-                    default:
-                        return new ReturnObject
-                        {
-                            Status = Status.STATUS_ERROR,
-                            Message = "Can't find by "+condition
-                        };
-            }
+            return Result(DashboardConfig.EOS, condition);
         }
         
         [HttpGet("eos/{condition}")]
         public ReturnObject EOSPrice(string condition)
         {
-            switch (condition)
-            {
-                case "day":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.EOS, RedisCacheKey.DAY));
-                case "week":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.EOS, RedisCacheKey.WEEK));
-                case "month":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.EOS, RedisCacheKey.MONTH));
-                case "year":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.EOS, RedisCacheKey.YEAR));
-                case "all":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.EOS, RedisCacheKey.ALL));
-                default:
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't find by "+condition
-                    };
-            }
+            return Result(DashboardConfig.EOS, condition);
         }
         
         [HttpGet("bitcoin/{condition}")]
         public ReturnObject BTCPrice(string condition)
         {
-            switch (condition)
-            {
-                case "day":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.BITCOIN, RedisCacheKey.DAY));
-                case "week":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.BITCOIN, RedisCacheKey.WEEK));
-                case "month":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.BITCOIN, RedisCacheKey.MONTH));
-                case "year":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.BITCOIN, RedisCacheKey.YEAR));
-                case "all":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.BITCOIN, RedisCacheKey.ALL));
-                default:
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't find by "+condition
-                    };
-            }
+            return Result(DashboardConfig.BITCOIN, condition);
         }
         
         [HttpGet("ethereum/{condition}")]
         public ReturnObject ETHPrice(string condition)
         {
-            switch (condition)
-            {
-                case "day":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.ETHEREUM, RedisCacheKey.DAY));
-                case "week":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.ETHEREUM, RedisCacheKey.WEEK));
-                case "month":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.ETHEREUM, RedisCacheKey.MONTH));
-                case "year":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.ETHEREUM, RedisCacheKey.YEAR));
-                case "all":
-                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
-                        RedisCacheKey.ETHEREUM, RedisCacheKey.ALL));
-                default:
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't find by "+condition
-                    };
-            }
+            return Result(DashboardConfig.ETHEREUM, condition);
         }
 
-        private ReturnObject Result(string cacheKey)
+        private ReturnObject Result(string networkName, string condition)
         {
+            var cacheKey = String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                networkName, condition);
+            
             if (!CacheHelper.HaveKey(cacheKey))
-                return null;
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Can't find by "+condition
+                };
             
             var result = new ReturnObject
             {

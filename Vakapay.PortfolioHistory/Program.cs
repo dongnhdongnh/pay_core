@@ -34,13 +34,13 @@ namespace Vakapay.PortfolioHistory
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection(),
+                ConnectionString = AppSettingHelper.GetDBConnection()
             };
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             var walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
             var portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(persistenceFactory);
 
-            SavePortfolioHistoryEvery(RedisCacheKey.INTERVAL, walletBusiness, portfolioHistoryBusiness);
+            SavePortfolioHistoryEvery(DashboardConfig.INTERVAL, walletBusiness, portfolioHistoryBusiness);
         }
     }
 }
