@@ -88,7 +88,7 @@ namespace Vakapay.ScanCoinmarket
 
         public static void Main(string[] args)
         {
-            client.BaseAddress = new Uri(DashboardConfig.COINMARKET_URL);
+            client.BaseAddress = new Uri(AppSettingHelper.Get("CoinmarketUrl"));
             client.Timeout = TimeSpan.FromSeconds(30);
             var sleepTime = DashboardConfig.INTERVAL * 60 * 1000;
             while (true)
