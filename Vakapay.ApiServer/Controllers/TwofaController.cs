@@ -252,32 +252,6 @@ namespace Vakapay.ApiServer.Controllers
         }
 
 
-        /**
-         *  send code when disable two
-         */
-        [HttpPost("disable/require-send-code-phone")]
-        public string SendCodeDisable()
-        {
-            try
-            {
-                var userModel = (User) RouteData.Values["UserModel"];
-
-                var google = new GoogleAuthen.TwoFactorAuthenticator();
-
-                var startSetup = google.GenerateSetupCode(userModel.Email, userModel.TwoFactorSecret, 300, 300);
-
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Data = startSetup.ManualEntryKey
-                }.ToJson();
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
-
 
         [HttpPost("require-send-code-phone")]
         public string SendCode([FromBody] JObject value)

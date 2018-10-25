@@ -531,7 +531,7 @@ namespace Vakapay.ApiServer.Controllers
         /**
          *  verify code when twofa add api access
          */
-        [HttpPost("api-access/verify-code-twofa")]
+        [HttpPost("verify-code-twofa")]
         public string VerifyCodeTwofa([FromBody] JObject value)
         {
             try
