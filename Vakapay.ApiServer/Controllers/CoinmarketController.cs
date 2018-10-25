@@ -24,13 +24,7 @@ namespace Vakapay.ApiServer.Controllers
         [HttpGet("vakacoin/{condition}")]
         public ReturnObject VKCPrice(string condition)
         {
-            return Result(DashboardConfig.EOS, condition);
-        }
-        
-        [HttpGet("eos/{condition}")]
-        public ReturnObject EOSPrice(string condition)
-        {
-            return Result(DashboardConfig.EOS, condition);
+            return Result(DashboardConfig.BITCOIN, condition);
         }
         
         [HttpGet("bitcoin/{condition}")]

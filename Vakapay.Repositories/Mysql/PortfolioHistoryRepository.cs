@@ -40,7 +40,7 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public ReturnObject InsertWithPrice(string userId, string vkcPrice, string btcPrice, string ethPrice, string eosPrice)
+        public ReturnObject InsertWithPrice(string userId, string vkcPrice, string btcPrice, string ethPrice)
         {
             string queryFromWallet = $"SELECT * FROM Wallet WHERE UserId = '{userId}'";
             List<Wallet> wallets = new List<Wallet>();
@@ -76,21 +76,17 @@ namespace Vakapay.Repositories.Mysql
             {
                 switch (wallet.Currency)
                 {
-                        case "Vakacoin":
+                        case CryptoCurrency.VAKA:
                             vkcAmount = wallet.Balance;
                             vkcValue = Convert.ToDecimal(vkcPrice) * vkcAmount;
                             break;
-                        case "Bitcoin":
+                        case CryptoCurrency.BTC:
                             btcAmount = wallet.Balance;
                             btcValue = Convert.ToDecimal(btcPrice) * btcAmount;
                             break;
-                        case "Ethereum":
+                        case CryptoCurrency.ETH:
                             ethAmount = wallet.Balance;
                             ethValue = Convert.ToDecimal(ethPrice) * ethAmount;
-                            break;
-                        case "Eosio": case "Eos":
-                            eosAmount = wallet.Balance;
-                            eosValue = Convert.ToDecimal(eosPrice) * eosAmount;
                             break;
                 }
             }
