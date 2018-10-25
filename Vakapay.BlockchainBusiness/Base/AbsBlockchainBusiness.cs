@@ -250,7 +250,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 int blockNumber = -1;
                 //Get lastBlock from last time
                 int.TryParse(
-                    CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
+                    CacheHelper.GetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
                         networkName)), out lastBlock);
                 if (lastBlock < 0)
                     lastBlock = 0;
@@ -290,7 +290,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     }
                 }
 
-                CacheHelper.SetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName),
+                CacheHelper.SetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName),
                     blockNumber.ToString());
                 if (blocks.Count <= 0)
                 {
