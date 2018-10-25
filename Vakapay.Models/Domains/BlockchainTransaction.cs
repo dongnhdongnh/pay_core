@@ -7,7 +7,7 @@ using Vakapay.Commons.Helpers;
 
 namespace Vakapay.Models.Domains
 {
-    public abstract class BlockchainTransaction : MultiThreadUpdateEntity
+    public class BlockchainTransaction : MultiThreadUpdateEntity
     {
 //        public string Id => CommonHelper.GenerateUuid(); //existed in MultiThreadUpdateEntity
 
