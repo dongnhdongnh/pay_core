@@ -176,8 +176,18 @@ namespace Vakapay.UserSendTransactionBusiness
             if (email != null)
             {
                 var res = SendMailBusiness.SendMailBusiness.CreateDataEmail("Notify send " + sendTransaction.Currency,
-                    email, sendTransaction.Amount, internalTransactions.Id,
-                    EmailTemplate.Sent, sendTransaction.Currency, _vakapayRepositoryFactory, true);
+                    email, internalTransactions.Amount, internalTransactions.Id,
+                    EmailTemplate.Sent, internalTransactions.Currency, _vakapayRepositoryFactory, true);
+                res.Wait();
+            }
+
+            var receiverEmail = receiver.Email;
+            if (receiverEmail != null)
+            {
+                var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(
+                    "Notify receive " + sendTransaction.Currency, receiverEmail, internalTransactions.Amount,
+                    internalTransactions.Id, EmailTemplate.Received, internalTransactions.Currency,
+                    _vakapayRepositoryFactory, true);
                 res.Wait();
             }
 
