@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using NLog;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;

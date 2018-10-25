@@ -250,7 +250,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 int blockNumber = -1;
                 //Get lastBlock from last time
                 int.TryParse(
-                    CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
+                    CacheHelper.GetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
                         networkName)), out lastBlock);
                 if (lastBlock < 0)
                     lastBlock = 0;
@@ -290,7 +290,7 @@ namespace Vakapay.BlockchainBusiness.Base
                     }
                 }
 
-                CacheHelper.SetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName),
+                CacheHelper.SetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName),
                     blockNumber.ToString());
                 if (blocks.Count <= 0)
                 {
@@ -392,9 +392,9 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
         /// <returns></returns>
-        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string userID,
-       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, int offset = -1, int limit = -1,
-       string[] orderBy = null)
+        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string userID,string currency,
+       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, string TableInternalWihdrawnName, int offset = -1, int limit = -1,
+       string[] orderBy = null,string search=null)
         {
             try
             {
@@ -402,7 +402,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 //WithdrawnrepoQuery.GetTableName();
                 //DepositrepoQuery.GetTableName();
                 //   WithdrawnrepoQuery.FindBySql();
-                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), offset, limit, orderBy);
+                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID,currency, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), TableInternalWihdrawnName, offset, limit, orderBy, search);
             }
             catch (Exception e)
             {
@@ -450,8 +450,8 @@ namespace Vakapay.BlockchainBusiness.Base
             return null;
         }
 
-        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string walletAdress, int offset = -1, int limit = -1,
-            string[] orderBy = null)
+        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency, int offset = -1, int limit = -1,
+            string[] orderBy = null,string search=null)
         {
             numberData = -1;
             Console.WriteLine("Not override");
