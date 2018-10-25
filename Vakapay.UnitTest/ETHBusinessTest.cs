@@ -70,7 +70,7 @@ namespace Vakapay.UnitTest
 		[Test]
 		public void DeleteCache()
 		{
-			Assert.IsNotNull((String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, CryptoCurrency.ETH)));
+			Assert.IsNotNull((String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, CryptoCurrency.ETH)));
 		}
 
 		[Test]

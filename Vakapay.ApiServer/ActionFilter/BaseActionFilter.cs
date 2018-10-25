@@ -37,8 +37,6 @@ namespace Vakapay.ApiServer.ActionFilter
             {
                 var email = actionExecutedContext.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.Email)
                     .Select(c => c.Value).SingleOrDefault();
-
-                Console.WriteLine(email);
                 
                 if (!string.IsNullOrEmpty(email))
                 {

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
@@ -80,9 +76,7 @@ namespace Vakapay.ApiServer.Controllers
                     if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
 
-                    var secret = secretAuthToken.UpdateOptionVerification;
-
-                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.UpdateOptionVerification, code, userModel);
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -92,7 +86,7 @@ namespace Vakapay.ApiServer.Controllers
                 userModel.Verification = (int) option;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.UPDATE_NOTIFICATION,
+                    ActionLog.UPDATE_OPTION_VETIFY,
                     HelpersApi.GetIp(Request));
 
                 return _userBusiness.UpdateProfile(userModel).ToJson();
@@ -150,9 +144,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
                     return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                var secret = secretAuthToken.TwofaEnable;
-
-                var isok = authenticator.CheckCode(secret, code, userModel);
+                var isok = authenticator.CheckCode(secretAuthToken.TwofaEnable, code, userModel);
 
                 if (!isok) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
@@ -198,6 +190,7 @@ namespace Vakapay.ApiServer.Controllers
                     return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 userModel.TwoFactor = false;
+                userModel.SecretAuthToken = null;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.TWOFA_DISABLE,
@@ -238,9 +231,7 @@ namespace Vakapay.ApiServer.Controllers
                     if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    var secret = secretAuthToken.SendTransaction;
-
-                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.SendTransaction, code, userModel);
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -251,7 +242,7 @@ namespace Vakapay.ApiServer.Controllers
                 //to do
 
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.UPDATE_NOTIFICATION,
+                    ActionLog.SEND_TRSANSACTION,
                     HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
@@ -298,6 +289,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var action = value["action"].ToString();
                 string secret = null;
+                int time = 30;
 
                 switch (action)
                 {
@@ -310,8 +302,8 @@ namespace Vakapay.ApiServer.Controllers
                     case ActionLog.UPDATE_PREFERENCES:
                         secret = ActionLog.UPDATE_PREFERENCES;
                         break;
-                    case ActionLog.UPDATE_NOTIFICATION:
-                        secret = ActionLog.UPDATE_NOTIFICATION;
+                    case ActionLog.UPDATE_OPTION_VETIFY:
+                        secret = ActionLog.UPDATE_OPTION_VETIFY;
                         break;
                     case ActionLog.UPDATE_PROFILE:
                         secret = ActionLog.UPDATE_PROFILE;
@@ -325,6 +317,14 @@ namespace Vakapay.ApiServer.Controllers
                     case ActionLog.SEND_TRSANSACTION:
                         secret = ActionLog.SEND_TRSANSACTION;
                         break;
+                    case ActionLog.API_ACCESS_ADD:
+                        secret = ActionLog.API_ACCESS_ADD;
+                        time = 120;
+                        break;
+                    case ActionLog.API_ACCESS_EDIT:
+                        secret = ActionLog.API_ACCESS_EDIT;
+                        time = 120;
+                        break;
                     case ActionLog.API_ACCESS:
                         secret = ActionLog.API_ACCESS;
                         break;
@@ -334,7 +334,6 @@ namespace Vakapay.ApiServer.Controllers
                     default:
                         return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 }
-
 
                 var userModel = (User) RouteData.Values["UserModel"];
 
@@ -355,7 +354,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (resultUpdate.Status == Status.STATUS_ERROR)
                     return resultUpdate.ToJson();
 
-                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(checkSecret.Secret)).ToJson();
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(checkSecret.Secret, time)).ToJson();
             }
             catch (Exception e)
             {
