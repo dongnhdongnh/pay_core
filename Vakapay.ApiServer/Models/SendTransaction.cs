@@ -5,10 +5,10 @@ namespace Vakapay.ApiServer.Models
 {
     public class TransactionDetail
     {
-        [JsonProperty(PropertyName = "Recipient_WalletAddress")]
+        [JsonProperty(PropertyName = "recipientWalletAddress")]
         public string RecipientWalletAddress { get; set; }
 
-        [JsonProperty(PropertyName = "Recipient_EmailAddress")]
+        [JsonProperty(PropertyName = "recipientEmailAddress")]
         public string RecipientEmailAddress { get; set; }
 
         [JsonProperty(PropertyName = "VNDAmount")]
@@ -17,27 +17,24 @@ namespace Vakapay.ApiServer.Models
         [JsonProperty(PropertyName = "VKCAmount")]
         public decimal VkcAmount { get; set; }
 
-        [JsonProperty(PropertyName = "VKCnote")]
+        [JsonProperty(PropertyName = "VKCNote")]
         public string VkcNote { get; set; }
-
-        [JsonProperty(PropertyName = "withdrawn_from")]
-        public string WithdrawnFrom { get; set; }
 
         [JsonProperty(PropertyName = "sendByAd")]
         public bool SendByAd { get; set; }
     }
 
-    public class TransactionCheckObject
-    {
-        [JsonProperty(PropertyName = "vakapayfee")]
-        public decimal VakapayFee;
-
-        [JsonProperty(PropertyName = "minerfee")]
-        public decimal MinerFee;
-
-        [JsonProperty(PropertyName = "total")]
-        public decimal Total;
-    }
+//    public class TransactionCheckObject
+//    {
+//        [JsonProperty(PropertyName = "vakapayFee")]
+//        public decimal VakapayFee;
+//
+//        [JsonProperty(PropertyName = "minerFee")]
+//        public decimal MinerFee;
+//
+//        [JsonProperty(PropertyName = "total")]
+//        public decimal Total;
+//    }
 
     public class SendTransaction
     {
@@ -50,16 +47,13 @@ namespace Vakapay.ApiServer.Models
         [JsonProperty(PropertyName = "networkName")]
         public string NetworkName { get; set; }
 
-        [JsonProperty(PropertyName = "address")]
-        public List<string> Address { get; set; }
-
         [JsonProperty(PropertyName = "detail")]
         public TransactionDetail Detail { get; set; }
 
-        [JsonProperty(PropertyName = "checkObject")]
-        public TransactionCheckObject CheckObject { get; set; }
+//        [JsonProperty(PropertyName = "checkObject")]
+//        public TransactionCheckObject CheckObject { get; set; }
 
-        [JsonProperty(PropertyName = "SMScode")]
+        [JsonProperty(PropertyName = "SMSCode")]
         public string SmsCode { get; set; }
     }
 }

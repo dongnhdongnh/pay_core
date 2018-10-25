@@ -250,7 +250,6 @@ namespace Vakapay.ApiServer.Controllers
                     Amount = request.Detail.VkcAmount,
                     Currency = request.SortName,
                     Description = request.Detail.VkcNote,
-                    Fee = request.CheckObject.MinerFee.ToString(CultureInfo.CurrentCulture)
                 };
 
                 var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
