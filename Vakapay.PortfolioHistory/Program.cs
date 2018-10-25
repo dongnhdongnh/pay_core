@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -39,7 +40,7 @@ namespace Vakapay.PortfolioHistory
             var walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
             var portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(persistenceFactory);
 
-            SavePortfolioHistoryEvery(DashboardConfig.INTERVAL, walletBusiness, portfolioHistoryBusiness);
+            SavePortfolioHistoryEvery(RedisCacheKey.INTERVAL, walletBusiness, portfolioHistoryBusiness);
         }
     }
 }

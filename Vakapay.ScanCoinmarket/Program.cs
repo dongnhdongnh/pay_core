@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 
 namespace Vakapay.ScanCoinmarket
@@ -56,128 +57,128 @@ namespace Vakapay.ScanCoinmarket
             try
             {
                 //get vakacoin
-                string vakacoinByDay = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string vakacoinByDay = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 24 * 60 * 60, currentTime);
-                string vakacoinByWeek = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string vakacoinByWeek = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 7 * 24 * 60 * 60, currentTime);
-                string vakacoinByMonth = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string vakacoinByMonth = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 30 * 24 * 60 * 60, currentTime);
-                string vakacoinByYear = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string vakacoinByYear = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 365 * 24 * 60 * 60, currentTime);
-                string vakacoinAll = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string vakacoinAll = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 5 * 365 * 24 * 60 * 60, currentTime);
                 
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
-                        DashboardConfig.DAY), vakacoinByDay);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.VAKACOIN,
+                        RedisCacheKey.DAY), vakacoinByDay);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
-                        DashboardConfig.WEEK), vakacoinByWeek);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.VAKACOIN,
+                        RedisCacheKey.WEEK), vakacoinByWeek);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
-                        DashboardConfig.MONTH), vakacoinByMonth);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.VAKACOIN,
+                        RedisCacheKey.MONTH), vakacoinByMonth);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
-                        DashboardConfig.YEAR), vakacoinByYear);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.VAKACOIN,
+                        RedisCacheKey.YEAR), vakacoinByYear);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
-                        DashboardConfig.ALL), vakacoinAll);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.VAKACOIN,
+                        RedisCacheKey.ALL), vakacoinAll);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
-                        DashboardConfig.CURRENT), GetCurrentPrice(vakacoinByDay));
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.VAKACOIN,
+                        RedisCacheKey.CURRENT), GetCurrentPrice(vakacoinByDay));
                 
                 // get bitcoin
-                string bitcoinByDay = await GetAsyncByTimeStamp(DashboardConfig.BITCOIN,
+                string bitcoinByDay = await GetAsyncByTimeStamp(RedisCacheKey.BITCOIN,
                     currentTime - 24 * 60 * 60, currentTime);
-                string bitcoinByWeek = await GetAsyncByTimeStamp(DashboardConfig.BITCOIN,
+                string bitcoinByWeek = await GetAsyncByTimeStamp(RedisCacheKey.BITCOIN,
                     currentTime - 7 * 24 * 60 * 60, currentTime);
-                string bitcoinByMonth = await GetAsyncByTimeStamp(DashboardConfig.BITCOIN,
+                string bitcoinByMonth = await GetAsyncByTimeStamp(RedisCacheKey.BITCOIN,
                     currentTime - 30 * 24 * 60 * 60, currentTime);
-                string bitcoinByYear = await GetAsyncByTimeStamp(DashboardConfig.BITCOIN,
+                string bitcoinByYear = await GetAsyncByTimeStamp(RedisCacheKey.BITCOIN,
                     currentTime - 365 * 24 * 60 * 60, currentTime);
-                string bitcoinAll = await GetAsyncByTimeStamp(DashboardConfig.BITCOIN,
+                string bitcoinAll = await GetAsyncByTimeStamp(RedisCacheKey.BITCOIN,
                     currentTime - 5 * 365 * 24 * 60 * 60, currentTime);
                 
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.BITCOIN,
-                        DashboardConfig.DAY), bitcoinByDay);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.BITCOIN,
+                        RedisCacheKey.DAY), bitcoinByDay);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.BITCOIN,
-                        DashboardConfig.WEEK), bitcoinByWeek);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.BITCOIN,
+                        RedisCacheKey.WEEK), bitcoinByWeek);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.BITCOIN,
-                        DashboardConfig.MONTH), bitcoinByMonth);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.BITCOIN,
+                        RedisCacheKey.MONTH), bitcoinByMonth);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.BITCOIN,
-                        DashboardConfig.YEAR), bitcoinByYear);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.BITCOIN,
+                        RedisCacheKey.YEAR), bitcoinByYear);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.BITCOIN,
-                        DashboardConfig.ALL), bitcoinAll);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.BITCOIN,
+                        RedisCacheKey.ALL), bitcoinAll);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.BITCOIN,
-                        DashboardConfig.CURRENT), GetCurrentPrice(bitcoinByDay));
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.BITCOIN,
+                        RedisCacheKey.CURRENT), GetCurrentPrice(bitcoinByDay));
 
                 //get ethereum
-                string ethereumByDay = await GetAsyncByTimeStamp(DashboardConfig.ETHEREUM,
+                string ethereumByDay = await GetAsyncByTimeStamp(RedisCacheKey.ETHEREUM,
                     currentTime - 24 * 60 * 60, currentTime);
-                string ethereumByWeek = await GetAsyncByTimeStamp(DashboardConfig.ETHEREUM,
+                string ethereumByWeek = await GetAsyncByTimeStamp(RedisCacheKey.ETHEREUM,
                     currentTime - 7 * 24 * 60 * 60, currentTime);
-                string ethereumByMonth = await GetAsyncByTimeStamp(DashboardConfig.ETHEREUM,
+                string ethereumByMonth = await GetAsyncByTimeStamp(RedisCacheKey.ETHEREUM,
                     currentTime - 30 * 24 * 60 * 60, currentTime);
-                string ethereumByYear = await GetAsyncByTimeStamp(DashboardConfig.ETHEREUM,
+                string ethereumByYear = await GetAsyncByTimeStamp(RedisCacheKey.ETHEREUM,
                     currentTime - 365 * 24 * 60 * 60, currentTime);
-                string ethereumAll = await GetAsyncByTimeStamp(DashboardConfig.ETHEREUM,
+                string ethereumAll = await GetAsyncByTimeStamp(RedisCacheKey.ETHEREUM,
                     currentTime - 5 * 365 * 24 * 60 * 60, currentTime);
 
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
-                        DashboardConfig.DAY), ethereumByDay);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.ETHEREUM,
+                        RedisCacheKey.DAY), ethereumByDay);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
-                        DashboardConfig.WEEK), ethereumByWeek);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.ETHEREUM,
+                        RedisCacheKey.WEEK), ethereumByWeek);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
-                        DashboardConfig.MONTH), ethereumByMonth);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.ETHEREUM,
+                        RedisCacheKey.MONTH), ethereumByMonth);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
-                        DashboardConfig.YEAR), ethereumByYear);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.ETHEREUM,
+                        RedisCacheKey.YEAR), ethereumByYear);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
-                        DashboardConfig.ALL), ethereumAll);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.ETHEREUM,
+                        RedisCacheKey.ALL), ethereumAll);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
-                        DashboardConfig.CURRENT), GetCurrentPrice(ethereumByDay));
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.ETHEREUM,
+                        RedisCacheKey.CURRENT), GetCurrentPrice(ethereumByDay));
 
                 //get eos
-                string eosByDay = await GetAsyncByTimeStamp(DashboardConfig.EOS, currentTime - 24 * 60 * 60,
+                string eosByDay = await GetAsyncByTimeStamp(RedisCacheKey.EOS, currentTime - 24 * 60 * 60,
                     currentTime);
-                string eosByWeek = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string eosByWeek = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 7 * 24 * 60 * 60, currentTime);
-                string eosByMonth = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string eosByMonth = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 30 * 24 * 60 * 60, currentTime);
-                string eosByYear = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string eosByYear = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 365 * 24 * 60 * 60, currentTime);
-                string eosAll = await GetAsyncByTimeStamp(DashboardConfig.EOS,
+                string eosAll = await GetAsyncByTimeStamp(RedisCacheKey.EOS,
                     currentTime - 5 * 365 * 24 * 60 * 60, currentTime);
 
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
-                        DashboardConfig.DAY), eosByDay);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.EOS,
+                        RedisCacheKey.DAY), eosByDay);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
-                        DashboardConfig.WEEK), eosByWeek);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.EOS,
+                        RedisCacheKey.WEEK), eosByWeek);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
-                        DashboardConfig.MONTH), eosByMonth);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.EOS,
+                        RedisCacheKey.MONTH), eosByMonth);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
-                        DashboardConfig.YEAR), eosByYear);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.EOS,
+                        RedisCacheKey.YEAR), eosByYear);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
-                        DashboardConfig.ALL), eosAll);
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.EOS,
+                        RedisCacheKey.ALL), eosAll);
                 CacheHelper.SetCacheString(
-                    String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
-                        DashboardConfig.CURRENT), GetCurrentPrice(eosByDay));
+                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, RedisCacheKey.EOS,
+                        RedisCacheKey.CURRENT), GetCurrentPrice(eosByDay));
             }
             catch (Exception e)
             {

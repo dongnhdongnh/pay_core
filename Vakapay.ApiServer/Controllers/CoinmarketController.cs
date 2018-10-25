@@ -27,20 +27,20 @@ namespace Vakapay.ApiServer.Controllers
             switch (condition)
             {
                     case "day":
-                        return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                            DashboardConfig.EOS, DashboardConfig.DAY));
+                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                            RedisCacheKey.EOS, RedisCacheKey.DAY));
                     case "week":
-                        return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                            DashboardConfig.EOS, DashboardConfig.WEEK));
+                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                            RedisCacheKey.EOS, RedisCacheKey.WEEK));
                     case "month":
-                        return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                            DashboardConfig.EOS, DashboardConfig.MONTH));
+                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                            RedisCacheKey.EOS, RedisCacheKey.MONTH));
                     case "year":
-                        return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                            DashboardConfig.EOS, DashboardConfig.YEAR));
+                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                            RedisCacheKey.EOS, RedisCacheKey.YEAR));
                     case "all":
-                        return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                            DashboardConfig.EOS, DashboardConfig.ALL));
+                        return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                            RedisCacheKey.EOS, RedisCacheKey.ALL));
                     default:
                         return new ReturnObject
                         {
@@ -56,20 +56,20 @@ namespace Vakapay.ApiServer.Controllers
             switch (condition)
             {
                 case "day":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.EOS, DashboardConfig.DAY));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.EOS, RedisCacheKey.DAY));
                 case "week":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.EOS, DashboardConfig.WEEK));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.EOS, RedisCacheKey.WEEK));
                 case "month":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.EOS, DashboardConfig.MONTH));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.EOS, RedisCacheKey.MONTH));
                 case "year":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.EOS, DashboardConfig.YEAR));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.EOS, RedisCacheKey.YEAR));
                 case "all":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.EOS, DashboardConfig.ALL));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.EOS, RedisCacheKey.ALL));
                 default:
                     return new ReturnObject
                     {
@@ -85,20 +85,20 @@ namespace Vakapay.ApiServer.Controllers
             switch (condition)
             {
                 case "day":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.BITCOIN, DashboardConfig.DAY));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.BITCOIN, RedisCacheKey.DAY));
                 case "week":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.BITCOIN, DashboardConfig.WEEK));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.BITCOIN, RedisCacheKey.WEEK));
                 case "month":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.BITCOIN, DashboardConfig.MONTH));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.BITCOIN, RedisCacheKey.MONTH));
                 case "year":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.BITCOIN, DashboardConfig.YEAR));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.BITCOIN, RedisCacheKey.YEAR));
                 case "all":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.BITCOIN, DashboardConfig.ALL));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.BITCOIN, RedisCacheKey.ALL));
                 default:
                     return new ReturnObject
                     {
@@ -114,20 +114,20 @@ namespace Vakapay.ApiServer.Controllers
             switch (condition)
             {
                 case "day":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.ETHEREUM, DashboardConfig.DAY));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.ETHEREUM, RedisCacheKey.DAY));
                 case "week":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.ETHEREUM, DashboardConfig.WEEK));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.ETHEREUM, RedisCacheKey.WEEK));
                 case "month":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.ETHEREUM, DashboardConfig.MONTH));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.ETHEREUM, RedisCacheKey.MONTH));
                 case "year":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.ETHEREUM, DashboardConfig.YEAR));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.ETHEREUM, RedisCacheKey.YEAR));
                 case "all":
-                    return Result(String.Format(DashboardConfig.COINMARKET_PRICE_CACHEKEY,
-                        DashboardConfig.ETHEREUM, DashboardConfig.ALL));
+                    return Result(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                        RedisCacheKey.ETHEREUM, RedisCacheKey.ALL));
                 default:
                     return new ReturnObject
                     {
