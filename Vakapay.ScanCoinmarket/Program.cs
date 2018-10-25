@@ -88,14 +88,13 @@ namespace Vakapay.ScanCoinmarket
 
         public static void Main(string[] args)
         {
-            client.BaseAddress = new Uri(AppSettingHelper.Get("CoinmarketUrl"));
+            client.BaseAddress = new Uri(AppSettingHelper.GetCoinMarketUrl());
             client.Timeout = TimeSpan.FromSeconds(30);
-            var sleepTime = DashboardConfig.INTERVAL * 60 * 1000;
             while (true)
             {
                 Console.WriteLine("Get data from Coinmarket!!!");
                 RunAsync().GetAwaiter().GetResult();
-                Thread.Sleep(sleepTime);
+                Thread.Sleep(AppSettingHelper.GetCoinMarketInterval());
             }
         }
     }
