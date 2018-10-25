@@ -21,7 +21,7 @@ namespace Vakapay.ApiServer.Helpers
             return ip;
         }
 
-        
+
         public static bool CheckCodeGoogle(string secret, string token)
         {
             var google = new GoogleAuthen.TwoFactorAuthenticator();
@@ -50,10 +50,16 @@ namespace Vakapay.ApiServer.Helpers
             return code;
         }
 
-        public static string CheckToken(User userModel, string action)
+        public static CheckTokenModel CheckToken(User userModel, string action)
         {
             try
             {
+                var secret = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                var data = new CheckTokenModel
+                {
+                    Secret = secret,
+                    NewSecret = null
+                };
                 var newSecret = new ActionCode();
 
                 if (string.IsNullOrEmpty(userModel.SecretAuthToken))
@@ -61,22 +67,22 @@ namespace Vakapay.ApiServer.Helpers
                     switch (action)
                     {
                         case ActionLog.TWOFA_ENABLE:
-                            newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            newSecret.TwofaEnable = secret;
                             break;
                         case ActionLog.API_ACCESS:
-                            newSecret.ApiAccess = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            newSecret.ApiAccess = secret;
                             break;
                         case ActionLog.SEND_TRSANSACTION:
-                            newSecret.SendTransaction = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            newSecret.SendTransaction = secret;
                             break;
                         case ActionLog.TWOFA_DISABLE:
-                            newSecret.TwofaDisable = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            newSecret.TwofaDisable = secret;
                             break;
                         case ActionLog.UPDATE_NOTIFICATION:
-                            newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            newSecret.UpdateOptionVerification = secret;
                             break;
                         case ActionLog.LOCK_SCREEN:
-                            newSecret.LockScreen = TwoStepsAuthenticator.Authenticator.GenerateKey();
+                            newSecret.LockScreen = secret;
                             break;
                     }
                 }
@@ -87,51 +93,28 @@ namespace Vakapay.ApiServer.Helpers
                     switch (action)
                     {
                         case ActionLog.TWOFA_ENABLE:
-                            if (string.IsNullOrEmpty(newSecret.TwofaEnable))
-                            {
-                                newSecret.TwofaEnable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
+                            newSecret.TwofaEnable = secret;
                             break;
                         case ActionLog.API_ACCESS:
-                            if (string.IsNullOrEmpty(newSecret.ApiAccess))
-                            {
-                                newSecret.ApiAccess = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
+                            newSecret.ApiAccess = secret;
                             break;
                         case ActionLog.SEND_TRSANSACTION:
-                            if (string.IsNullOrEmpty(newSecret.SendTransaction))
-                            {
-                                newSecret.SendTransaction = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
+                            newSecret.SendTransaction = secret;
                             break;
                         case ActionLog.TWOFA_DISABLE:
-                            if (string.IsNullOrEmpty(newSecret.TwofaDisable))
-                            {
-                                newSecret.TwofaDisable = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
+                            newSecret.TwofaDisable = secret;
                             break;
                         case ActionLog.UPDATE_NOTIFICATION:
-                            if (string.IsNullOrEmpty(newSecret.UpdateOptionVerification))
-                            {
-                                newSecret.UpdateOptionVerification = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
+                            newSecret.UpdateOptionVerification = secret;
                             break;
                         case ActionLog.LOCK_SCREEN:
-                            if (string.IsNullOrEmpty(newSecret.LockScreen))
-                            {
-                                newSecret.LockScreen = TwoStepsAuthenticator.Authenticator.GenerateKey();
-                            }
-
+                            newSecret.LockScreen = secret;
                             break;
                     }
                 }
 
-                return ActionCode.ToJson(newSecret);
+                data.NewSecret = ActionCode.ToJson(newSecret);
+                return data;
             }
             catch (Exception e)
             {

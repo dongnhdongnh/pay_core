@@ -160,39 +160,5 @@ namespace Vakapay.ApiServer.Controllers
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
-
-        // POST api/values
-        [HttpPost("lock-screen/require-send-code-phone")]
-        public string SendCodeLock()
-        {
-            try
-            {
-                var userModel = (User) RouteData.Values["UserModel"];
-
-
-                var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.LOCK_SCREEN);
-
-                if (checkSecret == null)
-                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
-
-                userModel.SecretAuthToken = checkSecret;
-                var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
-
-                var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                    return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
-
-                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(secretAuthToken.LockScreen))
-                    .ToJson();
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
     }
 }

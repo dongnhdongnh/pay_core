@@ -122,7 +122,7 @@ namespace Vakapay.ApiAccess.ActionFilter
         private static bool IsTokenExpired(string timeStamp)
         {
             var ticks = long.Parse(timeStamp);
-            var serverCurrentTime = CommonHelper.GetUnixTimestamp();
+            var serverCurrentTime = UnixTimestamp.ConvertToMiliseconds(CommonHelper.GetUnixTimestamp());
 
             var expired = (serverCurrentTime - ticks) > ExpirationMinutes;
             return expired;

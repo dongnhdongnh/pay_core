@@ -415,13 +415,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null)
-                    return HelpersApi.CreateDataError(MessageApiError.USER_NOT_EXIT);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("code"))
                 {
@@ -456,51 +450,6 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        // POST api/values
-        // then code when add api access
-        [HttpPost("api-access/require-send-code-phone")]
-        public string SendCodeAdd()
-        {
-            try
-            {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel != null)
-                {
-                    var checkSecret = HelpersApi.CheckToken(userModel, ActionLog.API_ACCESS);
-
-                    if (checkSecret == null)
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
-
-                    userModel.SecretAuthToken = checkSecret;
-                    var resultUpdate = _userBusiness.UpdateProfile(userModel);
-
-                    if (resultUpdate.Status == Status.STATUS_ERROR)
-                        return resultUpdate.ToJson();
-
-                    var secretAuthToken = ActionCode.FromJson(checkSecret);
-
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
-
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, 120);
-                    var code = authenticator.GetCode(secretAuthToken.ApiAccess);
-
-                    return _userBusiness.SendSms(userModel, code)
-                        .ToJson();
-                }
-
-                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
-
 
         /**
          *  verify code when twofa add api access
@@ -510,12 +459,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                if (userModel == null) return HelpersApi.CreateDataError(MessageApiError.USER_NOT_EXIT);
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
