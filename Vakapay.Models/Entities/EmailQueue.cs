@@ -6,7 +6,8 @@ namespace Vakapay.Models.Entities
 {
     public enum EmailTemplate
     {
-        NewDevice, Sent, Received, Verify
+        NewDevice, Sent, Received, Verify,
+        ReceivedInternal
     }
 
     [Table("EmailQueue")]

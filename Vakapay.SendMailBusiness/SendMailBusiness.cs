@@ -316,6 +316,15 @@ namespace Vakapay.SendMailBusiness
                     case EmailTemplate.Verify:
                         body = body.Replace("{verifyEmailUrl}", emailQueue.VerifyUrl);
                         break;
+
+                    case EmailTemplate.ReceivedInternal:
+                        body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
+                        body = body.Replace("{amount}", emailQueue.GetAmount());
+                        body = body.Replace("{sender}", GetSender(emailQueue));
+                        break;
+
+                    default:
+                        throw new Exception("Template not defined");
                 }
 
                 return body;
@@ -324,6 +333,23 @@ namespace Vakapay.SendMailBusiness
             {
                 Console.WriteLine(e);
                 return null;
+            }
+        }
+
+        private string GetSender(EmailQueue emailQueue)
+        {
+            try
+            {
+                var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
+                var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
+                var userRepository = new UserRepository(_connectionDb);
+                var user = userRepository.FindById(transaction.SenderUserId);
+                return user.Email;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
 
