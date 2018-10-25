@@ -431,5 +431,22 @@ namespace Vakapay.Repositories.Mysql
         {
             return base.SafeUpdate(row, new[] {nameof(row.AddressCount)});
         }
-    }
+
+		public List<string> DistinctUserId()
+		{
+			var queryString = "SELECT DISTINCT UserId FROM Wallet";
+			try
+			{
+				if (Connection.State != ConnectionState.Open)
+					Connection.Open();
+				var result = Connection.Query<string>(queryString);
+				return result.ToList();
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+				return null;
+			}
+		}
+	}
 }

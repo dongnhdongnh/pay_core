@@ -114,5 +114,10 @@ namespace Vakapay.Repositories.Mysql
         {
             return new InternalTransactionsRepository(dbConnection);
         }
+
+        public IPortfolioHistoryRepository GetPortfolioHistoryRepository(IDbConnection dbConnection)
+        {
+            return new PortfolioHistoryRepository(dbConnection);
+        }
     }
 }

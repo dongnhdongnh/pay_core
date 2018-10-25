@@ -23,5 +23,6 @@ namespace Vakapay.Models.Repositories
 		ISendEmailRepository GetSendEmailRepository(IDbConnection dbConnection);
 		ISendSmsRepository GetSendSmsRepository(IDbConnection dbConnection);
         IInternalTransactionRepository GetInternalTransactionRepository(IDbConnection dbConnection);
+		IPortfolioHistoryRepository GetPortfolioHistoryRepository(IDbConnection dbConnection);
 	}
 }
