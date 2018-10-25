@@ -1,15 +1,16 @@
- using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
- using Vakapay.Models.Domains;
- using Vakapay.Models.Repositories.Base;
+using Vakapay.Models.Domains;
+using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Repositories.Mysql.Base
 {
-    public abstract class BlockchainAddressRepository<TAddress> : MySqlBaseRepository<TAddress>, IAddressRepository<TAddress>
+    public abstract class BlockchainAddressRepository<TAddress> : MySqlBaseRepository<TAddress>,
+        IAddressRepository<TAddress>
         where TAddress : BlockchainAddress
     {
         public BlockchainAddressRepository(string connectionString) : base(connectionString)
@@ -38,7 +39,7 @@ namespace Vakapay.Repositories.Mysql.Base
             }
         }
 
-        public List<TAddress> FindByWalletId(string walletId)
+        public IEnumerable<TAddress> FindByWalletId(string walletId)
         {
             try
             {
@@ -53,6 +54,23 @@ namespace Vakapay.Repositories.Mysql.Base
             {
                 Logger.Error($"FindByWalletId walletID ({walletId}) Fail =>> fail: " + e.Message);
                 throw;
+            }
+        }
+
+        public List<TAddress> FindByUserIdAndCurrency(string userId, string currency)
+        {
+            try
+            {
+                var sQuery = $"SELECT t1.* FROM " + TableName +
+                             " t1 INNER JOIN wallet t2 ON t1.WalletId = t2.Id WHERE t2.UserId = '" + userId +
+                             "' AND t2.NetworkName = '" + currency + "';";
+                var result = Connection.Query<TAddress>(sQuery);
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                Logger.Error("BitcoinDepositTransactioRepository =>> FindByUserIdAndCurrency fail: " + e.Message);
+                return null;
             }
         }
 

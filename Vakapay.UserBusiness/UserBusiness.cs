@@ -476,7 +476,7 @@ namespace Vakapay.UserBusiness
                     Status = Status.STATUS_PENDING,
                     To = user.PhoneNumber,
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
-                    TextSend = "VaKaXaPay security code is: " + code,
+                    TextSend = "VakaPay security code is: " + code,
                 };
 
                 var resultSms = sendSmsRepository.CreateSmsQueueAsync(newSms);

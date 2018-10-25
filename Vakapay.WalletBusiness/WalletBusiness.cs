@@ -455,7 +455,8 @@ namespace Vakapay.WalletBusiness
                 switch (walletNetworkName)
                 {
                     case CryptoCurrency.BTC:
-                        var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
+                        var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                            AppSettingHelper.GetBitcoinRpcAuthentication());
 
                         getInfoResult = bitcoinRpc.GetInfo();
 
@@ -467,6 +468,7 @@ namespace Vakapay.WalletBusiness
                                 Message = "Bitcoin network error: " + getInfoResult.Message
                             };
                         }
+
                         break;
 
                     case CryptoCurrency.ETH:
@@ -481,6 +483,7 @@ namespace Vakapay.WalletBusiness
                                 Message = "Ethereum network error: " + blockNumber.Message
                             };
                         }
+
                         break;
 
                     case CryptoCurrency.VAKA:
@@ -495,6 +498,7 @@ namespace Vakapay.WalletBusiness
                                 Message = "Vakacoin network error: " + getInfoResult.Message
                             };
                         }
+
                         break;
                     default:
                         return new ReturnObject()
@@ -866,7 +870,8 @@ namespace Vakapay.WalletBusiness
             switch (networkName)
             {
                 case CryptoCurrency.BTC:
-                    var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
+                    var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                        AppSettingHelper.GetBitcoinRpcAuthentication());
                     var result = bitcoinRpc.ValidateAddress(address);
                     var jsonResult = JObject.Parse(result.Data);
                     return jsonResult["isvalid"].Value<bool>();
@@ -935,7 +940,7 @@ namespace Vakapay.WalletBusiness
             var transactionSend = ConnectionDb.BeginTransaction();
             try
             {
-                var sendResult = await CreateAddressForWallet(pendingWallet);
+                var sendResult = CreateAddressForWallet(pendingWallet);
 //                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
 //                {
 //                    return sendResult;
@@ -970,7 +975,7 @@ namespace Vakapay.WalletBusiness
             }
         }
 
-        private async Task<ReturnObject> CreateAddressForWallet(Wallet pendingWallet)
+        private ReturnObject CreateAddressForWallet(Wallet pendingWallet)
         {
             try
             {
@@ -992,7 +997,8 @@ namespace Vakapay.WalletBusiness
                         var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(vakapayRepositoryFactory, false);
                         res = bitcoinBusiness.CreateAddressAsync(
                             new BitcoinAddressRepository(ConnectionDb),
-                            new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication()),
+                            new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                                AppSettingHelper.GetBitcoinRpcAuthentication()),
                             pendingWallet.Id, pass).Result;
                         break;
 
@@ -1013,14 +1019,76 @@ namespace Vakapay.WalletBusiness
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                 return new ReturnObject()
-                 {
-                     Status = Status.STATUS_ERROR,
-                     Message = e.Message
-                 };
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
             }
         }
 
+
+        public async Task<ReturnObject> CreateAddressAsync(Wallet wallet)
+        {
+            var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+
+            //update Version to Model
+            wallet.Version += 1;
+
+            var transactionSend = ConnectionDb.BeginTransaction();
+            try
+            {
+                var sendResult = CreateAddressForWallet(wallet);
+                if (sendResult.Status == Status.STATUS_ERROR)
+                {
+                    return sendResult;
+                }
+
+                wallet.Status = sendResult.Status;
+                wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                wallet.IsProcessing = 0;
+                wallet.AddressCount += 1;
+
+                var updateResult = await walletRepository.SafeUpdate(wallet);
+                if (updateResult.Status == Status.STATUS_ERROR)
+                {
+                    transactionSend.Rollback();
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Cannot update wallet status"
+                    };
+                }
+
+                updateResult.Data = sendResult.Data;
+
+                transactionSend.Commit();
+                return updateResult;
+            }
+            catch (Exception e)
+            {
+                // release lock
+                transactionSend.Rollback();
+                var releaseResult = walletRepository.ReleaseLock(wallet);
+                Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+                throw;
+            }
+        }
+
+        public Wallet FindByUserAndNetwork(string userId, string networkName)
+        {
+            try
+            {
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var wallets = walletRepository.FindByUserAndNetwork(userId, networkName);
+                return wallets;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
         public List<string> DistinctUserId()
         {
             try
