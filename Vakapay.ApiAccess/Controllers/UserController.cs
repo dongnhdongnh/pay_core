@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
@@ -91,10 +92,17 @@ namespace Vakapay.ApiAccess.Controllers
                     scopeModel.Currencys = arrCurrency.ToList();
                 }
 
-                if (arrPermission != null && arrPermission.Length > 0)
+                if (arrPermission == null || arrPermission.Length <= 0)
+                    return CreateDataSuccess(JsonHelper.SerializeObject(scopeModel));
+                var listPermissions = new List<string>();
+                foreach (var item in arrPermission)
                 {
-                    scopeModel.Permissions = arrPermission.ToList();
+                    if (Models.Constants.listApiAccess.ContainsKey(item.Trim()))
+                    {
+                        listPermissions.Add(Models.Constants.listApiAccess[item.Trim()]);
+                    }
                 }
+                scopeModel.Permissions = listPermissions;
 
                 return CreateDataSuccess(JsonHelper.SerializeObject(scopeModel));
             }
