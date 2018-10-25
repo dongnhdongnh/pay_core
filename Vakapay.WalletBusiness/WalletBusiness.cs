@@ -715,7 +715,7 @@ namespace Vakapay.WalletBusiness
         /// <param name="orderBy"></param>
         /// <returns></returns>
         public List<BlockchainTransaction> GetHistory(out int numberData, string userId, string currencyName,
-            int offset = -1, int limit = -1, string[] orderBy = null)
+            int offset = -1, int limit = -1, string[] orderBy = null,string search=null)
         {
             numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
@@ -725,13 +725,13 @@ namespace Vakapay.WalletBusiness
             {
                 case CryptoCurrency.ETH:
                     
-                   output = ethereumBussiness.GetAllHistory(out numberData,userId,offset, limit, orderBy);
+                   output = ethereumBussiness.GetAllHistory(out numberData,userId, currencyName, offset, limit, orderBy,search);
                     break;
                 case CryptoCurrency.VAKA:
-                   output = vakacoinBussiness.GetAllHistory(out numberData, userId, offset, limit, orderBy);
+                   output = vakacoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit, orderBy, search);
                     break;
                 case CryptoCurrency.BTC:
-                   output = bitcoinBussiness.GetAllHistory(out numberData, userId, offset, limit, orderBy);
+                   output = bitcoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit, orderBy, search);
                     break;
                 default:
                     break;
@@ -919,6 +919,20 @@ namespace Vakapay.WalletBusiness
                      Status = Status.STATUS_ERROR,
                      Message = e.Message
                  };
+            }
+        }
+
+        public List<string> DistinctUserId()
+        {
+            try
+            {
+                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                return walletRepo.DistinctUserId();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
             }
         }
     }

@@ -47,11 +47,11 @@ namespace Vakapay.ScanVakaCoin
         public IEnumerable<object> StreamBlock(uint startBlock = 0)
         {
             if (CacheHelper.HaveKey(
-                String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
+                String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
                     CryptoCurrency.VAKA)
             ))
                 uint.TryParse(
-                    CacheHelper.GetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
+                    CacheHelper.GetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
                         CryptoCurrency.VAKA)),
                     out startBlock
                 );
@@ -67,7 +67,7 @@ namespace Vakapay.ScanVakaCoin
                 // Parse transactions from current block to last trusted block
                 for (uint blockNum = startBlock; blockNum <= lastIrreversibleBlock; blockNum++)
                 {
-                    CacheHelper.SetCacheString(String.Format(CacheHelper.CacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
+                    CacheHelper.SetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
                         "VAKA"), blockNum.ToString());
                     yield return _rpcClient.GetBlockByNumber(blockNum);
                 }

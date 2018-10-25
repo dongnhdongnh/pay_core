@@ -53,9 +53,5 @@ namespace Vakapay.Commons.Helpers
 			return CacheDatabase.KeyDelete(key);
 		}
 
-		public class CacheKey
-		{
-			public const String KEY_SCANBLOCK_LASTSCANBLOCK = "KEY_{0}_LASTSCANBLOCK";
-		}
 	}
 }
