@@ -12,10 +12,6 @@ namespace Vakapay.SendSms
     {
         private static void Main()
         {
-            var apiKey = AppSettingHelper.Get("Elastic:ApiKey");
-            var apiAddress = AppSettingHelper.Get("Elastic:SmsUrl");
-
-
             var repositoryConfig = new RepositoryConfiguration
             {
                 ConnectionString = AppSettingHelper.GetDBConnection()
@@ -28,7 +24,8 @@ namespace Vakapay.SendSms
             {
                 try
                 {
-                    var result = sendSmsBusiness.SendSmsAsync(apiAddress, apiKey);
+                    var result = sendSmsBusiness.SendSmsAsync(AppSettingHelper.GetElasticSmsUrl(),
+                        AppSettingHelper.GetElasticApiKey());
                     Console.WriteLine(JsonHelper.SerializeObject(result.Result));
                 }
                 catch (Exception e)
