@@ -146,12 +146,10 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    var secret = secretAuthToken.ApiAccess;
-
-                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessAdd, code, userModel, 120);
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -216,12 +214,10 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessDelete))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    var secret = secretAuthToken.ApiAccess;
-
-                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessDelete, code, userModel);
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -270,9 +266,7 @@ namespace Vakapay.ApiServer.Controllers
                     if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    var secret = secretAuthToken.ApiAccess;
-
-                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel);
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -324,9 +318,7 @@ namespace Vakapay.ApiServer.Controllers
                     if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    var secret = secretAuthToken.ApiAccess;
-
-                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel);
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -375,12 +367,11 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessEdit))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    var secret = secretAuthToken.ApiAccess;
 
-                    isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessEdit, code, userModel, 120);
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -421,17 +412,15 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     var code = value["code"].ToString();
 
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, 120);
 
                     var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
                         return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    var secret = secretAuthToken.ApiAccess;
-
-
-                    var isok = authenticator.CheckCode(secret, code, userModel);
+                    var isok = authenticator.CheckCode(secretAuthToken.ApiAccessAdd, code, userModel);
 
                     if (!isok) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 

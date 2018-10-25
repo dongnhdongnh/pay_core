@@ -298,6 +298,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var action = value["action"].ToString();
                 string secret = null;
+                int time = 30;
 
                 switch (action)
                 {
@@ -325,6 +326,14 @@ namespace Vakapay.ApiServer.Controllers
                     case ActionLog.SEND_TRSANSACTION:
                         secret = ActionLog.SEND_TRSANSACTION;
                         break;
+                    case ActionLog.API_ACCESS_ADD:
+                        secret = ActionLog.API_ACCESS_ADD;
+                        time = 120;
+                        break;
+                    case ActionLog.API_ACCESS_EDIT:
+                        secret = ActionLog.API_ACCESS_EDIT;
+                        time = 120;
+                        break;
                     case ActionLog.API_ACCESS:
                         secret = ActionLog.API_ACCESS;
                         break;
@@ -334,7 +343,6 @@ namespace Vakapay.ApiServer.Controllers
                     default:
                         return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 }
-
 
                 var userModel = (User) RouteData.Values["UserModel"];
 
@@ -355,7 +363,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (resultUpdate.Status == Status.STATUS_ERROR)
                     return resultUpdate.ToJson();
 
-                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(checkSecret.Secret)).ToJson();
+                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(checkSecret.Secret, time)).ToJson();
             }
             catch (Exception e)
             {

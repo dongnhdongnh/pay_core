@@ -12,6 +12,8 @@ namespace Vakapay.Commons.Constants
         public const string UPDATE_OPTION_VETIFY = "UpdateOptionVerify";
         public const string LOCK_SCREEN = "LockScreen";
         public const string SEND_TRSANSACTION = "SendTransaction";
+        public const string API_ACCESS_ADD = "ApiAccessAdd";
+        public const string API_ACCESS_EDIT = "ApiAccessEdit";
         public const string API_ACCESS = "ApiAccess";
         public const string API_ACCESS_DELETE = "ApiAccessDelete";
     }

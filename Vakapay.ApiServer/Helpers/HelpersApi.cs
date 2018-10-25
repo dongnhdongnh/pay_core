@@ -31,9 +31,9 @@ namespace Vakapay.ApiServer.Helpers
             return valid;
         }
 
-        public static bool CheckCodeSms(string secret, string token, User model)
+        public static bool CheckCodeSms(string secret, string token, User model, int time = 30)
         {
-            var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+            var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, time);
             return authenticator.CheckCode(secret, token, model);
         }
 
@@ -42,11 +42,12 @@ namespace Vakapay.ApiServer.Helpers
             return Uri.TryCreate(source, UriKind.Absolute, out var uriResult) && uriResult.Scheme == Uri.UriSchemeHttp;
         }
 
-        public static string SendCodeSms(string secret)
+        public static string SendCodeSms(string secret, int time = 30)
         {
-            var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+            var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, time);
             var code = authenticator.GetCode(secret);
             Console.WriteLine(code);
+            Console.WriteLine(secret);
             return code;
         }
 
@@ -62,55 +63,37 @@ namespace Vakapay.ApiServer.Helpers
                 };
                 var newSecret = new ActionCode();
 
-                if (string.IsNullOrEmpty(userModel.SecretAuthToken))
-                {
-                    switch (action)
-                    {
-                        case ActionLog.TWOFA_ENABLE:
-                            newSecret.TwofaEnable = secret;
-                            break;
-                        case ActionLog.API_ACCESS:
-                            newSecret.ApiAccess = secret;
-                            break;
-                        case ActionLog.SEND_TRSANSACTION:
-                            newSecret.SendTransaction = secret;
-                            break;
-                        case ActionLog.TWOFA_DISABLE:
-                            newSecret.TwofaDisable = secret;
-                            break;
-                        case ActionLog.UPDATE_NOTIFICATION:
-                            newSecret.UpdateOptionVerification = secret;
-                            break;
-                        case ActionLog.LOCK_SCREEN:
-                            newSecret.LockScreen = secret;
-                            break;
-                    }
-                }
-                else
+                if (!string.IsNullOrEmpty(userModel.SecretAuthToken))
                 {
                     newSecret = ActionCode.FromJson(userModel.SecretAuthToken);
+                }
 
-                    switch (action)
-                    {
-                        case ActionLog.TWOFA_ENABLE:
-                            newSecret.TwofaEnable = secret;
-                            break;
-                        case ActionLog.API_ACCESS:
-                            newSecret.ApiAccess = secret;
-                            break;
-                        case ActionLog.SEND_TRSANSACTION:
-                            newSecret.SendTransaction = secret;
-                            break;
-                        case ActionLog.TWOFA_DISABLE:
-                            newSecret.TwofaDisable = secret;
-                            break;
-                        case ActionLog.UPDATE_NOTIFICATION:
-                            newSecret.UpdateOptionVerification = secret;
-                            break;
-                        case ActionLog.LOCK_SCREEN:
-                            newSecret.LockScreen = secret;
-                            break;
-                    }
+                switch (action)
+                {
+                    case ActionLog.TWOFA_ENABLE:
+                        newSecret.TwofaEnable = secret;
+                        break;
+                    case ActionLog.API_ACCESS_ADD:
+                        newSecret.ApiAccessAdd = secret;
+                        break;
+                    case ActionLog.API_ACCESS_EDIT:
+                        newSecret.ApiAccessEdit = secret;
+                        break;
+                    case ActionLog.API_ACCESS:
+                        newSecret.ApiAccess = secret;
+                        break;
+                    case ActionLog.SEND_TRSANSACTION:
+                        newSecret.SendTransaction = secret;
+                        break;
+                    case ActionLog.TWOFA_DISABLE:
+                        newSecret.TwofaDisable = secret;
+                        break;
+                    case ActionLog.UPDATE_NOTIFICATION:
+                        newSecret.UpdateOptionVerification = secret;
+                        break;
+                    case ActionLog.LOCK_SCREEN:
+                        newSecret.LockScreen = secret;
+                        break;
                 }
 
                 data.NewSecret = ActionCode.ToJson(newSecret);
