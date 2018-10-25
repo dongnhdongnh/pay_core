@@ -15,10 +15,7 @@ namespace Vakapay.Commons.Constants
         public const string VAKACOIN = "vakacoin";
         public const string BITCOIN = "bitcoin";
         public const string ETHEREUM = "ethereum";
-        public const string EOS = "eos";
 
-        public const string COINMARKET_URL = "https://graphs2.coinmarketcap.com/currencies/";
-        
         public const int INTERVAL = 5;
 
         // current always in the last
@@ -29,7 +26,7 @@ namespace Vakapay.Commons.Constants
         
         public static readonly List<string> NETWORK_LIST = new List<string>
         {
-            VAKACOIN, BITCOIN, ETHEREUM, EOS
+            VAKACOIN, BITCOIN, ETHEREUM
         };
     }
 }
