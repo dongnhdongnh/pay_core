@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
@@ -86,7 +83,12 @@ namespace Vakapay.ApiServer.Controllers
                     if (!int.TryParse((string) status, out int outStatus))
                         return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    var password = value["password"];
+                    var password = value["password"].ToString();
+
+                    if (!HelpersApi.ValidatePass(password))
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+
                     bool isVerify;
 
                     if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
@@ -97,19 +99,17 @@ namespace Vakapay.ApiServer.Controllers
                     {
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                        if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
                             return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                        var secret = secretAuthToken.ApiAccess;
-
-                        isVerify = HelpersApi.CheckCodeSms(secret, code, userModel);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.LockScreen, code, userModel);
                     }
 
                     if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                     userModel.IsLockScreen = outStatus;
-                    userModel.SecondPassword = !string.IsNullOrEmpty(password.ToString())
-                        ? CommonHelper.Md5(password.ToString())
+                    userModel.SecondPassword = !string.IsNullOrEmpty(password)
+                        ? CommonHelper.Md5(password)
                         : "";
 
                     _userBusiness.UpdateProfile(userModel);
@@ -144,6 +144,9 @@ namespace Vakapay.ApiServer.Controllers
                 if (value.ContainsKey("password"))
                 {
                     var password = value["password"].ToString();
+
+                    if (!HelpersApi.ValidatePass(password))
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                     if (CommonHelper.Md5(password).Equals(userModel.SecondPassword))
                         return new ReturnObject

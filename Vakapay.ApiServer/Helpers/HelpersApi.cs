@@ -31,6 +31,12 @@ namespace Vakapay.ApiServer.Helpers
             return valid;
         }
 
+        public static bool ValidatePass(string pass)
+        {
+            const string pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,100}$";
+            return Regex.IsMatch(pass, pattern);
+        }
+
         public static bool CheckCodeSms(string secret, string token, User model, int time = 30)
         {
             var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, time);
@@ -73,6 +79,9 @@ namespace Vakapay.ApiServer.Helpers
                     case ActionLog.TWOFA_ENABLE:
                         newSecret.TwofaEnable = secret;
                         break;
+                    case ActionLog.UPDATE_OPTION_VETIFY:
+                        newSecret.UpdateOptionVerification = secret;
+                        break;
                     case ActionLog.API_ACCESS_ADD:
                         newSecret.ApiAccessAdd = secret;
                         break;
@@ -87,9 +96,6 @@ namespace Vakapay.ApiServer.Helpers
                         break;
                     case ActionLog.TWOFA_DISABLE:
                         newSecret.TwofaDisable = secret;
-                        break;
-                    case ActionLog.UPDATE_NOTIFICATION:
-                        newSecret.UpdateOptionVerification = secret;
                         break;
                     case ActionLog.LOCK_SCREEN:
                         newSecret.LockScreen = secret;
