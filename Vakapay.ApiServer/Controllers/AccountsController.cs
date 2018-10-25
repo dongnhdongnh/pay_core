@@ -200,10 +200,10 @@ namespace Vakapay.ApiServer.Controllers
         [HttpPost("{userId}/transactions")]
         public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
         {
+            var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+            ReturnObject result = null;
             try
             {
-                var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
-
                 var request = value.ToObject<UserSendTransaction>();
 
                 request.UserId = userId;
@@ -212,19 +212,27 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (res.Status == Status.STATUS_ERROR)
                 {
-                    return new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = res.Message}.ToJson();
+                    result = new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = res.Message};
                 }
-
-                return new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
+                else
+                {
+                    result = new ReturnDataObject()
+                        {Status = Status.STATUS_SUCCESS, Data = request};
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
             }
+            finally
+            {
+                sendTransactionBusiness.CloseDbConnection();
+            }
+
+            return result.ToJson();
         }
 
         [HttpPost("{userId}/transactions2")]

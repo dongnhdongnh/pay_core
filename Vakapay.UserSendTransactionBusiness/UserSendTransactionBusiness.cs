@@ -28,6 +28,11 @@ namespace Vakapay.UserSendTransactionBusiness
                 : vakapayRepositoryFactory.GetOldConnection();
         }
 
+        public void CloseDbConnection()
+        {
+            _connectionDb.Close();
+        }
+
         public ReturnObject AddSendTransaction(UserSendTransaction sendTransaction)
         {
             try
