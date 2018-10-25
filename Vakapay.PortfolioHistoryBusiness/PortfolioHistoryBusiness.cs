@@ -33,11 +33,8 @@ namespace Vakapay.PortfolioHistoryBusiness
             string ethPrice = CacheHelper.GetCacheString(String.Format(
                 RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
                 DashboardConfig.CURRENT));
-            string eosPrice = CacheHelper.GetCacheString(String.Format(
-                RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.EOS,
-                DashboardConfig.CURRENT));
             
-            return Repository.InsertWithPrice(userId, vkcPrice, btcPrice, ethPrice, eosPrice);
+            return Repository.InsertWithPrice(userId, vkcPrice, btcPrice, ethPrice);
         }
 
         public List<PortfolioHistory> FindByUserId(string userId, long from, long to)
