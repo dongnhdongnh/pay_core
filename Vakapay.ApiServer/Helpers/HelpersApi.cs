@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 
@@ -35,6 +37,36 @@ namespace Vakapay.ApiServer.Helpers
         {
             const string pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,100}$";
             return Regex.IsMatch(pass, pattern);
+        }
+
+        public static bool ValidatePermission(string permission)
+        {
+            var datas = permission.Split(",");
+            if (datas.Length > 0)
+            {
+                foreach (var data in datas)
+                {
+                    if (!Constants.listApiAccess.ContainsKey(data.Trim()))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool ValidateWallet(string wallets)
+        {
+            var datas = wallets.Split(",");
+            if (datas.Length > 0)
+            {
+                foreach (var data in datas)
+                {
+                    if (!CryptoCurrency.AllNetwork.Contains(data.Trim()))
+                        return false;
+                }
+            }
+
+            return true;
         }
 
         public static bool CheckCodeSms(string secret, string token, User model, int time = 30)

@@ -122,6 +122,89 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
+
+        // POST api/values
+        // verify code and update when update verify
+        [HttpPost("api-access/edit")]
+        public string EditApiAccess([FromBody] JObject value)
+        {
+            try
+            {
+                var userModel = (User) RouteData.Values["UserModel"];
+
+                if (!value.ContainsKey("code") || !value.ContainsKey("data"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var code = value["code"].ToString();
+                var data = DataApiKeyForm.FromJson(value["data"].ToString());
+
+                if (string.IsNullOrEmpty(data.apis) || string.IsNullOrEmpty(data.wallets) ||
+                    string.IsNullOrEmpty(data.id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 4);
+
+                bool isVerify;
+
+                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                {
+                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                }
+                else
+                {
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessAdd, code, userModel, 120);
+                }
+
+                // if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                //update api permissions
+                if (!CommonHelper.ValidateId(data.id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var modelApi = _userBusiness.GetApiKeyById(data.id);
+                if (modelApi == null)
+                    return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+
+
+                if (!modelApi.UserId.Equals(userModel.Id))
+                    return HelpersApi.CreateDataError(MessageApiError.USER_NOT_EXIT);
+
+                if (value.ContainsKey("notificationUrl"))
+                {
+                    modelApi.CallbackUrl = value["notificationUrl"].ToString();
+
+                    if (!HelpersApi.CheckUrlValid(modelApi.CallbackUrl))
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 1);
+                }
+
+                if (value.ContainsKey("allowedIp"))
+                {
+                    modelApi.ApiAllow = value["allowedIp"].ToString();
+                }
+
+                modelApi.Permissions = data.apis;
+                if (!HelpersApi.ValidatePermission(modelApi.Permissions))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 2);
+
+                modelApi.Wallets = data.wallets;
+                if (!HelpersApi.ValidateWallet(modelApi.Wallets))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 3);
+
+                _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.API_ACCESS,
+                    HelpersApi.GetIp(Request));
+
+                return _userBusiness.SaveApiKey(modelApi).ToJson();
+            }
+            catch (Exception e)
+            {
+                return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
         // POST api/values
         // verify code and update when update verify
         [HttpPost("api-access/create")]
@@ -164,7 +247,7 @@ namespace Vakapay.ApiServer.Controllers
                     modelApi.CallbackUrl = value["notificationUrl"].ToString();
 
                     if (!HelpersApi.CheckUrlValid(modelApi.CallbackUrl))
-                        HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 }
 
                 if (value.ContainsKey("allowedIp"))
@@ -173,9 +256,14 @@ namespace Vakapay.ApiServer.Controllers
                 }
 
                 modelApi.Permissions = value["apis"].ToString();
-                modelApi.Wallets = value["wallets"].ToString();
-                modelApi.Status = 1;
+                if (!HelpersApi.ValidatePermission(modelApi.Permissions))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                modelApi.Wallets = value["wallets"].ToString();
+                if (!HelpersApi.ValidateWallet(modelApi.Wallets))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                modelApi.Status = 1;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.API_ACCESS,

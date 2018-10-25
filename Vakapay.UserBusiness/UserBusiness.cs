@@ -288,7 +288,7 @@ namespace Vakapay.UserBusiness
                 else
                 {
                     model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
-                    var resultEdit = apirRepository.Insert(model);
+                    var resultEdit = apirRepository.Update(model);
 
                     return new ReturnObject
                     {
@@ -534,6 +534,7 @@ namespace Vakapay.UserBusiness
             {
                 var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
                 var user = userRepository.FindWhere(userRepository.QuerySearch(search));
+
                 return user;
             }
             catch (Exception e)
