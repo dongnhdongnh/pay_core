@@ -1,6 +1,5 @@
 using System;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
 using Vakapay.ApiAccess.Constants;
@@ -75,6 +74,37 @@ namespace Vakapay.ApiAccess.Controllers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("user/scopes")]
+        public ActionResult<string> GetScopes()
+        {
+            try
+            {
+                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var arrPermission = apiKeyModel.Permissions.Split(",");
+                var arrCurrency = apiKeyModel.Wallets.Split(",");
+                var scopeModel = new ScopesModel();
+                if (arrCurrency != null && arrCurrency.Length > 0)
+                {
+                    scopeModel.Currencys = arrCurrency.ToList();
+                }
+
+                if (arrPermission != null && arrPermission.Length > 0)
+                {
+                    scopeModel.Permissions = arrPermission.ToList();
+                }
+
+                return CreateDataSuccess(JsonHelper.SerializeObject(scopeModel));
+            }
+            catch (Exception)
+            {
+                return CreateDataSuccess(JsonHelper.SerializeObject(MessageError.SCOPES_ERROR));
+            }
+        }
+
+        /// <summary>
         /// CreateDataError
         /// </summary>
         /// <param name="message"></param>
@@ -85,6 +115,21 @@ namespace Vakapay.ApiAccess.Controllers
             {
                 Status = Status.STATUS_ERROR,
                 Message = message
+            }.ToJson();
+        }
+
+        /// <summary>
+        /// CreateDataSuccess
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public string CreateDataSuccess(string data)
+        {
+            return new ReturnObject
+            {
+                Status = Status.STATUS_SUCCESS,
+                Message = null,
+                Data = data
             }.ToJson();
         }
     }

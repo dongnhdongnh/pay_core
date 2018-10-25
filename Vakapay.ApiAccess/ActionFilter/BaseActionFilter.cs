@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -71,8 +70,8 @@ namespace Vakapay.ApiAccess.ActionFilter
         private static FilterModel GetMessageTokenInvalid(IHeaderDictionary headers, string path,
             IVakapayRepositoryFactory repositoryFactory)
         {
-            Console.WriteLine("GenerateTokenKey: " + CommonHelper.GenerateTokenKey("jm1ule1uvhp1s827",
-                                  "f6lyadz0qb7pdf6rrfjocq7adv4e151m", "1540372506277", path));
+            Console.WriteLine("GenerateTokenKey: " + CommonHelper.GenerateTokenKey("wk961j2jewxaz0zy",
+                                  "cjon3tnigdvuosipgxm1hlu3fd6umtbm", "1540372506277", path));
             var filterModel = new FilterModel
             {
                 Message = MessageError.TOKEN_INVALID,

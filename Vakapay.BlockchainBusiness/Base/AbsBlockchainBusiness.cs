@@ -220,6 +220,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 return new ReturnObject
                 {
                     Status = resultDB.Status,
+                    Data = (resultDB.Status == Status.STATUS_SUCCESS) ? address : null,
                     Message = resultDB.Message
                 };
             }
@@ -329,12 +330,12 @@ namespace Vakapay.BlockchainBusiness.Base
                                 Console.WriteLine("HELLO " + _currentPending.Hash);
                                 _currentPending.BlockNumber = _blockNumber;
                                 _currentPending.Fee = _fee;
-                                _currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                                _currentPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                                 //	_currentPending.Status = Status.StatusCompleted;
                                 //	_currentPending.InProcess = 0;
                                 Console.WriteLine("CaLL UPDATE");
 
-                                withdrawRepoQuery.Update((TWithDraw)_currentPending);
+                                withdrawRepoQuery.Update((TWithDraw) _currentPending);
                                 withdrawPendingTransactions.RemoveAt(i);
                             }
                         }
@@ -360,7 +361,7 @@ namespace Vakapay.BlockchainBusiness.Base
                             int _transaValue = 0;
                             if (_trans.Value.HexToInt(out _transaValue))
                             {
-                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
+                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal) _transaValue, networkName);
                             }
                         }
                     }
@@ -392,9 +393,12 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
         /// <returns></returns>
-        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string userID,string currency,
-       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, string TableInternalWihdrawnName, int offset = -1, int limit = -1,
-       string[] orderBy = null,string search=null)
+        public virtual List<BlockchainTransaction> GetAllHistory<T1, T2>(out int numberData, string userID,
+            string currency,
+            IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery,
+            IRepositoryBlockchainTransaction<T2> DepositrepoQuery, string TableInternalWihdrawnName, int offset = -1,
+            int limit = -1,
+            string[] orderBy = null, string search = null)
         {
             try
             {
@@ -402,7 +406,9 @@ namespace Vakapay.BlockchainBusiness.Base
                 //WithdrawnrepoQuery.GetTableName();
                 //DepositrepoQuery.GetTableName();
                 //   WithdrawnrepoQuery.FindBySql();
-                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID,currency, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), TableInternalWihdrawnName, offset, limit, orderBy, search);
+                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID, currency,
+                    WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), TableInternalWihdrawnName,
+                    offset, limit, orderBy, search);
             }
             catch (Exception e)
             {
@@ -450,8 +456,9 @@ namespace Vakapay.BlockchainBusiness.Base
             return null;
         }
 
-        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency, int offset = -1, int limit = -1,
-            string[] orderBy = null,string search=null)
+        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData, string userID, string currency,
+            int offset = -1, int limit = -1,
+            string[] orderBy = null, string search = null)
         {
             numberData = -1;
             Console.WriteLine("Not override");
