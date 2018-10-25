@@ -63,7 +63,7 @@ namespace Vakapay.Repositories.Mysql.Base
             {
                 var sQuery = $"SELECT t1.* FROM " + TableName +
                              " t1 INNER JOIN wallet t2 ON t1.WalletId = t2.Id WHERE t2.UserId = '" + userId +
-                             "' AND t2.NetworkName = '" + currency + "';";
+                             "' AND t2.Currency = '" + currency + "';";
                 var result = Connection.Query<TAddress>(sQuery);
                 return result.ToList();
             }
