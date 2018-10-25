@@ -33,18 +33,18 @@ namespace Vakapay.WalletBusiness
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
-        public WalletBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
+        public WalletBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
         {
-            vakapayRepositoryFactory = _vakapayRepositoryFactory;
+            this.vakapayRepositoryFactory = vakapayRepositoryFactory;
             ConnectionDb = isNewConnection
-                ? vakapayRepositoryFactory.GetDbConnection()
-                : vakapayRepositoryFactory.GetOldConnection();
+                ? this.vakapayRepositoryFactory.GetDbConnection()
+                : this.vakapayRepositoryFactory.GetOldConnection();
 
-            ethereumBussiness = new EthereumBusiness.EthereumBusiness(_vakapayRepositoryFactory, false);
-            bitcoinBussiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory, false);
-            vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory, false);
-            sendMailBusiness = new SendMailBusiness.SendMailBusiness(vakapayRepositoryFactory, false);
-            userBusiness = new UserBusiness.UserBusiness(vakapayRepositoryFactory, false);
+            ethereumBussiness = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory, false);
+            bitcoinBussiness = new BitcoinBusiness.BitcoinBusiness(vakapayRepositoryFactory, false);
+            vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
+            sendMailBusiness = new SendMailBusiness.SendMailBusiness(this.vakapayRepositoryFactory, false);
+            userBusiness = new UserBusiness.UserBusiness(this.vakapayRepositoryFactory, false);
         }
 
         /// <summary>
@@ -340,16 +340,10 @@ namespace Vakapay.WalletBusiness
                 var insertWithdraw = InsertToWithdrawTable(new BlockchainTransaction
                 {
                     UserId = walletById.UserId,
-                    Status = Status.STATUS_PENDING,
                     FromAddress = fromAddress,
                     ToAddress = toAddress,
                     Fee = free,
                     Amount = amount,
-                    CreatedAt = CommonHelper.GetUnixTimestamp(),
-                    UpdatedAt = CommonHelper.GetUnixTimestamp(),
-                    //						NetworkName = NetworkName.ETH,
-                    IsProcessing = 0,
-                    Version = 0
                 }, walletById.Currency);
 
                 return insertWithdraw;
@@ -372,19 +366,19 @@ namespace Vakapay.WalletBusiness
                 case CryptoCurrency.BTC:
                     var btcWithdrawTransaction =
                         vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(ConnectionDb);
-                    return btcWithdrawTransaction.Insert(blockchainTransaction as BitcoinWithdrawTransaction);
+                    return btcWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<BitcoinWithdrawTransaction>());
                     break;
 
                 case CryptoCurrency.ETH:
                     var etherWithdrawTransaction =
                         vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
-                    return etherWithdrawTransaction.Insert(blockchainTransaction as EthereumWithdrawTransaction);
+                    return etherWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<EthereumWithdrawTransaction>());
                     break;
 
                 case CryptoCurrency.VAKA:
                     var vakaWithdrawTransaction =
                         vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
-                    return vakaWithdrawTransaction.Insert(blockchainTransaction as VakacoinWithdrawTransaction);
+                    return vakaWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
                     break;
 
                 default:
@@ -477,6 +471,12 @@ namespace Vakapay.WalletBusiness
             };
         }
 
+        /// <summary>
+        /// Get Fee: return miner fee plus service fee
+        /// </summary>
+        /// <param name="walletNetworkName"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private decimal GetFee(string walletNetworkName)
         {
             // throw new NotImplementedException(); //TODO  must implement
@@ -494,6 +494,13 @@ namespace Vakapay.WalletBusiness
             }
         }
 
+        /// <summary>
+        /// Get sender: TODO This function will return a master wallet address or account to send coin to user request address
+        /// </summary>
+        /// <param name="wallet"></param>
+        /// <param name="toAddress"></param>
+        /// <param name="amount"></param>
+        /// <returns></returns>
         private string GetSenderAddress(Wallet wallet, string toAddress, decimal amount)
         {
 //            throw new NotImplementedException(); //TODO  must implement
