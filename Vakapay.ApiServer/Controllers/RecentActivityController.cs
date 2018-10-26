@@ -27,7 +27,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             _vakapayRepository = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
