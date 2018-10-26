@@ -200,14 +200,30 @@ namespace Vakapay.ApiServer.Controllers
         [HttpPost("{userId}/coinbase_transactions")]
         public ActionResult<string> SendTransactionsCoinbase(string userId, [FromBody] JObject value)
         {
-            var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
             ReturnObject result = null;
             try
             {
                 var request = value.ToObject<UserSendTransaction>();
-
                 request.UserId = userId;
+                result = AddSendTransaction(request);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
+            }
 
+            return result.ToJson();
+        }
+
+        private ReturnObject AddSendTransaction(UserSendTransaction request)
+        {
+            var sendTransactionBusiness =
+                new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+            ReturnObject result = null;
+            try
+            {
                 var res = sendTransactionBusiness.AddSendTransaction(request);
 
                 if (res.Status == Status.STATUS_ERROR)
@@ -232,12 +248,14 @@ namespace Vakapay.ApiServer.Controllers
                 sendTransactionBusiness.CloseDbConnection();
             }
 
-            return result.ToJson();
+            return result;
         }
+
 
         [HttpPost("{userId}/transactions")]
         public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
         {
+            ReturnObject result = null;
             try
             {
                 var request = value.ToObject<SendTransaction>();
@@ -252,24 +270,16 @@ namespace Vakapay.ApiServer.Controllers
                     Description = request.Detail.VkcNote,
                 };
 
-                var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
-                var res = sendTransactionBusiness.AddSendTransaction(userRequest);
-
-                if (res.Status == Status.STATUS_ERROR)
-                {
-                    return new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = res.Message}.ToJson();
-                }
-
-                return new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
+                result = AddSendTransaction(userRequest);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
             }
+
+            return result.ToJson();
         }
 
         [HttpGet]
