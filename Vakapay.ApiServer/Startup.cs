@@ -29,8 +29,7 @@ namespace Vakapay.ApiServer
                 .AddIdentityServerAuthentication(options =>
                 {
                     options.Authority = "https://vakaid.vakaxalab.com";
-                    options.RequireHttpsMetadata = false;
-
+                    options.RequireHttpsMetadata = true;
                     options.ApiName = "api1";
                 });
         }
@@ -64,7 +63,6 @@ namespace Vakapay.ApiServer
                     .AllowCredentials();
             });
 
-           
             app.UseMvc();
         }
     }

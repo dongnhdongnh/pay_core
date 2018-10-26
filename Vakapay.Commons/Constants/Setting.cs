@@ -18,5 +18,8 @@ namespace Vakapay.Commons.Constants
         public const string SECTION_KEY_API_KEY = "ApiKey";
         public const string SECTION_KEY_FROM_ADDRESS = "FromAddress";
         public const string SECTION_KEY_FROM_NAME = "FromName";
+
+        public const string SECTION_KEY_COIN_MARKET = "CoinMarket";
+        public const string SECTION_KEY_GET_PRICE_INTERVAL = "Interval";
     }
 }

@@ -7,6 +7,8 @@ namespace Vakapay.Models.Entities
         public string Description { get; set; }
         public string Ip { get; set; }
         public string UserId { get; set; }
+        public string Location { get; set; }
+        public string Source { get; set; }
         public int CreatedAt { get; set; }
     }
 }

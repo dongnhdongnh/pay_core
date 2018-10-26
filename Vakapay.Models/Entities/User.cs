@@ -29,13 +29,14 @@ namespace Vakapay.Models.Entities
         public string Notifications { get; set; }
         public string SecretAuthToken { get; set; }
         public int Verification { get; set; }
-        public int IsLock { get; set; }
+        public int IsLockScreen { get; set; }
         public bool TwoFactor { get; set; }
+        public string TwoFactorSecret { get; set; }
 
         public static User FromJson(string json) =>
             JsonHelper.DeserializeObject<User>(json, JsonHelper.ConvertSettings);
 
-//        public static string ToJson(User self) =>
-//            JsonHelper.SerializeObject(self, JsonHelper.ConvertSettings);
+        public static string ToJson(User self) =>
+            JsonHelper.SerializeObject(self, JsonHelper.ConvertSettings);
     }
 }

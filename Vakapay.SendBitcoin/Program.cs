@@ -59,6 +59,7 @@ namespace Vakapay.SendBitcoin
             }
             catch (Exception e)
             {
+                connection.Close();
                 Logger.Error(e, "Send Bitcoin");
                 Console.WriteLine(e.ToString());
             }
