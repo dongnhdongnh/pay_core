@@ -27,6 +27,11 @@ namespace Vakapay.UserSendTransactionBusiness
                 : vakapayRepositoryFactory.GetOldConnection();
         }
 
+        public void CloseDbConnection()
+        {
+            _connectionDb.Close();
+        }
+
         public ReturnObject AddSendTransaction(UserSendTransaction sendTransaction)
         {
             try
@@ -94,6 +99,16 @@ namespace Vakapay.UserSendTransactionBusiness
 
             var userRepository = new UserRepository(_connectionDb);
             var receiver = userRepository.FindByEmailAddress(sendTransaction.To);
+            var sender = userRepository.FindById(sendTransaction.UserId);
+
+            if (sender == null)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Sender UserID not found in Vakapay system"
+                };
+            }
 
             if (receiver == null)
             {
@@ -157,6 +172,26 @@ namespace Vakapay.UserSendTransactionBusiness
 
 
             sendTrx.Commit();
+
+
+            var email = sender.Email;
+            if (email != null)
+            {
+                var res = SendMailBusiness.SendMailBusiness.CreateDataEmail("Notify send " + sendTransaction.Currency,
+                    email, internalTransactions.Amount, internalTransactions.Id,
+                    EmailTemplate.Sent, internalTransactions.Currency, _vakapayRepositoryFactory, true);
+                res.Wait();
+            }
+
+            var receiverEmail = receiver.Email;
+            if (receiverEmail != null)
+            {
+                var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(
+                    "Notify receive " + sendTransaction.Currency, receiverEmail, internalTransactions.Amount,
+                    internalTransactions.Id, EmailTemplate.ReceivedInternal, internalTransactions.Currency,
+                    _vakapayRepositoryFactory, true);
+                res.Wait();
+            }
 
             return new ReturnObject()
             {
@@ -305,7 +340,7 @@ namespace Vakapay.UserSendTransactionBusiness
                     return updateBalanceRes;
                 }
 
-                transaction.Status = Status.STATUS_SUCCESS;
+                transaction.Status = Status.STATUS_COMPLETED;
 
                 return new ReturnObject()
                 {

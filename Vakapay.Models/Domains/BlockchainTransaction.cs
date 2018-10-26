@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Entities.ETH;
@@ -6,7 +7,7 @@ using Vakapay.Models.Entities.VAKA;
 
 namespace Vakapay.Models.Domains
 {
-    public abstract class BlockchainTransaction : MultiThreadUpdateModel
+    public class BlockchainTransaction : MultiThreadUpdateModel
     {
         public string UserId { get; set; }
         public string Hash { get; set; }
@@ -35,6 +36,31 @@ namespace Vakapay.Models.Domains
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        /// <summary>
+        /// Convert this BlockchainTransaction to deliver class by copy every readable and writable properties
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T ToDelivered<T>() where T : BlockchainTransaction, new()
+        {
+            var delivered = new T();
+
+            var sourceProps = typeof (BlockchainTransaction).GetProperties().Where(x => x.CanRead && x.CanWrite).ToList();
+
+            foreach (var sourceProp in sourceProps)
+            {
+                try
+                {
+                    sourceProp.SetValue(delivered, sourceProp.GetValue(this, null), null);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+            return delivered;
         }
     }
 }

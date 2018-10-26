@@ -192,35 +192,92 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [HttpPost("{userId}/transactions")]
-        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        [HttpPost("{userId}/coinbase_transactions")]
+        public ActionResult<string> SendTransactionsCoinbase(string userId, [FromBody] JObject value)
         {
+            ReturnObject result = null;
             try
             {
                 var sendTransactionBusiness =
                     new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
 
                 var request = value.ToObject<UserSendTransaction>();
-
                 request.UserId = userId;
-
-                var res = sendTransactionBusiness.AddSendTransaction(request);
-
-                if (res.Status == Status.STATUS_ERROR)
-                {
-                    return new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = res.Message}.ToJson();
-                }
-
-                return new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
+                result = AddSendTransaction(request);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
             }
+
+            return result.ToJson();
+        }
+
+        private ReturnObject AddSendTransaction(UserSendTransaction request)
+        {
+            var sendTransactionBusiness =
+                new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+            ReturnObject result = null;
+            try
+            {
+                var res = sendTransactionBusiness.AddSendTransaction(request);
+
+                if (res.Status == Status.STATUS_ERROR)
+                {
+                    result = new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = res.Message};
+                }
+                else
+                {
+                    result = new ReturnDataObject()
+                        {Status = Status.STATUS_SUCCESS, Data = request};
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
+            }
+            finally
+            {
+                sendTransactionBusiness.CloseDbConnection();
+            }
+
+            return result;
+        }
+
+
+        [HttpPost("{userId}/transactions")]
+        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        {
+            ReturnObject result = null;
+            try
+            {
+                var request = value.ToObject<SendTransaction>();
+
+                var userRequest = new UserSendTransaction()
+                {
+                    UserId = userId,
+                    Type = "send",
+                    To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
+                    Amount = request.Detail.VkcAmount,
+                    Currency = request.SortName,
+                    Description = request.Detail.VkcNote,
+                };
+
+                result = AddSendTransaction(userRequest);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
+            }
+
+            return result.ToJson();
         }
 
         [HttpGet]

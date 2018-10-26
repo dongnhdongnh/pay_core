@@ -43,6 +43,7 @@ namespace Vakapay.Models.Domains
                 {EmailTemplate.NewDevice, "newDevice.htm"},
                 {EmailTemplate.Sent, "sent.htm"},
                 {EmailTemplate.Received, "received.htm"},
+                {EmailTemplate.ReceivedInternal, "receivedInternal.htm"},
                 {EmailTemplate.Verify, "verify.htm"},
             };
 
