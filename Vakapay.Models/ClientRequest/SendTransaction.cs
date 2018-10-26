@@ -24,18 +24,6 @@ namespace Vakapay.ApiServer.Models
         public bool SendByAd { get; set; }
     }
 
-//    public class TransactionCheckObject
-//    {
-//        [JsonProperty(PropertyName = "vakapayFee")]
-//        public decimal VakapayFee;
-//
-//        [JsonProperty(PropertyName = "minerFee")]
-//        public decimal MinerFee;
-//
-//        [JsonProperty(PropertyName = "total")]
-//        public decimal Total;
-//    }
-
     public class SendTransaction
     {
         [JsonProperty(PropertyName = "name")]
@@ -49,9 +37,6 @@ namespace Vakapay.ApiServer.Models
 
         [JsonProperty(PropertyName = "detail")]
         public TransactionDetail Detail { get; set; }
-
-//        [JsonProperty(PropertyName = "checkObject")]
-//        public TransactionCheckObject CheckObject { get; set; }
 
         [JsonProperty(PropertyName = "SMSCode")]
         public string SmsCode { get; set; }

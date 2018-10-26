@@ -35,7 +35,6 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
                 var userRepository = new UserRepository(VakapayRepositoryFactory.GetOldConnection());
                 var wallets = walletRepository.FindAllWalletByUserId(id);
@@ -266,7 +265,7 @@ namespace Vakapay.ApiServer.Controllers
                     Type = "send",
                     To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
                     Amount = request.Detail.VkcAmount,
-                    Currency = request.SortName,
+                    Currency = request.Name,
                     Description = request.Detail.VkcNote,
                 };
 
