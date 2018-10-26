@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -35,17 +34,16 @@ namespace Vakapay.ApiServer.Controllers
         private WalletBusiness.WalletBusiness _walletBusiness;
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
-        private IConfiguration Configuration { get; }
-
         public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
-            Configuration = configuration;
         }
 
         [HttpGet("getUserInfo")]
         public IActionResult GetUserInfo()
         {
-            return new JsonResult(from c in User.Claims where c.Type == "userInfo" select new {c.Value});
+            return new JsonResult(from c in User.Claims
+                where c.Type == ParseDataKeyApi.KEY_CLAIM_GET_DATA_USER_IDENTITY
+                select new {c.Value});
         }
 
         [HttpPost("upload-avatar"), DisableRequestSizeLimit]
@@ -62,7 +60,7 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userCheck = (User) RouteData.Values["UserModel"];
+                var userCheck = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (file.Length > 2097152)
                     return CreateDataError("File max size 2Mb");
@@ -145,11 +143,12 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (userModel == null)
                 {
-                    var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
+                    var jsonUser = User.Claims.Where(c => c.Type == ParseDataKeyApi.KEY_CLAIM_GET_DATA_USER_IDENTITY)
+                        .Select(c => c.Value).SingleOrDefault();
 
                     var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
 
@@ -231,26 +230,26 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("streetAddress1"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_1))
                 {
-                    userModel.StreetAddress1 = value["streetAddress1"].ToString();
+                    userModel.StreetAddress1 = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_1].ToString();
                 }
 
-                if (value.ContainsKey("streetAddress2"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_2))
                 {
-                    userModel.StreetAddress2 = value["streetAddress2"].ToString();
+                    userModel.StreetAddress2 = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_2].ToString();
                 }
 
-                if (value.ContainsKey("city"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_CITY))
                 {
-                    userModel.City = value["city"].ToString();
+                    userModel.City = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_CITY].ToString();
                 }
 
-                if (value.ContainsKey("postalCode"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_POSTAL_CODE))
                 {
-                    userModel.PostalCode = value["postalCode"].ToString();
+                    userModel.PostalCode = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_POSTAL_CODE].ToString();
                 }
 
                 _userBusiness.UpdateProfile(userModel);
@@ -277,11 +276,11 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("currencyKey"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_CURRENCY))
                 {
-                    var currencyKey = value["currencyKey"].ToString();
+                    var currencyKey = value[ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_CURRENCY].ToString();
                     if (!string.IsNullOrEmpty(currencyKey) && Constants.listCurrency.ContainsKey(currencyKey))
                     {
                         userModel.CurrencyKey = currencyKey;
@@ -292,10 +291,10 @@ namespace Vakapay.ApiServer.Controllers
                     }
                 }
 
-                if (value.ContainsKey("timezoneKey"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_TIMEZONE))
                 {
-                    var timezoneKey = value["timezoneKey"].ToString();
-                    if (!string.IsNullOrEmpty(timezoneKey) && Constants.listTimeZone.ContainsKey(timezoneKey))
+                    var timezoneKey = value[ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_TIMEZONE].ToString();
+                    if (!string.IsNullOrEmpty(timezoneKey) && Constants.ListTimeZone.ContainsKey(timezoneKey))
                     {
                         userModel.TimezoneKey = timezoneKey;
                     }
@@ -329,11 +328,11 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("notifications"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION))
                 {
-                    userModel.CurrencyKey = value["notifications"].ToString();
+                    userModel.CurrencyKey = value[ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION].ToString();
                 }
 
                 _userBusiness.UpdateProfile(userModel);

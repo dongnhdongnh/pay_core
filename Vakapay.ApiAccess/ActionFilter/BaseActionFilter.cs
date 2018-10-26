@@ -44,8 +44,8 @@ namespace Vakapay.ApiAccess.ActionFilter
                     var filterModel = GetMessageTokenInvalid(headers, request.Path, _repositoryFactory);
                     if (filterModel.Status)
                     {
-                        actionExecutedContext.RouteData.Values.Add("UserModel", filterModel.UserModel);
-                        actionExecutedContext.RouteData.Values.Add("ApiKeyModel", filterModel.ApiKeyModel);
+                        actionExecutedContext.RouteData.Values.Add(Requests.KEY_PASS_DATA_USER_MODEL, filterModel.UserModel);
+                        actionExecutedContext.RouteData.Values.Add(Requests.KEY_PASS_DATA_API_KEY_MODEL, filterModel.ApiKeyModel);
                     }
                     else
                     {

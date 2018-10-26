@@ -40,7 +40,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return CreateDataError("User Info is not permission");
@@ -49,7 +49,7 @@ namespace Vakapay.ApiAccess.Controllers
                     !apiKeyModel.Permissions.Contains(Permissions.USER_MAIL))
                     return CreateDataError("User Info is not permission");
 
-                var userInfo = (User) RouteData.Values["UserModel"];
+                var userInfo = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
 
                 return new ReturnObject
                 {
@@ -83,7 +83,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
                 var arrPermission = apiKeyModel.Permissions.Split(",");
                 var arrCurrency = apiKeyModel.Wallets.Split(",");
                 var scopeModel = new ScopesModel();

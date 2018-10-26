@@ -56,7 +56,7 @@ namespace Vakapay.ApiAccess.Controllers
                 if (!CommonHelper.ValidateId(id))
                     return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
 
-                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
@@ -64,7 +64,7 @@ namespace Vakapay.ApiAccess.Controllers
                 if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
                     return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
 
-                var userInfo = (User) RouteData.Values["UserModel"];
+                var userInfo = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
 
                 var dataWithdraw = userBusiness.GetWithdraw(id, currency);
 
@@ -110,7 +110,7 @@ namespace Vakapay.ApiAccess.Controllers
                 if (!ApiAccessHelper.ValidateCurrency(currency))
                     return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
 
-                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
