@@ -197,8 +197,8 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [HttpPost("{userId}/transactions")]
-        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        [HttpPost("{userId}/coinbase_transactions")]
+        public ActionResult<string> SendTransactionsCoinbase(string userId, [FromBody] JObject value)
         {
             var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
             ReturnObject result = null;
@@ -235,8 +235,8 @@ namespace Vakapay.ApiServer.Controllers
             return result.ToJson();
         }
 
-        [HttpPost("{userId}/transactions2")]
-        public ActionResult<string> SendTransactions2(string userId, [FromBody] JObject value)
+        [HttpPost("{userId}/transactions")]
+        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
         {
             try
             {
