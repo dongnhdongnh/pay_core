@@ -6,7 +6,8 @@ namespace Vakapay.Models.Entities
 {
     public enum EmailTemplate
     {
-        NewDevice, Sent, Received, Verify
+        NewDevice, Sent, Received, Verify,
+        ReceivedInternal
     }
 
     [Table("EmailQueue")]
@@ -27,6 +28,7 @@ namespace Vakapay.Models.Entities
         public string SignInUrl { get; set; }
         public decimal Amount { get; set; }
         public string NetworkName { get; set; }
+        public bool IsInnerTransaction { get; set; }
         public string TransactionId { get; set; }
 
         //Verify email template

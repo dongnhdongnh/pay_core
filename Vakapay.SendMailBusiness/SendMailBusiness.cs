@@ -12,6 +12,7 @@ using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.SendMailBusiness
 {
@@ -31,7 +32,7 @@ namespace Vakapay.SendMailBusiness
                 : vakapayRepositoryFactory.GetOldConnection();
         }
 
-        public virtual async Task<ReturnObject> CreateEmailQueueAsync(EmailQueue emailQueue)
+        public async Task<ReturnObject> CreateEmailQueueAsync(EmailQueue emailQueue)
         {
             try
             {
@@ -53,7 +54,7 @@ namespace Vakapay.SendMailBusiness
             }
         }
 
-        public virtual async Task<ReturnObject> SendEmailAsync(string apiUrl, string apiKey, string from,
+        public async Task<ReturnObject> SendEmailAsync(string apiUrl, string apiKey, string from,
             string fromName)
         {
             var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb);
@@ -255,7 +256,13 @@ namespace Vakapay.SendMailBusiness
         {
             try
             {
-                return GetTransaction(emailQueue).ToAddress;
+                if (emailQueue.IsInnerTransaction == false) return GetTransaction(emailQueue).ToAddress;
+
+                var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
+                var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
+                var userRepository = new UserRepository(_connectionDb);
+                var user = userRepository.FindById(transaction.ReceiverUserId);
+                return user.Email;
             }
             catch (Exception e)
             {
@@ -309,6 +316,15 @@ namespace Vakapay.SendMailBusiness
                     case EmailTemplate.Verify:
                         body = body.Replace("{verifyEmailUrl}", emailQueue.VerifyUrl);
                         break;
+
+                    case EmailTemplate.ReceivedInternal:
+                        body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
+                        body = body.Replace("{amount}", emailQueue.GetAmount());
+                        body = body.Replace("{sender}", GetSender(emailQueue));
+                        break;
+
+                    default:
+                        throw new Exception("Template not defined");
                 }
 
                 return body;
@@ -317,6 +333,70 @@ namespace Vakapay.SendMailBusiness
             {
                 Console.WriteLine(e);
                 return null;
+            }
+        }
+
+        private string GetSender(EmailQueue emailQueue)
+        {
+            try
+            {
+                var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
+                var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
+                var userRepository = new UserRepository(_connectionDb);
+                var user = userRepository.FindById(transaction.SenderUserId);
+                return user.Email;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// CreateDataEmail
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="email"></param>
+        /// <param name="amount"></param>
+        /// <param name="transactionId"></param>
+        /// <param name="template"></param>
+        /// <param name="networkName"></param>
+        /// <param name="vakapayRepositoryFactory"></param>
+        /// <param name="isInnerTransaction"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
+        //            string networkName, string sendOrReceiver)
+        public static async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
+            EmailTemplate template, string networkName, IVakapayRepositoryFactory vakapayRepositoryFactory, bool isInnerTransaction)
+        {
+            try
+            {
+                var currentTime = CommonHelper.GetUnixTimestamp();
+                var sendMailBusiness = new SendMailBusiness(vakapayRepositoryFactory, false);
+
+                if (email == null) return;
+                var emailQueue = new EmailQueue
+                {
+                    Id = CommonHelper.GenerateUuid(),
+                    ToEmail = email,
+                    Template = template,
+                    Subject = subject,
+                    NetworkName = networkName,
+                    //                    SentOrReceived = sendOrReceiver,
+                    IsInnerTransaction = isInnerTransaction,
+                    Amount = amount,
+                    TransactionId = transactionId,
+                    Status = Status.STATUS_PENDING,
+                    CreatedAt = currentTime,
+                    UpdatedAt = currentTime
+                };
+                await sendMailBusiness.CreateEmailQueueAsync(emailQueue);
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
     }

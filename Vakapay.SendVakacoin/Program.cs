@@ -38,6 +38,13 @@ namespace Vakapay.SendVakacoin
 
             var business = new VakacoinBusiness.VakacoinBusiness(repoFactory);
             var connection = repoFactory.GetOldConnection() ?? repoFactory.GetDbConnection();
+
+            if (nodeUrl == null)
+            {
+                Console.WriteLine("node url null");
+                return;
+            }
+
             try
             {
                 while (true)
