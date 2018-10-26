@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Vakapay.ApiServer.Models
+namespace Vakapay.Models.ClientRequest
 {
     public class TransactionDetail
     {

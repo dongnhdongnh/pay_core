@@ -50,13 +50,13 @@ namespace Vakapay.UserSendTransactionBusiness
                     }
                 }
 
-                if (CommonHelper.IsValidEmail(sendTransaction.To))
+                if (sendTransaction.SendByBlockchainAddress)
                 {
-                    return AddSendTransactionToEmailAddress(sendTransaction);
+                    return AddSendTransactionToBlockchainAddress(sendTransaction);
                 }
                 else
                 {
-                    return AddSendTransactionToBlockchainAddress(sendTransaction);
+                    return AddSendTransactionToEmailAddress(sendTransaction);
                 }
             }
             catch (Exception e)
@@ -97,8 +97,8 @@ namespace Vakapay.UserSendTransactionBusiness
             var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
 
             var userRepository = new UserRepository(_connectionDb);
-            var receiver = userRepository.FindByEmailAddress(sendTransaction.To);
             var sender = userRepository.FindById(sendTransaction.UserId);
+            var receiver = userRepository.FindByEmailAddress(sendTransaction.To);
 
             if (sender == null)
             {

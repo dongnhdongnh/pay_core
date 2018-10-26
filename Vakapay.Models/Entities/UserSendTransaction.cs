@@ -32,5 +32,8 @@ namespace Vakapay.Models.Entities
 
         [JsonProperty("idem")]
         public string Idem { get; set; }
+
+        [JsonProperty(PropertyName = "sendByAd")]
+        public bool SendByBlockchainAddress{ get; set; }
     }
 }
