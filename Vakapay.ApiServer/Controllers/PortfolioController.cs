@@ -57,7 +57,8 @@ namespace Vakapay.ApiServer.Controllers
 
             var userid = userModel.Id;
             var currentTime = CommonHelper.GetUnixTimestamp();
-            if (Time.SECOND_COUNT_IN_PERIOD.ContainsKey(condition))
+           
+            if (!Time.SECOND_COUNT_IN_PERIOD.ContainsKey(condition))
             {
                 return new ReturnObject
                 {
@@ -82,10 +83,12 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (time != null && time.Equals(DashboardConfig.CURRENT))
                 {
+                    var returnData = JsonHelper.SerializeObject(data[data.Count - 1]);
+                    
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
-                        Data = JsonHelper.SerializeObject(data[data.Count - 1])
+                        Data = returnData
                     };
                 }
                 
@@ -105,7 +108,7 @@ namespace Vakapay.ApiServer.Controllers
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
-                        Data = JsonHelper.SerializeObject(data)
+                        Data = JsonHelper.SerializeObject(sortData)
                     };
                 }
                 

@@ -77,7 +77,6 @@ namespace Vakapay.ScanCoinmarket
             if (CacheHelper.HaveKey(cacheKeyDay))
             {
                 var arrPrice = CacheHelper.GetCacheString(cacheKeyDay);
-                Console.WriteLine("arrPrice = "+ arrPrice);
                 var split = arrPrice.Split(",");
                 var lastElement = split[split.Length - 1];
                 var price = lastElement.Substring(0, lastElement.Length - 2);

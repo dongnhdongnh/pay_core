@@ -25,7 +25,7 @@ namespace Vakapay.Repositories.Mysql
 
         public List<PortfolioHistory> FindByUserId(string userId, long from, long to)
         {
-            var query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND Timestamp > {from} AND Timestamp < {to}";
+            var query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND Timestamp > {from} AND Timestamp < {to} ORDER BY Timestamp ASC";
             try
             {
                 if (Connection.State != ConnectionState.Open)
@@ -52,9 +52,6 @@ namespace Vakapay.Repositories.Mysql
 
             decimal ethAmount = 0;
             decimal ethValue = 0;
-
-            decimal eosAmount = 0;
-            decimal eosValue = 0;
             try
             {
                 if (Connection.State != ConnectionState.Open)
@@ -101,8 +98,6 @@ namespace Vakapay.Repositories.Mysql
                 BitcoinValue = btcValue,
                 EthereumAmount = ethAmount,
                 EthereumValue = ethValue,
-                EosAmount = eosAmount,
-                EosValue = eosValue,
                 Timestamp = CommonHelper.GetUnixTimestamp()
             };
             return Insert(portfolioHistory);
