@@ -140,12 +140,20 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+
+                if (string.IsNullOrEmpty(email))
+                    return CreateDataError("Can't not email");
+
+                var query = new Dictionary<string, string> {{"Email", email}};
+
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = _userBusiness.GetUserInfo(query);
+
 
                 if (userModel == null)
                 {
@@ -157,7 +165,6 @@ namespace Vakapay.ApiServer.Controllers
 
                     if (resultData.Status == Status.STATUS_ERROR)
                         return CreateDataError("Can't not created User");
-
 
                     userModel = Vakapay.Models.Entities.User.FromJson(resultData.Data);
 
@@ -183,13 +190,11 @@ namespace Vakapay.ApiServer.Controllers
                 var location =
                     await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
 
-                var uaString = Request.Headers["User-Agent"].FirstOrDefault();
-                var uaParser = Parser.GetDefault();
-                var browser = uaParser.Parse(uaString);
+                var browser = HelpersApi.GetBrowser(Request);
 
                 var confirmedDevices = new ConfirmedDevices
                 {
-                    Browser = browser.ToString(),
+                    Browser = browser,
                     Ip = ip,
                     Location = !string.IsNullOrEmpty(location.CountryName)
                         ? location.City + "," + location.CountryName
@@ -197,7 +202,7 @@ namespace Vakapay.ApiServer.Controllers
                     UserId = userModel.Id
                 };
 
-                var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
+                var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser}};
 
 
                 //save devices
