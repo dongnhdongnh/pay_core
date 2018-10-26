@@ -20,6 +20,7 @@ namespace Vakapay.Models.ClientRequest
         public string VkcNote { get; set; }
 
         [JsonProperty(PropertyName = "sendByAd")]
+        [JsonRequired]
         public bool SendByAd { get; set; }
     }
 
@@ -32,9 +33,11 @@ namespace Vakapay.Models.ClientRequest
         public string SortName { get; set; }
 
         [JsonProperty(PropertyName = "networkName")]
+        [JsonRequired]
         public string NetworkName { get; set; }
 
         [JsonProperty(PropertyName = "detail")]
+        [JsonRequired]
         public TransactionDetail Detail { get; set; }
 
         [JsonProperty(PropertyName = "SMSCode")]
