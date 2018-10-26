@@ -1,20 +1,15 @@
 using Newtonsoft.Json;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Entities
 {
-    public class UserSendTransaction : BaseEntity
+    public class UserSendTransaction : BaseModel
     {
         public string UserId { get; set; }
 
-        [JsonProperty("type")]
-        [JsonRequired]
-        public string Type { get; set; }
+        [JsonProperty("type")] [JsonRequired] public string Type { get; set; }
 
-        [JsonProperty("to")]
-        [JsonRequired]
-        public string To { get; set; }
+        [JsonProperty("to")] [JsonRequired] public string To { get; set; }
 
         [JsonProperty("amount")]
         [JsonRequired]
@@ -24,13 +19,10 @@ namespace Vakapay.Models.Entities
         [JsonRequired]
         public string Currency { get; set; }
 
-        [JsonProperty("description")]
-        public string Description { get; set; }
+        [JsonProperty("description")] public string Description { get; set; }
 
-        [JsonProperty("fee")]
-        public string Fee { get; set; }
+        [JsonProperty("fee")] public string Fee { get; set; }
 
-        [JsonProperty("idem")]
-        public string Idem { get; set; }
+        [JsonProperty("idem")] public string Idem { get; set; }
     }
 }

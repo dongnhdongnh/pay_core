@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Vakapay.Models.Entities
+namespace Vakapay.Models.Entities.ETH
 {
     public class EthereumBlockResponse
     {

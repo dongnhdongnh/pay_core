@@ -30,7 +30,7 @@ namespace Vakapay.Repositories.Mysql
             return sQuery;
         }
 
-        
+
         public List<UserActionLog> GetListLog(string sql, int skip = 0, int take = 10)
         {
             try
@@ -48,7 +48,7 @@ namespace Vakapay.Repositories.Mysql
                 return null;
             }
         }
-        
+
         public UserActionLog FindWhere(string sql)
         {
             try

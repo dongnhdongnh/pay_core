@@ -8,7 +8,9 @@ namespace Vakapay.Models.Repositories.Base
     {
         TEntity FindRowPending();
         List<TEntity> FindRowsPending();
+
         List<TEntity> FindRowsInProcess();
+
 //        List<TEntity> FindRowsNotCompleteOnNet();
         TEntity FindRowError();
         TEntity FindRowByStatus(string status);

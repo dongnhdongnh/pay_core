@@ -1,18 +1,20 @@
 ﻿using System.Data;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumDepositTransactionRepository : BlockchainTransactionRepository<EthereumDepositTransaction>, IEthereumDepositTransactionRepository
-	{
-		public EthereumDepositTransactionRepository(string connectionString) : base(connectionString)
-		{
-		}
+    public class EthereumDepositTransactionRepository : BlockchainTransactionRepository<EthereumDepositTransaction>,
+        IEthereumDepositTransactionRepository
+    {
+        public EthereumDepositTransactionRepository(string connectionString) : base(connectionString)
+        {
+        }
 
-		public EthereumDepositTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
-		{
-		}
+        public EthereumDepositTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
+        {
+        }
 
 //		public ReturnObject Delete(string Id)
 //		{
@@ -133,5 +135,5 @@ namespace Vakapay.Repositories.Mysql
 //		{
 //			throw new NotImplementedException();
 //		}
-	}
+    }
 }

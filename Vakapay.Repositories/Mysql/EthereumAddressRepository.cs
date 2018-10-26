@@ -1,23 +1,22 @@
 using System.Data;
 using System.Threading.Tasks;
 using Vakapay.Commons.Constants;
-using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class EthereumAddressRepository : BlockchainAddressRepository<EthereumAddress>, IEthereumAddressRepository
-	{
-		public EthereumAddressRepository(string connectionString) : base(connectionString)
-		{
-		}
+    public class EthereumAddressRepository : BlockchainAddressRepository<EthereumAddress>, IEthereumAddressRepository
+    {
+        public EthereumAddressRepository(string connectionString) : base(connectionString)
+        {
+        }
 
-		public EthereumAddressRepository(IDbConnection dbConnection) : base(dbConnection)
-		{
-		}
+        public EthereumAddressRepository(IDbConnection dbConnection) : base(dbConnection)
+        {
+        }
 
 //		public ReturnObject Update(EthereumAddress objectUpdate)
 //		{
@@ -86,23 +85,20 @@ namespace Vakapay.Repositories.Mysql
 //			    return null;
 //		    }
 //	    }
-	    
-		public override Task<ReturnObject> InsertAddress(string address, string walletId, string other)
-		{
-			EthereumAddress insertObject = new EthereumAddress()
-			{
-				Id = CommonHelper.GenerateUuid(),
-				Address = address,
-				WalletId = walletId,
-				Password = other,
-				CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
-				UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
-				Status = Status.STATUS_ACTIVE
-			};
 
-			return Task.Run(() => this.Insert(insertObject));
-			//return new Task() { };
-			//throw new NotImplementedException();
-		}
+        public override Task<ReturnObject> InsertAddress(string address, string walletId, string other)
+        {
+            EthereumAddress insertObject = new EthereumAddress()
+            {
+                Address = address,
+                WalletId = walletId,
+                Password = other,
+                Status = Status.STATUS_ACTIVE
+            };
+
+            return Task.Run(() => Insert(insertObject));
+            //return new Task() { };
+            //throw new NotImplementedException();
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace Vakapay.ApiServer.Controllers
     [ApiController]
     public class VAKAController : Controller
     {
-        VakacoinRPC _vakacoinRpc = new VakacoinRPC(AppSettingHelper.GetVakacoinNode());
+        VakacoinRpc _vakacoinRpc = new VakacoinRpc(AppSettingHelper.GetVakacoinNode());
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)

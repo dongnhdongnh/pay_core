@@ -76,7 +76,8 @@ namespace Vakapay.Repositories.Mysql
                 {
                     Connection.Open();
                 }
-                var sQuery = "SELECT count(*) FROM " + TableName+";";
+
+                var sQuery = "SELECT count(*) FROM " + TableName + ";";
                 var count = Convert.ToInt32(Connection.Query<int>(sQuery));
                 return count;
             }
@@ -85,7 +86,6 @@ namespace Vakapay.Repositories.Mysql
                 Logger.Error("WebSessionRepository =>> GetCount fail: " + e.Message);
                 return 0;
             }
-            
         }
     }
 }

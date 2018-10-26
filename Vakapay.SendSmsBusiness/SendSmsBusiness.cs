@@ -69,13 +69,13 @@ namespace Vakapay.SendSmsBusiness
                 _connectionDb.Open();
 
             //begin first sms
-            var transctionScope = _connectionDb.BeginTransaction();
+            var transactionScope = _connectionDb.BeginTransaction();
             try
             {
                 var lockResult = await sendSmsRepository.LockForProcess(pendingSms);
                 if (lockResult.Status == Status.STATUS_ERROR)
                 {
-                    transctionScope.Rollback();
+                    transactionScope.Rollback();
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
@@ -83,11 +83,11 @@ namespace Vakapay.SendSmsBusiness
                     };
                 }
 
-                transctionScope.Commit();
+                transactionScope.Commit();
             }
             catch (Exception e)
             {
-                transctionScope.Rollback();
+                transactionScope.Rollback();
                 return new ReturnObject
                 {
                     Status = Status.STATUS_ERROR,
@@ -112,7 +112,7 @@ namespace Vakapay.SendSmsBusiness
 //                }
 
                 pendingSms.Status = sendResult.Status;
-                pendingSms.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                pendingSms.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                 pendingSms.IsProcessing = 0;
 
                 var updateResult = await sendSmsRepository.SafeUpdate(pendingSms);
@@ -135,6 +135,7 @@ namespace Vakapay.SendSmsBusiness
                 transactionSend.Rollback();
                 var releaseResult = sendSmsRepository.ReleaseLock(pendingSms);
                 Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+                _logger.Error(e);
                 throw;
             }
         }
@@ -158,7 +159,7 @@ namespace Vakapay.SendSmsBusiness
 
                     var result = JsonConvert.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {

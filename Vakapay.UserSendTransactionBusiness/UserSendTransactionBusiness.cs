@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Threading.Tasks;
 using NLog;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -19,12 +18,18 @@ namespace Vakapay.UserSendTransactionBusiness
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public UserSendTransactionBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
+        public UserSendTransactionBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory,
+            bool isNewConnection = true)
         {
             _vakapayRepositoryFactory = vakapayRepositoryFactory;
             _connectionDb = isNewConnection
                 ? vakapayRepositoryFactory.GetDbConnection()
                 : vakapayRepositoryFactory.GetOldConnection();
+        }
+
+        public void CloseDbConnection()
+        {
+            _connectionDb.Close();
         }
 
         public ReturnObject AddSendTransaction(UserSendTransaction sendTransaction)
@@ -80,6 +85,7 @@ namespace Vakapay.UserSendTransactionBusiness
                     Message = $"UserId {sendTransaction.UserId} with {sendTransaction.Currency} wallet is not found!"
                 };
             }
+
             var res = walletBusiness.Withdraw(wallet, sendTransaction.To, sendTransaction.Amount);
             return res;
         }
@@ -93,6 +99,16 @@ namespace Vakapay.UserSendTransactionBusiness
 
             var userRepository = new UserRepository(_connectionDb);
             var receiver = userRepository.FindByEmailAddress(sendTransaction.To);
+            var sender = userRepository.FindById(sendTransaction.UserId);
+
+            if (sender == null)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Sender UserID not found in Vakapay system"
+                };
+            }
 
             if (receiver == null)
             {
@@ -129,11 +145,12 @@ namespace Vakapay.UserSendTransactionBusiness
                 insertTrx.Rollback();
                 return insertRes;
             }
+
             insertTrx.Commit();
 
             var sendTrx = _connectionDb.BeginTransaction();
             var senRes = SendInternalTransaction(internalTransactions);
-            if (senRes.Status == Status.STATUS_ERROR )
+            if (senRes.Status == Status.STATUS_ERROR)
             {
                 sendTrx.Rollback();
                 internalTransactionsRepository.Update(internalTransactions);
@@ -154,9 +171,27 @@ namespace Vakapay.UserSendTransactionBusiness
             }
 
 
-
-
             sendTrx.Commit();
+
+
+            var email = sender.Email;
+            if (email != null)
+            {
+                var res = SendMailBusiness.SendMailBusiness.CreateDataEmail("Notify send " + sendTransaction.Currency,
+                    email, internalTransactions.Amount, internalTransactions.Id,
+                    EmailTemplate.Sent, internalTransactions.Currency, _vakapayRepositoryFactory, true);
+                res.Wait();
+            }
+
+            var receiverEmail = receiver.Email;
+            if (receiverEmail != null)
+            {
+                var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(
+                    "Notify receive " + sendTransaction.Currency, receiverEmail, internalTransactions.Amount,
+                    internalTransactions.Id, EmailTemplate.ReceivedInternal, internalTransactions.Currency,
+                    _vakapayRepositoryFactory, true);
+                res.Wait();
+            }
 
             return new ReturnObject()
             {
@@ -247,12 +282,13 @@ namespace Vakapay.UserSendTransactionBusiness
             try
             {
                 var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
-                var walletBusiness = new WalletBusiness.WalletBusiness(_vakapayRepositoryFactory,false);
 
-                var senderWallet = walletRepository.FindByUserAndNetwork(transaction.SenderUserId, transaction.Currency);
-                var receiverWallet = walletRepository.FindByUserAndNetwork(transaction.ReceiverUserId, transaction.Currency);
+                var senderWallet =
+                    walletRepository.FindByUserAndNetwork(transaction.SenderUserId, transaction.Currency);
+                var receiverWallet =
+                    walletRepository.FindByUserAndNetwork(transaction.ReceiverUserId, transaction.Currency);
 
-                if (senderWallet == null )
+                if (senderWallet == null)
                 {
                     transaction.Status = Status.STATUS_ERROR;
                     return new ReturnObject()
@@ -294,8 +330,9 @@ namespace Vakapay.UserSendTransactionBusiness
                     transaction.Status = Status.STATUS_ERROR;
                     return updateBalanceRes;
                 }
-                
-                updateBalanceRes = walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, senderWallet.Version);
+
+                updateBalanceRes =
+                    walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, senderWallet.Version);
 
                 if (updateBalanceRes.Status == Status.STATUS_ERROR)
                 {
@@ -303,7 +340,7 @@ namespace Vakapay.UserSendTransactionBusiness
                     return updateBalanceRes;
                 }
 
-                transaction.Status = Status.STATUS_SUCCESS;
+                transaction.Status = Status.STATUS_COMPLETED;
 
                 return new ReturnObject()
                 {

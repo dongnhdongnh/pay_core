@@ -6,7 +6,7 @@ using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.VAKA;
 using Vakapay.Repositories.Mysql;
 using VakaSharp;
 using VakaSharp.Api.v1;
@@ -14,29 +14,29 @@ using Action = VakaSharp.Api.v1.Action;
 
 namespace Vakapay.VakacoinBusiness
 {
-    public class VakacoinRPC : IBlockchainRPC
+    public class VakacoinRpc : IBlockchainRpc
     {
-        public string EndPointURL { get; set; }
-        private string ChainID { get; }
+        public string EndPointUrl { get; set; }
+        private string ChainId { get; }
         private VakaApi DefaultApi { get; }
         private Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
-        private const string CoreSymbol = "VAKA";
-        private const string SystemTokenContract = "vaka.token";
-        private const string ActivePermission = "active";
-        private const string TransferAction = "transfer";
+        private const string CORE_SYMBOL = "VAKA";
+        private const string SYSTEM_TOKEN_CONTRACT = "vaka.token";
+        private const string ACTIVE_PERMISSION = "active";
+        private const string TRANSFER_ACTION = "transfer";
 
         public VakacoinAccountRepository AccountRepository { get; set; }
 
-        public VakacoinRPC(string endPointUrl, string chainId = null)
+        public VakacoinRpc(string endPointUrl, string chainId = null)
         {
             try
             {
-                EndPointURL = endPointUrl;
+                EndPointUrl = endPointUrl;
 
                 var vakaConfig = new VakaConfigurator()
                 {
-                    HttpEndpoint = EndPointURL,
+                    HttpEndpoint = EndPointUrl,
                 };
                 DefaultApi = new VakaApi(vakaConfig);
 
@@ -46,8 +46,8 @@ namespace Vakapay.VakacoinBusiness
                     chainId = getInfoResult.ChainId;
                 }
 
-                ChainID = chainId;
-                DefaultApi.Config.ChainId = ChainID;
+                ChainId = chainId;
+                DefaultApi.Config.ChainId = ChainId;
             }
             catch (Exception e)
             {
@@ -78,11 +78,11 @@ namespace Vakapay.VakacoinBusiness
                     activePublicKey = ownerPublicKey;
                 }
 
-                var accountName = "";
+                string accountName;
                 do
                 {
                     accountName = CommonHelper.RandomAccountNameVakacoin();
-                } while (CheckAccountExist(accountName) == true);
+                } while (CheckAccountExist(accountName));
 
                 return CreateAccount(accountName, ownerPublicKey, activePublicKey);
             }
@@ -109,20 +109,20 @@ namespace Vakapay.VakacoinBusiness
                 // start CreateTransaction
                 var vakaConfig = new VakaConfigurator()
                 {
-                    HttpEndpoint = EndPointURL,
-                    ChainId = this.ChainID
+                    HttpEndpoint = EndPointUrl,
+                    ChainId = ChainId
                 };
 
                 var vaka = new Vaka(vakaConfig);
 
-                var result = vaka.CreateTransaction(new Transaction()
+                vaka.CreateTransaction(new Transaction()
                 {
                     Actions = new List<Action>()
                     {
                         new Action()
                         {
                             Account = "vaka",
-                            Authorization = new List<PermissionLevel>() { },
+                            Authorization = new List<PermissionLevel>(),
                             Name = "newaccountx",
                             Data = new
                             {
@@ -150,7 +150,7 @@ namespace Vakapay.VakacoinBusiness
                             }
                         }
                     }
-                }).Result;
+                });
 
 
                 return new ReturnObject
@@ -183,8 +183,8 @@ namespace Vakapay.VakacoinBusiness
                 var vakaConfig = new VakaConfigurator()
                 {
                     SignProvider = new DefaultSignProvider(sPrivateKey),
-                    HttpEndpoint = EndPointURL,
-                    ChainId = this.ChainID
+                    HttpEndpoint = EndPointUrl,
+                    ChainId = ChainId
                 };
 
                 var vaka = new Vaka(vakaConfig);
@@ -195,12 +195,12 @@ namespace Vakapay.VakacoinBusiness
                     {
                         new Action()
                         {
-                            Account = SystemTokenContract,
+                            Account = SYSTEM_TOKEN_CONTRACT,
                             Authorization = new List<PermissionLevel>()
                             {
-                                new PermissionLevel() {Actor = sFrom, Permission = ActivePermission}
+                                new PermissionLevel() {Actor = sFrom, Permission = ACTIVE_PERMISSION}
                             },
-                            Name = TransferAction,
+                            Name = TRANSFER_ACTION,
                             Data = new
                             {
                                 from = sFrom, to = sTo, quantity = sAmount,
@@ -233,9 +233,9 @@ namespace Vakapay.VakacoinBusiness
             {
                 var result = DefaultApi.GetCurrencyBalance(new GetCurrencyBalanceRequest()
                 {
-                    Code = SystemTokenContract,
+                    Code = SYSTEM_TOKEN_CONTRACT,
                     Account = username,
-                    Symbol = CoreSymbol
+                    Symbol = CORE_SYMBOL
                 }).Result;
                 return new ReturnObject
                 {
@@ -312,15 +312,15 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-                var transaction = (VakacoinTransaction) blockchainTransaction;
+                var transaction = (VakacoinTransaction)blockchainTransaction;
 
                 var senderInfo = AccountRepository.FindByAddress(blockchainTransaction.FromAddress);
 
                 if (senderInfo == null)
                 {
-                    throw new System.Exception("Not found sender key!");
+                    throw new Exception("Not found sender key!");
                 }
-                
+
                 var memo = transaction.Memo ?? "";
 
                 return await SendTransactionAsync(transaction.FromAddress, transaction.ToAddress,

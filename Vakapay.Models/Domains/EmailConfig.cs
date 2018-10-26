@@ -6,42 +6,46 @@ namespace Vakapay.Models.Domains
 {
     public class EmailConfig
     {
-        public const string VakapayUrl = "google.com.vn";
+        public const string VAKAPAY_URL = "google.com.vn";
 
-        public const string LogoImgUrl = "https://i.imgur.com/ooQLCzZ.png";
-        public const string CheckImgUrl = "https://i.imgur.com/EEDBk5M.png";
-        public const string MailImgUrl = "https://i.imgur.com/8idVPQD.png";
-        public const string HrImgUrl = "https://i.imgur.com/SDIW5OD.png";
-        public const string DeviceImgUrl = "https://i.imgur.com/2p0MC3f.png";
-        public const long BtcConfirmations = 3;
-        public const long EthConfirmations = 50;
-        public const long VakaConfirmations = 15;
-        
+        public const string LOGO_IMG_URL = "https://i.imgur.com/ooQLCzZ.png";
+        public const string CHECK_IMG_URL = "https://i.imgur.com/EEDBk5M.png";
+        public const string MAIL_IMG_URL = "https://i.imgur.com/8idVPQD.png";
+        public const string HR_IMG_URL = "https://i.imgur.com/SDIW5OD.png";
+        public const string DEVICE_IMG_URL = "https://i.imgur.com/2p0MC3f.png";
+        public const long BTC_CONFIRMATIONS = 3;
+        public const long ETH_CONFIRMATIONS = 50;
+        public const long VAKA_CONFIRMATIONS = 15;
+
         // template
-        public const string Template_NewDevice = "newDevice";
-        public const string Template_Verify = "verify";
-        public const string Template_SentOrReceived = "sent";
-        
+        public const string TEMPLATE_NEW_DEVICE = "newDevice";
+        public const string TEMPLATE_VERIFY = "verify";
+        public const string TEMPLATE_SENT_OR_RECEIVED = "sent";
+
         // for sent template
-        public const string SignInUrl = "google.com.vn";
-        public const string SentOrReceived_Sent = "sent";
-        public const string SentOrReceived_Received = "received";
-        
+        public const string SIGN_IN_URL = "google.com.vn";
+        public const string SENT_OR_RECEIVED_SENT = "sent";
+        public const string SENT_OR_RECEIVED_RECEIVED = "received";
+
         //email Subject
         //new device subject
-        public const string Subject_NewDevice = "New device";
-        //sent subject
-        public const string Subject_SentOrReceived = "Balance notification!";
-        //verify subject
-        public const string Subject_Verify = "Verify account";
+        public const string SUBJECT_NEW_DEVICE = "New device";
 
-        public static readonly Dictionary<EmailTemplate, string> TemplateFiles = new Dictionary<EmailTemplate, string>()
-        {
-            {EmailTemplate.NewDevice, "newDevice.htm"},
-            {EmailTemplate.Sent, "sent.htm"},
-            {EmailTemplate.Received, "received.htm"},
-            {EmailTemplate.Verify, "verify.htm"},
-        };
+        //sent subject
+        public const string SUBJECT_SENT_OR_RECEIVED = "Balance notification!";
+
+        //verify subject
+        public const string SUBJECT_VERIFY = "Verify account";
+
+        public static readonly Dictionary<EmailTemplate, string> TEMPLATE_FILES =
+            new Dictionary<EmailTemplate, string>()
+            {
+                {EmailTemplate.NewDevice, "newDevice.htm"},
+                {EmailTemplate.Sent, "sent.htm"},
+                {EmailTemplate.Received, "received.htm"},
+                {EmailTemplate.ReceivedInternal, "receivedInternal.htm"},
+                {EmailTemplate.Verify, "verify.htm"},
+            };
 
         public static string GetNumberOfNeededConfirmation(string networkName)
         {
@@ -49,13 +53,13 @@ namespace Vakapay.Models.Domains
             switch (networkName)
             {
                 case CryptoCurrency.VAKA:
-                    confirmation = EmailConfig.VakaConfirmations;
+                    confirmation = VAKA_CONFIRMATIONS;
                     break;
                 case CryptoCurrency.ETH:
-                    confirmation = EmailConfig.EthConfirmations;
+                    confirmation = ETH_CONFIRMATIONS;
                     break;
                 case CryptoCurrency.BTC:
-                    confirmation = EmailConfig.BtcConfirmations;
+                    confirmation = BTC_CONFIRMATIONS;
                     break;
             }
 

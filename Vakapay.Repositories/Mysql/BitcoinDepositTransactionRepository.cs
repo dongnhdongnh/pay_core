@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
@@ -267,5 +268,5 @@ namespace Vakapay.Repositories.Mysql
 //		{
 //			throw new NotImplementedException();
 //		}
-	}
+    }
 }

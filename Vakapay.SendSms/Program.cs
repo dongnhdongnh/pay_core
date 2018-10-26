@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
-using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -10,11 +8,11 @@ namespace Vakapay.SendSms
 {
     internal static class Program
     {
-        private static void Main(string[] args)
+        private static void Main()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -24,7 +22,8 @@ namespace Vakapay.SendSms
             {
                 try
                 {
-                    var result = sendSmsBusiness.SendSmsAsync(AppSettingHelper.GetElasticSmsUrl(), AppSettingHelper.GetElasticApiKey());
+                    var result = sendSmsBusiness.SendSmsAsync(AppSettingHelper.GetElasticSmsUrl(),
+                        AppSettingHelper.GetElasticApiKey());
                     Console.WriteLine(JsonHelper.SerializeObject(result.Result));
                 }
                 catch (Exception e)

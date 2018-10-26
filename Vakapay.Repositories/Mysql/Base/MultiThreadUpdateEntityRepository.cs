@@ -11,7 +11,7 @@ using Vakapay.Models.Domains;
 namespace Vakapay.Repositories.Mysql.Base
 {
     public abstract class MultiThreadUpdateEntityRepository<TEntity> : MySqlBaseRepository<TEntity>
-        where TEntity : MultiThreadUpdateEntity
+        where TEntity : MultiThreadUpdateModel
     {
         public MultiThreadUpdateEntityRepository(string connectionString) : base(connectionString)
         {
@@ -134,7 +134,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 Console.WriteLine("fucking error");
             }
 
-            return ExcuteSQL(SqlHelper.Query_Update(TableName, setQuery, whereValue));
+            return ExecuteSql(SqlHelper.Query_Update(TableName, setQuery, whereValue));
 
             //try
             //{
@@ -179,7 +179,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 {nameof(row.IsProcessing), "1"}
             };
 
-            return ExcuteSQL(SqlHelper.Query_Update(TableName, setQuery, whereValue));
+            return ExecuteSql(SqlHelper.Query_Update(TableName, setQuery, whereValue));
 
 
             //try
@@ -231,7 +231,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 {
                     var value = typeof(TEntity).GetProperty(prop).GetValue(row);
 
-                    if (value!=null)
+                    if (value != null)
                     {
                         setQuery.Add(prop, value.ToString());
                     }
@@ -249,7 +249,7 @@ namespace Vakapay.Repositories.Mysql.Base
                     Console.WriteLine("fucking error");
                 }
 
-                return ExcuteSQL(SqlHelper.Query_Update(TableName, setQuery, whereValue));
+                return ExecuteSql(SqlHelper.Query_Update(TableName, setQuery, whereValue));
             }
             catch (Exception e)
             {

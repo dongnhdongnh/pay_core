@@ -1,60 +1,67 @@
 ﻿using System;
+using Newtonsoft.Json;
+using Vakapay.Commons.Helpers;
 
-namespace Vakapay.Models.Entities
+namespace Vakapay.Models.Entities.ETH
 {
-	public class EthRPCJson
-	{
-		public class Sender
-		{
-			public Sender()
-			{ }
-			public Sender(string id, string method)
-			{
-				this.jsonrpc = "2.0";
-				this.id = id;
-				this.method = method;
-			}
-			public string jsonrpc;
-			public string method;
-			public Object[] param;
-			public string id;
-			public string GetJSon()
-			{
-				string output = JsonHelper.SerializeObject(this);
-				output = output.Replace("param", "params");
-				return output;
-			}
-		}
+    public class EthRpcJson
+    {
+        public class Sender
+        {
+            public Sender()
+            {
+            }
 
-		public class Getter
-		{
-			public Getter(string input)
-			{
-				if (input == null)
-					return;
-				Getter thing = JsonHelper.DeserializeObject<Getter>(input);
-				this.id = thing.id;
-				this.jsonrpc = thing.jsonrpc;
-				this.result = thing.result;
-			}
-			public string id;
-			public string jsonrpc;
-			public Object result;
-		}
+            public Sender(string id, string method)
+            {
+                JsonRpc = "2.0";
+                Id = id;
+                Method = method;
+            }
 
-		public class TransactionInfor
-		{
-			public string from;
-			public string to;
-			public string value;
-			public string hash;
-			public string blockHash;
-			public string blockNumber;
-			public string transactionIndex;
-			public string gas;
-			public string gasPrice;
-			public string input;
-			public string nonce;
-		}
-	}
+            [JsonProperty("jsonrpc")] public string JsonRpc;
+            [JsonProperty("method")] public string Method;
+            [JsonProperty("param")] public Object[] Param;
+            [JsonProperty("id")] public string Id;
+
+            public string GetJSon()
+            {
+                string output = JsonHelper.SerializeObject(this);
+                output = output.Replace("param", "params");
+                return output;
+            }
+        }
+
+        public class Getter
+        {
+            public Getter(string input)
+            {
+                if (input == null)
+                    return;
+                Getter thing = JsonHelper.DeserializeObject<Getter>(input);
+                Id = thing.Id;
+                JsonRpc = thing.JsonRpc;
+                Result = thing.Result;
+            }
+
+            [JsonProperty("id")] public string Id;
+            [JsonProperty("jsonrpc")] public string JsonRpc;
+            [JsonProperty("result")] public Object Result;
+        }
+
+        public class TransactionInfor
+        {
+            [JsonProperty("from")] public string From;
+            [JsonProperty("to")] public string To;
+            [JsonProperty("value")] public string Value;
+            [JsonProperty("hash")] public string Hash;
+            [JsonProperty("blockHash")] public string BlockHash;
+            [JsonProperty("blockNumber")] public string BlockNumber;
+            [JsonProperty("transactionIndex")] public string TransactionIndex;
+            [JsonProperty("gas")] public string Gas;
+            [JsonProperty("gasPrice")] public string GasPrice;
+            [JsonProperty("input")] public string Input;
+            [JsonProperty("nonce")] public string Nonce;
+        }
+    }
 }

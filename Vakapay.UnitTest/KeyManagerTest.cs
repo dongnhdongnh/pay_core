@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using Vakapay.Cryptography;
 
-namespace Vakapay
+namespace Vakapay.UnitTest
 {
     [TestFixture]
     public class KeyManagerTest
@@ -23,5 +23,4 @@ namespace Vakapay
             Assert.AreEqual(KeyManager.GetVakaPublicKey(privateKey), publicKey);
         }
     }
-    
 }

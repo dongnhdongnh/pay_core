@@ -18,7 +18,6 @@ namespace Vakapay.ApiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-         
             services.AddMvcCore().AddRazorViewEngine()
                 .AddAuthorization()
                 .AddJsonFormatters();
@@ -29,8 +28,7 @@ namespace Vakapay.ApiServer
                 .AddIdentityServerAuthentication(options =>
                 {
                     options.Authority = "https://vakaid.vakaxalab.com";
-                    options.RequireHttpsMetadata = false;
-
+                    options.RequireHttpsMetadata = true;
                     options.ApiName = "api1";
                 });
         }
@@ -46,7 +44,6 @@ namespace Vakapay.ApiServer
                 {
                     HotModuleReplacement = true
                 });
-
             }
             else
             {
@@ -64,7 +61,6 @@ namespace Vakapay.ApiServer
                     .AllowCredentials();
             });
 
-           
             app.UseMvc();
         }
     }

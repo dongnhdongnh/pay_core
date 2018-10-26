@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
-using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Repositories;
@@ -15,17 +13,16 @@ namespace Vakapay.SendEthereum
         {
             try
             {
-                var startTime = DateTime.Now.Ticks;
                 CacheHelper.DeleteCacheString("cache");
 
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = AppSettingHelper.GetDBConnection()
+                    ConnectionString = AppSettingHelper.GetDbConnection()
                 };
 
                 for (var i = 0; i < 10; i++)
                 {
-                    var ts = new Thread(() => RunSend(repositoryConfig, startTime));
+                    var ts = new Thread(() => RunSend(repositoryConfig));
                     ts.Start();
                 }
             }
@@ -35,7 +32,7 @@ namespace Vakapay.SendEthereum
             }
         }
 
-        private static void RunSend(RepositoryConfiguration repositoryConfig, long startTime)
+        private static void RunSend(RepositoryConfiguration repositoryConfig)
         {
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
@@ -50,7 +47,7 @@ namespace Vakapay.SendEthereum
                     var rpc = new EthereumRpc("http://localhost:9900");
 
                     var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
-                    var resultSend = ethereumBusiness.SendTransactionAsync(ethereumRepo, rpc, "");
+                    var resultSend = ethereumBusiness.SendTransactionAsync(ethereumRepo, rpc);
                     Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
 
