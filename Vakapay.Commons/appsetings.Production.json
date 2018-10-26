@@ -1,0 +1,13 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection":
+      "server=localhost;userid=vakapay;password=D9N37Xk2ZP9ahKu;database=vakapay_test;port=3306;Connection Timeout=120;SslMode=none;Max Pool Size=300"
+  },
+  "Chain": {
+    "BTC": {
+      "Url": "http://localhost:18443",
+      "Username": "vakaxa",
+      "Password": "jY6FNTHSWuMiqdJebNdH"
+    },
+  },
+}

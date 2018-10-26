@@ -1,5 +1,4 @@
 using System;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +16,13 @@ namespace Vakapay.ApiAccess.ActionFilter
     public class BaseActionFilter : ActionFilterAttribute
     {
         private readonly VakapayRepositoryMysqlPersistenceFactory _repositoryFactory;
-        private const int ExpirationMinutes = 100 * 10 * 60 * 1000;
+        private const int EXPIRATION_MINUTES = 100 * 10 * 60 * 1000;
 
         public BaseActionFilter()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             _repositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -124,7 +123,7 @@ namespace Vakapay.ApiAccess.ActionFilter
             var ticks = long.Parse(timeStamp);
             var serverCurrentTime = UnixTimestamp.ConvertToMiliseconds(CommonHelper.GetUnixTimestamp());
 
-            var expired = (serverCurrentTime - ticks) > ExpirationMinutes;
+            var expired = (serverCurrentTime - ticks) > EXPIRATION_MINUTES;
             return expired;
         }
 

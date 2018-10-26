@@ -1,16 +1,15 @@
-using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 
-namespace Vakapay.ApiServer.Helpers
+namespace Vakapay.ApiAccess.Helpers
 {
     public static class ApiAccessHelper
     {
         public static bool ValidateCurrency(string currency)
         {
-            return CryptoCurrency.AllNetwork.Contains(currency);
+            return CryptoCurrency.ALL_NETWORK.Contains(currency);
         }
 
         public static string CreateDataError(string message)

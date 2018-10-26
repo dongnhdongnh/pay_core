@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +12,6 @@ using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -32,7 +28,6 @@ namespace Vakapay.ApiServer.Controllers
     public class ApiAccessController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
-        private readonly WalletBusiness.WalletBusiness _walletBusiness;
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
@@ -43,13 +38,12 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
             _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
-            _walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
         }
 
         [HttpGet("api-access/get-info")]
@@ -57,7 +51,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (userModel != null)
                 {
@@ -90,7 +84,7 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 var dataApiKeys =
                     _userBusiness.GetApiKeys(userModel.Id, Convert.ToInt32(offset), Convert.ToInt32(limit));
@@ -130,7 +124,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("data"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -138,8 +132,8 @@ namespace Vakapay.ApiServer.Controllers
                 var code = value["code"].ToString();
                 var data = DataApiKeyForm.FromJson(value["data"].ToString());
 
-                if (string.IsNullOrEmpty(data.apis) || string.IsNullOrEmpty(data.wallets) ||
-                    string.IsNullOrEmpty(data.id))
+                if (string.IsNullOrEmpty(data.Apis) || string.IsNullOrEmpty(data.Wallets) ||
+                    string.IsNullOrEmpty(data.Id))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 4);
 
                 bool isVerify;
@@ -161,10 +155,10 @@ namespace Vakapay.ApiServer.Controllers
                 // if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 //update api permissions
-                if (!CommonHelper.ValidateId(data.id))
+                if (!CommonHelper.ValidateId(data.Id))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var modelApi = _userBusiness.GetApiKeyById(data.id);
+                var modelApi = _userBusiness.GetApiKeyById(data.Id);
                 if (modelApi == null)
                     return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
 
@@ -185,11 +179,11 @@ namespace Vakapay.ApiServer.Controllers
                     modelApi.ApiAllow = value["allowedIp"].ToString();
                 }
 
-                modelApi.Permissions = data.apis;
+                modelApi.Permissions = data.Apis;
                 if (!HelpersApi.ValidatePermission(modelApi.Permissions))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 2);
 
-                modelApi.Wallets = data.wallets;
+                modelApi.Wallets = data.Wallets;
                 if (!HelpersApi.ValidateWallet(modelApi.Wallets))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 3);
 
@@ -212,7 +206,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("apis") || !value.ContainsKey("wallets"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -285,7 +279,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -334,7 +328,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -386,7 +380,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -438,7 +432,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -494,7 +488,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("code"))
                 {
@@ -536,7 +530,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 

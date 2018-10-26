@@ -36,7 +36,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -49,15 +49,15 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
                     Data = JsonHelper.SerializeObject(new SecurityModel
                     {
-                        twofaOption = userModel.Verification,
-                        isEnableTwofa = userModel.TwoFactor
+                        TwofaOption = userModel.Verification,
+                        IsEnableTwofa = userModel.TwoFactor
                     })
                 }.ToJson();
             }
@@ -73,14 +73,14 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("code") && value.ContainsKey("status") && value.ContainsKey("password"))
                 {
                     var code = value["code"].ToString();
                     var status = value["status"];
 
-                    if (!int.TryParse((string) status, out int outStatus))
+                    if (!int.TryParse((string)status, out int outStatus))
                         return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                     var password = value["password"].ToString();
@@ -132,7 +132,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (userModel.IsLockScreen == 0)
                     return new ReturnObject

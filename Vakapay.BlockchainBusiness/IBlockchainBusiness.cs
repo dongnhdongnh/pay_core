@@ -5,11 +5,11 @@ namespace Vakapay.BlockchainBusiness
 {
     public interface IBlockchainBusiness
     {
-        ReturnObject SendTransaction(string From, string To, decimal amount);
-        ReturnObject SendTransaction(string From, string To, decimal amount, string Password);
-        ReturnObject SendMultiTransaction(string From, string[] To, decimal amount);
+        ReturnObject SendTransaction(string from, string to, decimal amount);
+        ReturnObject SendTransaction(string from, string to, decimal amount, string password);
+        ReturnObject SendMultiTransaction(string from, string[] to, decimal amount);
         ReturnObject SignData(string data, string privateKey);
-        ReturnObject CreateNewAddress(string WalletId, string password = "");
-        Task<ReturnObject> SendTransactionAsysn(string From, string To, decimal amount);
+        ReturnObject CreateNewAddress(string walletId, string password = "");
+        Task<ReturnObject> SendTransactionAsysn(string from, string to, decimal amount);
     }
 }

@@ -6,31 +6,30 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
+using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 
 namespace Vakapay.BitcoinBusiness
 {
-    public class BitcoinRpc : IBlockchainRPC
+    public class BitcoinRpc : IBlockchainRpc
     {
-        private readonly Uri Url;
+        public string EndPointUrl { get; set; }
 
-        private readonly ICredentials Credential;
+        private readonly ICredentials _credential;
 
         public BitcoinRpc(string endPointUrl, NetworkCredential credential)
         {
-            Url = new Uri(endPointUrl);
-            Credential = credential;
+            EndPointUrl = endPointUrl;
+            _credential = credential;
         }
-
-        private IBlockchainRPC _blockchainRpcImplementation;
 
         private ReturnObject InvokeMethod(string aSMethod, params object[] aParams)
         {
             try
             {
-                HttpWebRequest webRequest = (HttpWebRequest) WebRequest.Create(Url);
+                HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(new Uri(EndPointUrl));
 
-                webRequest.Credentials = Credential;
+                webRequest.Credentials = _credential;
                 webRequest.ContentType = "application/json-rpc";
                 webRequest.Method = "POST";
 
@@ -705,8 +704,6 @@ namespace Vakapay.BitcoinBusiness
                 Message = e.Message
             };
         }
-
-        public string EndPointURL { get; set; }
 
         public ReturnObject CreateNewAddress(string account)
         {

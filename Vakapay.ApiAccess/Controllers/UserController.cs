@@ -1,9 +1,6 @@
 using System;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
-using Vakapay.ApiAccess.Constants;
 using Vakapay.ApiAccess.Model;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -20,17 +17,17 @@ namespace Vakapay.ApiAccess.Controllers
     public class UserController : ControllerBase
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }
-        private UserBusiness.UserBusiness userBusiness { get; }
+        private UserBusiness.UserBusiness UserBusiness { get; }
 
         public UserController()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             VakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            userBusiness = new UserBusiness.UserBusiness(VakapayRepositoryFactory);
+            UserBusiness = new UserBusiness.UserBusiness(VakapayRepositoryFactory);
         }
 
         [HttpGet("user")]
@@ -40,7 +37,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey)RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return CreateDataError("User Info is not permission");
@@ -49,7 +46,7 @@ namespace Vakapay.ApiAccess.Controllers
                     !apiKeyModel.Permissions.Contains(Permissions.USER_MAIL))
                     return CreateDataError("User Info is not permission");
 
-                var userInfo = (User) RouteData.Values["UserModel"];
+                var userInfo = (User)RouteData.Values["UserModel"];
 
                 return new ReturnObject
                 {

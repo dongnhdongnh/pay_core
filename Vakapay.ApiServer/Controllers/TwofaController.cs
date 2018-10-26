@@ -40,7 +40,7 @@ namespace Vakapay.ApiServer.Controllers
 
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -55,7 +55,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
@@ -83,7 +83,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var option = value["option"];
 
-                userModel.Verification = (int) option;
+                userModel.Verification = (int)option;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_OPTION_VETIFY,
@@ -102,7 +102,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
@@ -132,7 +132,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
@@ -181,7 +181,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
@@ -212,7 +212,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
@@ -242,7 +242,7 @@ namespace Vakapay.ApiServer.Controllers
                 //to do
 
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.SEND_TRSANSACTION,
+                    ActionLog.SEND_TRANSACTION,
                     HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
@@ -260,7 +260,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -288,7 +288,7 @@ namespace Vakapay.ApiServer.Controllers
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var action = value["action"].ToString();
-                string secret = null;
+                string secret;
                 int time = 30;
 
                 switch (action)
@@ -314,8 +314,8 @@ namespace Vakapay.ApiServer.Controllers
                     case ActionLog.LOCK_SCREEN:
                         secret = ActionLog.LOCK_SCREEN;
                         break;
-                    case ActionLog.SEND_TRSANSACTION:
-                        secret = ActionLog.SEND_TRSANSACTION;
+                    case ActionLog.SEND_TRANSACTION:
+                        secret = ActionLog.SEND_TRANSACTION;
                         break;
                     case ActionLog.API_ACCESS_ADD:
                         secret = ActionLog.API_ACCESS_ADD;
@@ -335,7 +335,7 @@ namespace Vakapay.ApiServer.Controllers
                         return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 var checkSecret = HelpersApi.CheckToken(userModel, secret);
 

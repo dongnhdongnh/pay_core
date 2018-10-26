@@ -33,7 +33,7 @@ namespace Vakapay.PortfolioHistoryBusiness
             string ethPrice = CacheHelper.GetCacheString(String.Format(
                 RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
                 DashboardConfig.CURRENT));
-            
+
             return Repository.InsertWithPrice(userId, vkcPrice, btcPrice, ethPrice);
         }
 

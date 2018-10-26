@@ -114,7 +114,6 @@ namespace Vakapay.SendMailBusiness
 //                }
 
                 pendingEmail.Status = sendResult.Status;
-                pendingEmail.UpdatedAt = CommonHelper.GetUnixTimestamp();
                 pendingEmail.IsProcessing = 0;
 
                 var updateResult = await sendEmailRepository.SafeUpdate(pendingEmail);
@@ -170,7 +169,7 @@ namespace Vakapay.SendMailBusiness
 
                     var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
@@ -276,20 +275,20 @@ namespace Vakapay.SendMailBusiness
             try
             {
                 string body = string.Empty;
-                string directory = Directory.GetParent(Directory.GetCurrentDirectory()) + "/MailTemplate/" +
-                                   EmailConfig.TemplateFiles[emailQueue.Template];
+                string directory = Directory.GetCurrentDirectory() + "/MailTemplate/" +
+                                   EmailConfig.TEMPLATE_FILES[emailQueue.Template];
 
                 using (StreamReader reader = new StreamReader(directory))
                 {
                     body = reader.ReadToEnd();
                 }
 
-                body = body.Replace("{vakapayUrl}", EmailConfig.VakapayUrl);
-                body = body.Replace("{logoImgUrl}", EmailConfig.LogoImgUrl);
-                body = body.Replace("{mailImgUrl}", EmailConfig.MailImgUrl);
-                body = body.Replace("{checkImgUrl}", EmailConfig.CheckImgUrl);
-                body = body.Replace("{hrImgUrl}", EmailConfig.HrImgUrl);
-                body = body.Replace("{deviceImgUrl}", EmailConfig.DeviceImgUrl);
+                body = body.Replace("{vakapayUrl}", EmailConfig.VAKAPAY_URL);
+                body = body.Replace("{logoImgUrl}", EmailConfig.LOGO_IMG_URL);
+                body = body.Replace("{mailImgUrl}", EmailConfig.MAIL_IMG_URL);
+                body = body.Replace("{checkImgUrl}", EmailConfig.CHECK_IMG_URL);
+                body = body.Replace("{hrImgUrl}", EmailConfig.HR_IMG_URL);
+                body = body.Replace("{deviceImgUrl}", EmailConfig.DEVICE_IMG_URL);
 
                 switch (emailQueue.Template)
                 {

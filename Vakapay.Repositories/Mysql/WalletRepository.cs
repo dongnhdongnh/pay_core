@@ -116,7 +116,7 @@ namespace Vakapay.Repositories.Mysql
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 //                Int32 unixTimestamp = (Int32)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-                var unixTimestamp = (int) CommonHelper.GetUnixTimestamp();
+                var unixTimestamp = (int)CommonHelper.GetUnixTimestamp();
                 string sQuery =
                     $"UPDATE {TableName} SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID AND Version = @VERSION";
 
@@ -220,11 +220,6 @@ namespace Vakapay.Repositories.Mysql
 
                     default:
                         throw new Exception("Network name is not defined!");
-                }
-
-                if (blockchainAddresses == null)
-                {
-                    return null;
                 }
 
                 var result = new List<string>();
@@ -432,21 +427,21 @@ namespace Vakapay.Repositories.Mysql
             return base.SafeUpdate(row, new[] {nameof(row.AddressCount)});
         }
 
-		public List<string> DistinctUserId()
-		{
-			var queryString = "SELECT DISTINCT UserId FROM Wallet";
-			try
-			{
-				if (Connection.State != ConnectionState.Open)
-					Connection.Open();
-				var result = Connection.Query<string>(queryString);
-				return result.ToList();
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				return null;
-			}
-		}
-	}
+        public List<string> DistinctUserId()
+        {
+            var queryString = "SELECT DISTINCT UserId FROM Wallet";
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                var result = Connection.Query<string>(queryString);
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+    }
 }

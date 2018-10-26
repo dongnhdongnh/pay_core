@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Vakapay.ApiServer.Models;
@@ -19,13 +16,12 @@ namespace Vakapay.ApiServer.ActionFilter
     public class BaseActionFilter : ActionFilterAttribute
     {
         private readonly VakapayRepositoryMysqlPersistenceFactory _repositoryFactory;
-        private const int ExpirationMinutes = 100 * 10 * 60 * 1000;
 
         public BaseActionFilter()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             _repositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -37,22 +33,21 @@ namespace Vakapay.ApiServer.ActionFilter
             {
                 var email = actionExecutedContext.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.Email)
                     .Select(c => c.Value).SingleOrDefault();
-                
-               
-                
+
+
                 if (!string.IsNullOrEmpty(email))
                 {
                     var query = new Dictionary<string, string> {{"Email", email}};
                     var userBusiness = new UserBusiness.UserBusiness(_repositoryFactory);
                     var userModel = userBusiness.GetUserInfo(query);
-                 
+
                     if (userModel != null)
                     {
                         actionExecutedContext.RouteData.Values.Add("UserModel", userModel);
                         return;
                     }
                 }
-                
+
 
                 actionExecutedContext.Result = new JsonResult(CreateDataError(MessageApiError.USER_NOT_EXIT));
             }
