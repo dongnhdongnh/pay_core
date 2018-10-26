@@ -6,29 +6,24 @@ namespace Vakapay.Repositories.Mysql
 {
     public class VakapayRepositoryMysqlPersistenceFactory : IVakapayRepositoryFactory
     {
-        public RepositoryConfiguration repositoryConfiguration { get; }
+        public RepositoryConfiguration RepositoryConfiguration { get; }
 
         public IDbConnection Connection { get; set; }
 
-        public VakapayRepositoryMysqlPersistenceFactory(RepositoryConfiguration _repositoryConfiguration)
+        public VakapayRepositoryMysqlPersistenceFactory(RepositoryConfiguration repositoryConfiguration)
         {
-            repositoryConfiguration = _repositoryConfiguration;
-        }
-
-        public IApiKeyRepository getApiKeyRepository(IDbConnection connection)
-        {
-            return new ApiKeyRepository(connection);
+            RepositoryConfiguration = repositoryConfiguration;
         }
 
         public IDbConnection GetDbConnection()
         {
-            Connection = new MySqlConnection(repositoryConfiguration.ConnectionString);
+            Connection = new MySqlConnection(RepositoryConfiguration.ConnectionString);
             return Connection;
         }
 
         public IDbConnection GetOldConnection()
         {
-            return Connection ?? (Connection = new MySqlConnection(repositoryConfiguration.ConnectionString));
+            return Connection ?? (Connection = new MySqlConnection(RepositoryConfiguration.ConnectionString));
         }
 
         public IWalletRepository GetWalletRepository(IDbConnection dbConnection)

@@ -1,18 +1,20 @@
 ﻿using System.Data;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.VAKA;
 using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-	public class VakacoinDepositTransactionRepository : BlockchainTransactionRepository<VakacoinDepositTransaction>, IVakacoinDepositTransactionRepository
-	{
-		public VakacoinDepositTransactionRepository(string connectionString) : base(connectionString)
-		{
-		}
+    public class VakacoinDepositTransactionRepository : BlockchainTransactionRepository<VakacoinDepositTransaction>,
+        IVakacoinDepositTransactionRepository
+    {
+        public VakacoinDepositTransactionRepository(string connectionString) : base(connectionString)
+        {
+        }
 
-		public VakacoinDepositTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
-		{
-		}
+        public VakacoinDepositTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
+        {
+        }
 
 //		public ReturnObject Delete(string Id)
 //		{
@@ -133,5 +135,5 @@ namespace Vakapay.Repositories.Mysql
 //		{
 //			throw new NotImplementedException();
 //		}
-	}
+    }
 }

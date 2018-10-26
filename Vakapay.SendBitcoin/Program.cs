@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
-using Microsoft.Extensions.Configuration;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using NLog;
@@ -13,7 +10,7 @@ namespace Vakapay.SendBitcoin
 {
     internal static class Program
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         private static void Main()
         {
@@ -21,7 +18,7 @@ namespace Vakapay.SendBitcoin
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = AppSettingHelper.GetDBConnection()
+                    ConnectionString = AppSettingHelper.GetDbConnection()
                 };
 
                 for (var i = 0; i < 10; i++)
@@ -47,10 +44,11 @@ namespace Vakapay.SendBitcoin
                 while (true)
                 {
                     Console.WriteLine("Start Send Bitcoin....");
-                    var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
+                    var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                        AppSettingHelper.GetBitcoinRpcAuthentication());
 
                     var bitcoinRepo = repoFactory.GetBitcoinWithdrawTransactionRepository(connection);
-                    var resultSend = bitcoinBusiness.SendTransactionAsync(bitcoinRepo, rpc, "");
+                    var resultSend = bitcoinBusiness.SendTransactionAsync(bitcoinRepo, rpc);
                     Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
                     Console.WriteLine("Send Bitcoin End...");
@@ -60,7 +58,7 @@ namespace Vakapay.SendBitcoin
             catch (Exception e)
             {
                 connection.Close();
-                Logger.Error(e, "Send Bitcoin");
+                _logger.Error(e, "Send Bitcoin");
                 Console.WriteLine(e.ToString());
             }
         }

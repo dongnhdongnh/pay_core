@@ -6,7 +6,6 @@ using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -19,11 +18,12 @@ namespace Vakapay.ApiServer.Controllers
     public class AccountsController : Controller
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }
+
         public AccountsController()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             VakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -34,11 +34,8 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
-                var userRepository = new UserRepository(VakapayRepositoryFactory.GetOldConnection());
                 var wallets = walletRepository.FindAllWalletByUserId(id);
-                var user = userRepository.FindById(id);
 
                 var balances = new List<CurrencyBalance>();
 
@@ -73,7 +70,6 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
 
                 var addresses = walletRepository.GetAddressesByUserId(userId);
@@ -201,7 +197,8 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+                var sendTransactionBusiness =
+                    new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
 
                 var request = value.ToObject<UserSendTransaction>();
 
@@ -254,11 +251,11 @@ namespace Vakapay.ApiServer.Controllers
                 transactions.AddRange(vakacoinDepositTrxRepo.FindTransactionsByUserId(userId));
                 transactions.AddRange(vakacoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
 
-                var sortedTransactions = transactions.OrderByDescending(o=>o.UpdatedAt).ToList();
+                var sortedTransactions = transactions.OrderByDescending(o => o.UpdatedAt).ToList();
 
-                if ( limit != null && limit > 0 && limit < sortedTransactions.Count )
+                if (limit != null && limit > 0 && limit < sortedTransactions.Count)
                 {
-                    sortedTransactions = sortedTransactions.GetRange(0, (int) limit);
+                    sortedTransactions = sortedTransactions.GetRange(0, (int)limit);
                 }
 
                 return new ReturnDataObject()

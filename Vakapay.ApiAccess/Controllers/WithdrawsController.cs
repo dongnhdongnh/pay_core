@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
 using Vakapay.ApiAccess.Constants;
+using Vakapay.ApiAccess.Helpers;
 using Vakapay.ApiAccess.Model;
-using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -23,19 +19,19 @@ namespace Vakapay.ApiAccess.Controllers
     public class WithdrawsController : ControllerBase
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }
-        private UserBusiness.UserBusiness userBusiness { get; }
-        private WalletBusiness.WalletBusiness walletBusiness { get; }
+        private UserBusiness.UserBusiness UserBusiness { get; }
+        private WalletBusiness.WalletBusiness WalletBusiness { get; }
 
         public WithdrawsController()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             VakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            userBusiness = new UserBusiness.UserBusiness(VakapayRepositoryFactory);
-            walletBusiness =
+            UserBusiness = new UserBusiness.UserBusiness(VakapayRepositoryFactory);
+            WalletBusiness =
                 new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
         }
 
@@ -56,7 +52,7 @@ namespace Vakapay.ApiAccess.Controllers
                 if (!CommonHelper.ValidateId(id))
                     return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
 
-                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey)RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
@@ -64,9 +60,9 @@ namespace Vakapay.ApiAccess.Controllers
                 if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
                     return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
 
-                var userInfo = (User) RouteData.Values["UserModel"];
+                var userInfo = (User)RouteData.Values["UserModel"];
 
-                var dataWithdraw = userBusiness.GetWithdraw(id, currency);
+                var dataWithdraw = UserBusiness.GetWithdraw(id, currency);
 
                 if (dataWithdraw != null)
                 {
@@ -110,7 +106,7 @@ namespace Vakapay.ApiAccess.Controllers
                 if (!ApiAccessHelper.ValidateCurrency(currency))
                     return ApiAccessHelper.CreateDataError(MessageError.PARAM_INVALID);
 
-                var apiKeyModel = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey)RouteData.Values["ApiKeyModel"];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
@@ -118,14 +114,13 @@ namespace Vakapay.ApiAccess.Controllers
                 if (!apiKeyModel.Permissions.Contains(Permissions.READ_TRANSACTIONS))
                     return ApiAccessHelper.CreateDataError(MessageError.USER_PERMISSION);
 
-                int numberData = 0;
-                var withdraws = walletBusiness.GetHistory(out numberData, apiKeyModel.UserId, currency,
+                var withdraws = WalletBusiness.GetHistory(out var numberData, apiKeyModel.UserId, currency,
                     offset, limit);
 
                 var data = new ListWithdraws
                 {
-                    total = numberData,
-                    listWithdraws = withdraws
+                    Total = numberData,
+                    ListTransactions = withdraws
                 };
 
                 return new ReturnObject

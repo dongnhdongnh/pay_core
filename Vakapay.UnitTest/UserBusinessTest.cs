@@ -11,28 +11,26 @@ namespace Vakapay.UnitTest
     [TestFixture]
     public class UserBusinessTest
     {
-        VakapayRepositoryMysqlPersistenceFactory _PersistenceFactory;
+        VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
         VakapayRepositoryMysqlPersistenceFactory PersistenceFactory
         {
             get
             {
-                if (_PersistenceFactory == null)
+                if (_persistenceFactory == null)
                 {
                     var repositoryConfig = new RepositoryConfiguration
                     {
-                        ConnectionString = AppSettingHelper.GetDBConnection()
+                        ConnectionString = AppSettingHelper.GetDbConnection()
                     };
                     Console.WriteLine("New Connect");
-                    _PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+                    _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
                 }
 
-                return _PersistenceFactory;
+                return _persistenceFactory;
             }
-            set { this._PersistenceFactory = value; }
+            set { _persistenceFactory = value; }
         }
-
-        UserBusiness.UserBusiness userBus;
 
         [Test]
         public void UserInfo()
@@ -40,7 +38,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             Console.WriteLine("New Address");
@@ -62,7 +60,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             Console.WriteLine("New Address");
@@ -75,7 +73,6 @@ namespace Vakapay.UnitTest
                 Ip = "192.168.1.157",
                 ActionName = "loggin",
                 UserId = "aaaaaaaaaa",
-                CreatedAt = (int) CommonHelper.GetUnixTimestamp()
             };
             var resultCreated = userBus.AddActionLog(log.Description, log.UserId, log.ActionName, log.Ip);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
@@ -88,7 +85,7 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             Console.WriteLine("New Address");
@@ -99,7 +96,7 @@ namespace Vakapay.UnitTest
 
             var resultCreated = userBus.Login(
                 new User {Email = "ngochuan2212@gmail.com", PhoneNumber = "+84988478266", FullName = "Ngo Ngoc Huan"});
-            var resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindByEmailAddress("ngochuan2212@gmail.com"));
+            walletBusiness.MakeAllWalletForNewUser(userRepo.FindByEmailAddress("ngochuan2212@gmail.com"));
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
 
@@ -108,7 +105,7 @@ namespace Vakapay.UnitTest
                 {
                     Email = "tieuthanhliem@gmail.com", PhoneNumber = "+84965995710", FullName = "Tieu Thanh Liem"
                 });
-            resultTest = walletBusiness.MakeAllWalletForNewUser(userRepo.FindByEmailAddress("tieuthanhliem@gmail.com"));
+            walletBusiness.MakeAllWalletForNewUser(userRepo.FindByEmailAddress("tieuthanhliem@gmail.com"));
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }

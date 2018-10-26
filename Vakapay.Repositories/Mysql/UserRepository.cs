@@ -4,6 +4,9 @@ using System.Data;
 using Dapper;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
+using Vakapay.Models.Entities.ETH;
+using Vakapay.Models.Entities.VAKA;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql.Base;
 
@@ -104,7 +107,7 @@ namespace Vakapay.Repositories.Mysql
                 return null;
             }
         }
-        
+
         public string FindEmailByBitcoinAddress(string bitcoinAddress)
         {
             try
@@ -138,7 +141,7 @@ namespace Vakapay.Repositories.Mysql
 
                 var sQuery = $"SELECT * FROM {TableName} WHERE {nameof(User.Email)} = @Email";
 
-                var result = Connection.QuerySingleOrDefault<User>(sQuery, new { Email = emailAddress });
+                var result = Connection.QuerySingleOrDefault<User>(sQuery, new {Email = emailAddress});
 
                 return result;
             }

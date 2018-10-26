@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Threading;
-using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -14,7 +12,7 @@ namespace Vakapay.SendSms
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

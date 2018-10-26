@@ -26,13 +26,13 @@ namespace Vakapay.ApiServer.Controllers
         {
             return Result(DashboardConfig.BITCOIN, condition);
         }
-        
+
         [HttpGet("bitcoin/{condition}")]
         public ReturnObject BTCPrice(string condition)
         {
             return Result(DashboardConfig.BITCOIN, condition);
         }
-        
+
         [HttpGet("ethereum/{condition}")]
         public ReturnObject ETHPrice(string condition)
         {
@@ -43,14 +43,14 @@ namespace Vakapay.ApiServer.Controllers
         {
             var cacheKey = String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
                 networkName, condition);
-            
+
             if (!CacheHelper.HaveKey(cacheKey))
                 return new ReturnObject
                 {
                     Status = Status.STATUS_ERROR,
-                    Message = "Can't find by "+condition
+                    Message = "Can't find by " + condition
                 };
-            
+
             var result = new ReturnObject
             {
                 Status = Status.STATUS_SUCCESS,

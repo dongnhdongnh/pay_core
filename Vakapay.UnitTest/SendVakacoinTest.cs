@@ -13,14 +13,13 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
             // New DB connection
             var accountRepo = persistenceFactory.GetVakacoinAccountRepository(persistenceFactory.GetDbConnection());
-
         }
     }
 }

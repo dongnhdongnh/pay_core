@@ -1,3 +1,5 @@
+using Vakapay.Commons.Helpers;
+
 namespace Vakapay.ApiServer.Models
 {
     public class ActionCode

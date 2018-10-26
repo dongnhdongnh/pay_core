@@ -4,34 +4,35 @@ using NLog;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.BitcoinNotifi
 {
-    internal static class BitcoinNotify
+    internal class BitcoinNotify
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static readonly WalletBusiness.WalletBusiness WalletBusiness = null;
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
+        private static WalletBusiness.WalletBusiness _walletBusiness = null;
 
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
             try
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = AppSettingHelper.GetDBConnection()
+                    ConnectionString = AppSettingHelper.GetDbConnection()
                 };
 
                 var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
                 var btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory);
-                var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
+                var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                    AppSettingHelper.GetBitcoinRpcAuthentication());
 
                 var transaction = rpc.FindTransactionByHash(args[0]);
-                Logger.Debug("BitcoinNotify =>> BTCTransactionModel: " + transaction.Data);
+                _logger.Debug("BitcoinNotify =>> BTCTransactionModel: " + transaction.Data);
                 var transactionModel = BtcTransactionModel.FromJson(transaction.Data);
                 if (transactionModel.BtcTransactionDetailsModel != null &&
                     transactionModel.BtcTransactionDetailsModel.Length > 0)
@@ -51,12 +52,12 @@ namespace Vakapay.BitcoinNotifi
                 }
                 else
                 {
-                    Logger.Debug("BitcoinNotify BtcTransactionDetailsModel is not exist");
+                    _logger.Debug("BitcoinNotify BtcTransactionDetailsModel is not exist");
                 }
             }
             catch (Exception e)
             {
-                Logger.Error(e, "BitcoinNotify exception");
+                _logger.Error(e, "BitcoinNotify exception");
             }
         }
 
@@ -78,14 +79,14 @@ namespace Vakapay.BitcoinNotifi
                         Hash = transactionId,
                         ToAddress = address
                     });
-                Logger.Debug("GetDepositTransaction from DB: " + depositTransaction.ToJson());
+                _logger.Debug("GetDepositTransaction from DB: " + depositTransaction.ToJson());
 
                 return depositTransaction;
             }
 
             catch (Exception e)
             {
-                Logger.Error(e, "GetDepositTransaction exception");
+                _logger.Error(e, "GetDepositTransaction exception");
                 return null;
             }
         }
@@ -102,35 +103,35 @@ namespace Vakapay.BitcoinNotifi
         {
             try
             {
-                Logger.Debug("HandleNotifiDataReceiver start");
+                _logger.Debug("HandleNotifiDataReceiver start");
 
                 var btcDepositTransactionRepository = btcBusiness
                     .VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(btcBusiness.DbConnection);
 
-                Logger.Debug("HandleNotifiDataReceiver start1");
+                _logger.Debug("HandleNotifiDataReceiver start1");
                 var currentBtcDepositTransaction = GetDepositTransaction(btcDepositTransactionRepository,
                     transactionModelDetail.Address, transactionModel.Txid);
-                Logger.Debug("HandleNotifiDataReceiver =>> currentBtcDepositTransaction: " +
-                             currentBtcDepositTransaction);
+                _logger.Debug("HandleNotifiDataReceiver =>> currentBtcDepositTransaction: " +
+                              currentBtcDepositTransaction);
                 var currentTime = CommonHelper.GetUnixTimestamp();
                 if (transactionModel.Confirmations == 0)
                 {
-                    Logger.Debug("HandleNotifiDataReceiver with confirm = 0");
+                    _logger.Debug("HandleNotifiDataReceiver with confirm = 0");
                     if (currentBtcDepositTransaction == null)
                     {
                         CreateNewBtcDepositTransaction(transactionModel, transactionModelDetail,
-                            btcDepositTransactionRepository, currentTime);
+                            btcDepositTransactionRepository);
                     }
                     else
                     {
                         // transaction is exist
-                        Logger.Debug(
+                        _logger.Debug(
                             "HandleNotifiDataReceiver =>> BitcoinDepositTransaction is exist, don't create new data");
                     }
                 }
                 else
                 {
-                    Logger.Debug("HandleNotifiDataReceiver with confirm > 0");
+                    _logger.Debug("HandleNotifiDataReceiver with confirm > 0");
                     if (currentBtcDepositTransaction != null)
                     {
                         currentBtcDepositTransaction.BlockHash = transactionModel.BlockHash;
@@ -142,11 +143,11 @@ namespace Vakapay.BitcoinNotifi
                     else
                     {
                         CreateNewBtcDepositTransaction(transactionModel, transactionModelDetail,
-                            btcDepositTransactionRepository, currentTime);
+                            btcDepositTransactionRepository);
                     }
 
                     // update balance 
-                    WalletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address, transactionModelDetail.Amount,
+                    _walletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address, transactionModelDetail.Amount,
                         "Bitcoin");
 
                     //insert new email data
@@ -155,7 +156,7 @@ namespace Vakapay.BitcoinNotifi
             }
             catch (Exception e)
             {
-                Logger.Error(e, "HandleNotifiDataReceiver exception");
+                _logger.Error(e, "HandleNotifiDataReceiver exception");
             }
         }
 
@@ -177,17 +178,18 @@ namespace Vakapay.BitcoinNotifi
                     const string title = "Notify receiver Bitcoin";
 //                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
 //                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
-                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount, "", //TODO add transaction Id
+                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
+                        "", //TODO add transaction Id
                         EmailTemplate.Received, CryptoCurrency.BTC);
                 }
                 else
                 {
-                    Logger.Debug("CreateDataEmail =>> error because email fail");
+                    _logger.Debug("CreateDataEmail =>> error because email fail");
                 }
             }
             catch (Exception e)
             {
-                Logger.Error("CreateDataEmail error: ", e.Message);
+                _logger.Error("CreateDataEmail error: ", e.Message);
             }
         }
 
@@ -197,15 +199,14 @@ namespace Vakapay.BitcoinNotifi
         /// <param name="transactionModel"></param>
         /// <param name="transactionModelDetail"></param>
         /// <param name="btcDepositTransactionRepository"></param>
-        /// <param name="currentTime"></param>
         private static void CreateNewBtcDepositTransaction(BtcTransactionModel transactionModel,
             BtcTransactionDetailModel transactionModelDetail,
-            IBitcoinDepositTransactionRepository btcDepositTransactionRepository, long currentTime
+            IBitcoinDepositTransactionRepository btcDepositTransactionRepository
         )
         {
             try
             {
-                Logger.Debug("cretateNewBtcDepositTransaction ");
+                _logger.Debug("cretateNewBtcDepositTransaction ");
                 var btcDepositTransaction = new BitcoinDepositTransaction
                 {
                     Hash = transactionModel.Txid,
@@ -217,16 +218,14 @@ namespace Vakapay.BitcoinNotifi
                     ToAddress = transactionModelDetail.Address,
                     Fee = 0,
                     Status = Status.STATUS_PENDING,
-                    CreatedAt = currentTime,
-                    UpdatedAt = currentTime
                 };
-                Logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
-                             btcDepositTransaction.ToJson());
+                _logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
+                              btcDepositTransaction.ToJson());
                 btcDepositTransactionRepository.Insert(btcDepositTransaction);
             }
             catch (Exception e)
             {
-                Logger.Error(e, "cretateNewBtcDepositTransaction ");
+                _logger.Error(e, "cretateNewBtcDepositTransaction ");
             }
         }
 
@@ -247,13 +246,13 @@ namespace Vakapay.BitcoinNotifi
                     Hash = transactionId,
                     ToAddress = address
                 });
-                Logger.Debug("GetBtcWithdrawTransaction from DB: " + listBtcRawTransactions.Count);
+                _logger.Debug("GetBtcWithdrawTransaction from DB: " + listBtcRawTransactions.Count);
                 return listBtcRawTransactions.Count > 0 ? listBtcRawTransactions.ElementAt(0) : null;
             }
 
             catch (Exception e)
             {
-                Logger.Error(e, "GetBtcWithdrawTransaction exception");
+                _logger.Error(e, "GetBtcWithdrawTransaction exception");
                 return null;
             }
         }
@@ -269,7 +268,7 @@ namespace Vakapay.BitcoinNotifi
         {
             try
             {
-                Logger.Debug("HandleNotifyDataSend start");
+                _logger.Debug("HandleNotifyDataSend start");
                 if (transactionModel.Confirmations > 0)
                 {
                     var bitcoinRawTransactionRepository = btcBusiness
@@ -279,10 +278,10 @@ namespace Vakapay.BitcoinNotifi
                         GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
                             transactionModel.Txid);
 
-                    Logger.Debug("HandleNotifyDataSend =>> btcWithdrawTransaction: " + currentBtcWithdrawTransaction);
+                    _logger.Debug("HandleNotifyDataSend =>> btcWithdrawTransaction: " + currentBtcWithdrawTransaction);
                     if (currentBtcWithdrawTransaction != null)
                     {
-                        Logger.Debug("HandleNotifyDataSend ==>> Update hash and time update ");
+                        _logger.Debug("HandleNotifyDataSend ==>> Update hash and time update ");
                         var currentTime = CommonHelper.GetUnixTimestamp();
                         currentBtcWithdrawTransaction.BlockHash = transactionModel.BlockHash;
                         currentBtcWithdrawTransaction.UpdatedAt = currentTime;
@@ -291,12 +290,12 @@ namespace Vakapay.BitcoinNotifi
                 }
                 else
                 {
-                    Logger.Debug("HandleNotifyDataSend =>> confirm == 0");
+                    _logger.Debug("HandleNotifyDataSend =>> confirm == 0");
                 }
             }
             catch (Exception e)
             {
-                Logger.Error(e, "HandleNotifyDataSend exception");
+                _logger.Error(e, "HandleNotifyDataSend exception");
             }
         }
     }

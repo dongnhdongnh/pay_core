@@ -4,25 +4,17 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using Dapper;
-using NLog;
 using Vakapay.Commons.Constants;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
     public class BitcoinWithdrawTransactionRepository : BlockchainTransactionRepository<BitcoinWithdrawTransaction>,
         IBitcoinWithdrawTransactionRepository
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
-        private IBitcoinWithdrawTransactionRepository _bitcoinRawTransactionRepositoryImplementation;
-
-        public BitcoinWithdrawTransactionRepository(string connectionString) : base(connectionString)
-        {
-        }
-
         public BitcoinWithdrawTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
         {
         }
@@ -98,7 +90,7 @@ namespace Vakapay.Repositories.Mysql
         }
 
 
-        public ReturnObject ExcuteSQL(string sqlString)
+        public ReturnObject ExecuteSql(string sqlString)
         {
             try
             {

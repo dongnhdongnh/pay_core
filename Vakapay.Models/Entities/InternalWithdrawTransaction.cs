@@ -2,7 +2,7 @@ using Vakapay.Models.Domains;
 
 namespace Vakapay.Models.Entities
 {
-    public class InternalWithdrawTransaction : MultiThreadUpdateEntity
+    public class InternalWithdrawTransaction : MultiThreadUpdateModel
     {
         public string SenderUserId { get; set; }
         public string ReceiverUserId { get; set; }

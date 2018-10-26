@@ -17,6 +17,7 @@ namespace Vakapay.Repositories.Mysql
         public SendSmsRepository(IDbConnection dbConnection) : base(dbConnection)
         {
         }
+
 //
 //        public SmsQueue FindPendingSms()
 //        {

@@ -15,11 +15,11 @@ namespace Vakapay.ApiAccess.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            var userModel = (User) RouteData.Values["UserModel"];
-            var apiKey = (ApiKey) RouteData.Values["ApiKeyModel"];
+            var userModel = (User)RouteData.Values["UserModel"];
+            var apiKey = (ApiKey)RouteData.Values["ApiKeyModel"];
             Console.WriteLine("ValuesController ==>> userModel: " + userModel.Id + " ==>> ApiKeyModel: " + apiKey.Id);
 
-            return new string[] {"value1", "value2"};
+            return new[] {"value1", "value2"};
         }
 
         // GET api/values/5

@@ -23,10 +23,11 @@ namespace Vakapay.PortfolioHistory
                 var lsUserId = GetDistinctUserId(walletBusiness);
                 foreach (var userId in lsUserId)
                 {
-                    Console.WriteLine("Scanned UserId = "+userId + " at "+ CommonHelper.GetUnixTimestamp());
+                    Console.WriteLine("Scanned UserId = " + userId + " at " + CommonHelper.GetUnixTimestamp());
                     portfolioHistoryBusiness.InsertWithPrice(userId);
                 }
-                Thread.Sleep(minutes*60*1000);
+
+                Thread.Sleep(minutes * 60 * 1000);
             }
         }
 
@@ -34,7 +35,7 @@ namespace Vakapay.PortfolioHistory
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             var walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);

@@ -112,7 +112,7 @@ namespace Vakapay.SendSmsBusiness
 //                }
 
                 pendingSms.Status = sendResult.Status;
-                pendingSms.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                pendingSms.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                 pendingSms.IsProcessing = 0;
 
                 var updateResult = await sendSmsRepository.SafeUpdate(pendingSms);
@@ -159,7 +159,7 @@ namespace Vakapay.SendSmsBusiness
 
                     var result = JsonConvert.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -16,7 +15,6 @@ using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -62,7 +60,7 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userCheck = (User) RouteData.Values["UserModel"];
+                var userCheck = (User)RouteData.Values["UserModel"];
 
                 if (file.Length > 2097152)
                     return CreateDataError("File max size 2Mb");
@@ -145,7 +143,7 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (userModel == null)
                 {
@@ -231,7 +229,7 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("streetAddress1"))
                 {
@@ -277,12 +275,12 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("currencyKey"))
                 {
                     var currencyKey = value["currencyKey"].ToString();
-                    if (!string.IsNullOrEmpty(currencyKey) && Constants.listCurrency.ContainsKey(currencyKey))
+                    if (!string.IsNullOrEmpty(currencyKey) && PaymentCurrency.LIST_CURRENCY.ContainsKey(currencyKey))
                     {
                         userModel.CurrencyKey = currencyKey;
                     }
@@ -295,7 +293,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (value.ContainsKey("timezoneKey"))
                 {
                     var timezoneKey = value["timezoneKey"].ToString();
-                    if (!string.IsNullOrEmpty(timezoneKey) && Constants.listTimeZone.ContainsKey(timezoneKey))
+                    if (!string.IsNullOrEmpty(timezoneKey) && Timezone.LIST_TIME_ZONE.ContainsKey(timezoneKey))
                     {
                         userModel.TimezoneKey = timezoneKey;
                     }
@@ -329,7 +327,7 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (value.ContainsKey("notifications"))
                 {
@@ -372,7 +370,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

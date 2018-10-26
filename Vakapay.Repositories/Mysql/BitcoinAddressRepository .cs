@@ -2,9 +2,8 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using Vakapay.Commons.Constants;
-using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql.Base;
 
@@ -12,8 +11,6 @@ namespace Vakapay.Repositories.Mysql
 {
     public class BitcoinAddressRepository : BlockchainAddressRepository<BitcoinAddress>, IBitcoinAddressRepository
     {
-        private IBitcoinAddressRepository _bitcoinAddressRepositoryImplementation;
-
         public BitcoinAddressRepository(string connectionString) : base(connectionString)
         {
         }
@@ -99,16 +96,11 @@ namespace Vakapay.Repositories.Mysql
         {
             try
             {
-                var time = (int) CommonHelper.GetUnixTimestamp();
-
                 var bcAddress = new BitcoinAddress
                 {
-                    Id = CommonHelper.GenerateUuid(),
                     Address = address,
                     Status = Status.STATUS_ACTIVE,
                     WalletId = walletId,
-                    CreatedAt = time,
-                    UpdatedAt = time
                 };
 
                 return Insert(bcAddress);

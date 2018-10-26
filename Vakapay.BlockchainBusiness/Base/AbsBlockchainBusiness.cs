@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -37,7 +36,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <typeparam name="TBlockchainTransaction"></typeparam>
         /// <returns></returns>
         public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
-            IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
+            IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRpc rpcClass,
             string privateKey = "") where TBlockchainTransaction : BlockchainTransaction
         {
             /*
@@ -156,13 +155,13 @@ namespace Vakapay.BlockchainBusiness.Base
                     Data = sendTransaction.Data
                 };
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //release lock
                 transactionDbSend.Rollback();
                 var resultRelease = repoQuery.ReleaseLock(pendingTransaction);
                 Console.WriteLine(JsonHelper.SerializeObject(resultRelease));
-                throw e;
+                throw;
             }
         }
 
@@ -170,7 +169,6 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <summary>
         /// Created Address with optimistic lock
         /// </summary>
-        /// <param name="wallet"></param>
         /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
         /// <param name="walletId"></param>
@@ -178,7 +176,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <typeparam name="TBlockchainAddress"></typeparam>
         /// <returns></returns>
         public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(
-            IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
+            IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRpc rpcClass, string walletId,
             string other = "") where TBlockchainAddress : BlockchainAddress
         {
             try
@@ -233,176 +231,33 @@ namespace Vakapay.BlockchainBusiness.Base
             }
         }
 
-        public virtual async Task<ReturnObject> ScanBlockAsync<TWithDraw, TDeposit, TBlockResponse, TTransaction>(
-            string networkName,
-            IWalletBusiness wallet,
-            IRepositoryBlockchainTransaction<TWithDraw> withdrawRepoQuery,
-            IRepositoryBlockchainTransaction<TDeposit> depositRepoQuery,
-            IBlockchainRPC rpcClass)
-            where TWithDraw : BlockchainTransaction
-            where TDeposit : BlockchainTransaction
-            where TBlockResponse : EthereumBlockResponse
-            where TTransaction : EthereumTransactionResponse
-        {
-            try
-            {
-                int lastBlock = -1;
-                int blockNumber = -1;
-                //Get lastBlock from last time
-                int.TryParse(
-                    CacheHelper.GetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK,
-                        networkName)), out lastBlock);
-                if (lastBlock < 0)
-                    lastBlock = 0;
-
-                //get blockNumber:
-                var _result = rpcClass.GetBlockNumber();
-                if (_result.Status == Status.STATUS_ERROR)
-                {
-                    throw new Exception("Cant GetBlockNumber");
-                }
-
-                if (!int.TryParse(_result.Data.ToString(), out blockNumber))
-                {
-                    throw new Exception("Cant parse block number");
-                }
-
-                //Get list of new block that have transactions
-                if (lastBlock >= blockNumber)
-                    lastBlock = blockNumber;
-                Console.WriteLine("SCAN FROM " + lastBlock + "___" + blockNumber);
-                List<TBlockResponse> blocks = new List<TBlockResponse>();
-                for (int i = lastBlock; i <= blockNumber; i++)
-                {
-                    if (i < 0) continue;
-                    _result = rpcClass.GetBlockByNumber(i);
-                    if (_result.Status == Status.STATUS_ERROR)
-                    {
-                        return _result;
-                    }
-
-                    if (_result.Data == null)
-                        continue;
-                    TBlockResponse _block = JsonHelper.DeserializeObject<TBlockResponse>(_result.Data.ToString());
-                    if (_block.TransactionsResponse.Length > 0)
-                    {
-                        blocks.Add(_block);
-                    }
-                }
-
-                CacheHelper.SetCacheString(String.Format(RedisCacheKey.KEY_SCANBLOCK_LASTSCANBLOCK, networkName),
-                    blockNumber.ToString());
-                if (blocks.Count <= 0)
-                {
-                    throw new Exception("no blocks have transaction");
-                }
-                //Get done,List<> blocks now contains all block that have transaction
-                //check Transaction and update:
-                //Search transactions which need to scan:
-
-                var withdrawPendingTransactions = withdrawRepoQuery.FindTransactionsNotCompleteOnNet();
-                //Scan all block and check Withdraw transaction:
-                Console.WriteLine("Scan withdrawPendingTransactions");
-                if (withdrawPendingTransactions.Count > 0)
-                {
-                    foreach (TBlockResponse _block in blocks)
-                    {
-                        if (withdrawPendingTransactions.Count <= 0)
-                        {
-                            //SCAN DONE:
-                            break;
-                        }
-
-                        for (int i = withdrawPendingTransactions.Count - 1; i >= 0; i--)
-                        {
-                            BlockchainTransaction _currentPending = withdrawPendingTransactions[i];
-                            EthereumTransactionResponse _trans =
-                                _block.TransactionsResponse.SingleOrDefault(x => x.Hash.Equals(_currentPending.Hash));
-                            int _blockNumber = -1;
-                            int _fee = 0;
-
-                            if (_trans != null)
-                            {
-                                _trans.BlockNumber.HexToInt(out _blockNumber);
-                                if (_trans.Fee != null)
-                                    _trans.Fee.HexToInt(out _fee);
-                                Console.WriteLine("HELLO " + _currentPending.Hash);
-                                _currentPending.BlockNumber = _blockNumber;
-                                _currentPending.Fee = _fee;
-                                _currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
-                                //	_currentPending.Status = Status.StatusCompleted;
-                                //	_currentPending.InProcess = 0;
-                                Console.WriteLine("CaLL UPDATE");
-
-                                withdrawRepoQuery.Update((TWithDraw)_currentPending);
-                                withdrawPendingTransactions.RemoveAt(i);
-                            }
-                        }
-                    }
-                }
-
-                Console.WriteLine("Scan withdrawPendingTransactions Done");
-                //check wallet balance and update 
-                foreach (TBlockResponse _block in blocks)
-                {
-                    foreach (EthereumTransactionResponse _trans in _block.TransactionsResponse)
-                    {
-                        string _toAddress = _trans.To;
-                        string _fromAddress = _trans.From;
-                        if (!wallet.CheckExistedAddress(_toAddress, networkName))
-                        {
-                            //logger.Info(to + " is not exist in Wallet!!!");
-                            continue;
-                        }
-                        else
-                        {
-                            //Console.WriteLine("value" + _trans.value);
-                            int _transaValue = 0;
-                            if (_trans.Value.HexToInt(out _transaValue))
-                            {
-                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
-                            }
-                        }
-                    }
-                }
-
-
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_COMPLETED,
-                    Message = "Scan done"
-                };
-            }
-            catch (Exception e)
-            {
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_ERROR,
-                    Message = e.Message
-                };
-            }
-        }
-
         /// <summary>
         /// get history from both withdrawn and deposit table
         /// </summary>
-        /// <typeparam name="TBlockchainTransaction"></typeparam>
-        /// <param name="repoQuery"></param>
+        /// <param name="tableInternalWithdrawName"></param>
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
+        /// <param name="numberData"></param>
+        /// <param name="currency"></param>
+        /// <param name="withdrawRepository"></param>
+        /// <param name="search"></param>
+        /// <param name="userID"></param>
+        /// <param name="depositRepository"></param>
         /// <returns></returns>
-        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string userID,string currency,
-       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, string TableInternalWihdrawnName, int offset = -1, int limit = -1,
-       string[] orderBy = null,string search=null)
+        public virtual List<BlockchainTransaction> GetAllHistory<T1, T2>(out int numberData, string userID,
+            string currency,
+            IRepositoryBlockchainTransaction<T1> withdrawRepository,
+            IRepositoryBlockchainTransaction<T2> depositRepository, string tableInternalWithdrawName, int offset = -1,
+            int limit = -1,
+            string[] orderBy = null, string search = null)
         {
             try
             {
                 Console.WriteLine("FIND HISTORY FROM ABS");
-                //WithdrawnrepoQuery.GetTableName();
-                //DepositrepoQuery.GetTableName();
-                //   WithdrawnrepoQuery.FindBySql();
-                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID,currency, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), TableInternalWihdrawnName, offset, limit, orderBy, search);
+                return withdrawRepository.FindTransactionHistoryAll(out numberData, userID, currency,
+                    withdrawRepository.GetTableName(), depositRepository.GetTableName(), tableInternalWithdrawName,
+                    offset, limit, orderBy, search);
             }
             catch (Exception e)
             {
@@ -450,8 +305,9 @@ namespace Vakapay.BlockchainBusiness.Base
             return null;
         }
 
-        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency, int offset = -1, int limit = -1,
-            string[] orderBy = null,string search=null)
+        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData, string userID, string currency,
+            int offset = -1, int limit = -1,
+            string[] orderBy = null, string search = null)
         {
             numberData = -1;
             Console.WriteLine("Not override");
@@ -469,30 +325,23 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <param name="networkName"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
-        //            string networkName, string sendOrReceiver)
         public async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
             EmailTemplate template, string networkName)
         {
             try
             {
-                var currentTime = CommonHelper.GetUnixTimestamp();
                 var sendMailBusiness = new SendMailBusiness.SendMailBusiness(VakapayRepositoryFactory, false);
 
                 if (email == null) return;
                 var emailQueue = new EmailQueue
                 {
-                    Id = CommonHelper.GenerateUuid(),
                     ToEmail = email,
                     Template = template,
                     Subject = subject,
                     NetworkName = networkName,
-                    //                    SentOrReceived = sendOrReceiver,
                     Amount = amount,
                     TransactionId = transactionId,
                     Status = Status.STATUS_PENDING,
-                    CreatedAt = currentTime,
-                    UpdatedAt = currentTime
                 };
                 await sendMailBusiness.CreateEmailQueueAsync(emailQueue);
             }

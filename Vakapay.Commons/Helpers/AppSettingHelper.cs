@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Constants;
@@ -27,7 +26,7 @@ namespace Vakapay.Commons.Helpers
             return Configuration[sectionKey];
         }
 
-        public static string GetDBConnection()
+        public static string GetDbConnection()
         {
             return Configuration.GetConnectionString(Setting.SECTION_KEY_SQL);
         }
@@ -46,16 +45,16 @@ namespace Vakapay.Commons.Helpers
         {
             return GetNodeSetting(CryptoCurrency.VAKA, Setting.SECTION_KEY_BLOCK_INTERVAL);
         }
-        
+
         public static string GetBitcoinNode()
         {
             return GetNodeSetting(CryptoCurrency.BTC);
         }
-        
+
         public static NetworkCredential GetBitcoinRpcAuthentication()
         {
             return new NetworkCredential(GetNodeSetting(CryptoCurrency.BTC, Setting.SECTION_KEY_USERNAME),
-                    GetNodeSetting(CryptoCurrency.BTC, Setting.SECTION_KEY_PASSWORD));
+                GetNodeSetting(CryptoCurrency.BTC, Setting.SECTION_KEY_PASSWORD));
         }
 
         public static string GetEthereumNode()

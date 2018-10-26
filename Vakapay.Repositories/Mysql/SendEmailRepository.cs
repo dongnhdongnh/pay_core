@@ -17,6 +17,7 @@ namespace Vakapay.Repositories.Mysql
         public SendEmailRepository(IDbConnection dbConnection) : base(dbConnection)
         {
         }
+
 //
 //        public EmailQueue FindPendingEmail()
 //        {
