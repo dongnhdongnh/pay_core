@@ -8,6 +8,7 @@ using Vakapay.Models.Domains;
 using Vakapay.Commons.Constants;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
+using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiServer.Controllers
 {
@@ -27,9 +28,9 @@ namespace Vakapay.ApiServer.Controllers
             };
              PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
-                new Vakapay.WalletBusiness.WalletBusiness(persistenceFactory);
+                new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
             _userBusiness
-                = new Vakapay.UserBusiness.UserBusiness(persistenceFactory);
+                = new Vakapay.UserBusiness.UserBusiness(PersistenceFactory);
         }
 
         [HttpGet("test")]
@@ -115,7 +116,7 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 //  var addresses = _walletBusiness.GetAddresses(walletId, networkName);
-                float rate = 1000.001f;
+                float rate = 1.0f / 7000000.0f;
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
@@ -142,8 +143,8 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 //  var addresses = _walletBusiness.GetAddresses(walletId, networkName);
-                float vakapayfee = -1.0f;
-                float minerfee = -1.0f;
+                float vakapayfee = 0.01f;
+                float minerfee = 0.01f;
                 float total = vakapayfee + minerfee + float.Parse(amount);
                 var feeObject = new {vakapayfee = vakapayfee, minerfee = minerfee, total = total};
                 return new ReturnObject()
@@ -219,7 +220,7 @@ namespace Vakapay.ApiServer.Controllers
                 result = new ReturnObject()
                 { Status = Status.STATUS_ERROR, Message = e.Message };
             }
-
+          //  result = new ReturnObject() { Status = Status.STATUS_ERROR, Message = "test" };
             return result.ToJson();
         }
 

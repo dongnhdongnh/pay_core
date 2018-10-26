@@ -16,7 +16,8 @@ namespace Vakapay.Models.Domains
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
         public decimal Fee { get; set; }
-<<<<<<< HEAD
+
+
         public string Description { get; set; }
 
         //[Write(false)]
@@ -24,8 +25,7 @@ namespace Vakapay.Models.Domains
         //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         //public int Type { get; set; }
 
-=======
->>>>>>> master
+
 
         public string NetworkName()
         {
