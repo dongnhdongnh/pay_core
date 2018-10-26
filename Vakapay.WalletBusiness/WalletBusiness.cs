@@ -812,10 +812,17 @@ namespace Vakapay.WalletBusiness
 
         public Wallet FindByAddressAndNetworkName(string addr, string networkName)
         {
-            var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-            var wallets = walletRepository.FindByAddressAndNetworkName(addr, networkName);
+            try
+            {
+                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var wallets = walletRepository.FindByAddressAndNetworkName(addr, networkName);
 
-            return wallets;
+                return wallets;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         public string FindEmailByAddressAndNetworkName(string addr, string networkName)

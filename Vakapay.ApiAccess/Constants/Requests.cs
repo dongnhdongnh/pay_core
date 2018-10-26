@@ -6,5 +6,8 @@ namespace Vakapay.ApiAccess.Constants
 
         public const string TYPE_DEPOSIT = "Deposit";
         public const string TYPE_WITH_DRAW = "Withdraw";
+        
+        public const string KEY_PASS_DATA_USER_MODEL = "UserModel";
+        public const string KEY_PASS_DATA_API_KEY_MODEL = "ApiKeyModel";
     }
 }

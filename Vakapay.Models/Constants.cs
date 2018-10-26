@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 namespace Vakapay.Models
 {
-    public class Constants
+    public static class Constants
     {
-        public static Dictionary<string, string> listTimeZone = new Dictionary<string, string>
+        public static readonly Dictionary<string, string> ListTimeZone = new Dictionary<string, string>
         {
             {"American Samoa", "(GMT-11:00) American Samoa"},
             {"International Date Line West", "(GMT-11:00) International Date Line West"},

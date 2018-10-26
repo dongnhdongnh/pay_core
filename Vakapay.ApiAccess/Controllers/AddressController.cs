@@ -51,7 +51,7 @@ namespace Vakapay.ApiAccess.Controllers
                     return CreateDataError(checkIdAddress);
                 }
 
-                var apiKey = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKey = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
                 var checkCurrency = CheckCurrency(currency, apiKey);
                 if (!string.IsNullOrEmpty(checkCurrency))
                 {
@@ -86,7 +86,7 @@ namespace Vakapay.ApiAccess.Controllers
                 }
 
                 if (blockChainAddress?.WalletId == null) return CreateDataError(MessageError.DATA_NOT_FOUND);
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
                 var walletBusiness = new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
                 var walletModel = walletBusiness.GetWalletByID(blockChainAddress.WalletId);
                 if (walletModel != null && string.Equals(walletModel.UserId, userModel.Id))
@@ -115,7 +115,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var apiKey = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKey = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
                 var checkCurrency = CheckCurrency(currency, apiKey);
                 if (!string.IsNullOrEmpty(checkCurrency))
                 {
@@ -127,7 +127,7 @@ namespace Vakapay.ApiAccess.Controllers
                     return CreateDataError(MessageError.READ_ADDRESS_NOT_PERMISSION);
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
                 List<BlockchainAddress> listBlockChainAddress = null;
                 switch (currency)
                 {
@@ -198,7 +198,7 @@ namespace Vakapay.ApiAccess.Controllers
                     return CreateDataError(checkIdAddress);
                 }
 
-                var apiKey = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKey = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
                 var checkCurrency = CheckCurrency(currency, apiKey);
                 if (!string.IsNullOrEmpty(checkCurrency))
                 {
@@ -302,7 +302,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var apiKey = (ApiKey) RouteData.Values["ApiKeyModel"];
+                var apiKey = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
                 var checkCurrency = CheckCurrency(currency, apiKey);
                 if (!string.IsNullOrEmpty(checkCurrency))
                 {
@@ -314,7 +314,7 @@ namespace Vakapay.ApiAccess.Controllers
                     return CreateDataError(MessageError.CREATE_TRANSACION_NOT_PERMISSION);
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
                 var walletBusiness = new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
                 var wallet = walletBusiness.FindByUserAndNetwork(userModel.Id, currency);
                 if (wallet == null) return CreateDataError(MessageError.CREATE_ADDRESS_FAIL);

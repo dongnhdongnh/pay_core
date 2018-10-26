@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
+using Vakapay.ApiAccess.Constants;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiAccess.Controllers
@@ -15,8 +16,8 @@ namespace Vakapay.ApiAccess.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            var userModel = (User) RouteData.Values["UserModel"];
-            var apiKey = (ApiKey) RouteData.Values["ApiKeyModel"];
+            var userModel = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
+            var apiKey = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
             Console.WriteLine("ValuesController ==>> userModel: " + userModel.Id + " ==>> ApiKeyModel: " + apiKey.Id);
 
             return new string[] {"value1", "value2"};
