@@ -433,9 +433,17 @@ namespace Vakapay.Repositories.Mysql
                     {
                         //if (prop.Value != null)
                         {
+                            
                             if (count > 0)
                                 orderStr.Append(",");
-                            orderStr.AppendFormat(" {0}", prop);
+                            if (prop[0].Equals('-'))
+                            {
+                                orderStr.AppendFormat(" {0} DESC ", prop.Remove(0,1));
+                            }
+                            else
+                            {
+                                orderStr.AppendFormat(" {0}", prop);
+                            }
                             count++;
                         }
                     }
