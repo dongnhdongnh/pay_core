@@ -18,7 +18,7 @@ namespace Vakapay.Models.Domains
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
         public decimal Fee { get; set; }
-
+        public string Description { get; set; }
 
         //[Write(false)]
         //[Computed]

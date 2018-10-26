@@ -406,7 +406,7 @@ namespace Vakapay.Repositories.Mysql
                 string searchString = "";
                 if (whereValue != null && whereValue != String.Empty && whereValue != "")
                 {
-                    searchString = " and ABS(Amount)=whereValue";
+                    searchString = " and ABS(Amount)= "+ whereValue+" ";
                 }
                 internalWithdrawnTable = internalWithdrawnTable.Replace("`", string.Empty);
                 var _selectInternal = $"SELECT {internalWithdrawnTable}.Id,SenderUserId as UserId,SenderUserId as FromAddress,Email as ToAddress,{internalWithdrawnTable}.CreatedAt,{internalWithdrawnTable}.Status,-Amount as Amount " +
