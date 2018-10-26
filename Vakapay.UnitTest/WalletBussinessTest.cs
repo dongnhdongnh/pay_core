@@ -5,6 +5,7 @@ using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -23,7 +24,7 @@ namespace Vakapay.UnitTest
                 {
                     var repositoryConfig = new RepositoryConfiguration()
                     {
-                        ConnectionString = AppSettingHelper.GetDBConnection()
+                        ConnectionString = AppSettingHelper.GetDbConnection()
                     };
 
                     var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -39,7 +40,7 @@ namespace Vakapay.UnitTest
         EthereumRpc _rpcClass;
         private VakapayRepositoryMysqlPersistenceFactory _vakapayRepositoryFactory;
 
-        EthereumRpc RPCClass
+        EthereumRpc RpcClass
         {
             get
             {
@@ -54,7 +55,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration()
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             _vakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -64,18 +65,18 @@ namespace Vakapay.UnitTest
 
         [TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c306")]
         [TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c307")]
-        public void CreateAllWalletForUser(string userID)
+        public void CreateAllWalletForUser(string userId)
         {
             var repositoryConfig = new RepositoryConfiguration()
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
                 new Vakapay.WalletBusiness.WalletBusiness(persistence);
             var user = new User();
-            user.Id = userID;
+            user.Id = userId;
 
             //blockChain.Name = NetworkName.ETH;
             //var resultTest = _walletBusiness.CreateNewWallet(user, blockChain.Name);
@@ -97,19 +98,19 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            _ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory, true);
-            var connection = PersistenceFactory.GetDbConnection();
-            var ethAddressRepos = PersistenceFactory.GetEthereumAddressRepository(connection);
-            var _walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(persistenceFactory);
+            var connection = persistenceFactory.GetDbConnection();
+            var ethAddressRepos = persistenceFactory.GetEthereumAddressRepository(connection);
+            _walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
 
             string pass = "password";
             //	var resultTest = _ethBus.CreateNewAddAddress(wallet);
             var outPut =
-                await _ethBus.CreateAddressAsync<EthereumAddress>(ethAddressRepos, RPCClass, walletId,
+                await _ethBus.CreateAddressAsync<EthereumAddress>(ethAddressRepos, RpcClass, walletId,
                     pass);
             Assert.IsNotNull(outPut);
         }
@@ -119,7 +120,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             //Create user active for test
@@ -175,7 +176,7 @@ namespace Vakapay.UnitTest
                 userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.VAKA);
 
-            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
+            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal)0.0001);
             Assert.AreEqual(res.Status, Status.STATUS_SUCCESS);
         }
 
@@ -189,7 +190,7 @@ namespace Vakapay.UnitTest
                 userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.BTC);
 
-            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal) 0.0001);
+            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal)0.0001);
             Assert.AreEqual(res.Status, Status.STATUS_SUCCESS);
         }
 
@@ -203,7 +204,7 @@ namespace Vakapay.UnitTest
                 userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.ETH);
 
-            var res = _walletBusiness.Withdraw(wallet, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", (decimal) 0.0001);
+            var res = _walletBusiness.Withdraw(wallet, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", (decimal)0.0001);
             Assert.AreEqual(res.Status, Status.STATUS_SUCCESS);
         }
 
@@ -212,7 +213,7 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration()
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -221,7 +222,6 @@ namespace Vakapay.UnitTest
 
 
             var connection = persistence.GetDbConnection();
-            var userRepo = persistence.GetUserRepository(connection);
             var walletRepo = persistence.GetWalletRepository(connection);
 
             ReturnObject resultTest = null;
@@ -246,51 +246,51 @@ namespace Vakapay.UnitTest
         }
 
 
-		//rootAddress
-		[TestCase("46b4594c-a45a-400d-86ce-9a7869d61180", "0x13f022d72158410433cbd66f5dd8bf6d2d129924")]
-		public void InsertPendingTxsToWithdraw(string walletId, string toAddr)
-		{
-			var repositoryConfig = new RepositoryConfiguration()
-			{
-				ConnectionString = AppSettingHelper.GetDBConnection()
-			};
+        //rootAddress
+        [TestCase("46b4594c-a45a-400d-86ce-9a7869d61180", "0x13f022d72158410433cbd66f5dd8bf6d2d129924")]
+        public void InsertPendingTxsToWithdraw(string walletId, string toAddr)
+        {
+            var repositoryConfig = new RepositoryConfiguration()
+            {
+                ConnectionString = AppSettingHelper.GetDbConnection()
+            };
 
-			var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-			_walletBusiness =
-				new Vakapay.WalletBusiness.WalletBusiness(persistence);
+            var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _walletBusiness =
+                new Vakapay.WalletBusiness.WalletBusiness(persistence);
 
-			var wallet = new Wallet();
-			wallet.Id = walletId;
+            var wallet = new Wallet();
+            wallet.Id = walletId;
 
-			ReturnObject resultTest = null;
-			
-			resultTest = _walletBusiness.Withdraw(wallet, toAddr, 1000000000000000000000m);
-			
-			
-			Console.WriteLine(JsonHelper.SerializeObject(resultTest));
-			Assert.AreEqual(Status.STATUS_SUCCESS, resultTest.Status);
-		}
+            ReturnObject resultTest = null;
+
+            resultTest = _walletBusiness.Withdraw(wallet, toAddr, 1000000000000000000000m);
+
+
+            Console.WriteLine(JsonHelper.SerializeObject(resultTest));
+            Assert.AreEqual(Status.STATUS_SUCCESS, resultTest.Status);
+        }
 
         [TestCase("8abc6056-9c81-4b6e-bb22-81f0ab0e0a28")]
-        public void GetHistory(string walletID)
+        public void GetHistory(string walletId)
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
-                new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
+                new Vakapay.WalletBusiness.WalletBusiness(persistenceFactory);
 
-            var wallet = _walletBusiness.GetWalletByID(walletID);
-            int numberDB;
+            var wallet = _walletBusiness.GetWalletById(walletId);
+            int numberDb;
             if (wallet == null)
             {
                 Console.WriteLine("wallet null");
             }
             else
-                _walletBusiness.GetHistory(out numberDB, wallet.UserId, wallet.Currency, 1, 3);
+                _walletBusiness.GetHistory(out numberDb, wallet.UserId, wallet.Currency, 1, 3);
         }
 
         //[Test]
@@ -340,12 +340,12 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
-                new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
+                new Vakapay.WalletBusiness.WalletBusiness(persistenceFactory);
 
             Assert.AreEqual(result, Vakapay.WalletBusiness.WalletBusiness.ValidateAddress(address, networkName));
         }

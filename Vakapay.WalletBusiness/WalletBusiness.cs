@@ -14,6 +14,9 @@ using Vakapay.Cryptography;
 using Vakapay.EthereumBusiness;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
+using Vakapay.Models.Entities.ETH;
+using Vakapay.Models.Entities.VAKA;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.VakacoinBusiness;
@@ -27,24 +30,24 @@ namespace Vakapay.WalletBusiness
         VakacoinBusiness.VakacoinBusiness vakacoinBussiness;
         SendMailBusiness.SendMailBusiness sendMailBusiness;
         UserBusiness.UserBusiness userBusiness;
-        private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
+        private readonly IVakapayRepositoryFactory _vakapayRepositoryFactory;
 
-        private readonly IDbConnection ConnectionDb;
+        private readonly IDbConnection _connectionDb;
 
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         public WalletBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
         {
-            this.vakapayRepositoryFactory = vakapayRepositoryFactory;
-            ConnectionDb = isNewConnection
-                ? this.vakapayRepositoryFactory.GetDbConnection()
-                : this.vakapayRepositoryFactory.GetOldConnection();
+            _vakapayRepositoryFactory = vakapayRepositoryFactory;
+            _connectionDb = isNewConnection
+                ? _vakapayRepositoryFactory.GetDbConnection()
+                : _vakapayRepositoryFactory.GetOldConnection();
 
             ethereumBussiness = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory, false);
             bitcoinBussiness = new BitcoinBusiness.BitcoinBusiness(vakapayRepositoryFactory, false);
             vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
-            sendMailBusiness = new SendMailBusiness.SendMailBusiness(this.vakapayRepositoryFactory, false);
-            userBusiness = new UserBusiness.UserBusiness(this.vakapayRepositoryFactory, false);
+            sendMailBusiness = new SendMailBusiness.SendMailBusiness(_vakapayRepositoryFactory, false);
+            userBusiness = new UserBusiness.UserBusiness(_vakapayRepositoryFactory, false);
         }
 
         /// <summary>
@@ -57,12 +60,12 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                foreach (string blockchainName in CryptoCurrency.AllNetwork)
+                foreach (string blockchainName in CryptoCurrency.ALL_NETWORK)
                 {
-                    ReturnObject _result = CreateNewWallet(user, blockchainName);
-                    if (_result.Status == Status.STATUS_ERROR)
+                    ReturnObject result = CreateNewWallet(user, blockchainName);
+                    if (result.Status == Status.STATUS_ERROR)
                     {
-                        return _result;
+                        return result;
                     }
                 }
 
@@ -96,9 +99,9 @@ namespace Vakapay.WalletBusiness
             //commit transaction
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
+                if (_connectionDb.State != ConnectionState.Open)
                 {
-                    ConnectionDb.Open();
+                    _connectionDb.Open();
                 }
 
 //                if (checkExisted)
@@ -115,7 +118,7 @@ namespace Vakapay.WalletBusiness
 //                    }
 //                }
 
-                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var walletRepo = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 var existUserNetwork =
                     walletRepo.FindByUserAndNetwork(user.Id,
                         blockchainNetwork);
@@ -136,15 +139,11 @@ namespace Vakapay.WalletBusiness
 
                 var wallet = new Wallet
                 {
-//                    Id = CommonHelper.GenerateUuid(),
-//                    Address = null, //Comment Id: NoAddressNeeded
                     Balance = 0,
                     IsProcessing = 0,
                     Status = Status.STATUS_PENDING,
                     Version = 0,
-                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     Currency = blockchainNetwork,
-                    UpdatedAt = (int) CommonHelper.GetUnixTimestamp(),
                     UserId = user.Id
                 };
                 var resultMakeWallet = walletRepo.Insert(wallet);
@@ -177,9 +176,9 @@ namespace Vakapay.WalletBusiness
             //find wallet by usser
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 var wallet = walletRepository.FindAllWalletByUser(user);
                 if (wallet != null)
                     return wallet;
@@ -231,9 +230,9 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                if (ConnectionDb.State != ConnectionState.Open)
+                if (_connectionDb.State != ConnectionState.Open)
                 {
-                    ConnectionDb.Open();
+                    _connectionDb.Open();
                 }
 
                 var fromAddress = GetSenderAddress(wallet, toAddress, amount);
@@ -248,8 +247,8 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
-                var userRepository   = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
+                var userRepository   = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
 
                 // 1. Validate User status
                 var walletById = walletRepository.FindById(wallet.Id);
@@ -365,19 +364,19 @@ namespace Vakapay.WalletBusiness
             {
                 case CryptoCurrency.BTC:
                     var btcWithdrawTransaction =
-                        vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(ConnectionDb);
+                        _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb);
                     return btcWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<BitcoinWithdrawTransaction>());
                     break;
 
                 case CryptoCurrency.ETH:
                     var etherWithdrawTransaction =
-                        vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
+                        _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb);
                     return etherWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<EthereumWithdrawTransaction>());
                     break;
 
                 case CryptoCurrency.VAKA:
                     var vakaWithdrawTransaction =
-                        vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
+                        _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb);
                     return vakaWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
                     break;
 
@@ -410,7 +409,8 @@ namespace Vakapay.WalletBusiness
                 switch (walletNetworkName)
                 {
                     case CryptoCurrency.BTC:
-                        var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
+                        var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                            AppSettingHelper.GetBitcoinRpcAuthentication());
 
                         getInfoResult = bitcoinRpc.GetInfo();
 
@@ -422,6 +422,7 @@ namespace Vakapay.WalletBusiness
                                 Message = "Bitcoin network error: " + getInfoResult.Message
                             };
                         }
+
                         break;
 
                     case CryptoCurrency.ETH:
@@ -436,10 +437,11 @@ namespace Vakapay.WalletBusiness
                                 Message = "Ethereum network error: " + blockNumber.Message
                             };
                         }
+
                         break;
 
                     case CryptoCurrency.VAKA:
-                        var vakacoinRpc = new VakacoinRPC(AppSettingHelper.GetVakacoinNode());
+                        var vakacoinRpc = new VakacoinRpc(AppSettingHelper.GetVakacoinNode());
                         getInfoResult = vakacoinRpc.GetInfo();
 
                         if (getInfoResult.Status == Status.STATUS_ERROR)
@@ -450,6 +452,7 @@ namespace Vakapay.WalletBusiness
                                 Message = "Vakacoin network error: " + getInfoResult.Message
                             };
                         }
+
                         break;
                     default:
                         return new ReturnObject()
@@ -484,9 +487,9 @@ namespace Vakapay.WalletBusiness
             {
                 // TODO fake:
                 case CryptoCurrency.BTC:
-                    return (decimal) 0.0005;
+                    return (decimal)0.0005;
                 case CryptoCurrency.ETH:
-                    return (decimal) 0.0005;
+                    return (decimal)0.0005;
                 case CryptoCurrency.VAKA:
                     return 0;
                 default:
@@ -512,9 +515,9 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 var wallet = walletRepository.FindByAddressAndNetworkName(toAddress, networkName);
                 if (wallet == null)
                 {
@@ -536,7 +539,6 @@ namespace Vakapay.WalletBusiness
 
                 wallet.Balance += addedBalance;
                 wallet.Version += 1;
-                wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                 var result = walletRepository.Update(wallet);
                 if (result.Status == Status.STATUS_ERROR)
                 {
@@ -547,21 +549,17 @@ namespace Vakapay.WalletBusiness
                     User user = userBusiness.GetUserById(wallet.UserId);
                     if (user != null)
                     {
-                        var currentTime = CommonHelper.GetUnixTimestamp();
                         //send mail:
-                        EmailQueue _email = new EmailQueue()
+                        EmailQueue email = new EmailQueue()
                         {
-                            Id = CommonHelper.GenerateUuid(),
                             ToEmail = user.Email,
                             NetworkName = wallet.Currency,
                             Amount = addedBalance,
                             Template = EmailTemplate.Received,
-                            Subject = EmailConfig.Subject_SentOrReceived,
-                            CreatedAt = currentTime,
-                            UpdatedAt = currentTime
+                            Subject = EmailConfig.SUBJECT_SENT_OR_RECEIVED,
                             //							Content = networkName + "+" + addedBlance
                         };
-                        result = sendMailBusiness.CreateEmailQueueAsync(_email).Result;
+                        result = sendMailBusiness.CreateEmailQueueAsync(email).Result;
                     }
                 }
 
@@ -577,13 +575,13 @@ namespace Vakapay.WalletBusiness
             }
         }
 
-        public Wallet GetWalletByID(String id)
+        public Wallet GetWalletById(String id)
         {
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 var wallet = walletRepository.FindById(id);
                 return wallet;
             }
@@ -598,9 +596,9 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
 
                 var result = walletRepository.FindBySql($"SELECT * FROM {SimpleCRUD.GetTableName(typeof(Wallet))}");
                 return result;
@@ -619,9 +617,9 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 var wallet = walletRepository.FindByAddressAndNetworkName(address, networkName);
 
                 return wallet != null;
@@ -637,9 +635,9 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 return walletRepository.GetStringAddresses(walletId, networkName);
             }
             catch (Exception e)
@@ -654,8 +652,8 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
 
                 var wallet = FindByAddressAndNetworkName(addr, networkName);
 
@@ -686,9 +684,9 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                if (ConnectionDb.State != ConnectionState.Open)
-                    ConnectionDb.Open();
-                var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 var result = walletRepository.UpdateBalanceWallet(amount, id, version);
 
                 return result;
@@ -713,37 +711,39 @@ namespace Vakapay.WalletBusiness
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
+        /// <param name="search"></param>
         /// <returns></returns>
         public List<BlockchainTransaction> GetHistory(out int numberData, string userId, string currencyName,
-            int offset = -1, int limit = -1, string[] orderBy = null,string search=null)
+            int offset = -1, int limit = -1, string[] orderBy = null, string search = null)
         {
             numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
-           // Console.WriteLine(wallet.Currency);
-           
+            // Console.WriteLine(wallet.Currency);
+
             switch (currencyName)
             {
                 case CryptoCurrency.ETH:
-                    
-                   output = ethereumBussiness.GetAllHistory(out numberData,userId, currencyName, offset, limit, orderBy,search);
+
+                    output = ethereumBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
+                        orderBy, search);
                     break;
                 case CryptoCurrency.VAKA:
-                   output = vakacoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit, orderBy, search);
+                    output = vakacoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
+                        orderBy, search);
                     break;
                 case CryptoCurrency.BTC:
-                   output = bitcoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit, orderBy, search);
-                    break;
-                default:
+                    output = bitcoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
+                        orderBy, search);
                     break;
             }
-           
-          //  Console.WriteLine("get history " + wallet.Currency + "_count=_" + output.Count);
+
+            //  Console.WriteLine("get history " + wallet.Currency + "_count=_" + output.Count);
             return output;
         }
 
         public Wallet FindByAddressAndNetworkName(string addr, string networkName)
         {
-            var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+            var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
             var wallets = walletRepository.FindByAddressAndNetworkName(addr, networkName);
 
             return wallets;
@@ -751,7 +751,7 @@ namespace Vakapay.WalletBusiness
 
         public string FindEmailByAddressAndNetworkName(string addr, string networkName)
         {
-            var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+            var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
             var wallet = FindByAddressAndNetworkName(addr, networkName);
 
             var user = userRepository.FindById(wallet.UserId);
@@ -767,7 +767,8 @@ namespace Vakapay.WalletBusiness
             switch (networkName)
             {
                 case CryptoCurrency.BTC:
-                    var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
+                    var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                        AppSettingHelper.GetBitcoinRpcAuthentication());
                     var result = bitcoinRpc.ValidateAddress(address);
                     var jsonResult = JObject.Parse(result.Data);
                     return jsonResult["isvalid"].Value<bool>();
@@ -776,13 +777,11 @@ namespace Vakapay.WalletBusiness
                     return BlockchainHeper.IsEthereumAddress(address);
 
                 case CryptoCurrency.VAKA:
-                    var vakacoinRpc = new VakacoinRPC(AppSettingHelper.GetVakacoinNode());
+                    var vakacoinRpc = new VakacoinRpc(AppSettingHelper.GetVakacoinNode());
                     return vakacoinRpc.CheckAccountExist(address);
                 default:
                     throw new Exception("Network name not define!");
             }
-
-            return true;
         }
 
         /// <summary>
@@ -791,7 +790,7 @@ namespace Vakapay.WalletBusiness
         /// <returns></returns>
         public async Task<ReturnObject> CreateAddressAsync()
         {
-            var walletRepository = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+            var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
             var pendingWallet = walletRepository.FindRowPending();
 
             if (pendingWallet?.Id == null)
@@ -801,10 +800,10 @@ namespace Vakapay.WalletBusiness
                     Message = "Pending wallet not found"
                 };
 
-            if (ConnectionDb.State != ConnectionState.Open)
-                ConnectionDb.Open();
+            if (_connectionDb.State != ConnectionState.Open)
+                _connectionDb.Open();
 
-            var dbTransaction = ConnectionDb.BeginTransaction();
+            var dbTransaction = _connectionDb.BeginTransaction();
             try
             {
                 var lockResult = await walletRepository.LockForProcess(pendingWallet);
@@ -833,7 +832,7 @@ namespace Vakapay.WalletBusiness
             //update Version to Model
             pendingWallet.Version += 1;
 
-            var transactionSend = ConnectionDb.BeginTransaction();
+            var transactionSend = _connectionDb.BeginTransaction();
             try
             {
                 var sendResult = await CreateAddressForWallet(pendingWallet);
@@ -881,31 +880,30 @@ namespace Vakapay.WalletBusiness
                 {
                     case CryptoCurrency.ETH:
                         Console.WriteLine("make eth");
-                        var ethereumBusiness = new EthereumBusiness.EthereumBusiness(vakapayRepositoryFactory, false);
+                        var ethereumBusiness = new EthereumBusiness.EthereumBusiness(_vakapayRepositoryFactory, false);
                         res = ethereumBusiness.CreateAddressAsync(
-                            new EthereumAddressRepository(ConnectionDb),
+                            new EthereumAddressRepository(_connectionDb),
                             new EthereumRpc(AppSettingHelper.GetEthereumNode()),
                             pendingWallet.Id, pass).Result;
                         break;
 
                     case CryptoCurrency.BTC:
                         Console.WriteLine("make btc");
-                        var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(vakapayRepositoryFactory, false);
+                        var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory, false);
                         res = bitcoinBusiness.CreateAddressAsync(
-                            new BitcoinAddressRepository(ConnectionDb),
-                            new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication()),
+                            new BitcoinAddressRepository(_connectionDb),
+                            new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                                AppSettingHelper.GetBitcoinRpcAuthentication()),
                             pendingWallet.Id, pass).Result;
                         break;
 
                     case CryptoCurrency.VAKA:
                         Console.WriteLine("make vaka");
-                        var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
+                        var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory, false);
                         res = vakaBusiness.CreateAddressAsync(
-                            new VakacoinAccountRepository(ConnectionDb),
-                            new VakacoinRPC(AppSettingHelper.GetVakacoinNode()),
+                            new VakacoinAccountRepository(_connectionDb),
+                            new VakacoinRpc(AppSettingHelper.GetVakacoinNode()),
                             pendingWallet.Id, pass).Result;
-                        break;
-                    default:
                         break;
                 }
 
@@ -914,11 +912,11 @@ namespace Vakapay.WalletBusiness
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                 return new ReturnObject()
-                 {
-                     Status = Status.STATUS_ERROR,
-                     Message = e.Message
-                 };
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
             }
         }
 
@@ -926,7 +924,7 @@ namespace Vakapay.WalletBusiness
         {
             try
             {
-                var walletRepo = vakapayRepositoryFactory.GetWalletRepository(ConnectionDb);
+                var walletRepo = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
                 return walletRepo.DistinctUserId();
             }
             catch (Exception e)

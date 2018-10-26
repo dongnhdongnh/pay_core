@@ -5,9 +5,11 @@ using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Repositories.Mysql.Base;
 using Vakapay.Models.Repositories;
+
 namespace Vakapay.Repositories.Mysql
 {
-    public class InternalTransactionsRepository : MultiThreadUpdateEntityRepository<InternalWithdrawTransaction>, IInternalTransactionRepository
+    public class InternalTransactionsRepository : MultiThreadUpdateEntityRepository<InternalWithdrawTransaction>,
+        IInternalTransactionRepository
     {
         public InternalTransactionsRepository(string connectionString) : base(connectionString)
         {
@@ -22,12 +24,16 @@ namespace Vakapay.Repositories.Mysql
             throw new System.NotImplementedException();
         }
 
-        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userID, string currencyName, string TableNameWithdrawn, string TableNameDeposit, string TableInternalWithdrawn, int offset, int limit, string[] orderBy)
+        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userId,
+            string currencyName, string tableNameWithdraw, string tableNameDeposit, string tableInternalWithdraw,
+            int offset, int limit, string[] orderBy)
         {
             throw new System.NotImplementedException();
         }
 
-        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userID, string currencyName, string TableNameWithdrawn, string TableNameDeposit, string TableInternalWithdrawn, int offset, int limit, string[] orderBy, string whereValue)
+        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userId,
+            string currencyName, string tableNameWithdraw, string tableNameDeposit, string tableInternalWithdraw,
+            int offset, int limit, string[] orderBy, string whereValue)
         {
             throw new System.NotImplementedException();
         }

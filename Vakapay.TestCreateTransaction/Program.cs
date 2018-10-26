@@ -1,7 +1,7 @@
 ﻿using System;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -13,7 +13,7 @@ namespace Vakapay.TestCreateTransaction
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
 
@@ -27,7 +27,6 @@ namespace Vakapay.TestCreateTransaction
                     var trans = new EthereumWithdrawTransaction
                     {
                         Amount = 1,
-                        CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
                         Fee = 0,
                         BlockNumber = 0,
                         FromAddress = null,
@@ -36,21 +35,16 @@ namespace Vakapay.TestCreateTransaction
 //                        NetworkName = "ETH",
                         Status = Status.STATUS_PENDING,
                         Version = 0,
-                        UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                         ToAddress = "0x13f022d72158410433cbd66f5dd8bf6d2d129924"
-
                     };
                     var resultInsert = ethereumWithdrawTransactionRepository.Insert(trans);
                     Console.WriteLine(JsonHelper.SerializeObject(resultInsert));
-
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
-            
-            
         }
     }
 }

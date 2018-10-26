@@ -11,7 +11,7 @@ namespace Vakapay.Commons.Constants
         public const string MONTH = "month";
         public const string YEAR = "year";
         public const string ALL = "all";
-        
+
         public const string VAKACOIN = "vakacoin";
         public const string BITCOIN = "bitcoin";
         public const string ETHEREUM = "ethereum";
@@ -23,7 +23,7 @@ namespace Vakapay.Commons.Constants
         {
             DAY, WEEK, MONTH, YEAR, ALL, CURRENT
         };
-        
+
         public static readonly List<string> NETWORK_LIST = new List<string>
         {
             VAKACOIN, BITCOIN, ETHEREUM

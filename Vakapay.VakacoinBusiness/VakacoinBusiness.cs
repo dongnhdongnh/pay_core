@@ -3,11 +3,10 @@ using System.Data;
 using System.Threading.Tasks;
 using Vakapay.BlockchainBusiness.Base;
 using Vakapay.Commons.Constants;
-using Vakapay.Commons.Helpers;
 using Vakapay.Cryptography;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.VAKA;
 using Vakapay.Models.Repositories.Base;
 using Vakapay.Repositories.Mysql;
 
@@ -21,7 +20,7 @@ namespace Vakapay.VakacoinBusiness
     public class VakacoinBusiness : AbsBlockchainBusiness, IBlockchainBusiness
     {
         private IVakacoinDepositTransactionRepository VakacoinDepositRepo { get; set; }
-        private VakacoinRPC VakacoinRPCObj { get; set; }
+        private VakacoinRpc VakacoinRpcObj { get; set; }
 
         public VakacoinBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
             : base(vakapayRepositoryFactory, isNewConnection)
@@ -29,7 +28,7 @@ namespace Vakapay.VakacoinBusiness
             VakacoinDepositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
         }
 
-        public void SetAccountRepositoryForRpc(VakacoinRPC rpc)
+        public void SetAccountRepositoryForRpc(VakacoinRpc rpc)
         {
             rpc.AccountRepository =
                 (VakacoinAccountRepository)VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
@@ -46,7 +45,7 @@ namespace Vakapay.VakacoinBusiness
             {
                 var keyPair = KeyManager.GenerateKeyPair();
 
-                var resultRpc = VakacoinRPCObj.CreateRandomAccount(keyPair.PublicKey);
+                var resultRpc = VakacoinRpcObj.CreateRandomAccount(keyPair.PublicKey);
 
                 if (resultRpc.Status == Status.STATUS_ERROR)
                     return resultRpc;
@@ -62,9 +61,6 @@ namespace Vakapay.VakacoinBusiness
                     OwnerPublicKey = keyPair.PublicKey,
                     ActivePrivateKey = keyPair.PrivateKey,
                     ActivePublicKey = keyPair.PublicKey,
-                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
-                    Id = CommonHelper.GenerateUuid(),
-                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId,
                 });
 
@@ -107,9 +103,6 @@ namespace Vakapay.VakacoinBusiness
                     OwnerPublicKey = ownerPublicKey,
                     ActivePrivateKey = activePrivateKey,
                     ActivePublicKey = activePublicKey,
-                    CreatedAt = (int)CommonHelper.GetUnixTimestamp(),
-                    Id = CommonHelper.GenerateUuid(),
-                    UpdatedAt = (int)CommonHelper.GetUnixTimestamp(),
                     WalletId = walletId
                 });
 
@@ -141,8 +134,6 @@ namespace Vakapay.VakacoinBusiness
                     ToAddress = toAddress,
                     Fee = fee,
                     Status = status,
-                    CreatedAt = CommonHelper.GetUnixTimestamp(),
-                    UpdatedAt = CommonHelper.GetUnixTimestamp(),
                     IsProcessing = 0,
                     Version = 0
                 };
@@ -166,8 +157,6 @@ namespace Vakapay.VakacoinBusiness
                 var vakacoinwithdrawRepo =
                     VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
                 blockchainTransaction.Status = Status.STATUS_PENDING;
-                blockchainTransaction.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
-                blockchainTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                 return vakacoinwithdrawRepo.Insert(blockchainTransaction);
             }
             catch (Exception e)
@@ -180,17 +169,17 @@ namespace Vakapay.VakacoinBusiness
             }
         }
 
-        public ReturnObject SendTransaction(string From, string To, decimal amount)
+        public ReturnObject SendTransaction(string from, string to, decimal amount)
         {
             throw new NotImplementedException();
         }
 
-        public ReturnObject SendTransaction(string From, string To, decimal amount, string Password)
+        public ReturnObject SendTransaction(string @from, string to, decimal amount, string password)
         {
             throw new NotImplementedException();
         }
 
-        public ReturnObject SendMultiTransaction(string From, string[] To, decimal amount)
+        public ReturnObject SendMultiTransaction(string from, string[] to, decimal amount)
         {
             throw new NotImplementedException();
         }
@@ -200,12 +189,12 @@ namespace Vakapay.VakacoinBusiness
             throw new NotImplementedException();
         }
 
-        public ReturnObject CreateNewAddress(string WalletId, string password = "")
+        public ReturnObject CreateNewAddress(string walletId, string password = "")
         {
             throw new NotImplementedException();
         }
 
-        public Task<ReturnObject> SendTransactionAsysn(string From, string To, decimal amount)
+        public Task<ReturnObject> SendTransactionAsysn(string from, string to, decimal amount)
         {
             throw new NotImplementedException();
         }
@@ -213,7 +202,6 @@ namespace Vakapay.VakacoinBusiness
         /// <summary>
         /// Created Address with optimistic lock
         /// </summary>
-        /// <param name="wallet"></param>
         /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
         /// <param name="walletId"></param>
@@ -222,7 +210,7 @@ namespace Vakapay.VakacoinBusiness
         /// <returns></returns>
         public override async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(
             IAddressRepository<TBlockchainAddress> repoQuery,
-            IBlockchainRPC rpcClass, string walletId, string other = "")
+            IBlockchainRpc rpcClass, string walletId, string other = "")
         {
             //return base.CreateAddressAsync(wallet, repoQuery, rpcClass, walletId, other);
 
@@ -239,14 +227,13 @@ namespace Vakapay.VakacoinBusiness
                         Message = "Wallet Not Found"
                     };
 
-                VakacoinRPCObj = rpcClass as VakacoinRPC;
+                VakacoinRpcObj = rpcClass as VakacoinRpc;
 
-                var results = CreateNewAccount(walletId); // Create account and add account name to VakacoinAccount table
-                
+                var results =
+                    CreateNewAccount(walletId); // Create account and add account name to VakacoinAccount table
+
                 if (results.Status == Status.STATUS_ERROR)
                     return results;
-
-                var accountName = results.Data;
 
                 return new ReturnObject
                 {
@@ -278,12 +265,14 @@ namespace Vakapay.VakacoinBusiness
             return GetHistory<VakacoinDepositTransaction>(depositRepo, offset, limit, orderBy);
         }
 
-        public override List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency,int offset = -1, int limit = -1, string[] orderBy = null,string search=null)
+        public override List<BlockchainTransaction> GetAllHistory(out int numberData, string userId, string currency,
+            int offset = -1, int limit = -1, string[] orderBy = null, string search = null)
         {
             var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
             var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
             var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection);
-            return GetAllHistory<VakacoinWithdrawTransaction,VakacoinDepositTransaction>(out numberData, userID,currency, withdrawRepo, depositRepo,inter.GetTableName(), offset, limit, orderBy,search);
+            return GetAllHistory<VakacoinWithdrawTransaction, VakacoinDepositTransaction>(out numberData, userId,
+                currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
         }
     }
 }

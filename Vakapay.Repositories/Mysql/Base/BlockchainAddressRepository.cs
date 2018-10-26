@@ -1,15 +1,16 @@
- using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
- using Vakapay.Models.Domains;
- using Vakapay.Models.Repositories.Base;
+using Vakapay.Models.Domains;
+using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Repositories.Mysql.Base
 {
-    public abstract class BlockchainAddressRepository<TAddress> : MySqlBaseRepository<TAddress>, IAddressRepository<TAddress>
+    public abstract class BlockchainAddressRepository<TAddress> : MySqlBaseRepository<TAddress>,
+        IAddressRepository<TAddress>
         where TAddress : BlockchainAddress
     {
         public BlockchainAddressRepository(string connectionString) : base(connectionString)

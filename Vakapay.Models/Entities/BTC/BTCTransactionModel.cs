@@ -1,7 +1,8 @@
-namespace Vakapay.Models.Entities
-{
-    using Newtonsoft.Json;
+using Newtonsoft.Json;
+using Vakapay.Commons.Helpers;
 
+namespace Vakapay.Models.Entities.BTC
+{
     public class BtcTransactionModel
     {
         [JsonProperty("amount")] public decimal Amount { get; set; }
@@ -29,7 +30,7 @@ namespace Vakapay.Models.Entities
         [JsonProperty("hex")] public string Hex { get; set; }
 
         public static BtcTransactionModel FromJson(string json) =>
-            JsonHelper.DeserializeObject<BtcTransactionModel>(json, JsonHelper.ConvertSettings);
+            JsonHelper.DeserializeObject<BtcTransactionModel>(json, JsonHelper.CONVERT_SETTINGS);
 
 //        public string ToJson() =>
 //            JsonHelper.SerializeObject(this, JsonHelper.ConvertSettings);

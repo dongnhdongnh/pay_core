@@ -1,8 +1,10 @@
+using Newtonsoft.Json;
+
 namespace Vakapay.ApiServer.Models
 {
     public class SecurityModel
     {
-        public bool isEnableTwofa { get; set; }
-        public int twofaOption { get; set; }
+        [JsonProperty("isEnableTwofa")] public bool IsEnableTwofa { get; set; }
+        [JsonProperty("twofaOption")] public int TwofaOption { get; set; }
     }
 }

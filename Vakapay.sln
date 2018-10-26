@@ -55,7 +55,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BlockchainCoreProjects", "B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.BitcoinNotifi", "Vakapay.BitcoinNotifi\Vakapay.BitcoinNotifi.csproj", "{4F4B39E3-07E6-4302-9286-8A491251BDA5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VakaSharp", "VakacoinCore\VakaSharp\VakaSharp.csproj", "{00A04F06-7A30-4D02-864B-2144AFA5F7CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VakaSharp", "VakaSharp\VakaSharp.csproj", "{00A04F06-7A30-4D02-864B-2144AFA5F7CF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.TestCreateTransaction", "Vakapay.TestCreateTransaction\Vakapay.TestCreateTransaction.csproj", "{087B422B-9943-46A5-906D-E601D7CFFCB3}"
 EndProject

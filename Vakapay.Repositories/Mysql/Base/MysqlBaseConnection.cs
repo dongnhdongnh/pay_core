@@ -5,35 +5,35 @@ using NLog;
 
 namespace Vakapay.Repositories.Mysql.Base
 {
-	public class MysqlBaseConnection : IDisposable
-	{
-		public static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
-		public string TableName { get; set; }
+    public class MysqlBaseConnection : IDisposable
+    {
+        public static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
+        public string TableName { get; set; }
 
-		public MySqlConnection Connection { get; }
+        public MySqlConnection Connection { get; }
 
-		public MysqlBaseConnection(string connectionString, string tableName)
-		{
-			TableName = tableName;
-			Connection = new MySqlConnection(connectionString);
-		}
+        public MysqlBaseConnection(string connectionString, string tableName)
+        {
+            TableName = tableName;
+            Connection = new MySqlConnection(connectionString);
+        }
 
-		public MysqlBaseConnection(IDbConnection dbConnection, string tableName)
-		{
-			TableName = tableName;
-			Connection = dbConnection as MySqlConnection;
-		}
+        public MysqlBaseConnection(IDbConnection dbConnection, string tableName)
+        {
+            TableName = tableName;
+            Connection = dbConnection as MySqlConnection;
+        }
 
-		protected string GetClassName()
-		{
-			return this.GetType().Name;
-		}
+        protected string GetClassName()
+        {
+            return GetType().Name;
+        }
 
-		public void Dispose()
-		{
-			if (Connection.State == ConnectionState.Open)
-				Connection.Close();
-			this.Connection?.Dispose();
-		}
-	}
+        public void Dispose()
+        {
+            if (Connection.State == ConnectionState.Open)
+                Connection.Close();
+            Connection?.Dispose();
+        }
+    }
 }

@@ -7,6 +7,7 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
 
@@ -37,7 +38,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <typeparam name="TBlockchainTransaction"></typeparam>
         /// <returns></returns>
         public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
-            IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
+            IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRpc rpcClass,
             string privateKey = "") where TBlockchainTransaction : BlockchainTransaction
         {
             /*
@@ -170,7 +171,6 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <summary>
         /// Created Address with optimistic lock
         /// </summary>
-        /// <param name="wallet"></param>
         /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
         /// <param name="walletId"></param>
@@ -178,7 +178,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <typeparam name="TBlockchainAddress"></typeparam>
         /// <returns></returns>
         public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(
-            IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
+            IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRpc rpcClass, string walletId,
             string other = "") where TBlockchainAddress : BlockchainAddress
         {
             try
@@ -238,7 +238,7 @@ namespace Vakapay.BlockchainBusiness.Base
             IWalletBusiness wallet,
             IRepositoryBlockchainTransaction<TWithDraw> withdrawRepoQuery,
             IRepositoryBlockchainTransaction<TDeposit> depositRepoQuery,
-            IBlockchainRPC rpcClass)
+            IBlockchainRpc rpcClass)
             where TWithDraw : BlockchainTransaction
             where TDeposit : BlockchainTransaction
             where TBlockResponse : EthereumBlockResponse
@@ -386,23 +386,30 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <summary>
         /// get history from both withdrawn and deposit table
         /// </summary>
-        /// <typeparam name="TBlockchainTransaction"></typeparam>
-        /// <param name="repoQuery"></param>
+        /// <param name="tableInternalWithdrawName"></param>
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
+        /// <param name="numberData"></param>
+        /// <param name="currency"></param>
+        /// <param name="withdrawRepository"></param>
+        /// <param name="search"></param>
+        /// <param name="userID"></param>
+        /// <param name="depositRepository"></param>
         /// <returns></returns>
-        public virtual List<BlockchainTransaction> GetAllHistory<T1,T2>(out int numberData,string userID,string currency,
-       IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery, IRepositoryBlockchainTransaction<T2> DepositrepoQuery, string TableInternalWihdrawnName, int offset = -1, int limit = -1,
-       string[] orderBy = null,string search=null)
+        public virtual List<BlockchainTransaction> GetAllHistory<T1, T2>(out int numberData, string userID,
+            string currency,
+            IRepositoryBlockchainTransaction<T1> withdrawRepository,
+            IRepositoryBlockchainTransaction<T2> depositRepository, string tableInternalWithdrawName, int offset = -1,
+            int limit = -1,
+            string[] orderBy = null, string search = null)
         {
             try
             {
                 Console.WriteLine("FIND HISTORY FROM ABS");
-                //WithdrawnrepoQuery.GetTableName();
-                //DepositrepoQuery.GetTableName();
-                //   WithdrawnrepoQuery.FindBySql();
-                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID,currency, WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), TableInternalWihdrawnName, offset, limit, orderBy, search);
+                return withdrawRepository.FindTransactionHistoryAll(out numberData, userID, currency,
+                    withdrawRepository.GetTableName(), depositRepository.GetTableName(), tableInternalWithdrawName,
+                    offset, limit, orderBy, search);
             }
             catch (Exception e)
             {
@@ -450,8 +457,9 @@ namespace Vakapay.BlockchainBusiness.Base
             return null;
         }
 
-        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData,string userID,string currency, int offset = -1, int limit = -1,
-            string[] orderBy = null,string search=null)
+        public virtual List<BlockchainTransaction> GetAllHistory(out int numberData, string userID, string currency,
+            int offset = -1, int limit = -1,
+            string[] orderBy = null, string search = null)
         {
             numberData = -1;
             Console.WriteLine("Not override");

@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.Models.Entities;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Constants;
 using Newtonsoft.Json.Linq;
@@ -18,30 +18,33 @@ namespace Vakapay.ApiServer.Controllers
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
         WalletBusiness.WalletBusiness _walletBusiness;
         UserBusiness.UserBusiness _userBusiness;
+
         public WalletController()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
              PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
-                    new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
+                new Vakapay.WalletBusiness.WalletBusiness(persistenceFactory);
             _userBusiness
-            = new Vakapay.UserBusiness.UserBusiness(PersistenceFactory);
+                = new Vakapay.UserBusiness.UserBusiness(persistenceFactory);
         }
+
         [HttpGet("test")]
         public ActionResult<string> GetTest()
         {
             return "hello";
             //  return null;
         }
+
         [HttpGet("all")]
-        public ActionResult<ReturnObject> GetWalletsByUser([FromQuery]string userID)
+        public ActionResult<ReturnObject> GetWalletsByUser([FromQuery] string userId)
         {
             try
             {
-                var user = _userBusiness.GetUserById(userID);
+                var user = _userBusiness.GetUserById(userId);
                 if (user == null)
                     return new ReturnObject()
                     {
@@ -57,7 +60,6 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
-
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_ERROR,
@@ -65,6 +67,7 @@ namespace Vakapay.ApiServer.Controllers
                 };
             }
         }
+
         //[HttpPost("all")]
         //public ActionResult<string> GetWalletsByUser([FromBody]User user)
         //{
@@ -74,15 +77,15 @@ namespace Vakapay.ApiServer.Controllers
         //}
         //  WalletBusiness.WalletBusiness walletBusiness = new WalletBusiness.WalletBusiness();
         [HttpGet("Infor")]
-        public ActionResult<string> GetWalletInfor([FromQuery]string walletID)
+        public ActionResult<string> GetWalletInfor([FromQuery] string walletID)
         {
-            var wallet = _walletBusiness.GetWalletByID(walletID);
+            var wallet = _walletBusiness.GetWalletById(walletID);
             return JsonHelper.SerializeObject(wallet);
             //  return null;
         }
 
         [HttpGet("AddressInfor")]
-        public ActionResult<ReturnObject> GetAddresses([FromQuery]string walletId, [FromQuery]string networkName)
+        public ActionResult<ReturnObject> GetAddresses([FromQuery] string walletId, [FromQuery] string networkName)
         {
             try
             {
@@ -96,7 +99,6 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
-
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_ERROR,
@@ -108,7 +110,7 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpGet("GetExchangeRate")]
-        public ActionResult<ReturnObject> GetExchangeRate([FromQuery]string networkName)
+        public ActionResult<ReturnObject> GetExchangeRate([FromQuery] string networkName)
         {
             try
             {
@@ -123,7 +125,6 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
-
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_ERROR,
@@ -135,7 +136,8 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpGet("CheckSendCoin")]
-        public ActionResult<ReturnObject> CheckSendCoin([FromQuery]string fromAddress, [FromQuery]string toAddress, [FromQuery]string networkName, [FromQuery]string amount)
+        public ActionResult<ReturnObject> CheckSendCoin([FromQuery] string fromAddress, [FromQuery] string toAddress,
+            [FromQuery] string networkName, [FromQuery] string amount)
         {
             try
             {
@@ -143,17 +145,16 @@ namespace Vakapay.ApiServer.Controllers
                 float vakapayfee = -1.0f;
                 float minerfee = -1.0f;
                 float total = vakapayfee + minerfee + float.Parse(amount);
-                var _feeObject= new { vakapayfee = vakapayfee, minerfee =minerfee,total=total };  
+                var feeObject = new {vakapayfee = vakapayfee, minerfee = minerfee, total = total};
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
                     // Data = numberData.ToString(),
-                    Message = JsonHelper.SerializeObject(_feeObject)
+                    Message = JsonHelper.SerializeObject(feeObject)
                 };
             }
             catch (Exception e)
             {
-
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_ERROR,
@@ -165,24 +166,23 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("History")]
-        public ActionResult<ReturnObject> GetWalletHistory([FromBody]HistorySearch walletSearch)
+        public ActionResult<ReturnObject> GetWalletHistory([FromBody] HistorySearch walletSearch)
         {
             try
             {
                 //  var _history = _walletBusiness.GetHistory(walletSearch.wallet, 1, 3, new string[] { nameof(BlockchainTransaction.CreatedAt) });
-                int numberData = 0;
-                var _history = _walletBusiness.GetHistory(out numberData, walletSearch.userID, walletSearch.networkName, walletSearch.offset, walletSearch.limit, walletSearch.orderBy, walletSearch.search);
+                int numberData;
+                var history = _walletBusiness.GetHistory(out numberData, walletSearch.UserId, walletSearch.NetworkName,
+                    walletSearch.Offset, walletSearch.Limit, walletSearch.OrderBy, walletSearch.Search);
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
                     Data = numberData.ToString(),
-                    Message = JsonHelper.SerializeObject(_history)
+                    Message = JsonHelper.SerializeObject(history)
                 };
             }
             catch (Exception e)
             {
-
-
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_ERROR,
@@ -265,12 +265,12 @@ namespace Vakapay.ApiServer.Controllers
 
         public class HistorySearch
         {
-            public string userID;
-            public string networkName;
-            public int offset = -1;
-            public int limit = -1;
-            public string[] orderBy = null;
-            public string search;
+            [DataMember(Name = "userID")] public string UserId;
+            [DataMember(Name = "networkName")] public string NetworkName;
+            [DataMember(Name = "offset")] public int Offset = -1;
+            [DataMember(Name = "limit")] public int Limit = -1;
+            [DataMember(Name = "orderBy")] public string[] OrderBy;
+            [DataMember(Name = "search")] public string Search;
         }
     }
 }

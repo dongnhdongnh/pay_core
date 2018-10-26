@@ -3,7 +3,7 @@ using System.Threading;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -15,7 +15,7 @@ namespace Vakapay.ScanEthereum
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
             RunScan(repositoryConfig);
         }
@@ -26,7 +26,7 @@ namespace Vakapay.ScanEthereum
             var repoFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
             var ethereumBusiness = new EthereumBusiness.EthereumBusiness(repoFactory);
-            var WalletBusiness = new WalletBusiness.WalletBusiness(repoFactory);
+            var walletBusiness = new WalletBusiness.WalletBusiness(repoFactory);
             var connection = repoFactory.GetOldConnection() ?? repoFactory.GetDbConnection();
             try
             {
@@ -41,7 +41,7 @@ namespace Vakapay.ScanEthereum
                     var resultSend =
                         ethereumBusiness
                             .ScanBlockAsync<EthereumWithdrawTransaction, EthereumDepositTransaction,
-                                EthereumBlockResponse, EthereumTransactionResponse>(CryptoCurrency.ETH, WalletBusiness,
+                                EthereumBlockResponse, EthereumTransactionResponse>(CryptoCurrency.ETH, walletBusiness,
                                 ethereumRepo, ethereumDepoRepo, rpc);
                     Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 

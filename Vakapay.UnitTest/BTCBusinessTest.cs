@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Vakapay.BitcoinBusiness;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -12,40 +12,41 @@ namespace Vakapay.UnitTest
     [TestFixture]
     public class BTCBusinessTest
     {
-        BitcoinRpc btcRpc;
+        BitcoinRpc _btcRpc;
 
-        BitcoinRpc RPCClass
+        BitcoinRpc RpcClass
         {
             get
             {
-                if (btcRpc == null)
-                    btcRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
-                return btcRpc;
+                if (_btcRpc == null)
+                    _btcRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+                        AppSettingHelper.GetBitcoinRpcAuthentication());
+                return _btcRpc;
             }
         }
 
-        VakapayRepositoryMysqlPersistenceFactory _PersistenceFactory;
+        VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
         VakapayRepositoryMysqlPersistenceFactory PersistenceFactory
         {
             get
             {
-                if (_PersistenceFactory == null)
+                if (_persistenceFactory == null)
                 {
                     var repositoryConfig = new RepositoryConfiguration
                     {
-                        ConnectionString = AppSettingHelper.GetDBConnection()
+                        ConnectionString = AppSettingHelper.GetDbConnection()
                     };
                     Console.WriteLine("New Connect");
-                    _PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+                    _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
                 }
 
-                return _PersistenceFactory;
+                return _persistenceFactory;
             }
-            set { this._PersistenceFactory = value; }
+            set { _persistenceFactory = value; }
         }
 
-        Vakapay.BitcoinBusiness.BitcoinBusiness btcBus;
+        Vakapay.BitcoinBusiness.BitcoinBusiness _btcBus;
 
         [Test]
         public async System.Threading.Tasks.Task CreateNewAddressAsync()
@@ -53,17 +54,16 @@ namespace Vakapay.UnitTest
             Console.WriteLine("start");
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
             Console.WriteLine("New Address");
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             var connection = PersistenceFactory.GetDbConnection();
-            btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(PersistenceFactory);
-            var walletBusiness = new WalletBusiness.WalletBusiness(PersistenceFactory);
+            _btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(PersistenceFactory);
             var bitcoinRepo = PersistenceFactory.GetBitcoinAddressRepository(connection);
-            string walletID = CommonHelper.RandomString(15);
+            string walletId = CommonHelper.RandomString(15);
             var resultCreated =
-                await btcBus.CreateAddressAsync<BitcoinAddress>(bitcoinRepo, RPCClass, walletID);
+                await _btcBus.CreateAddressAsync<BitcoinAddress>(bitcoinRepo, RpcClass, walletId);
             Console.WriteLine(JsonHelper.SerializeObject(resultCreated));
             Assert.IsNotNull(resultCreated);
         }
@@ -73,19 +73,19 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(PersistenceFactory);
-            var _trans = new BitcoinWithdrawTransaction
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(persistenceFactory);
+            var trans = new BitcoinWithdrawTransaction
             {
                 ToAddress = "2Muk22rW4opjTd18KA48bzHUqiG19ZUJDLb",
-                Amount = (decimal) 0.0001
+                Amount = (decimal)0.0001
             };
             ReturnObject outPut = null;
             for (int i = 0; i < numOfTrans; i++)
-                outPut = btcBus.FakePendingTransaction(_trans);
+                outPut = _btcBus.FakePendingTransaction(trans);
             Console.WriteLine(JsonHelper.SerializeObject(outPut));
             Assert.IsNotNull(outPut);
         }
@@ -95,19 +95,19 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(PersistenceFactory);
-            var _trans = new BitcoinWithdrawTransaction
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(persistenceFactory);
+            var trans = new BitcoinWithdrawTransaction
             {
                 ToAddress = "2NBRLqwA5NGfXtMkmU82aveKxVHLVPNewpG",
-                Amount = (decimal) 0.0001
+                Amount = (decimal)0.0001
             };
             ReturnObject outPut = null;
             for (int i = 0; i < numOfTrans; i++)
-                outPut = btcBus.FakePendingTransaction(_trans);
+                outPut = _btcBus.FakePendingTransaction(trans);
             Console.WriteLine(JsonHelper.SerializeObject(outPut));
             Assert.IsNotNull(outPut);
         }
@@ -117,19 +117,19 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(PersistenceFactory);
-            var _trans = new BitcoinWithdrawTransaction
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(persistenceFactory);
+            var trans = new BitcoinWithdrawTransaction
             {
                 ToAddress = "2MtXuJo6U69RP2otQuAiw2bKQmZEgiAHVJE",
-                Amount = (decimal) 0.0001
+                Amount = (decimal)0.0001
             };
             ReturnObject outPut = null;
             for (int i = 0; i < numOfTrans; i++)
-                outPut = btcBus.FakePendingTransaction(_trans);
+                outPut = _btcBus.FakePendingTransaction(trans);
             Console.WriteLine(JsonHelper.SerializeObject(outPut));
             Assert.IsNotNull(outPut);
         }
@@ -139,19 +139,19 @@ namespace Vakapay.UnitTest
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(PersistenceFactory);
-            var _trans = new BitcoinWithdrawTransaction
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _btcBus = new Vakapay.BitcoinBusiness.BitcoinBusiness(persistenceFactory);
+            var trans = new BitcoinWithdrawTransaction
             {
                 ToAddress = "2NEQBQ2JU1gezBaJg5Lwq69Pr8c65y7TEbv",
-                Amount = (decimal) 0.0001
+                Amount = (decimal)0.0001
             };
             ReturnObject outPut = null;
             for (int i = 0; i < numOfTrans; i++)
-                outPut = btcBus.FakePendingTransaction(_trans);
+                outPut = _btcBus.FakePendingTransaction(trans);
             Console.WriteLine(JsonHelper.SerializeObject(outPut));
             Assert.IsNotNull(outPut);
         }

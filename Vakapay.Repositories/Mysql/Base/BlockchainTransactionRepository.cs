@@ -9,11 +9,11 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories.Base;
-using Vakapay.Repositories.Mysql.Base;
 
-namespace Vakapay.Repositories.Mysql
+namespace Vakapay.Repositories.Mysql.Base
 {
-    public abstract class BlockchainTransactionRepository<TTransaction> : MultiThreadUpdateEntityRepository<TTransaction>,
+    public abstract class BlockchainTransactionRepository<TTransaction> :
+        MultiThreadUpdateEntityRepository<TTransaction>,
         IRepositoryBlockchainTransaction<TTransaction> where TTransaction : BlockchainTransaction
     {
         public BlockchainTransactionRepository(string connectionString) : base(connectionString)
@@ -277,8 +277,10 @@ namespace Vakapay.Repositories.Mysql
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
                 //Console.WriteLine("FIND TRANSACTION BY STATUS");
-                var sqlString = $"Select * from {TableName} where BlockNumber = @BlockNumber and IsProcessing = 0 and Status=@Status";
-                var result = Connection.Query<TTransaction>(sqlString, new { BlockNumber = 0, Status = Status.STATUS_COMPLETED })
+                var sqlString =
+                    $"Select * from {TableName} where BlockNumber = @BlockNumber and IsProcessing = 0 and Status=@Status";
+                var result = Connection
+                    .Query<TTransaction>(sqlString, new {BlockNumber = 0, Status = Status.STATUS_COMPLETED})
                     .ToList();
                 return result;
             }
@@ -288,13 +290,15 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public List<BlockchainTransaction> FindTransactionHistory(int offset = -1, int limit = -1, string[] orderBy = null)
+        public List<BlockchainTransaction> FindTransactionHistory(int offset = -1, int limit = -1,
+            string[] orderBy = null)
         {
             try
             {
-                var _setQuery = new Dictionary<string, string>();
-                _setQuery.Add(nameof(BlockchainTransaction.Status), Status.STATUS_COMPLETED);
-                return FindBySql(SqlHelper.Query_Search(TableName, _setQuery, limit, offset, orderBy)).ToList<BlockchainTransaction>();
+                var setQuery = new Dictionary<string, string>();
+                setQuery.Add(nameof(BlockchainTransaction.Status), Status.STATUS_COMPLETED);
+                return FindBySql(SqlHelper.Query_Search(TableName, setQuery, limit, offset, orderBy))
+                    .ToList<BlockchainTransaction>();
             }
             catch (Exception e)
             {
@@ -302,6 +306,7 @@ namespace Vakapay.Repositories.Mysql
                 return null;
                 //	throw;
             }
+
             //	throw new NotImplementedException();
         }
 
@@ -318,7 +323,7 @@ namespace Vakapay.Repositories.Mysql
                 }
 
                 var sqlString = $"Select * from {TableName} where UserId = @UserId";
-                var result = Connection.Query<TTransaction>(sqlString, new { UserId = userId })
+                var result = Connection.Query<TTransaction>(sqlString, new {UserId = userId})
                     .ToList<BlockchainTransaction>();
                 return result;
             }
@@ -342,7 +347,7 @@ namespace Vakapay.Repositories.Mysql
                 }
 
                 var sqlString = $"Select * from {TableName} where FromAddress = @Address";
-                var result = Connection.Query<TTransaction>(sqlString, new { Address = fromAddress })
+                var result = Connection.Query<TTransaction>(sqlString, new {Address = fromAddress})
                     .ToList<BlockchainTransaction>();
                 return result;
             }
@@ -366,7 +371,7 @@ namespace Vakapay.Repositories.Mysql
                 }
 
                 var sqlString = $"Select * from {TableName} where ToAddress = @Address";
-                var result = Connection.Query<TTransaction>(sqlString, new { Address = toAddress })
+                var result = Connection.Query<TTransaction>(sqlString, new {Address = toAddress})
                     .ToList<BlockchainTransaction>();
                 return result;
             }
@@ -380,7 +385,7 @@ namespace Vakapay.Repositories.Mysql
 
         public List<BlockchainTransaction> FindTransactionsInner(string innerAddress)
         {
-            var className = this.GetClassName();
+            var className = GetClassName();
 
             if (className.Contains("Deposit"))
             {
@@ -392,12 +397,14 @@ namespace Vakapay.Repositories.Mysql
                 return FindTransactionsFromAddress(innerAddress);
             }
 
-            throw new Exception(className + ": Transaction repository class name not contain \"Deposit\" or \"Withdraw\" keyword");
+            throw new Exception(
+                className + ": Transaction repository class name not contain \"Deposit\" or \"Withdraw\" keyword");
         }
 
 
-
-        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userID, string currency, string TableNameWithdrawn, string TableNameDeposit, string internalWithdrawnTable, int offset, int limit, string[] orderByValue, string whereValue)
+        public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userId, string currency,
+            string tableNameWithdraw, string tableNameDeposit, string tableInternalWithdraw, int offset, int limit,
+            string[] orderByValue, string whereValue)
 
         {
             numberData = -1;
@@ -408,22 +415,28 @@ namespace Vakapay.Repositories.Mysql
                 {
                     searchString = " and ABS(Amount)= "+ whereValue+" ";
                 }
-                internalWithdrawnTable = internalWithdrawnTable.Replace("`", string.Empty);
-                var _selectInternal = $"SELECT {internalWithdrawnTable}.Id,SenderUserId as UserId,SenderUserId as FromAddress,Email as ToAddress,{internalWithdrawnTable}.CreatedAt,{internalWithdrawnTable}.Status,-Amount as Amount " +
-                    $"FROM {internalWithdrawnTable} left join user on ReceiverUserId=user.Id" +
-                    $" where SenderUserId = '{userID}'and Currency = '{currency}' "+ searchString +
+
+                tableInternalWithdraw = tableInternalWithdraw.Replace("`", string.Empty);
+                var selectInternal =
+                    $"SELECT {tableInternalWithdraw}.Id,SenderUserId as UserId,SenderUserId as FromAddress,Email as ToAddress,{tableInternalWithdraw}.CreatedAt,{tableInternalWithdraw}.Status,-Amount as Amount " +
+                    $"FROM {tableInternalWithdraw} left join user on ReceiverUserId=user.Id" +
+                    $" where SenderUserId = '{userId}'and Currency = '{currency}' " + searchString +
                     $"UNION ALL " +
-                    $"SELECT {internalWithdrawnTable}.Id,ReceiverUserId as UserId,Email as FromAddress,ReceiverUserId as ToAddress,{internalWithdrawnTable}.CreatedAt,{internalWithdrawnTable}.Status,Amount as Amount " +
-                    $"FROM {internalWithdrawnTable} left join user on SenderUserId=user.Id" +
-                    $" where ReceiverUserId = '{userID}'and Currency = '{currency}'"+ searchString;
-                var _selectThing = "Id,UserId,FromAddress,ToAddress,CreatedAt,Status";
-                var output = $"Select * from ( SELECT {_selectThing},-Amount AS Amount FROM {TableNameWithdrawn} WHERE UserId='{userID}'"+searchString +
+                    $"SELECT {tableInternalWithdraw}.Id,ReceiverUserId as UserId,Email as FromAddress,ReceiverUserId as ToAddress,{tableInternalWithdraw}.CreatedAt,{tableInternalWithdraw}.Status,Amount as Amount " +
+                    $"FROM {tableInternalWithdraw} left join user on SenderUserId=user.Id" +
+                    $" where ReceiverUserId = '{userId}'and Currency = '{currency}'" + searchString;
+                var selectThing = "Id,UserId,FromAddress,ToAddress,CreatedAt,Status";
+                var output =
+                    $"Select * from ( SELECT {selectThing},-Amount AS Amount FROM {tableNameWithdraw} WHERE UserId='{userId}'" +
+                    searchString +
                     $" UNION ALL " +
-                    $" SELECT {_selectThing},Amount FROM {TableNameDeposit} WHERE UserId='{userID}' {searchString} UNION ALL {_selectInternal}) as t_uni ";
-                var output_count = $"Select count(*) from ( SELECT {_selectThing},-Amount AS Amount FROM {TableNameWithdrawn} WHERE UserId='{userID}'" + searchString+
+                    $" SELECT {selectThing},Amount FROM {tableNameDeposit} WHERE UserId='{userId}' {searchString} UNION ALL {selectInternal}) as t_uni ";
+                var outputCount =
+                    $"Select count(*) from ( SELECT {selectThing},-Amount AS Amount FROM {tableNameWithdraw} WHERE UserId='{userId}'" +
+                    searchString +
                     $" UNION ALL " +
-                    $" SELECT {_selectThing},Amount FROM {TableNameDeposit} WHERE UserId='{userID}' {searchString} UNION ALL {_selectInternal}) as t_uni ";
-                numberData = ExcuteCount(output_count);
+                    $" SELECT {selectThing},Amount FROM {tableNameDeposit} WHERE UserId='{userId}' {searchString} UNION ALL {selectInternal}) as t_uni ";
+                numberData = ExcuteCount(outputCount);
                 StringBuilder orderStr = new StringBuilder("");
                 int count = 0;
                 if (orderByValue != null)
@@ -447,12 +460,15 @@ namespace Vakapay.Repositories.Mysql
                             count++;
                         }
                     }
+
                     output += " ORDER BY " + orderStr.ToString();
                 }
+
                 if (limit > 0)
                 {
                     output += " LIMIT " + limit;
                 }
+
                 if (offset > 0)
                 {
                     output += " OFFSET " + offset;
@@ -466,7 +482,6 @@ namespace Vakapay.Repositories.Mysql
                 return null;
                 //	throw;
             }
-
         }
 
         public string GetTableName()
@@ -474,9 +489,10 @@ namespace Vakapay.Repositories.Mysql
             return TableName;
             // throw new NotImplementedException();
         }
+
         public override Task<ReturnObject> SafeUpdate(TTransaction row)
         {
-            return base.SafeUpdate(row, new[] { nameof(row.Hash) });
+            return base.SafeUpdate(row, new[] {nameof(row.Hash)});
         }
     }
 }

@@ -6,13 +6,14 @@ namespace Vakapay.Commons.Helpers
     {
         public static long ToUnixTimestamp(DateTime date)
         {
-            return ((DateTimeOffset) date).ToUnixTimeSeconds();
+            return ((DateTimeOffset)date).ToUnixTimeSeconds();
         }
 
         public static DateTime FromUnixTimestamp(long unixTimestamp)
         {
             return DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).DateTime;
         }
+
         public static long ConvertToMiliseconds(long unixTimestamp)
         {
             return DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).ToUnixTimeMilliseconds();
@@ -31,7 +32,7 @@ namespace Vakapay.Commons.Helpers
 
         public static long GetChartDataBeginTime(long from, long interval)
         {
-            return (long)Math.Floor((double)from/interval) * interval;
+            return (long)Math.Floor((double)from / interval) * interval;
         }
     }
 }

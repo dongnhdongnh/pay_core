@@ -14,7 +14,7 @@ namespace Vakapay.ScanWallet
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = AppSettingHelper.GetDBConnection()
+                    ConnectionString = AppSettingHelper.GetDbConnection()
                 };
 
                 for (var i = 0; i < 10; i++)

@@ -20,47 +20,56 @@ namespace Vakapay.Cryptography
             return true;
         }
 
-        private const string Alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-        private const int Size = 25;
- 
+        private const string ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+        private const int SIZE = 25;
+
         private static byte[] DecodeBase58(string input)
         {
-            var output = new byte[Size];
+            var output = new byte[SIZE];
             foreach (var t in input)
             {
-                var p = Alphabet.IndexOf(t);
+                var p = ALPHABET.IndexOf(t);
                 if (p == -1) throw new Exception("invalid character found");
-                var j = Size;
+                var j = SIZE;
                 while (--j > 0)
                 {
                     p += 58 * output[j];
                     output[j] = (byte)(p % 256);
                     p /= 256;
                 }
+
                 if (p != 0) throw new Exception("address too long");
             }
+
             return output;
         }
- 
+
         private static byte[] Hash(byte[] bytes)
         {
             var hasher = new SHA256Managed();
             return hasher.ComputeHash(bytes);
         }
-        
-        public static bool IsEthereumAddress(string address) {
-            if (! new Regex("^(0x|0X)?[0-9a-fA-F]{40}$").IsMatch(address)) {
+
+        public static bool IsEthereumAddress(string address)
+        {
+            if (!new Regex("^(0x|0X)?[0-9a-fA-F]{40}$").IsMatch(address))
+            {
                 // check if it has the basic requirements of an address
                 return false;
-            } else if (new Regex("^(0x)?[0-9a-f]{40}$").IsMatch(address) || new Regex("^(0x|0X)?[0-9A-F]{40}$").IsMatch(address)) {
+            }
+            else if (new Regex("^(0x)?[0-9a-f]{40}$").IsMatch(address) ||
+                     new Regex("^(0x|0X)?[0-9A-F]{40}$").IsMatch(address))
+            {
                 // If it's all small caps or all all caps, return "true
                 return true;
-            } else {
+            }
+            else
+            {
                 // Otherwise check each case
                 return IsChecksumAddress(address);
             }
         }
-        
+
         /// <summary>
         /// Validates if the hex string is 40 alphanumeric characters
         /// </summary>
@@ -83,16 +92,17 @@ namespace Vakapay.Cryptography
                     value <= 7 && address[i].ToString().ToLower() != address[i].ToString())
                     return false;
             }
+
             return true;
         }
-        
+
         public bool IsValidAddressLength(string address)
         {
             address = address.RemoveHexPrefix();
             return address.Length == 40;
         }
     }
-    
+
     public class Sha3Keccack
     {
         public string CalculateHash(string value)
@@ -120,19 +130,19 @@ namespace Vakapay.Cryptography
 
     public static class HexByteConverterExtensions
     {
-        private static readonly byte[] Empty = new byte[0];
-        
+        private static readonly byte[] EMPTY = new byte[0];
+
         public static string ToHex(this byte[] value, bool prefix = false)
         {
             var strPrex = prefix ? "0x" : "";
             return strPrex + string.Concat(value.Select(b => b.ToString("x2")).ToArray());
         }
-        
+
         public static bool HasHexPrefix(this string value)
         {
             return value.StartsWith("0x");
         }
-        
+
         public static string RemoveHexPrefix(this string value)
         {
             return value.Replace("0x", "");
@@ -143,7 +153,7 @@ namespace Vakapay.Cryptography
             byte[] bytes = null;
             if (string.IsNullOrEmpty(value))
             {
-                bytes = Empty;
+                bytes = EMPTY;
             }
             else
             {
@@ -174,16 +184,17 @@ namespace Vakapay.Cryptography
                     var upper = FromCharacterToByte(value[readIndex], readIndex, 4);
                     var lower = FromCharacterToByte(value[readIndex + 1], readIndex + 1);
 
-                    bytes[writeIndex++] = (byte) (upper | lower);
+                    bytes[writeIndex++] = (byte)(upper | lower);
                 }
             }
 
             return bytes;
         }
-        
+
         public static byte[] HexToByteArray(this string value)
         {
-            try {
+            try
+            {
                 return HexToByteArrayInternal(value);
             }
             catch (FormatException ex)
@@ -192,21 +203,21 @@ namespace Vakapay.Cryptography
                     "String '{0}' could not be converted to byte array (not hex?).", value), ex);
             }
         }
-        
+
         private static byte FromCharacterToByte(char character, int index, int shift = 0)
         {
-            var value = (byte) character;
+            var value = (byte)character;
             if (0x40 < value && 0x47 > value || 0x60 < value && 0x67 > value)
             {
                 if (0x40 == (0x40 & value))
                     if (0x20 == (0x20 & value))
-                        value = (byte) ((value + 0xA - 0x61) << shift);
+                        value = (byte)((value + 0xA - 0x61) << shift);
                     else
-                        value = (byte) ((value + 0xA - 0x41) << shift);
+                        value = (byte)((value + 0xA - 0x41) << shift);
             }
             else if (0x29 < value && 0x40 > value)
             {
-                value = (byte) ((value - 0x30) << shift);
+                value = (byte)((value - 0x30) << shift);
             }
             else
             {
