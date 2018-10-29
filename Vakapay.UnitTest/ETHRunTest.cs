@@ -5,19 +5,19 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.UnitTest
 {
-	class ETHRunTest
-	{
-		static void Main(string[] args)
-		{
-			Console.WriteLine("start auto scan");
-			var repositoryConfig = new RepositoryConfiguration
-			{
-				ConnectionString = AppSettingHelper.GetDBConnection()
-			};
+    class ETHRunTest
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("start auto scan");
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = AppSettingHelper.GetDbConnection()
+            };
 
-			var PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-			var _ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(PersistenceFactory);
-			//_ethBus.AutoScanBlock();
-		}
-	}
+            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            var ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(persistenceFactory);
+            //_ethBus.AutoScanBlock();
+        }
+    }
 }

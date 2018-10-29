@@ -12,13 +12,13 @@ namespace Vakapay.ScanVakaCoin
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection(),
+                ConnectionString = AppSettingHelper.GetDbConnection(),
             };
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
             var helper = new VakacoinChainHelper(
                 int.Parse(AppSettingHelper.GetVakacoinBlockInterval()),
-                new VakacoinRPC(AppSettingHelper.GetVakacoinNode()),
+                new VakacoinRpc(AppSettingHelper.GetVakacoinNode()),
                 new VakacoinBusiness.VakacoinBusiness(persistenceFactory),
                 new WalletBusiness.WalletBusiness(persistenceFactory),
                 new SendMailBusiness.SendMailBusiness(persistenceFactory)

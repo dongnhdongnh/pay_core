@@ -6,7 +6,6 @@ using UAParser;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 
@@ -47,7 +46,7 @@ namespace Vakapay.ApiServer.Helpers
             {
                 foreach (var data in datas)
                 {
-                    if (!Constants.listApiAccess.ContainsKey(data.Trim()))
+                    if (!ApiAccess.LIST_API_ACCESS.ContainsKey(data.Trim()))
                         return false;
                 }
             }
@@ -62,7 +61,7 @@ namespace Vakapay.ApiServer.Helpers
             {
                 foreach (var data in datas)
                 {
-                    if (!CryptoCurrency.AllNetwork.Contains(data.Trim()))
+                    if (!CryptoCurrency.ALL_NETWORK.Contains(data.Trim()))
                         return false;
                 }
             }
@@ -143,7 +142,7 @@ namespace Vakapay.ApiServer.Helpers
                     case ActionLog.API_ACCESS:
                         newSecret.ApiAccess = secret;
                         break;
-                    case ActionLog.SEND_TRSANSACTION:
+                    case ActionLog.SEND_TRANSACTION:
                         newSecret.SendTransaction = secret;
                         break;
                     case ActionLog.TWOFA_DISABLE:

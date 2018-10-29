@@ -21,7 +21,6 @@ namespace Vakapay.ApiServer.Controllers
     [Authorize]
     public class PortfolioController : ControllerBase
     {
-        private readonly VakapayRepositoryMysqlPersistenceFactory _vakapayRepository;
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly PortfolioHistoryBusiness.PortfolioHistoryBusiness _portfolioHistoryBusiness;
 
@@ -29,14 +28,14 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
-            _vakapayRepository = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            _userBusiness = new UserBusiness.UserBusiness(_vakapayRepository);
-            _portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(_vakapayRepository);
+            var vakapayRepository = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            _userBusiness = new UserBusiness.UserBusiness(vakapayRepository);
+            _portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(vakapayRepository);
         }
-        
+
         [HttpGet("value/{condition}")]
         public ReturnObject PortfolioValueHistory(string condition)
         {
@@ -49,7 +48,8 @@ namespace Vakapay.ApiServer.Controllers
             if (userModel == null)
             {
                 //return error
-                return new ReturnObject{
+                return new ReturnObject
+                {
                     Status = Status.STATUS_ERROR,
                     Message = "User not exist in DB"
                 };
@@ -57,7 +57,8 @@ namespace Vakapay.ApiServer.Controllers
 
             var userid = userModel.Id;
             var currentTime = CommonHelper.GetUnixTimestamp();
-            if (Time.SECOND_COUNT_IN_PERIOD.ContainsKey(condition))
+           
+            if (!Time.SECOND_COUNT_IN_PERIOD.ContainsKey(condition))
             {
                 return new ReturnObject
                 {
@@ -65,7 +66,9 @@ namespace Vakapay.ApiServer.Controllers
                     Message = "Data not found with condition " + condition
                 };
             }
-            return Result(userid, currentTime - Time.SECOND_COUNT_IN_PERIOD[condition], currentTime, condition == DashboardConfig.CURRENT ? condition : null);
+
+            return Result(userid, currentTime - Time.SECOND_COUNT_IN_PERIOD[condition], currentTime,
+                condition == DashboardConfig.CURRENT ? condition : null);
         }
 
         private ReturnObject Result(string userId, long from, long to, string time = null)
@@ -82,13 +85,15 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (time != null && time.Equals(DashboardConfig.CURRENT))
                 {
+                    var returnData = JsonHelper.SerializeObject(data[data.Count - 1]);
+                    
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
-                        Data = JsonHelper.SerializeObject(data[data.Count - 1])
+                        Data = returnData
                     };
                 }
-                
+
                 // if data is too many
                 if (data.Count >= 600)
                 {
@@ -105,10 +110,10 @@ namespace Vakapay.ApiServer.Controllers
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
-                        Data = JsonHelper.SerializeObject(data)
+                        Data = JsonHelper.SerializeObject(sortData)
                     };
                 }
-                
+
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,

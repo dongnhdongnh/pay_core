@@ -15,6 +15,7 @@ namespace Vakapay.Cryptography
             Array.Copy(doubleHash, 0, updatedSource, updatedSource.Length - CheckSumSizeInBytes, CheckSumSizeInBytes);
             return Encode(updatedSource);
         }
+
         public static string GetPublicWif(byte[] publicKey, string prefix)
         {
             var hash = Ripemd160Manager.GetHash(publicKey);
@@ -23,6 +24,7 @@ namespace Vakapay.Cryptography
             var encodedHash = Encode(updatedPublicKey);
             return prefix + encodedHash;
         }
+
         public static byte[] DecodePrivateWif(string data)
         {
             if (data.All(Hexdigits.Contains))
@@ -40,6 +42,7 @@ namespace Vakapay.Cryptography
                     throw new NotImplementedException();
             }
         }
+
         public static byte[] Base58CheckDecode(string data)
         {
             var s = Decode(data);
@@ -54,6 +57,7 @@ namespace Vakapay.Cryptography
 
             return CutFirstBytes(dec, 1);
         }
+
         public static string EncodeSignature(byte[] source)
         {
             var buf = AddLastBytes(source, 2);

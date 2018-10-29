@@ -20,17 +20,12 @@ namespace Vakapay.Cryptography
             var publicKey = Secp256K1Manager.GetPublicKey(privateBytes, true);
             return WifUtility.GetPublicWif(publicKey, "VAKA");
         }
-        
+
         public class KeyPair
         {
-            public string PrivateKey { get; set;}
-        
-            public string PublicKey { get; set; }
+            public string PrivateKey { get; set; }
 
-            public KeyPair()
-            {
-            
-            }
+            public string PublicKey { get; set; }
         }
     }
 }

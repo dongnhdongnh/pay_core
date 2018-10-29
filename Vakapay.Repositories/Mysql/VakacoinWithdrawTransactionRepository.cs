@@ -4,79 +4,79 @@ using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Text;
-using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.VAKA;
 using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-
-	public class VakacoinWithdrawTransactionRepository : BlockchainTransactionRepository<VakacoinWithdrawTransaction>, IVakacoinWithdrawTransactionRepository
-	{
+    public class VakacoinWithdrawTransactionRepository : BlockchainTransactionRepository<VakacoinWithdrawTransaction>,
+        IVakacoinWithdrawTransactionRepository
+    {
 //		String TableName = "vakapay.vakacoinwithdrawtransaction";
-		public string Query_Search(Dictionary<string, string> whereValue)
-		{
-			StringBuilder whereStr = new StringBuilder("");
-			int count = 0;
-			foreach (var prop in whereValue)
-			{
-				if (prop.Value != null)
-				{
-					if (count > 0)
-						whereStr.Append(" AND ");
-					whereStr.AppendFormat(" {0}='{1}'", prop.Key, prop.Value);
-					count++;
-				}
-			}
+        public string Query_Search(Dictionary<string, string> whereValue)
+        {
+            StringBuilder whereStr = new StringBuilder("");
+            int count = 0;
+            foreach (var prop in whereValue)
+            {
+                if (prop.Value != null)
+                {
+                    if (count > 0)
+                        whereStr.Append(" AND ");
+                    whereStr.AppendFormat(" {0}='{1}'", prop.Key, prop.Value);
+                    count++;
+                }
+            }
 
-			string output = string.Format("SELECT * FROM {0} WHERE {1}", TableName, whereStr);
-			Console.WriteLine(output);
-			return output;
-		}
+            string output = string.Format("SELECT * FROM {0} WHERE {1}", TableName, whereStr);
+            Console.WriteLine(output);
+            return output;
+        }
 
-		public string Query_Update(object updateValue, Dictionary<string, string> whereValue)
-		{
-			StringBuilder updateStr = new StringBuilder("");
-			StringBuilder whereStr = new StringBuilder("");
+        public string Query_Update(object updateValue, Dictionary<string, string> whereValue)
+        {
+            StringBuilder updateStr = new StringBuilder("");
+            StringBuilder whereStr = new StringBuilder("");
 
-			int count = 0;
-			foreach (PropertyInfo prop in updateValue.GetType().GetProperties())
-			{
-				if (prop.GetValue(updateValue, null) != null)
-				{
-					if (count > 0)
-						updateStr.Append(",");
-					updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(updateValue, null));
-					count++;
-				}
-			}
+            int count = 0;
+            foreach (PropertyInfo prop in updateValue.GetType().GetProperties())
+            {
+                if (prop.GetValue(updateValue, null) != null)
+                {
+                    if (count > 0)
+                        updateStr.Append(",");
+                    updateStr.AppendFormat(" {0}='{1}'", prop.Name, prop.GetValue(updateValue, null));
+                    count++;
+                }
+            }
 
-			// if (whereStr != null)
-			count = 0;
-			foreach (var prop in whereValue)
-			{
-				if (prop.Value != null)
-				{
-					if (count > 0)
-						whereStr.Append(" AND ");
-					whereStr.AppendFormat(" {0}='{1}'", prop.Key, prop.Value);
-					count++;
-				}
-			}
+            // if (whereStr != null)
+            count = 0;
+            foreach (var prop in whereValue)
+            {
+                if (prop.Value != null)
+                {
+                    if (count > 0)
+                        whereStr.Append(" AND ");
+                    whereStr.AppendFormat(" {0}='{1}'", prop.Key, prop.Value);
+                    count++;
+                }
+            }
 
 
+            string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
+            Console.WriteLine(output);
+            return output;
+        }
 
-			string output = string.Format(@"UPDATE {0} SET {1} WHERE {2}", TableName, updateStr, whereStr);
-			Console.WriteLine(output);
-			return output;
-		}
+        public VakacoinWithdrawTransactionRepository(string connectionString) : base(connectionString)
+        {
+        }
 
-		public VakacoinWithdrawTransactionRepository(string connectionString) : base(connectionString)
-		{
-		}
-
-		public VakacoinWithdrawTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
-		{
-		}
+        public VakacoinWithdrawTransactionRepository(IDbConnection dbConnection) : base(dbConnection)
+        {
+        }
 
 //		public ReturnObject Delete(string Id)
 //		{
@@ -165,8 +165,8 @@ namespace Vakapay.Repositories.Mysql
 //				var result = 0;
 //				if (transaction != null)
 //				{
-//					MySqlTransaction _transaction = (MySqlTransaction)transaction;
-//					result = Connection.Execute(sqlString, null, _transaction);
+//					MySqlTransaction mysqlTransaction = (MySqlTransaction)transaction;
+//					result = Connection.Execute(sqlString, null, mysqlTransaction);
 //				}
 //				else
 //				{
@@ -226,24 +226,25 @@ namespace Vakapay.Repositories.Mysql
 //			throw new NotImplementedException();
 //		}
 
-		public object GetTransaction()
-		{
-			if (Connection.State != ConnectionState.Open)
-				Connection.Open();
-			return Connection.BeginTransaction();
-		}
+        public object GetTransaction()
+        {
+            if (Connection.State != ConnectionState.Open)
+                Connection.Open();
+            return Connection.BeginTransaction();
+        }
 
-		public void TransactionCommit(object transaction)
-		{
-			MySqlTransaction _transaction = (MySqlTransaction)transaction;
-			_transaction.Commit();
-		}
+        public void TransactionCommit(object transaction)
+        {
+            MySqlTransaction mysqlTransaction = (MySqlTransaction)transaction;
+            mysqlTransaction.Commit();
+        }
 
-		public void TransactionRollback(object transaction)
-		{
-			MySqlTransaction _transaction = (MySqlTransaction)transaction;
-			_transaction.Rollback();
-		}
+        public void TransactionRollback(object transaction)
+        {
+            MySqlTransaction mysqlTransaction = (MySqlTransaction)transaction;
+            mysqlTransaction.Rollback();
+        }
+
 //
 //		public List<BlockchainTransaction> FindTransactionsByStatus(string status)
 //		{
@@ -254,6 +255,5 @@ namespace Vakapay.Repositories.Mysql
 //		{
 //			throw new NotImplementedException();
 //		}
-	}
-
+    }
 }

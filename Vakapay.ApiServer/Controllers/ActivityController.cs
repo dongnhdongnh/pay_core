@@ -29,19 +29,14 @@ namespace Vakapay.ApiServer.Controllers
         private readonly UserBusiness.UserBusiness _userBusiness;
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
-
-        private IConfiguration Configuration { get; }
-
         public ActivityController(
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
         )
         {
-            Configuration = configuration;
-
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -57,7 +52,7 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var queryStringValue = Request.Query;
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -112,7 +107,7 @@ namespace Vakapay.ApiServer.Controllers
                     checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
                 }
 
-                var userModel = (User) RouteData.Values["UserModel"];
+                var userModel = (User)RouteData.Values["UserModel"];
 
 
                 return _userBusiness.GetListConfirmedDevices(userModel.Id, Convert.ToInt32(offset),

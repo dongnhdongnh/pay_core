@@ -1,23 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using NLog;
 using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
-using Vakapay.VakacoinBusiness;
 using VakaSharp.Api.v1;
 using VakaSharp.CustomTypes;
 using Action = VakaSharp.Api.v1.Action;
 
-namespace Vakapay.ScanVakaCoin
+namespace Vakapay.VakacoinBusiness
 {
     public class VakacoinChainHelper : IChainHelper
     {
-        private VakacoinRPC _rpcClient;
-        private VakacoinBusiness.VakacoinBusiness _vakacoinBusiness;
+        private VakacoinRpc _rpcClient;
+        private VakacoinBusiness _vakacoinBusiness;
         private IWalletBusiness _walletBusiness;
         private int _blockInterval;
         private SendMailBusiness.SendMailBusiness _sendMailBusiness;
@@ -25,14 +23,14 @@ namespace Vakapay.ScanVakaCoin
         public const String TRANSACTION_STATUS_EXECUTED = "executed";
         public const String TRANSACTION_ACTION_TRANSFER = "transfer";
 
-        public IBlockchainRPC RpcClient
+        public IBlockchainRpc RpcClient
         {
             get { return _rpcClient; }
-            set { _rpcClient = (VakacoinRPC) value; }
+            set { _rpcClient = (VakacoinRpc)value; }
         }
 
-        public VakacoinChainHelper(int blockInterval, VakacoinRPC rpcClient,
-            VakacoinBusiness.VakacoinBusiness vakacoinBusiness, IWalletBusiness walletBusiness,
+        public VakacoinChainHelper(int blockInterval, VakacoinRpc rpcClient,
+            VakacoinBusiness vakacoinBusiness, IWalletBusiness walletBusiness,
             SendMailBusiness.SendMailBusiness sendMailBusiness)
         {
             _blockInterval = blockInterval;
@@ -80,7 +78,7 @@ namespace Vakapay.ScanVakaCoin
 
         public void ParseTransaction(object block)
         {
-            GetBlockResponse blockResponse = (GetBlockResponse) block;
+            GetBlockResponse blockResponse = (GetBlockResponse)block;
             foreach ((Action action, PackedTransaction packedTransaction) in GetListAction(blockResponse))
             {
                 if (action.Data.Equals(null))
@@ -104,7 +102,7 @@ namespace Vakapay.ScanVakaCoin
                     return;
 
                 // Save to table in db
-                _vakacoinBusiness.CreateDepositTransaction(packedTransaction.Id, (int) blockResponse.BlockNum,
+                _vakacoinBusiness.CreateDepositTransaction(packedTransaction.Id, (int)blockResponse.BlockNum,
                     transferData.Symbol(), transferData.Amount(), transferData.From, transferData.To, 0,
                     Status.STATUS_SUCCESS);
 
@@ -149,17 +147,14 @@ namespace Vakapay.ScanVakaCoin
 
             var email = new EmailQueue
             {
-                Id = CommonHelper.GenerateUuid(),
                 ToEmail = toEmail,
-                SignInUrl = EmailConfig.SignInUrl,
+                SignInUrl = EmailConfig.SIGN_IN_URL,
                 Amount = transferData.Amount(),
                 Template = EmailTemplate.Received,
 //                SentOrReceived = EmailConfig.SentOrReceived_Received,
                 NetworkName = transferData.Symbol(),
-                Subject = EmailConfig.Subject_SentOrReceived,
+                Subject = EmailConfig.SUBJECT_SENT_OR_RECEIVED,
                 Status = Status.STATUS_PENDING,
-                CreatedAt = CommonHelper.GetUnixTimestamp(),
-                UpdatedAt = CommonHelper.GetUnixTimestamp(),
                 IsProcessing = 0,
                 Version = 0
             };

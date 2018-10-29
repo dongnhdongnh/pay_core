@@ -6,7 +6,6 @@ using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -19,11 +18,12 @@ namespace Vakapay.ApiServer.Controllers
     public class AccountsController : Controller
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }
+
         public AccountsController()
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             VakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -34,11 +34,8 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
-                var userRepository = new UserRepository(VakapayRepositoryFactory.GetOldConnection());
                 var wallets = walletRepository.FindAllWalletByUserId(id);
-                var user = userRepository.FindById(id);
 
                 var balances = new List<CurrencyBalance>();
 
@@ -73,7 +70,6 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-
                 var walletRepository = new WalletRepository(VakapayRepositoryFactory.GetOldConnection());
 
                 var addresses = walletRepository.GetAddressesByUserId(userId);
@@ -196,34 +192,92 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [HttpPost("{userId}/transactions")]
-        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        [HttpPost("{userId}/coinbase_transactions")]
+        public ActionResult<string> SendTransactionsCoinbase(string userId, [FromBody] JObject value)
         {
+            ReturnObject result = null;
             try
             {
-                var sendTransactionBusiness = new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+                var sendTransactionBusiness =
+                    new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
 
                 var request = value.ToObject<UserSendTransaction>();
-
                 request.UserId = userId;
-
-                var res = sendTransactionBusiness.AddSendTransaction(request);
-
-                if (res.Status == Status.STATUS_ERROR)
-                {
-                    return new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = res.Message}.ToJson();
-                }
-
-                return new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = request}.ToJson();
+                result = AddSendTransaction(request);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
             }
+
+            return result.ToJson();
+        }
+
+        private ReturnObject AddSendTransaction(UserSendTransaction request)
+        {
+            var sendTransactionBusiness =
+                new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
+            ReturnObject result = null;
+            try
+            {
+                var res = sendTransactionBusiness.AddSendTransaction(request);
+
+                if (res.Status == Status.STATUS_ERROR)
+                {
+                    result = new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = res.Message};
+                }
+                else
+                {
+                    result = new ReturnDataObject()
+                        {Status = Status.STATUS_SUCCESS, Data = request};
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
+            }
+            finally
+            {
+                sendTransactionBusiness.CloseDbConnection();
+            }
+
+            return result;
+        }
+
+
+        [HttpPost("{userId}/transactions")]
+        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        {
+            ReturnObject result = null;
+            try
+            {
+                var request = value.ToObject<SendTransaction>();
+
+                var userRequest = new UserSendTransaction()
+                {
+                    UserId = userId,
+                    Type = "send",
+                    To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
+                    Amount = request.Detail.VkcAmount,
+                    Currency = request.SortName,
+                    Description = request.Detail.VkcNote,
+                };
+
+                result = AddSendTransaction(userRequest);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                result = new ReturnObject()
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
+            }
+
+            return result.ToJson();
         }
 
         [HttpGet]
@@ -254,11 +308,11 @@ namespace Vakapay.ApiServer.Controllers
                 transactions.AddRange(vakacoinDepositTrxRepo.FindTransactionsByUserId(userId));
                 transactions.AddRange(vakacoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
 
-                var sortedTransactions = transactions.OrderByDescending(o=>o.UpdatedAt).ToList();
+                var sortedTransactions = transactions.OrderByDescending(o => o.UpdatedAt).ToList();
 
-                if ( limit != null && limit > 0 && limit < sortedTransactions.Count )
+                if (limit != null && limit > 0 && limit < sortedTransactions.Count)
                 {
-                    sortedTransactions = sortedTransactions.GetRange(0, (int) limit);
+                    sortedTransactions = sortedTransactions.GetRange(0, (int)limit);
                 }
 
                 return new ReturnDataObject()

@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using Dapper;
-using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Repositories.Mysql.Base;
 

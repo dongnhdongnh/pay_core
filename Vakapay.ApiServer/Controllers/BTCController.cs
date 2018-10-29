@@ -8,13 +8,13 @@ namespace Vakapay.ApiService.Controllers
     [ApiController]
     public class BTCController : Controller
     {
-        BitcoinRpc _bitcoinRpcRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
+        private readonly BitcoinRpc _bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
+            AppSettingHelper.GetBitcoinRpcAuthentication());
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)
         {
-            var oputput = _bitcoinRpcRpc.CreateNewAddress(pass);
-            return JsonHelper.SerializeObject(oputput);
+            return JsonHelper.SerializeObject(_bitcoinRpc.CreateNewAddress(pass));
         }
     }
 }

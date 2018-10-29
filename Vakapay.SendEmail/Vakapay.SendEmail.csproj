@@ -16,4 +16,7 @@
     <ProjectReference Include="..\Vakapay.Repositories\Vakapay.Repositories.csproj" />
     <ProjectReference Include="..\Vakapay.SendMailBusiness\Vakapay.SendMailBusiness.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="$(SolutionDir)templates\**" CopyToOutputDirectory="Always" />
+  </ItemGroup>
 </Project>

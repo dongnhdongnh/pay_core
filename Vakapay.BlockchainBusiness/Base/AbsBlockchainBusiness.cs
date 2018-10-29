@@ -7,6 +7,7 @@ using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
 
@@ -37,7 +38,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <typeparam name="TBlockchainTransaction"></typeparam>
         /// <returns></returns>
         public virtual async Task<ReturnObject> SendTransactionAsync<TBlockchainTransaction>(
-            IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRPC rpcClass,
+            IRepositoryBlockchainTransaction<TBlockchainTransaction> repoQuery, IBlockchainRpc rpcClass,
             string privateKey = "") where TBlockchainTransaction : BlockchainTransaction
         {
             /*
@@ -131,9 +132,9 @@ namespace Vakapay.BlockchainBusiness.Base
                         //                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
                         //                            email, pendingTransaction.Amount,
                         //                            Constants.TEMPLATE_EMAIL_SENT, pendingTransaction.NetworkName(),Constants.TYPE_SEND);
-                        await CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
+                        await SendMailBusiness.SendMailBusiness.CreateDataEmail("Notify send " + pendingTransaction.NetworkName(),
                             email, pendingTransaction.Amount, pendingTransaction.Id,
-                            EmailTemplate.Sent, pendingTransaction.NetworkName());
+                            EmailTemplate.Sent, pendingTransaction.NetworkName(), VakapayRepositoryFactory, false);
                     }
                 }
 
@@ -170,7 +171,6 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <summary>
         /// Created Address with optimistic lock
         /// </summary>
-        /// <param name="wallet"></param>
         /// <param name="repoQuery"></param>
         /// <param name="rpcClass"></param>
         /// <param name="walletId"></param>
@@ -178,7 +178,7 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <typeparam name="TBlockchainAddress"></typeparam>
         /// <returns></returns>
         public virtual async Task<ReturnObject> CreateAddressAsync<TBlockchainAddress>(
-            IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRPC rpcClass, string walletId,
+            IAddressRepository<TBlockchainAddress> repoQuery, IBlockchainRpc rpcClass, string walletId,
             string other = "") where TBlockchainAddress : BlockchainAddress
         {
             try
@@ -220,7 +220,6 @@ namespace Vakapay.BlockchainBusiness.Base
                 return new ReturnObject
                 {
                     Status = resultDB.Status,
-                    Data = (resultDB.Status == Status.STATUS_SUCCESS) ? address : null,
                     Message = resultDB.Message
                 };
             }
@@ -239,7 +238,7 @@ namespace Vakapay.BlockchainBusiness.Base
             IWalletBusiness wallet,
             IRepositoryBlockchainTransaction<TWithDraw> withdrawRepoQuery,
             IRepositoryBlockchainTransaction<TDeposit> depositRepoQuery,
-            IBlockchainRPC rpcClass)
+            IBlockchainRpc rpcClass)
             where TWithDraw : BlockchainTransaction
             where TDeposit : BlockchainTransaction
             where TBlockResponse : EthereumBlockResponse
@@ -330,12 +329,12 @@ namespace Vakapay.BlockchainBusiness.Base
                                 Console.WriteLine("HELLO " + _currentPending.Hash);
                                 _currentPending.BlockNumber = _blockNumber;
                                 _currentPending.Fee = _fee;
-                                _currentPending.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                                _currentPending.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                                 //	_currentPending.Status = Status.StatusCompleted;
                                 //	_currentPending.InProcess = 0;
                                 Console.WriteLine("CaLL UPDATE");
 
-                                withdrawRepoQuery.Update((TWithDraw) _currentPending);
+                                withdrawRepoQuery.Update((TWithDraw)_currentPending);
                                 withdrawPendingTransactions.RemoveAt(i);
                             }
                         }
@@ -361,7 +360,7 @@ namespace Vakapay.BlockchainBusiness.Base
                             int _transaValue = 0;
                             if (_trans.Value.HexToInt(out _transaValue))
                             {
-                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal) _transaValue, networkName);
+                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
                             }
                         }
                     }
@@ -387,27 +386,29 @@ namespace Vakapay.BlockchainBusiness.Base
         /// <summary>
         /// get history from both withdrawn and deposit table
         /// </summary>
-        /// <typeparam name="TBlockchainTransaction"></typeparam>
-        /// <param name="repoQuery"></param>
+        /// <param name="tableInternalWithdrawName"></param>
         /// <param name="offset"></param>
         /// <param name="limit"></param>
         /// <param name="orderBy"></param>
+        /// <param name="numberData"></param>
+        /// <param name="currency"></param>
+        /// <param name="withdrawRepository"></param>
+        /// <param name="search"></param>
+        /// <param name="userID"></param>
+        /// <param name="depositRepository"></param>
         /// <returns></returns>
         public virtual List<BlockchainTransaction> GetAllHistory<T1, T2>(out int numberData, string userID,
             string currency,
-            IRepositoryBlockchainTransaction<T1> WithdrawnrepoQuery,
-            IRepositoryBlockchainTransaction<T2> DepositrepoQuery, string TableInternalWihdrawnName, int offset = -1,
+            IRepositoryBlockchainTransaction<T1> withdrawRepository,
+            IRepositoryBlockchainTransaction<T2> depositRepository, string tableInternalWithdrawName, int offset = -1,
             int limit = -1,
             string[] orderBy = null, string search = null)
         {
             try
             {
                 Console.WriteLine("FIND HISTORY FROM ABS");
-                //WithdrawnrepoQuery.GetTableName();
-                //DepositrepoQuery.GetTableName();
-                //   WithdrawnrepoQuery.FindBySql();
-                return WithdrawnrepoQuery.FindTransactionHistoryAll(out numberData, userID, currency,
-                    WithdrawnrepoQuery.GetTableName(), DepositrepoQuery.GetTableName(), TableInternalWihdrawnName,
+                return withdrawRepository.FindTransactionHistoryAll(out numberData, userID, currency,
+                    withdrawRepository.GetTableName(), depositRepository.GetTableName(), tableInternalWithdrawName,
                     offset, limit, orderBy, search);
             }
             catch (Exception e)
@@ -463,50 +464,6 @@ namespace Vakapay.BlockchainBusiness.Base
             numberData = -1;
             Console.WriteLine("Not override");
             return null;
-        }
-
-        /// <summary>
-        /// CreateDataEmail
-        /// </summary>
-        /// <param name="subject"></param>
-        /// <param name="email"></param>
-        /// <param name="amount"></param>
-        /// <param name="transactionId"></param>
-        /// <param name="template"></param>
-        /// <param name="networkName"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
-        //            string networkName, string sendOrReceiver)
-        public async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
-            EmailTemplate template, string networkName)
-        {
-            try
-            {
-                var currentTime = CommonHelper.GetUnixTimestamp();
-                var sendMailBusiness = new SendMailBusiness.SendMailBusiness(VakapayRepositoryFactory, false);
-
-                if (email == null) return;
-                var emailQueue = new EmailQueue
-                {
-                    Id = CommonHelper.GenerateUuid(),
-                    ToEmail = email,
-                    Template = template,
-                    Subject = subject,
-                    NetworkName = networkName,
-                    //                    SentOrReceived = sendOrReceiver,
-                    Amount = amount,
-                    TransactionId = transactionId,
-                    Status = Status.STATUS_PENDING,
-                    CreatedAt = currentTime,
-                    UpdatedAt = currentTime
-                };
-                await sendMailBusiness.CreateEmailQueueAsync(emailQueue);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
         }
 
         /// <summary>

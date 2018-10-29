@@ -12,7 +12,7 @@ using Vakapay.Repositories.Mysql.Base;
 
 namespace Vakapay.Repositories.Mysql
 {
-    public class PortfolioHistoryRepository: MySqlBaseRepository<PortfolioHistory>, IPortfolioHistoryRepository
+    public class PortfolioHistoryRepository : MySqlBaseRepository<PortfolioHistory>, IPortfolioHistoryRepository
 
     {
         public PortfolioHistoryRepository(string connectionString) : base(connectionString)
@@ -25,7 +25,8 @@ namespace Vakapay.Repositories.Mysql
 
         public List<PortfolioHistory> FindByUserId(string userId, long from, long to)
         {
-            var query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND Timestamp > {from} AND Timestamp < {to}";
+            var query = 
+                $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND Timestamp > {from} AND Timestamp < {to} ORDER BY Timestamp ASC";
             try
             {
                 if (Connection.State != ConnectionState.Open)
@@ -35,7 +36,7 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                Logger.Error("PortfolioHistoryRepository error when find portfolio ", e);
+                Logger.Error(e, "PortfolioHistoryRepository error when find portfolio ");
                 return null;
             }
         }
@@ -52,9 +53,6 @@ namespace Vakapay.Repositories.Mysql
 
             decimal ethAmount = 0;
             decimal ethValue = 0;
-
-            decimal eosAmount = 0;
-            decimal eosValue = 0;
             try
             {
                 if (Connection.State != ConnectionState.Open)
@@ -64,11 +62,11 @@ namespace Vakapay.Repositories.Mysql
             }
             catch (Exception e)
             {
-                Logger.Error("PortfolioHistoryRepository error when queryFromWallet ", e);
+                Logger.Error(e, "PortfolioHistoryRepository error when queryFromWallet ");
                 return new ReturnObject
                 {
                     Status = Status.STATUS_ERROR,
-                    Message = "PortfolioHistoryRepository error when queryFromWallet, "+e
+                    Message = "PortfolioHistoryRepository error when queryFromWallet, " + e
                 };
             }
 
@@ -76,18 +74,18 @@ namespace Vakapay.Repositories.Mysql
             {
                 switch (wallet.Currency)
                 {
-                        case CryptoCurrency.VAKA:
-                            vkcAmount = wallet.Balance;
-                            vkcValue = Convert.ToDecimal(vkcPrice) * vkcAmount;
-                            break;
-                        case CryptoCurrency.BTC:
-                            btcAmount = wallet.Balance;
-                            btcValue = Convert.ToDecimal(btcPrice) * btcAmount;
-                            break;
-                        case CryptoCurrency.ETH:
-                            ethAmount = wallet.Balance;
-                            ethValue = Convert.ToDecimal(ethPrice) * ethAmount;
-                            break;
+                    case CryptoCurrency.VAKA:
+                        vkcAmount = wallet.Balance;
+                        vkcValue = Convert.ToDecimal(vkcPrice) * vkcAmount;
+                        break;
+                    case CryptoCurrency.BTC:
+                        btcAmount = wallet.Balance;
+                        btcValue = Convert.ToDecimal(btcPrice) * btcAmount;
+                        break;
+                    case CryptoCurrency.ETH:
+                        ethAmount = wallet.Balance;
+                        ethValue = Convert.ToDecimal(ethPrice) * ethAmount;
+                        break;
                 }
             }
 
@@ -101,8 +99,6 @@ namespace Vakapay.Repositories.Mysql
                 BitcoinValue = btcValue,
                 EthereumAmount = ethAmount,
                 EthereumValue = ethValue,
-                EosAmount = eosAmount,
-                EosValue = eosValue,
                 Timestamp = CommonHelper.GetUnixTimestamp()
             };
             return Insert(portfolioHistory);

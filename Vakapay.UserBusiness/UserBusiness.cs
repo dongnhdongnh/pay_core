@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using NLog;
-using StackExchange.Redis;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -15,22 +12,20 @@ namespace Vakapay.UserBusiness
 {
     public class UserBusiness
     {
-        private readonly IVakapayRepositoryFactory vakapayRepositoryFactory;
+        private readonly IVakapayRepositoryFactory _vakapayRepositoryFactory;
 
-        private readonly IDbConnection ConnectionDb;
-
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        private readonly IDbConnection _connectionDb;
 
         //private WalletBusiness.WalletBusiness _walletBusiness;
 
-        public UserBusiness(IVakapayRepositoryFactory _vakapayRepositoryFactory, bool isNewConnection = true)
+        public UserBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
         {
-            vakapayRepositoryFactory = _vakapayRepositoryFactory;
+            _vakapayRepositoryFactory = vakapayRepositoryFactory;
 
             //_walletBusiness = new WalletBusiness.WalletBusiness(vakapayRepositoryFactory);
-            ConnectionDb = isNewConnection
-                ? vakapayRepositoryFactory.GetDbConnection()
-                : vakapayRepositoryFactory.GetOldConnection();
+            _connectionDb = isNewConnection
+                ? _vakapayRepositoryFactory.GetDbConnection()
+                : _vakapayRepositoryFactory.GetOldConnection();
         }
 
         /// <summary>
@@ -44,7 +39,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
                 var userCheck = userRepository.FindById(idUser);
                 if (userCheck == null)
                 {
@@ -55,7 +50,7 @@ namespace Vakapay.UserBusiness
                     };
                 }
 
-                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+                var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb);
 
                 var search =
                     new Dictionary<string, string>
@@ -88,6 +83,7 @@ namespace Vakapay.UserBusiness
         /// <param name="idUser"></param>
         /// <param name="actionLog"></param>
         /// <param name="ip"></param>
+        /// <param name="source"></param>
         /// <returns></returns>
         public ReturnObject AddActionLog(string description, string idUser, string actionLog, string ip,
             string source = "web")
@@ -109,10 +105,10 @@ namespace Vakapay.UserBusiness
                         : "localhost",
                     Id = CommonHelper.GenerateUuid(),
                     Source = source,
-                    CreatedAt = (int) CommonHelper.GetUnixTimestamp()
+                    CreatedAt = (int)CommonHelper.GetUnixTimestamp()
                 };
 
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
                 var userCheck = userRepository.FindById(log.UserId);
                 if (userCheck == null)
                 {
@@ -123,7 +119,7 @@ namespace Vakapay.UserBusiness
                     };
                 }
 
-                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+                var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb);
 
                 return logRepository.Insert(log);
             }
@@ -148,7 +144,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
                 var userCheck = userRepository.FindById(idUser);
                 if (userCheck == null)
                 {
@@ -159,7 +155,7 @@ namespace Vakapay.UserBusiness
                     };
                 }
 
-                var apiRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+                var apiRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
 
                 var search =
                     new Dictionary<string, string>
@@ -188,7 +184,6 @@ namespace Vakapay.UserBusiness
         /// <summary>
         /// Get Api key
         /// </summary>
-        /// <param name="apiKey"></param>
         /// <returns></returns>
         public BlockchainTransaction GetWithdraw(string id, string currency)
         {
@@ -199,21 +194,19 @@ namespace Vakapay.UserBusiness
                 {
                     case CryptoCurrency.ETH:
                         var ethereumRepo =
-                            vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(ConnectionDb);
+                            _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb);
                         output = ethereumRepo.FindById(id);
 
                         break;
                     case CryptoCurrency.VAKA:
                         var vakaRepo =
-                            vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(ConnectionDb);
+                            _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb);
                         output = vakaRepo.FindById(id);
                         break;
                     case CryptoCurrency.BTC:
                         var bitcoinRepo =
-                            vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(ConnectionDb);
+                            _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb);
                         output = bitcoinRepo.FindById(id);
-                        break;
-                    default:
                         break;
                 }
 
@@ -234,7 +227,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var apiRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+                var apiRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
 
                 var search =
                     new Dictionary<string, string>
@@ -256,9 +249,9 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
                 var userCheck = userRepository.FindById(model.UserId);
-                var apirRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+                var apirRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
                 if (userCheck == null)
                 {
                     return new ReturnObject
@@ -274,8 +267,8 @@ namespace Vakapay.UserBusiness
                     model.Status = 1;
                     model.KeyApi = CommonHelper.RandomString(16);
                     model.Secret = CommonHelper.RandomString(32);
-                    model.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
-                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    model.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
+                    model.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                     var resultAdd = apirRepository.Insert(model);
 
                     return new ReturnObject
@@ -287,7 +280,7 @@ namespace Vakapay.UserBusiness
                 }
                 else
                 {
-                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    model.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                     var resultEdit = apirRepository.Update(model);
 
                     return new ReturnObject
@@ -313,7 +306,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
                 var userCheck = userRepository.FindById(confirmedDevices.UserId);
                 if (userCheck == null)
                 {
@@ -324,10 +317,10 @@ namespace Vakapay.UserBusiness
                     };
                 }
 
-                var logRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var logRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
 
                 confirmedDevices.Id = CommonHelper.GenerateUuid();
-                confirmedDevices.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                confirmedDevices.SignedIn = (int)CommonHelper.GetUnixTimestamp();
                 return logRepository.Insert(confirmedDevices);
             }
             catch (Exception e)
@@ -349,7 +342,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
 
                 var userCheck = userRepository.FindById(user.Id);
                 if (userCheck == null)
@@ -382,7 +375,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
 
                 var search =
                     new Dictionary<string, string>
@@ -391,7 +384,7 @@ namespace Vakapay.UserBusiness
                     };
 
                 var userCheck = userRepository.FindWhere(userRepository.QuerySearch(search));
-                var time = (int) CommonHelper.GetUnixTimestamp();
+                var time = (int)CommonHelper.GetUnixTimestamp();
 
                 if (userCheck == null)
                 {
@@ -401,8 +394,6 @@ namespace Vakapay.UserBusiness
                         userModel.Id = CommonHelper.GenerateUuid();
                         userModel.Status = Status.STATUS_ACTIVE;
                         userModel.FullName = userModel.FirstName + " " + userModel.LastName;
-                        userModel.CreatedAt = time;
-                        userModel.UpdatedAt = time;
                         //created new user
                         var resultCreatedUser = userRepository.Insert(userModel);
 
@@ -468,15 +459,13 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var sendSmsRepository = new SendSmsBusiness.SendSmsBusiness(vakapayRepositoryFactory, false);
+                var sendSmsRepository = new SendSmsBusiness.SendSmsBusiness(_vakapayRepositoryFactory, false);
 
                 var newSms = new SmsQueue
                 {
-                    Id = CommonHelper.GenerateUuid(),
                     Status = Status.STATUS_PENDING,
                     To = user.PhoneNumber,
-                    CreatedAt = (int) CommonHelper.GetUnixTimestamp(),
-                    TextSend = "VakaPay security code is: " + code,
+                    TextSend = "VaKaXaPay security code is: " + code,
                 };
 
                 var resultSms = sendSmsRepository.CreateSmsQueueAsync(newSms);
@@ -512,7 +501,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
 
                 var user = userRepository.FindById(id);
                 return user;
@@ -532,7 +521,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = vakapayRepositoryFactory.GetUserRepository(ConnectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
                 var user = userRepository.FindWhere(userRepository.QuerySearch(search));
 
                 return user;
@@ -553,7 +542,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var confirmedDevicesRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
                 var confirmedDevices =
                     confirmedDevicesRepository.FindWhere(confirmedDevicesRepository.QuerySearch(search));
                 return confirmedDevices;
@@ -570,7 +559,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var confirmedDevicesRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
 
                 var search =
                     new Dictionary<string, string>
@@ -617,7 +606,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var confirmedDevicesRepository = vakapayRepositoryFactory.GetConfirmedDevicesRepository(ConnectionDb);
+                var confirmedDevicesRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
                 var resultObject = confirmedDevicesRepository.Delete(id);
                 return resultObject;
             }
@@ -640,7 +629,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var logRepository = vakapayRepositoryFactory.GetUserActionLogRepository(ConnectionDb);
+                var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb);
                 var resultObject = logRepository.Delete(id);
                 return resultObject;
             }
@@ -663,7 +652,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var apiKeyRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+                var apiKeyRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
                 var resultObject = apiKeyRepository.Delete(id);
                 return resultObject;
             }
@@ -682,7 +671,7 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var apiKeyRepository = vakapayRepositoryFactory.GetApiKeyRepository(ConnectionDb);
+                var apiKeyRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
 
                 var apiKey = apiKeyRepository.FindById(id);
                 return apiKey;

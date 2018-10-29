@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -51,7 +48,8 @@ namespace Vakapay.ScanCoinmarket
                         if (timeCondition.Equals(DashboardConfig.CURRENT))
                         {
                             GetCurrentPrice(String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, networkName,
-                                DashboardConfig.DAY), String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, networkName,
+                                DashboardConfig.DAY), String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY,
+                                networkName,
                                 timeCondition));
                         }
                         else
@@ -59,7 +57,8 @@ namespace Vakapay.ScanCoinmarket
                             var priceList = await GetAsyncByTimeStamp(networkName,
                                 currentTime - Time.SECOND_COUNT_IN_PERIOD[timeCondition], currentTime);
                             CacheHelper.SetCacheString(
-                                String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, networkName, timeCondition), priceList);
+                                String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, networkName, timeCondition),
+                                priceList);
                         }
                     }
                     catch (Exception e)
@@ -77,11 +76,9 @@ namespace Vakapay.ScanCoinmarket
             if (CacheHelper.HaveKey(cacheKeyDay))
             {
                 var arrPrice = CacheHelper.GetCacheString(cacheKeyDay);
-                Console.WriteLine("arrPrice = "+ arrPrice);
                 var split = arrPrice.Split(",");
                 var lastElement = split[split.Length - 1];
                 var price = lastElement.Substring(0, lastElement.Length - 2);
-                Console.WriteLine("price = "+ price);
                 CacheHelper.SetCacheString(cacheKeyCurrent, price);
             }
         }
