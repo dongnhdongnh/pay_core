@@ -413,7 +413,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 string searchString = "";
                 if (whereValue != null && whereValue != String.Empty && whereValue != "")
                 {
-                    searchString = " and ABS(Amount)=whereValue";
+                    searchString = " and ABS(Amount)= "+ whereValue+" ";
                 }
 
                 tableInternalWithdraw = tableInternalWithdraw.Replace("`", string.Empty);
@@ -446,9 +446,17 @@ namespace Vakapay.Repositories.Mysql.Base
                     {
                         //if (prop.Value != null)
                         {
+                            
                             if (count > 0)
                                 orderStr.Append(",");
-                            orderStr.AppendFormat(" {0}", prop);
+                            if (prop[0].Equals('-'))
+                            {
+                                orderStr.AppendFormat(" {0} DESC ", prop.Remove(0,1));
+                            }
+                            else
+                            {
+                                orderStr.AppendFormat(" {0}", prop);
+                            }
                             count++;
                         }
                     }

@@ -13,8 +13,6 @@ namespace Vakapay.Models.Entities
         public decimal BitcoinValue { get; set; }
         public decimal EthereumAmount { get; set; }
         public decimal EthereumValue { get; set; }
-        public decimal EosAmount { get; set; }
-        public decimal EosValue { get; set; }
         public long Timestamp { get; set; }
     }
 }

@@ -17,6 +17,16 @@ namespace Vakapay.Models.Domains
         public string ToAddress { get; set; }
         public decimal Fee { get; set; }
 
+
+        public string Description { get; set; }
+
+        //[Write(false)]
+        //[Computed]
+        //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        //public int Type { get; set; }
+
+
+
         public string NetworkName()
         {
             switch (GetType().Name)
