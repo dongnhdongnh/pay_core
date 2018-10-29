@@ -16,7 +16,7 @@ namespace Vakapay.ApiServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    
     [BaseActionFilter]
     public class WalletController : Controller
     {

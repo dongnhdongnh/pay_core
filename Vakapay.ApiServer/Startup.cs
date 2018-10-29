@@ -24,13 +24,13 @@ namespace Vakapay.ApiServer
 
             services.AddCors();
 
-            services.AddAuthentication("Bearer")
-                .AddIdentityServerAuthentication(options =>
-                {
-                    options.Authority = "https://vakaid.vakaxalab.com";
-                    options.RequireHttpsMetadata = true;
-                    options.ApiName = "api1";
-                });
+            //services.AddAuthentication("Bearer")
+            //    .AddIdentityServerAuthentication(options =>
+            //    {
+            //        options.Authority = "https://vakaid.vakaxalab.com";
+            //        options.RequireHttpsMetadata = true;
+            //        options.ApiName = "api1";
+            //    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
