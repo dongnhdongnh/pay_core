@@ -257,12 +257,20 @@ namespace Vakapay.ApiServer.Controllers
 
 
         [HttpPost("{userId}/transactions")]
-        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        public ActionResult<ReturnObject> SendTransactions(string userId, [FromBody] JObject value)
         {
             ReturnObject result = null;
             try
             {
                 var request = value.ToObject<SendTransaction>();
+
+                var userModel = RouteData.Values["userId"];
+
+                if ( userModel == null || userId != (string) userModel)
+                {
+                    return new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = "UserId is not the same!"};
+                }
 
                 var userRequest = new UserSendTransaction()
                 {
@@ -284,7 +292,7 @@ namespace Vakapay.ApiServer.Controllers
                     {Status = Status.STATUS_ERROR, Message = e.Message};
             }
 
-            return result.ToJson();
+            return result;
         }
 
         [HttpGet]
