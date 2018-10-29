@@ -36,7 +36,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -56,8 +56,8 @@ namespace Vakapay.ApiServer.Controllers
                     Status = Status.STATUS_SUCCESS,
                     Data = JsonHelper.SerializeObject(new SecurityModel
                     {
-                        twofaOption = userModel.Verification,
-                        isEnableTwofa = userModel.TwoFactor
+                        TwofaOption = userModel.Verification,
+                        IsEnableTwofa = userModel.TwoFactor
                     })
                 }.ToJson();
             }

@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
 using Vakapay.ApiAccess.Constants;
+using Vakapay.ApiAccess.Helpers;
 using Vakapay.ApiAccess.Model;
-using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -30,7 +26,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             VakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -124,8 +120,8 @@ namespace Vakapay.ApiAccess.Controllers
 
                 var data = new ListWithdraws
                 {
-                    total = numberData,
-                    listWithdraws = withdraws
+                    Total = numberData,
+                    ListTransactions = withdraws
                 };
 
                 return new ReturnObject

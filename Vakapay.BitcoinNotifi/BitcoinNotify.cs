@@ -2,10 +2,11 @@
 using System.Linq;
 using NLog;
 using Vakapay.BitcoinBusiness;
-using Vakapay.BlockchainBusiness.Base;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
+using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
@@ -14,7 +15,7 @@ namespace Vakapay.BitcoinNotifi
     internal static class BitcoinNotify
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static WalletBusiness.WalletBusiness _walletBusiness;
+        private static readonly WalletBusiness.WalletBusiness WalletBusiness = null;
 
         private static void Main(string[] args)
         {
@@ -22,14 +23,13 @@ namespace Vakapay.BitcoinNotifi
             {
                 var repositoryConfig = new RepositoryConfiguration
                 {
-                    ConnectionString = AppSettingHelper.GetDBConnection()
+                    ConnectionString = AppSettingHelper.GetDbConnection()
                 };
 
                 var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
                 var btcBusiness = new BitcoinBusiness.BitcoinBusiness(persistenceFactory);
-                var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
-                    AppSettingHelper.GetBitcoinRpcAuthentication());
+                var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(), AppSettingHelper.GetBitcoinRpcAuthentication());
 
                 var transaction = rpc.FindTransactionByHash(args[0]);
                 Logger.Debug("BitcoinNotify =>> BTCTransactionModel: " + transaction.Data);
@@ -39,7 +39,6 @@ namespace Vakapay.BitcoinNotifi
                 {
                     foreach (var transactionModelDetail in transactionModel.BtcTransactionDetailsModel)
                     {
-                        _walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
                         if (transactionModelDetail.Category.Equals("receive"))
                         {
                             HandleNotifyDataReceiver(transactionModel, transactionModelDetail, btcBusiness);
@@ -148,9 +147,8 @@ namespace Vakapay.BitcoinNotifi
                     }
 
                     // update balance 
-                    _walletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address,
-                        transactionModelDetail.Amount,
-                        CryptoCurrency.BTC);
+                    WalletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address, transactionModelDetail.Amount,
+                        "Bitcoin");
 
                     //insert new email data
                     CreateDataEmail(btcBusiness, transactionModelDetail);
@@ -177,11 +175,11 @@ namespace Vakapay.BitcoinNotifi
 
                 if (email != null)
                 {
-                    const string title = "Notify receiver BitCoin";
+                    const string title = "Notify receiver Bitcoin";
 //                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
-//                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BIT_COIN, Constants.TYPE_RECEIVER);
-                   btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
-                       "", EmailTemplate.Received, CryptoCurrency.BTC);
+//                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
+                    var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount, "", //TODO add transaction Id
+                        EmailTemplate.Received, CryptoCurrency.BTC, btcBusiness.VakapayRepositoryFactory, false);
                 }
                 else
                 {
@@ -214,6 +212,7 @@ namespace Vakapay.BitcoinNotifi
                     Hash = transactionModel.Txid,
                     BlockNumber = 0,
                     BlockHash = transactionModel.BlockHash,
+//                    NetworkName = "Bitcoin",
                     Amount = transactionModel.Amount,
                     FromAddress = "",
                     ToAddress = transactionModelDetail.Address,
@@ -222,8 +221,6 @@ namespace Vakapay.BitcoinNotifi
                     CreatedAt = currentTime,
                     UpdatedAt = currentTime
                 };
-                var userId = GetUserIdByAddress(transactionModelDetail.Address);
-                btcDepositTransaction.UserId = userId;
                 Logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
                              btcDepositTransaction.ToJson());
                 btcDepositTransactionRepository.Insert(btcDepositTransaction);
@@ -237,16 +234,16 @@ namespace Vakapay.BitcoinNotifi
         /// <summary>
         /// GetBtcWithdrawTransaction
         /// </summary>
-        /// <param name="bitCoinRawTransactionRepository"></param>
+        /// <param name="bitcoinRawTransactionRepository"></param>
         /// <param name="address"></param>
         /// <param name="transactionId"></param>
         /// <returns></returns>
         private static BitcoinWithdrawTransaction GetBtcWithdrawTransaction(
-            IBitcoinWithdrawTransactionRepository bitCoinRawTransactionRepository, string address, string transactionId)
+            IBitcoinWithdrawTransactionRepository bitcoinRawTransactionRepository, string address, string transactionId)
         {
             try
             {
-                var listBtcRawTransactions = bitCoinRawTransactionRepository.FindWhere(new BitcoinWithdrawTransaction
+                var listBtcRawTransactions = bitcoinRawTransactionRepository.FindWhere(new BitcoinWithdrawTransaction
                 {
                     Hash = transactionId,
                     ToAddress = address
@@ -269,31 +266,29 @@ namespace Vakapay.BitcoinNotifi
         /// <param name="transactionModelDetail"></param>
         /// <param name="btcBusiness"></param>
         private static void HandleNotifyDataSend(BtcTransactionModel transactionModel,
-            BtcTransactionDetailModel transactionModelDetail, AbsBlockchainBusiness btcBusiness)
+            BtcTransactionDetailModel transactionModelDetail, BitcoinBusiness.BitcoinBusiness btcBusiness)
         {
             try
             {
                 Logger.Debug("HandleNotifyDataSend start");
                 if (transactionModel.Confirmations > 0)
                 {
-                    var bitCoinRawTransactionRepository = btcBusiness
+                    var bitcoinRawTransactionRepository = btcBusiness
                         .VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(btcBusiness.DbConnection);
 
                     var currentBtcWithdrawTransaction =
-                        GetBtcWithdrawTransaction(bitCoinRawTransactionRepository, transactionModelDetail.Address,
+                        GetBtcWithdrawTransaction(bitcoinRawTransactionRepository, transactionModelDetail.Address,
                             transactionModel.Txid);
 
                     Logger.Debug("HandleNotifyDataSend =>> btcWithdrawTransaction: " + currentBtcWithdrawTransaction);
-                    if (currentBtcWithdrawTransaction == null) return;
-                    Logger.Debug("HandleNotifyDataSend ==>> Update hash and time update ");
-                    var currentTime = CommonHelper.GetUnixTimestamp();
-                    if (currentBtcWithdrawTransaction.UserId == null)
+                    if (currentBtcWithdrawTransaction != null)
                     {
-                        currentBtcWithdrawTransaction.UserId = GetUserIdByAddress(transactionModelDetail.Address);
+                        Logger.Debug("HandleNotifyDataSend ==>> Update hash and time update ");
+                        var currentTime = CommonHelper.GetUnixTimestamp();
+                        currentBtcWithdrawTransaction.BlockHash = transactionModel.BlockHash;
+                        currentBtcWithdrawTransaction.UpdatedAt = currentTime;
+                        bitcoinRawTransactionRepository.Update(currentBtcWithdrawTransaction);
                     }
-                    currentBtcWithdrawTransaction.BlockHash = transactionModel.BlockHash;
-                    currentBtcWithdrawTransaction.UpdatedAt = currentTime;
-                    bitCoinRawTransactionRepository.Update(currentBtcWithdrawTransaction);
                 }
                 else
                 {
@@ -304,12 +299,6 @@ namespace Vakapay.BitcoinNotifi
             {
                 Logger.Error(e, "HandleNotifyDataSend exception");
             }
-        }
-
-        private static string GetUserIdByAddress(string address)
-        {
-            var wallet = _walletBusiness.FindByAddressAndNetworkName(address, CryptoCurrency.BTC);
-            return wallet?.UserId;
         }
     }
 }

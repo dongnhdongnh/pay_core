@@ -38,7 +38,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -133,8 +133,8 @@ namespace Vakapay.ApiServer.Controllers
                 var code = value["code"].ToString();
                 var data = DataApiKeyForm.FromJson(value["data"].ToString());
 
-                if (string.IsNullOrEmpty(data.apis) || string.IsNullOrEmpty(data.wallets) ||
-                    string.IsNullOrEmpty(data.id))
+                if (string.IsNullOrEmpty(data.Apis) || string.IsNullOrEmpty(data.Wallets) ||
+                    string.IsNullOrEmpty(data.Id))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 4);
 
                 bool isVerify;
@@ -156,10 +156,10 @@ namespace Vakapay.ApiServer.Controllers
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 //update api permissions
-                if (!CommonHelper.ValidateId(data.id))
+                if (!CommonHelper.ValidateId(data.Id))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var modelApi = _userBusiness.GetApiKeyById(data.id);
+                var modelApi = _userBusiness.GetApiKeyById(data.Id);
                 if (modelApi == null)
                     return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
 
@@ -180,11 +180,11 @@ namespace Vakapay.ApiServer.Controllers
                     modelApi.ApiAllow = value["allowedIp"].ToString();
                 }
 
-                modelApi.Permissions = data.apis;
+                modelApi.Permissions = data.Apis;
                 if (!HelpersApi.ValidatePermission(modelApi.Permissions))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 2);
 
-                modelApi.Wallets = data.wallets;
+                modelApi.Wallets = data.Wallets;
                 if (!HelpersApi.ValidateWallet(modelApi.Wallets))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 3);
 

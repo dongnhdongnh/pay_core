@@ -22,7 +22,7 @@ namespace Vakapay.ApiAccess.ActionFilter
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             _repositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);

@@ -26,7 +26,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             VakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -97,9 +97,9 @@ namespace Vakapay.ApiAccess.Controllers
                 var listPermissions = new List<string>();
                 foreach (var item in arrPermission)
                 {
-                    if (Models.Constants.listApiAccess.ContainsKey(item.Trim()))
+                    if (Commons.Constants.ApiAccess.LIST_API_ACCESS.ContainsKey(item.Trim()))
                     {
-                        listPermissions.Add(Models.Constants.listApiAccess[item.Trim()]);
+                        listPermissions.Add(Commons.Constants.ApiAccess.LIST_API_ACCESS[item.Trim()]);
                     }
                 }
                 scopeModel.Permissions = listPermissions;

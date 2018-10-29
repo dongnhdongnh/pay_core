@@ -870,6 +870,53 @@ namespace Vakapay.WalletBusiness
             }
         }
 
+        public async Task<ReturnObject> CreateAddressAsync(Wallet wallet)
+        {
+            var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
+
+            //update Version to Model
+            wallet.Version += 1;
+
+            var transactionSend = _connectionDb.BeginTransaction();
+            try
+            {
+                var sendResult = await CreateAddressForWallet(wallet);
+                if (sendResult.Status == Status.STATUS_ERROR)
+                {
+                    return sendResult;
+                }
+
+                wallet.Status = sendResult.Status;
+                wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                wallet.IsProcessing = 0;
+                wallet.AddressCount += 1;
+
+                var updateResult = await walletRepository.SafeUpdate(wallet);
+                if (updateResult.Status == Status.STATUS_ERROR)
+                {
+                    transactionSend.Rollback();
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Cannot update wallet status"
+                    };
+                }
+
+                updateResult.Data = sendResult.Data;
+
+                transactionSend.Commit();
+                return updateResult;
+            }
+            catch (Exception e)
+            {
+                // release lock
+                transactionSend.Rollback();
+                var releaseResult = walletRepository.ReleaseLock(wallet);
+                Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+                throw;
+            }
+        }
+        
         private async Task<ReturnObject> CreateAddressForWallet(Wallet pendingWallet)
         {
             try
@@ -920,6 +967,21 @@ namespace Vakapay.WalletBusiness
             }
         }
 
+        public Wallet FindByUserAndNetwork(string userId, string networkName)
+        {
+            try
+            {
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
+                var wallets = walletRepository.FindByUserAndNetwork(userId, networkName);
+                return wallets;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+        
         public List<string> DistinctUserId()
         {
             try

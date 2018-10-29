@@ -88,7 +88,7 @@ namespace Vakapay.ApiAccess.Controllers
                 if (blockChainAddress?.WalletId == null) return CreateDataError(MessageError.DATA_NOT_FOUND);
                 var userModel = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
                 var walletBusiness = new WalletBusiness.WalletBusiness(VakapayRepositoryFactory);
-                var walletModel = walletBusiness.GetWalletByID(blockChainAddress.WalletId);
+                var walletModel = walletBusiness.GetWalletById(blockChainAddress.WalletId);
                 if (walletModel != null && string.Equals(walletModel.UserId, userModel.Id))
                 {
                     return CreateDataSuccess(JsonConvert.SerializeObject(blockChainAddress));
@@ -355,7 +355,7 @@ namespace Vakapay.ApiAccess.Controllers
 
         private string CheckCurrency(string currency, ApiKey apiKey)
         {
-            if (string.IsNullOrEmpty(currency) || !CryptoCurrency.AllNetwork.Contains(currency))
+            if (string.IsNullOrEmpty(currency) || !CryptoCurrency.ALL_NETWORK.Contains(currency))
             {
                 return CreateDataError(MessageError.PARAM_INVALID);
             }

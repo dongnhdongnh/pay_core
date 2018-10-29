@@ -36,7 +36,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
@@ -244,7 +244,7 @@ namespace Vakapay.ApiServer.Controllers
                 //to do
 
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.SEND_TRSANSACTION,
+                    ActionLog.SEND_TRANSACTION,
                     HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
@@ -289,8 +289,8 @@ namespace Vakapay.ApiServer.Controllers
                     case ActionLog.LOCK_SCREEN:
                         secret = ActionLog.LOCK_SCREEN;
                         break;
-                    case ActionLog.SEND_TRSANSACTION:
-                        secret = ActionLog.SEND_TRSANSACTION;
+                    case ActionLog.SEND_TRANSACTION:
+                        secret = ActionLog.SEND_TRANSACTION;
                         break;
                     case ActionLog.API_ACCESS_ADD:
                         secret = ActionLog.API_ACCESS_ADD;

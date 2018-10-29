@@ -11,16 +11,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
-using UAParser;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
-using Vakapay.Models;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
+using Vakapay.Commons.Constants;
 
 namespace Vakapay.ApiServer.Controllers
 {
@@ -287,7 +286,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_CURRENCY))
                 {
                     var currencyKey = value[ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_CURRENCY].ToString();
-                    if (!string.IsNullOrEmpty(currencyKey) && Constants.listCurrency.ContainsKey(currencyKey))
+                    if (!string.IsNullOrEmpty(currencyKey) && PaymentCurrency.LIST_CURRENCY.ContainsKey(currencyKey))
                     {
                         userModel.CurrencyKey = currencyKey;
                     }
@@ -300,7 +299,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_TIMEZONE))
                 {
                     var timezoneKey = value[ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_TIMEZONE].ToString();
-                    if (!string.IsNullOrEmpty(timezoneKey) && Constants.ListTimeZone.ContainsKey(timezoneKey))
+                    if (!string.IsNullOrEmpty(timezoneKey) && Timezone.LIST_TIME_ZONE.ContainsKey(timezoneKey))
                     {
                         userModel.TimezoneKey = timezoneKey;
                     }
@@ -377,7 +376,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             var repositoryConfig = new RepositoryConfiguration
             {
-                ConnectionString = AppSettingHelper.GetDBConnection()
+                ConnectionString = AppSettingHelper.GetDbConnection()
             };
 
             _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
