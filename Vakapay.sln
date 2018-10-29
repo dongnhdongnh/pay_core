@@ -77,6 +77,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.PortfolioHistoryBus
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vakapay.PortfolioHistory", "Vakapay.PortfolioHistory\Vakapay.PortfolioHistory.csproj", "{587FC60A-156A-40CC-A39E-0D366CDF812F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiProject", "ApiProject", "{73FD621C-4650-4C1C-8F5B-34B2C544585F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vakapay.ApiAccess", "Vakapay.ApiAccess\Vakapay.ApiAccess.csproj", "{95833279-0314-441B-A1DC-8FA4F6916031}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -211,6 +215,10 @@ Global
 		{587FC60A-156A-40CC-A39E-0D366CDF812F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{587FC60A-156A-40CC-A39E-0D366CDF812F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{587FC60A-156A-40CC-A39E-0D366CDF812F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95833279-0314-441B-A1DC-8FA4F6916031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95833279-0314-441B-A1DC-8FA4F6916031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95833279-0314-441B-A1DC-8FA4F6916031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95833279-0314-441B-A1DC-8FA4F6916031}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -247,6 +255,8 @@ Global
 		{4CA76091-36A5-419D-B39E-E9444A48D6C3} = {4E6A4058-F824-4EA9-B00B-F3F801881F0E}
 		{F6242AEC-DBA5-49CC-87C4-03D13C02E368} = {3AD83376-344D-4C86-A1C9-F1324F4C0541}
 		{587FC60A-156A-40CC-A39E-0D366CDF812F} = {4E6A4058-F824-4EA9-B00B-F3F801881F0E}
+		{8C67EB8E-1090-41F4-A0A2-2593152635A1} = {73FD621C-4650-4C1C-8F5B-34B2C544585F}
+		{95833279-0314-441B-A1DC-8FA4F6916031} = {73FD621C-4650-4C1C-8F5B-34B2C544585F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3E31696F-3D55-4AE6-AEA3-DEA78FBC8971}

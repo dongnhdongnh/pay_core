@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
@@ -7,6 +8,7 @@ using Vakapay.Repositories.Mysql;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Constants;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Models;
 using Vakapay.Models.Entities;
 
@@ -14,6 +16,8 @@ namespace Vakapay.ApiServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+    [BaseActionFilter]
     public class WalletController : Controller
     {
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
@@ -26,7 +30,7 @@ namespace Vakapay.ApiServer.Controllers
             {
                 ConnectionString = AppSettingHelper.GetDbConnection()
             };
-             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
                 new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
             _userBusiness
@@ -41,18 +45,12 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpGet("all")]
-        public ActionResult<ReturnObject> GetWalletsByUser([FromQuery] string userId)
+        public ActionResult<ReturnObject> GetWalletsByUser()
         {
             try
             {
-                var user = _userBusiness.GetUserById(userId);
-                if (user == null)
-                    return new ReturnObject()
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "No user"
-                    };
-                var wallets = _walletBusiness.LoadAllWalletByUser(user);
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var wallets = _walletBusiness.LoadAllWalletByUser(userModel);
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
@@ -172,8 +170,10 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 //  var _history = _walletBusiness.GetHistory(walletSearch.wallet, 1, 3, new string[] { nameof(BlockchainTransaction.CreatedAt) });
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+
                 int numberData;
-                var history = _walletBusiness.GetHistory(out numberData, walletSearch.UserId, walletSearch.NetworkName,
+                var history = _walletBusiness.GetHistory(out numberData, userModel.Id, walletSearch.NetworkName,
                     walletSearch.Offset, walletSearch.Limit, walletSearch.OrderBy, walletSearch.Search);
                 return new ReturnObject()
                 {
@@ -195,18 +195,22 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("sendTransactions")]
-        public ActionResult<string> SendTransactions( [FromBody] JObject value)
+        public ActionResult<string> SendTransactions([FromBody] JObject value)
         {
             ReturnObject result = null;
+            var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+
             try
             {
                 var request = value.ToObject<SendTransaction>();
 
                 var userRequest = new UserSendTransaction()
                 {
-                    UserId = "8377a95b-79b4-4dfb-8e1e-b4833443c306",
+                    UserId = userModel.Id,
                     Type = "send",
-                    To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
+                    To = request.Detail.SendByAd
+                        ? request.Detail.RecipientWalletAddress
+                        : request.Detail.RecipientEmailAddress,
                     Amount = request.Detail.VkcAmount,
                     Currency = request.NetworkName,
                     Description = request.Detail.VkcNote,
@@ -218,12 +222,12 @@ namespace Vakapay.ApiServer.Controllers
             {
                 Console.WriteLine(e);
                 result = new ReturnObject()
-                { Status = Status.STATUS_ERROR, Message = e.Message };
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
             }
-          //  result = new ReturnObject() { Status = Status.STATUS_ERROR, Message = "test" };
+
+            //  result = new ReturnObject() { Status = Status.STATUS_ERROR, Message = "test" };
             return result.ToJson();
         }
-
 
 
         private ReturnObject AddSendTransaction(UserSendTransaction request)
@@ -238,19 +242,19 @@ namespace Vakapay.ApiServer.Controllers
                 if (res.Status == Status.STATUS_ERROR)
                 {
                     result = new ReturnObject()
-                    { Status = Status.STATUS_ERROR, Message = res.Message };
+                        {Status = Status.STATUS_ERROR, Message = res.Message};
                 }
                 else
                 {
                     result = new ReturnDataObject()
-                    { Status = Status.STATUS_SUCCESS, Data = request };
+                        {Status = Status.STATUS_SUCCESS, Data = request};
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 result = new ReturnObject()
-                { Status = Status.STATUS_ERROR, Message = e.Message };
+                    {Status = Status.STATUS_ERROR, Message = e.Message};
             }
             finally
             {
@@ -259,9 +263,6 @@ namespace Vakapay.ApiServer.Controllers
 
             return result;
         }
-
-
-        
 
 
         public class HistorySearch

@@ -51,7 +51,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (userModel != null)
                 {
@@ -84,31 +84,32 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 var dataApiKeys =
                     _userBusiness.GetApiKeys(userModel.Id, Convert.ToInt32(offset), Convert.ToInt32(limit));
 
-                if (dataApiKeys.Status == Status.STATUS_SUCCESS)
-                {
-                    var listApiKeys = JsonHelper.DeserializeObject<List<ResultApiAccess>>(dataApiKeys.Data);
-                    if (listApiKeys.Count > 0)
-                    {
-                        foreach (var listApiKey in listApiKeys)
-                        {
-                            listApiKey.KeyApi = listApiKey.KeyApi.Substring(0, 10) + "...";
-                        }
-                    }
-
+                if (dataApiKeys.Status != Status.STATUS_SUCCESS)
+                    return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+                var listApiKeys = JsonHelper.DeserializeObject<List<ResultApiAccess>>(dataApiKeys.Data);
+                if (listApiKeys.Count <= 0)
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
                         Data = JsonHelper.SerializeObject(listApiKeys)
                     }.ToJson();
+                foreach (var listApiKey in listApiKeys)
+                {
+                    listApiKey.KeyApi = listApiKey.KeyApi.Substring(0, 10) + "...";
                 }
 
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = JsonHelper.SerializeObject(listApiKeys)
+                }.ToJson();
 
-                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+
             }
             catch (Exception e)
             {
@@ -124,7 +125,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("data"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -152,7 +153,7 @@ namespace Vakapay.ApiServer.Controllers
                     isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessAdd, code, userModel, 120);
                 }
 
-                // if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 //update api permissions
                 if (!CommonHelper.ValidateId(data.Id))
@@ -206,7 +207,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("apis") || !value.ContainsKey("wallets"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -232,9 +233,8 @@ namespace Vakapay.ApiServer.Controllers
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
                 //update api permissions
-                var modelApi = new ApiKey();
+                var modelApi = new ApiKey {UserId = userModel.Id};
 
-                modelApi.UserId = userModel.Id;
 
                 if (value.ContainsKey("notificationUrl"))
                 {
@@ -279,7 +279,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -328,7 +328,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -359,13 +359,10 @@ namespace Vakapay.ApiServer.Controllers
 
                 var apiKey = _userBusiness.GetApiKeyById(id);
 
-                if (apiKey != null)
-                {
-                    apiKey.Status = 0;
-                    return _userBusiness.SaveApiKey(apiKey).ToJson();
-                }
+                if (apiKey == null) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                apiKey.Status = 0;
+                return _userBusiness.SaveApiKey(apiKey).ToJson();
 
-                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
             }
             catch (Exception e)
             {
@@ -380,7 +377,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -432,7 +429,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (!value.ContainsKey("code") || !value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -488,32 +485,29 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("code"))
+                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                var code = value["code"].ToString();
+
+                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, 120);
+
+                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+
+                if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
+                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                var isOk = authenticator.CheckCode(secretAuthToken.ApiAccessAdd, code, userModel);
+
+                if (!isOk) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                return new ReturnObject
                 {
-                    var code = value["code"].ToString();
+                    Status = Status.STATUS_SUCCESS,
+                    Message = "Verify access"
+                }.ToJson();
 
-                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, 120);
-
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
-
-
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
-
-                    var isok = authenticator.CheckCode(secretAuthToken.ApiAccessAdd, code, userModel);
-
-                    if (!isok) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
-
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_SUCCESS,
-                        Message = "Verify access"
-                    }.ToJson();
-                }
-
-                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
             }
             catch (Exception e)
             {
@@ -523,14 +517,14 @@ namespace Vakapay.ApiServer.Controllers
 
 
         /**
-         *  verify code when twofa add api access
+         *  verify code when two Fa add api access
          */
-        [HttpPost("api-access/verify-code-twofa")]
-        public string VerifyCodeTwofa([FromBody] JObject value)
+        [HttpPost("verify-code-twofa")]
+        public string VerifyCodeTwoFa([FromBody] JObject value)
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 

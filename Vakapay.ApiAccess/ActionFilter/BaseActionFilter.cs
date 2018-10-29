@@ -16,7 +16,7 @@ namespace Vakapay.ApiAccess.ActionFilter
     public class BaseActionFilter : ActionFilterAttribute
     {
         private readonly VakapayRepositoryMysqlPersistenceFactory _repositoryFactory;
-        private const int EXPIRATION_MINUTES = 100 * 10 * 60 * 1000;
+        private const int ExpirationMinutes = 1000 * 10 * 60 * 1000;
 
         public BaseActionFilter()
         {
@@ -44,8 +44,8 @@ namespace Vakapay.ApiAccess.ActionFilter
                     var filterModel = GetMessageTokenInvalid(headers, request.Path, _repositoryFactory);
                     if (filterModel.Status)
                     {
-                        actionExecutedContext.RouteData.Values.Add("UserModel", filterModel.UserModel);
-                        actionExecutedContext.RouteData.Values.Add("ApiKeyModel", filterModel.ApiKeyModel);
+                        actionExecutedContext.RouteData.Values.Add(Requests.KEY_PASS_DATA_USER_MODEL, filterModel.UserModel);
+                        actionExecutedContext.RouteData.Values.Add(Requests.KEY_PASS_DATA_API_KEY_MODEL, filterModel.ApiKeyModel);
                     }
                     else
                     {
@@ -70,8 +70,8 @@ namespace Vakapay.ApiAccess.ActionFilter
         private static FilterModel GetMessageTokenInvalid(IHeaderDictionary headers, string path,
             IVakapayRepositoryFactory repositoryFactory)
         {
-            Console.WriteLine("GenerateTokenKey: " + CommonHelper.GenerateTokenKey("jm1ule1uvhp1s827",
-                                  "f6lyadz0qb7pdf6rrfjocq7adv4e151m", "1540372506277", path));
+            Console.WriteLine("GenerateTokenKey: " + CommonHelper.GenerateTokenKey("wk961j2jewxaz0zy",
+                                  "cjon3tnigdvuosipgxm1hlu3fd6umtbm", "1540372506277", path));
             var filterModel = new FilterModel
             {
                 Message = MessageError.TOKEN_INVALID,
@@ -123,7 +123,7 @@ namespace Vakapay.ApiAccess.ActionFilter
             var ticks = long.Parse(timeStamp);
             var serverCurrentTime = UnixTimestamp.ConvertToMiliseconds(CommonHelper.GetUnixTimestamp());
 
-            var expired = (serverCurrentTime - ticks) > EXPIRATION_MINUTES;
+            var expired = (serverCurrentTime - ticks) > ExpirationMinutes;
             return expired;
         }
 

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Vakapay.ApiAccess.ActionFilter;
+using Vakapay.ApiAccess.Constants;
 using Vakapay.ApiAccess.Model;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -17,7 +20,7 @@ namespace Vakapay.ApiAccess.Controllers
     public class UserController : ControllerBase
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }
-        private UserBusiness.UserBusiness UserBusiness { get; }
+        private UserBusiness.UserBusiness userBusiness { get; }
 
         public UserController()
         {
@@ -27,7 +30,7 @@ namespace Vakapay.ApiAccess.Controllers
             };
 
             VakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            UserBusiness = new UserBusiness.UserBusiness(VakapayRepositoryFactory);
+            userBusiness = new UserBusiness.UserBusiness(VakapayRepositoryFactory);
         }
 
         [HttpGet("user")]
@@ -37,7 +40,7 @@ namespace Vakapay.ApiAccess.Controllers
         {
             try
             {
-                var apiKeyModel = (ApiKey)RouteData.Values["ApiKeyModel"];
+                var apiKeyModel = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
 
                 if (string.IsNullOrEmpty(apiKeyModel.Permissions))
                     return CreateDataError("User Info is not permission");
@@ -46,7 +49,7 @@ namespace Vakapay.ApiAccess.Controllers
                     !apiKeyModel.Permissions.Contains(Permissions.USER_MAIL))
                     return CreateDataError("User Info is not permission");
 
-                var userInfo = (User)RouteData.Values["UserModel"];
+                var userInfo = (User) RouteData.Values[Requests.KEY_PASS_DATA_USER_MODEL];
 
                 return new ReturnObject
                 {
@@ -72,6 +75,44 @@ namespace Vakapay.ApiAccess.Controllers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("user/scopes")]
+        public ActionResult<string> GetScopes()
+        {
+            try
+            {
+                var apiKeyModel = (ApiKey) RouteData.Values[Requests.KEY_PASS_DATA_API_KEY_MODEL];
+                var arrPermission = apiKeyModel.Permissions.Split(",");
+                var arrCurrency = apiKeyModel.Wallets.Split(",");
+                var scopeModel = new ScopesModel();
+                if (arrCurrency != null && arrCurrency.Length > 0)
+                {
+                    scopeModel.Currencys = arrCurrency.ToList();
+                }
+
+                if (arrPermission == null || arrPermission.Length <= 0)
+                    return CreateDataSuccess(JsonHelper.SerializeObject(scopeModel));
+                var listPermissions = new List<string>();
+                foreach (var item in arrPermission)
+                {
+                    if (Commons.Constants.ApiAccess.LIST_API_ACCESS.ContainsKey(item.Trim()))
+                    {
+                        listPermissions.Add(Commons.Constants.ApiAccess.LIST_API_ACCESS[item.Trim()]);
+                    }
+                }
+                scopeModel.Permissions = listPermissions;
+
+                return CreateDataSuccess(JsonHelper.SerializeObject(scopeModel));
+            }
+            catch (Exception)
+            {
+                return CreateDataSuccess(JsonHelper.SerializeObject(MessageError.SCOPES_ERROR));
+            }
+        }
+
+        /// <summary>
         /// CreateDataError
         /// </summary>
         /// <param name="message"></param>
@@ -82,6 +123,21 @@ namespace Vakapay.ApiAccess.Controllers
             {
                 Status = Status.STATUS_ERROR,
                 Message = message
+            }.ToJson();
+        }
+
+        /// <summary>
+        /// CreateDataSuccess
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public string CreateDataSuccess(string data)
+        {
+            return new ReturnObject
+            {
+                Status = Status.STATUS_SUCCESS,
+                Message = null,
+                Data = data
             }.ToJson();
         }
     }
