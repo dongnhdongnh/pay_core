@@ -338,7 +338,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION))
                 {
-                    userModel.CurrencyKey = value[ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION].ToString();
+                    userModel.Notifications = value[ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION].ToString();
                 }
 
                 _userBusiness.UpdateProfile(userModel);

@@ -39,7 +39,7 @@ namespace Vakapay.Repositories.Mysql.Base
             }
         }
 
-        public IEnumerable<TAddress> FindByWalletId(string walletId)
+        public List<TAddress> FindByWalletId(string walletId)
         {
             try
             {
