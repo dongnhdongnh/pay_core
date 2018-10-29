@@ -57,7 +57,7 @@ namespace Vakapay.ApiServer.Controllers
                     Data = JsonHelper.SerializeObject(new SecurityModel
                     {
                         TwofaOption = userModel.Verification,
-                        IsEnableTwofa = userModel.TwoFactor
+                        IsEnableTwofa = userModel.IsTwoFactor
                     })
                 }.ToJson();
             }
@@ -93,7 +93,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 bool isVerify;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                if (userModel.IsTwoFactor == 1 && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
                 {
                     isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
                 }

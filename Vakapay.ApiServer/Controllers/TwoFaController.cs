@@ -63,7 +63,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 bool isVerify;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                if (userModel.IsTwoFactor == 1 && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
                 {
                     isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
                 }
@@ -109,7 +109,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, token))
                     return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                userModel.TwoFactor = true;
+                userModel.IsTwoFactor = 1;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.TWOFA_ENABLE,
@@ -190,7 +190,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
                     return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                userModel.TwoFactor = false;
+                userModel.IsTwoFactor = 0;
                 userModel.SecretAuthToken = null;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
@@ -222,7 +222,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 bool isVerify;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                if (userModel.IsTwoFactor == 1 && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
                 {
                     isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
                 }

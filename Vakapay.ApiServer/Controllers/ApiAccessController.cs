@@ -108,8 +108,6 @@ namespace Vakapay.ApiServer.Controllers
                     Status = Status.STATUS_SUCCESS,
                     Data = JsonHelper.SerializeObject(listApiKeys)
                 }.ToJson();
-
-
             }
             catch (Exception e)
             {
@@ -127,33 +125,42 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code") || !value.ContainsKey("data"))
+                if (!value.ContainsKey("data"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
+
                 var data = DataApiKeyForm.FromJson(value["data"].ToString());
 
                 if (string.IsNullOrEmpty(data.Apis) || string.IsNullOrEmpty(data.Wallets) ||
                     string.IsNullOrEmpty(data.Id))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 4);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                bool isVerify = false;
 
-                bool isVerify;
-
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccessEdit))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessAdd, code, userModel, 120);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessEdit, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
 
                 //update api permissions
                 if (!CommonHelper.ValidateId(data.Id))
@@ -172,7 +179,7 @@ namespace Vakapay.ApiServer.Controllers
                     modelApi.CallbackUrl = value["notificationUrl"].ToString();
 
                     if (!HelpersApi.CheckUrlValid(modelApi.CallbackUrl))
-                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 1);
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 }
 
                 if (value.ContainsKey("allowedIp"))
@@ -182,11 +189,11 @@ namespace Vakapay.ApiServer.Controllers
 
                 modelApi.Permissions = data.Apis;
                 if (!HelpersApi.ValidatePermission(modelApi.Permissions))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 2);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 modelApi.Wallets = data.Wallets;
                 if (!HelpersApi.ValidateWallet(modelApi.Wallets))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 3);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.API_ACCESS,
@@ -209,25 +216,32 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code") || !value.ContainsKey("apis") || !value.ContainsKey("wallets"))
+                if (!value.ContainsKey("apis") || !value.ContainsKey("wallets"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value["code"].ToString();
+                bool isVerify = false;
 
-                bool isVerify;
-
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessAdd, code, userModel, 120);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccessAdd))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessAdd, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -281,25 +295,33 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
 
-                bool isVerify;
+                bool isVerify = false;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessDelete))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccessDelete))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessDelete, code, userModel);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessDelete, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -330,25 +352,33 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
 
-                bool isVerify;
+                bool isVerify = false;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -362,7 +392,6 @@ namespace Vakapay.ApiServer.Controllers
                 if (apiKey == null) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 apiKey.Status = 0;
                 return _userBusiness.SaveApiKey(apiKey).ToJson();
-
             }
             catch (Exception e)
             {
@@ -379,25 +408,34 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
 
-                bool isVerify;
+                bool isVerify = false;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel);
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -431,27 +469,36 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code") || !value.ContainsKey("id"))
+                if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
 
-                bool isVerify;
+                bool isVerify = false;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccessEdit))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessEdit, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.ApiAccessEdit))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
-
-
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessEdit, code, userModel, 120);
-                }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
@@ -507,7 +554,6 @@ namespace Vakapay.ApiServer.Controllers
                     Status = Status.STATUS_SUCCESS,
                     Message = "Verify access"
                 }.ToJson();
-
             }
             catch (Exception e)
             {
@@ -528,7 +574,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                if (!userModel.TwoFactor || string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                if (userModel.IsTwoFactor != 1 || string.IsNullOrEmpty(userModel.TwoFactorSecret))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var code = value["code"].ToString();
