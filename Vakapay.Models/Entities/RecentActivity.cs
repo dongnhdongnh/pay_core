@@ -12,5 +12,6 @@
         public decimal Value { get; set; }
         public decimal Price { get; set; }
         public int BockNumber { get; set; }
+        public string Status { get; set; }
     }
 }

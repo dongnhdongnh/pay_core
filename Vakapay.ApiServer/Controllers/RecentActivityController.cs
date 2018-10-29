@@ -130,7 +130,8 @@ namespace Vakapay.ApiServer.Controllers
                     ToAddress = transaction.ToAddress,
                     Hash = transaction.Hash,
                     Price = price,
-                    Value = transaction.Amount * price
+                    Value = transaction.Amount * price,
+                    Status = transaction.Status
                 };
                 activities.Add(activity);
             }
