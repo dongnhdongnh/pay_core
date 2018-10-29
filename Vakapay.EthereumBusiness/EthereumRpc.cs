@@ -17,9 +17,15 @@ namespace Vakapay.EthereumBusiness
     public class EthereumRpc : IBlockchainRpc
     {
         public string EndPointUrl { get; set; }
-        private static string rootAddress = "0x12890d2cce102216644c59dae5baed380d84830c";
-        private static string rootPassword = "password";
+        private static string rootAddress = "";
+        private static string rootPassword = "";
 
+        public static void SetAdminAddressPassword(string inputRootAddress,string inputRootPassword)
+        {
+            rootAddress = inputRootAddress;
+            rootPassword = inputRootPassword;
+          
+        }
 
         public EthereumRpc(string url)
         {
