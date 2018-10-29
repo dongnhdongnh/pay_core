@@ -90,21 +90,29 @@ namespace Vakapay.ApiServer.Controllers
                 if (!HelpersApi.ValidatePass(password))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                bool isVerify = false;
 
-                bool isVerify;
-
-                if (userModel.IsTwoFactor == 1 && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.LockScreen, code, userModel);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.LockScreen, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);

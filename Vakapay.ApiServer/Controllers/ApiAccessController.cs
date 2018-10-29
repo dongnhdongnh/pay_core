@@ -219,6 +219,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("apis") || !value.ContainsKey("wallets"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                var code = value["code"].ToString();
                 bool isVerify = false;
 
                 switch (userModel.IsTwoFactor)
