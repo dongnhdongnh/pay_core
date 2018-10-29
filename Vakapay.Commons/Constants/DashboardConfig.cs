@@ -12,7 +12,7 @@ namespace Vakapay.Commons.Constants
         public const string YEAR = "year";
         public const string ALL = "all";
 
-        public const string VAKACOIN = "vakacoin";
+        public const string VAKACOIN = "bitcoin";
         public const string BITCOIN = "bitcoin";
         public const string ETHEREUM = "ethereum";
 
