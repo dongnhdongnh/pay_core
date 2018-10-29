@@ -6,6 +6,9 @@ using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 using Vakapay.Models.Domains;
 using Vakapay.Commons.Constants;
+using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.Models;
+using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiServer.Controllers
 {
@@ -13,6 +16,7 @@ namespace Vakapay.ApiServer.Controllers
     [ApiController]
     public class WalletController : Controller
     {
+        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
         WalletBusiness.WalletBusiness _walletBusiness;
         UserBusiness.UserBusiness _userBusiness;
 
@@ -22,11 +26,11 @@ namespace Vakapay.ApiServer.Controllers
             {
                 ConnectionString = AppSettingHelper.GetDbConnection()
             };
-            var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
+             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _walletBusiness =
-                new Vakapay.WalletBusiness.WalletBusiness(persistenceFactory);
+                new Vakapay.WalletBusiness.WalletBusiness(PersistenceFactory);
             _userBusiness
-                = new Vakapay.UserBusiness.UserBusiness(persistenceFactory);
+                = new Vakapay.UserBusiness.UserBusiness(PersistenceFactory);
         }
 
         [HttpGet("test")]
@@ -112,7 +116,7 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 //  var addresses = _walletBusiness.GetAddresses(walletId, networkName);
-                float rate = 1000.001f;
+                float rate = 1.0f / 7000000.0f;
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
@@ -139,8 +143,8 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 //  var addresses = _walletBusiness.GetAddresses(walletId, networkName);
-                float vakapayfee = -1.0f;
-                float minerfee = -1.0f;
+                float vakapayfee = 0.01f;
+                float minerfee = 0.01f;
                 float total = vakapayfee + minerfee + float.Parse(amount);
                 var feeObject = new {vakapayfee = vakapayfee, minerfee = minerfee, total = total};
                 return new ReturnObject()
@@ -189,6 +193,76 @@ namespace Vakapay.ApiServer.Controllers
 
             //  return null;
         }
+
+        [HttpPost("sendTransactions")]
+        public ActionResult<string> SendTransactions( [FromBody] JObject value)
+        {
+            ReturnObject result = null;
+            try
+            {
+                var request = value.ToObject<SendTransaction>();
+
+                var userRequest = new UserSendTransaction()
+                {
+                    UserId = "8377a95b-79b4-4dfb-8e1e-b4833443c306",
+                    Type = "send",
+                    To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
+                    Amount = request.Detail.VkcAmount,
+                    Currency = request.NetworkName,
+                    Description = request.Detail.VkcNote,
+                };
+
+                result = AddSendTransaction(userRequest);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                result = new ReturnObject()
+                { Status = Status.STATUS_ERROR, Message = e.Message };
+            }
+          //  result = new ReturnObject() { Status = Status.STATUS_ERROR, Message = "test" };
+            return result.ToJson();
+        }
+
+
+
+        private ReturnObject AddSendTransaction(UserSendTransaction request)
+        {
+            var sendTransactionBusiness =
+                new UserSendTransactionBusiness.UserSendTransactionBusiness(PersistenceFactory);
+            ReturnObject result = null;
+            try
+            {
+                var res = sendTransactionBusiness.AddSendTransaction(request);
+
+                if (res.Status == Status.STATUS_ERROR)
+                {
+                    result = new ReturnObject()
+                    { Status = Status.STATUS_ERROR, Message = res.Message };
+                }
+                else
+                {
+                    result = new ReturnDataObject()
+                    { Status = Status.STATUS_SUCCESS, Data = request };
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                result = new ReturnObject()
+                { Status = Status.STATUS_ERROR, Message = e.Message };
+            }
+            finally
+            {
+                sendTransactionBusiness.CloseDbConnection();
+            }
+
+            return result;
+        }
+
+
+        
+
 
         public class HistorySearch
         {
