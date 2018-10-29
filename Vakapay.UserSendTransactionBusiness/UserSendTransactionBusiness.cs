@@ -50,6 +50,17 @@ namespace Vakapay.UserSendTransactionBusiness
                     }
                 }
 
+                var walletBusiness = new WalletBusiness.WalletBusiness(_vakapayRepositoryFactory, false);
+
+                var valid = walletBusiness.ValidateWithdrawAmount(sendTransaction.UserId,
+                    sendTransaction.SendByBlockchainAddress, sendTransaction.Amount, sendTransaction.Fee,
+                    sendTransaction.Currency);
+
+                if (valid.Status == Status.STATUS_ERROR)
+                {
+                    return valid;
+                }
+
                 if (sendTransaction.SendByBlockchainAddress)
                 {
                     return AddSendTransactionToBlockchainAddress(sendTransaction);
@@ -308,13 +319,23 @@ namespace Vakapay.UserSendTransactionBusiness
                     };
                 }
 
-                if (senderWallet.Balance < transaction.Amount)
+                if (transaction.Amount > senderWallet.Balance)
                 {
                     transaction.Status = Status.STATUS_ERROR;
                     return new ReturnObject()
                     {
                         Status = Status.STATUS_ERROR,
-                        Message = "sender balance is smaller than transaction amount"
+                        Message = "Sender balance is smaller than transaction amount"
+                    };
+                }
+
+                if (transaction.Amount <= 0)
+                {
+                    transaction.Status = Status.STATUS_ERROR;
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Transaction amount must be positive"
                     };
                 }
 

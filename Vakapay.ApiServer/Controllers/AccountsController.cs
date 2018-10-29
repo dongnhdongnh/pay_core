@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
@@ -14,8 +16,11 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.ApiServer.Controllers
 {
+    [Produces("application/json")]
     [Route("v1/[controller]")]
+    [EnableCors]
     [ApiController]
+    [Authorize]
     public class AccountsController : Controller
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }

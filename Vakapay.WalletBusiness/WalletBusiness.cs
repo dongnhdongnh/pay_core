@@ -933,5 +933,62 @@ namespace Vakapay.WalletBusiness
                 return null;
             }
         }
+
+        public ReturnObject ValidateWithdrawAmount(string userId,
+            bool sendByBlockchainAddress, decimal amount, string sendTransactionFee, string currency)
+        {
+            try
+            {
+                // Validate amount
+                if (amount <= 0)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Withdraw balance must be positive."
+                    };
+                }
+
+                var walletRepository = new WalletRepository(_connectionDb);
+
+                var wallet = walletRepository.FindByUserAndNetwork(userId, currency);
+
+                if (sendByBlockchainAddress == true)
+                {
+                    if (amount + GetFee(currency) > wallet.Balance)
+                    {
+                        return new ReturnObject()
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Withdraw balance + fee is larger than wallet balance."
+                        };
+                    }
+                }
+                else
+                {
+                    if (amount > wallet.Balance)
+                    {
+                        return new ReturnObject()
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Withdraw balance larger than wallet balance."
+                        };
+                    }
+                }
+
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_SUCCESS
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Validate amount throw exception."
+                };
+            }
+        }
     }
 }
