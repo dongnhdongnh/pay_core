@@ -479,7 +479,7 @@ namespace Vakapay.Repositories.Mysql.Base
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return null;
+                throw e;
                 //	throw;
             }
         }
