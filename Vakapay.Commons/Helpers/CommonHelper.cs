@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -101,6 +102,14 @@ namespace Vakapay.Commons.Helpers
                 return "0x" + input.ToString("X");
             else
                 return extra + input.ToString("X");
+        }
+
+        public static string ToHex(this BigInteger input, string extra = null)
+        {
+            if (extra == null)
+                return "0x" + input.ToString("X").TrimStart(new char[] { '0' } );
+            else
+                return extra + input.ToString("X").TrimStart(new char[] { '0' } );
         }
 
         public static bool HexToInt(this string hex, out int result)
