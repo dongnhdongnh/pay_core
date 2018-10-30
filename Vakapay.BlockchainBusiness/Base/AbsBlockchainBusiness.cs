@@ -124,7 +124,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 pendingTransaction.Hash = sendTransaction.Data;
 
                 //create database email when send success
-                if (sendTransaction.Status == Status.STATUS_SUCCESS)
+                if (sendTransaction.Status == Status.STATUS_COMPLETED)
                 {
                     var email = GetEmailByTransaction(pendingTransaction);
                     if (email != null)
