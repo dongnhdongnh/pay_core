@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
@@ -26,6 +27,7 @@ namespace Vakapay.ApiServer.Controllers
     public class SecurityController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 

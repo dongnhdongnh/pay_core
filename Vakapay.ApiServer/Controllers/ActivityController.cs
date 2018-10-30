@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
+using NLog;
+using NLog.Fluent;
 using UAParser;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
@@ -30,7 +32,9 @@ namespace Vakapay.ApiServer.Controllers
     public class ActivityController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
+
 
         public ActivityController(
             IConfiguration configuration,
@@ -94,6 +98,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.LOG_LIST + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -228,6 +233,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.DEVICE_LIST + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -244,6 +250,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.DEVICE_DELETE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -260,6 +267,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.LOG_DELETE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }

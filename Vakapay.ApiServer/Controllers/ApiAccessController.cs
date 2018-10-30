@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
@@ -29,6 +30,7 @@ namespace Vakapay.ApiServer.Controllers
     public class ApiAccessController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
@@ -67,6 +69,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_GET_INFO + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -163,6 +166,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_GET_LIST + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -248,13 +252,14 @@ namespace Vakapay.ApiServer.Controllers
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.API_ACCESS,
+                    ActionLog.API_ACCESS_EDIT,
                     HelpersApi.GetIp(Request));
 
                 return _userBusiness.SaveApiKey(modelApi).ToJson();
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_EDIT + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -268,9 +273,12 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey(ParseDataKeyApi.KEY_API_ACCESS_DATA_APIS) || !value.ContainsKey(ParseDataKeyApi.KEY_API_ACCESS_DATA_WALLETS))
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_API_ACCESS_DATA_APIS) ||
+                    !value.ContainsKey(ParseDataKeyApi.KEY_API_ACCESS_DATA_WALLETS))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+
+                //check verify
                 var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
                 bool isVerify = false;
 
@@ -303,6 +311,7 @@ namespace Vakapay.ApiServer.Controllers
                 var modelApi = new ApiKey {UserId = userModel.Id};
 
 
+                //validate data
                 if (value.ContainsKey(ParseDataKeyApi.KEY_API_ACCESS_DATA_NOTIFY))
                 {
                     modelApi.CallbackUrl = value[ParseDataKeyApi.KEY_API_ACCESS_DATA_NOTIFY].ToString();
@@ -327,13 +336,14 @@ namespace Vakapay.ApiServer.Controllers
                 modelApi.Status = 1;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.API_ACCESS,
+                    ActionLog.API_ACCESS_ADD,
                     HelpersApi.GetIp(Request));
 
                 return _userBusiness.SaveApiKey(modelApi).ToJson();
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_ADD + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -391,6 +401,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_DELETE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -448,6 +459,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_DISABLE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -509,6 +521,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_ENABLE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -574,6 +587,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_DETAIL + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -587,7 +601,8 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE)) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
 
                 var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, 120);
@@ -610,6 +625,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -625,7 +641,8 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE)) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 if (userModel.IsTwoFactor != 1 || string.IsNullOrEmpty(userModel.TwoFactorSecret))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
@@ -641,6 +658,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.API_ACCESS_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
