@@ -4,6 +4,11 @@ namespace Vakapay.Commons.Constants
     {
         //Pass from filter to Controller
         public const string KEY_PASS_DATA_USER_MODEL = "UserModel";
+        public const string KEY_PASS_DATA_GET_OFFSET = "offset";
+        public const string KEY_PASS_DATA_GET_LIMIT = "limit";
+        public const string KEY_PASS_DATA_GET_FILTER = "filter";
+        public const string KEY_PASS_DATA_GET_SORT = "sort";
+        public const string KEY_PASS_DATA_GET_CODE = "code";
         
         
         /*-------------------------------------------------------------------User Controller----------------------------------------------------*/
@@ -22,6 +27,8 @@ namespace Vakapay.Commons.Constants
         
         //User controller Update Notification
         public const string KEY_USER_UPDATE_NOTIFICATION = "notifications";
+        //User controller Update Avatar
+        public const string KEY_USER_UPDATE_AVATAR = "image";
         
         
         
@@ -57,5 +64,15 @@ namespace Vakapay.Commons.Constants
         
         //Security controller VerifyPassword
         public const string KEY_SECURITY_VERIFY_PASSWORD = "password";
+        
+        /*-------------------------------------------------------------------ApiAccess Controller----------------------------------------------------*/
+        
+        //ApiAccess controller data update and add
+        public const string KEY_API_ACCESS_DATA = "data";
+        public const string KEY_API_ACCESS_DATA_NOTIFY = "notificationUrl";
+        public const string KEY_API_ACCESS_DATA_IP = "allowedIp";
+        public const string KEY_API_ACCESS_DATA_APIS = "apis";
+        public const string KEY_API_ACCESS_DATA_WALLETS = "wallets";
+       
     }
 }

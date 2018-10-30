@@ -66,13 +66,13 @@ namespace Vakapay.ApiServer.Controllers
                 switch (userModel.IsTwoFactor)
                 {
                     case 1:
-                        if (!value.ContainsKey("code"))
+                        if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
                             return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                         isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
                         break;
                     case 2:
-                        if (!value.ContainsKey("code"))
+                        if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
                             return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);

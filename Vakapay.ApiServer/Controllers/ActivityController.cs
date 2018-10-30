@@ -62,12 +62,12 @@ namespace Vakapay.ApiServer.Controllers
 
                 StringValues sort;
                 StringValues filter;
-                queryStringValue.TryGetValue("offset", out var offset);
-                queryStringValue.TryGetValue("limit", out var limit);
-                if (queryStringValue.ContainsKey("offset"))
-                    queryStringValue.TryGetValue("filter", out filter);
-                if (queryStringValue.ContainsKey("sort"))
-                    queryStringValue.TryGetValue("sort", out sort);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_OFFSET, out var offset);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_LIMIT, out var limit);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER, out filter);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT, out sort);
                 sort = ConvertSortLog(sort);
 
                 if (userModel != null)
@@ -181,12 +181,12 @@ namespace Vakapay.ApiServer.Controllers
 
                 StringValues sort;
                 StringValues filter;
-                queryStringValue.TryGetValue("offset", out var offset);
-                queryStringValue.TryGetValue("limit", out var limit);
-                if (queryStringValue.ContainsKey("offset"))
-                    queryStringValue.TryGetValue("filter", out filter);
-                if (queryStringValue.ContainsKey("sort"))
-                    queryStringValue.TryGetValue("sort", out sort);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_OFFSET, out var offset);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_LIMIT, out var limit);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER, out filter);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT, out sort);
 
                 sort = ConvertSortDevice(sort);
 
