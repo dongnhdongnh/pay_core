@@ -34,7 +34,7 @@ namespace Vakapay.ApiServer.ActionFilter
                 var email = actionExecutedContext.HttpContext.User.Claims.Where(c => c.Type == ClaimTypes.Email)
                     .Select(c => c.Value).SingleOrDefault();
 
-                email = "ngochuan2212@gmail.com";
+             //   email = "ngochuan2212@gmail.com";
 
                 if (!string.IsNullOrEmpty(email))
                 {

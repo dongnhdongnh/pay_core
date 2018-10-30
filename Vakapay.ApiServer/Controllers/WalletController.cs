@@ -10,14 +10,14 @@ using Vakapay.Commons.Constants;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Models;
-using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Entities;
+using Vakapay.Models.ClientRequest;
 
 namespace Vakapay.ApiServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+    [Authorize]
     [BaseActionFilter]
     public class WalletController : Controller
     {
@@ -114,6 +114,9 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
+                //CacheHelper.GetCacheString(String.Format(
+                //RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.VAKACOIN,
+                //DashboardConfig.CURRENT));
                 //  var addresses = _walletBusiness.GetAddresses(walletId, networkName);
                 float rate = 1.0f / 7000000.0f;
                 return new ReturnObject()
