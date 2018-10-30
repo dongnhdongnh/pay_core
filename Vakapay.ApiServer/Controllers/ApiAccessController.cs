@@ -184,7 +184,10 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey(ParseDataKeyApi.KEY_API_ACCESS_DATA))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+
 
                 var data = DataApiKeyForm.FromJson(value[ParseDataKeyApi.KEY_API_ACCESS_DATA].ToString());
 
@@ -279,7 +282,10 @@ namespace Vakapay.ApiServer.Controllers
 
 
                 //check verify
-                var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+
                 bool isVerify = false;
 
                 switch (userModel.IsTwoFactor)
@@ -361,7 +367,10 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+
 
                 bool isVerify = false;
 
@@ -419,7 +428,10 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+
 
                 bool isVerify = false;
 
@@ -476,7 +488,10 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+
 
                 bool isVerify = false;
 
@@ -538,7 +553,10 @@ namespace Vakapay.ApiServer.Controllers
                 if (!value.ContainsKey("id"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
+                    code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
+
 
                 bool isVerify = false;
 
@@ -603,6 +621,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
                 var code = value[ParseDataKeyApi.KEY_PASS_DATA_GET_CODE].ToString();
 
                 var authenticator = new TwoStepsAuthenticator.TimeAuthenticator(null, null, 120);

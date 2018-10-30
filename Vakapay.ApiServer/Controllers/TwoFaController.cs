@@ -55,13 +55,13 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-
                 if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value[ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE].ToString();
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE))
+                    code = value[ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE].ToString();
+
 
                 bool isVerify = false;
 
@@ -237,7 +237,10 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
 
-                var code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
+                    code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS].ToString();
+
 
                 bool isVerify = false;
 
