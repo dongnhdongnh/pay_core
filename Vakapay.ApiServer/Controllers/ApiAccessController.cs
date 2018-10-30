@@ -70,6 +70,41 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
+        private string ConvertSort(string sort)
+        {
+            var key = sort;
+            var desc = "";
+            if (key[0].Equals('-'))
+            {
+                desc = key[0].ToString();
+                key = sort.Remove(0, 1);
+            }
+
+            switch (key)
+            {
+                case "id":
+                    return desc + "Id";
+
+                case "userid":
+                    return desc + "UserId";
+
+                case "keyapi":
+                    return desc + "KeyApi";
+
+                case "permissions":
+                    return desc + "Permissions";
+
+                case "wallets":
+                    return desc + "Wallets";
+
+                case "status":
+                    return desc + "Status";
+
+                default:
+                    return null;
+            }
+        }
+
         [HttpGet("api-access/get-list-api-access")]
         public string GetListApiAccess()
         {
@@ -86,12 +121,13 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("filter", out var filter);
                 queryStringValue.TryGetValue("sort", out var sort);
 
+                sort = ConvertSort(sort);
 
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
                 int numberData;
                 var dataApiKeys =
                     _userBusiness.GetApiKeys(out numberData, userModel.Id, Convert.ToInt32(offset),
-                        Convert.ToInt32(limit), filter.ToString(), sort.ToString());
+                        Convert.ToInt32(limit), filter.ToString(), sort);
 
                 if (dataApiKeys.Status != Status.STATUS_SUCCESS)
                     return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);

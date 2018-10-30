@@ -63,13 +63,13 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("limit", out var limit);
                 queryStringValue.TryGetValue("filter", out var filter);
                 queryStringValue.TryGetValue("sort", out var sort);
-
+                sort = ConvertSortLog(sort);
 
                 if (userModel != null)
                 {
                     int numberData;
                     var resultLogs = _userBusiness.GetActionLog(out numberData, userModel.Id, Convert.ToInt32(offset),
-                        Convert.ToInt32(limit), filter.ToString(), sort.ToString());
+                        Convert.ToInt32(limit), filter.ToString(), sort);
                     if (resultLogs.Status != Status.STATUS_SUCCESS)
                         return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
 
@@ -93,6 +93,71 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
+        private string ConvertSortLog(string sort)
+        {
+            var key = sort;
+            var desc = "";
+            if (key[0].Equals('-'))
+            {
+                desc = key[0].ToString();
+                key = sort.Remove(0, 1);
+            }
+
+            switch (key)
+            {
+                case "id":
+                    return desc + "Id";
+
+                case "actionname":
+                    return desc + "ActionName";
+
+                case "ip":
+                    return desc + "Ip";
+
+                case "userid":
+                    return desc + "UserId";
+
+                case "location":
+                    return desc + "Location";
+
+                case "createdAt":
+                    return desc + "CreatedAt";
+
+                default:
+                    return null;
+            }
+        }
+
+        private string ConvertSortDevice(string sort)
+        {
+            var key = sort;
+            var desc = "";
+            if (key[0].Equals('-'))
+            {
+                desc = key[0].ToString();
+                key = sort.Remove(0, 1);
+            }
+
+            switch (key)
+            {
+                case "id":
+                    return desc + "Id";
+                case "userid":
+                    return desc + "UserId";
+                case "browser":
+                    return desc + "Browser";
+                case "ip":
+                    return desc + "Ip";
+                case "location":
+                    return desc + "Location";
+                case "signedin":
+                    return desc + "SignedIn";
+
+                default:
+                    return null;
+            }
+        }
+
         // POST api/values
         [HttpGet("device-history/get-list")]
         public string GetConfirmedDevices()
@@ -108,6 +173,7 @@ namespace Vakapay.ApiServer.Controllers
                 queryStringValue.TryGetValue("limit", out var limit);
                 queryStringValue.TryGetValue("filter", out var filter);
                 queryStringValue.TryGetValue("sort", out var sort);
+                sort = ConvertSortDevice(sort);
 
                 var ip = HelpersApi.GetIp(Request);
 
@@ -115,13 +181,9 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (!string.IsNullOrEmpty(ip))
                 {
-                    //get location for ip
+                    var browser = HelpersApi.GetBrowser(Request);
 
-                    var uaString = Request.Headers["User-Agent"].FirstOrDefault();
-                    var uaParser = Parser.GetDefault();
-                    var browser = uaParser.Parse(uaString);
-
-                    var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
+                    var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser}};
 
                     //save web session
                     checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
@@ -133,7 +195,7 @@ namespace Vakapay.ApiServer.Controllers
                 var resultDevice = _userBusiness.GetListConfirmedDevices(out numberData, userModel.Id,
                     checkConfirmedDevices,
                     Convert.ToInt32(offset),
-                    Convert.ToInt32(limit), sort: sort.ToString(), filter: filter.ToString());
+                    Convert.ToInt32(limit), sort, filter);
 
                 if (resultDevice.Status != Status.STATUS_SUCCESS)
                     return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);

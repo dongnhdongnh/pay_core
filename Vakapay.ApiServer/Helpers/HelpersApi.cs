@@ -105,7 +105,7 @@ namespace Vakapay.ApiServer.Helpers
             if (browser.ToLower().Contains("firefox"))
                 return uaParser.ParseOS(uaString) + ", " + "Firefox";
 
-            return null;
+            return uaParser.Parse(uaString).ToString();
         }
 
         public static CheckTokenModel CheckToken(User userModel, string action)
