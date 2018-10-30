@@ -29,7 +29,7 @@ namespace Vakapay.Models.Entities
         public string SecretAuthToken { get; set; }
         public int Verification { get; set; }
         public int IsLockScreen { get; set; }
-        public bool TwoFactor { get; set; }
+        public int IsTwoFactor { get; set; }
         public string TwoFactorSecret { get; set; }
 
         public static User FromJson(string json) =>

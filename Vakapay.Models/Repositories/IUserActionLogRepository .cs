@@ -8,6 +8,6 @@ namespace Vakapay.Models.Repositories
     {
         string QuerySearch(Dictionary<string, string> models);
         UserActionLog FindWhere(string sql);
-        List<UserActionLog> GetListLog(string sql, int skip, int take);
+        List<UserActionLog> GetListLog(out int numberData, string sql, int skip, int take, string filter, string sort);
     }
 }

@@ -8,7 +8,12 @@ namespace Vakapay.ApiAccess.Constants
         public const string TOKEN_INVALID = "Header error(Token invalid)";
         public const string TOKEN_EXPIDER = "Token expired";
         public const string USER_NOT_EXIT = "User not exit";
-        public const string API_TIME_STAMP_INVALID = "Header error(Api TimeStamp invalid)";
-        public const string HEADER_API_INVALID = "Header error(ApiSecret or ApiKey invalid)";
+        public const string CURRENCY_NOT_PERMISSION = "Not permission currency.";
+        public const string READ_ADDRESS_NOT_PERMISSION = "Not permission Read Address.";
+        public const string READ_TRANSACION_NOT_PERMISSION = "Not permission Read Transaction.";
+        public const string CREATE_TRANSACION_NOT_PERMISSION = "Not permission Create Transaction.";
+        public const string ADDRESS_INVALID = "Address invalid.";
+        public const string CREATE_ADDRESS_FAIL = "Create address fail.";
+        public const string SCOPES_ERROR = "Don't find scope user";
     }
 }

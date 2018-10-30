@@ -57,6 +57,23 @@ namespace Vakapay.Repositories.Mysql.Base
             }
         }
 
+        public List<TAddress> FindByUserIdAndCurrency(string userId, string currency)
+        {
+            try
+            {
+                var sQuery = $"SELECT t1.* FROM " + TableName +
+                             " t1 INNER JOIN wallet t2 ON t1.WalletId = t2.Id WHERE t2.UserId = '" + userId +
+                             "' AND t2.Currency = '" + currency + "';";
+                var result = Connection.Query<TAddress>(sQuery);
+                return result.ToList();
+            }
+            catch (Exception e)
+            {
+                Logger.Error("BitcoinDepositTransactioRepository =>> FindByUserIdAndCurrency fail: " + e.Message);
+                return null;
+            }
+        }
+
         public abstract Task<ReturnObject> InsertAddress(string address, string walletId, string other);
     }
 }

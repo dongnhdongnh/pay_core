@@ -23,21 +23,17 @@ namespace Vakapay.ApiServer.Controllers
     [ApiController]
     [Authorize]
     [BaseActionFilter]
-    public class TwofaController : ControllerBase
+    public class TwoFaController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
-        private IConfiguration Configuration { get; }
-
-        public TwofaController(
+        public TwoFaController(
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
         )
         {
-            Configuration = configuration;
-
             var repositoryConfig = new RepositoryConfiguration
             {
                 ConnectionString = AppSettingHelper.GetDbConnection()
@@ -55,35 +51,48 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                if (!value.ContainsKey("option")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value["code"].ToString();
+                var code = value[ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE].ToString();
 
-                bool isVerify;
+                bool isVerify = false;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.UpdateOptionVerification, code, userModel);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        if (string.IsNullOrEmpty(secretAuthToken.UpdateOptionVerification))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.UpdateOptionVerification, code, userModel,
+                            120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
+
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                var option = value["option"];
+                var option = value[ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION];
 
-                userModel.Verification = (int)option;
+                userModel.Verification = (int) option;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.UPDATE_OPTION_VETIFY,
@@ -102,15 +111,16 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("token")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_ENABLE_GOOGLE_TOKEN))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var token = value["token"].ToString();
+                var token = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_ENABLE_GOOGLE_TOKEN].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, token))
                     return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                userModel.TwoFactor = true;
+                userModel.IsTwoFactor = 1;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.TWOFA_ENABLE,
@@ -126,27 +136,32 @@ namespace Vakapay.ApiServer.Controllers
 
 
         // POST api/values
-        // verify code when enable twofa
+        // verify code when enable twoFa
         [HttpPost("enable/verify-code-sms")]
         public string VerifyCodeEnable([FromBody] JObject value)
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (userModel.IsTwoFactor == 2)
+                {
+                    if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_ENABLE_CODE))
+                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value["code"].ToString();
-                var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
+                    var code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_ENABLE_CODE].ToString();
+                    var authenticator = new TwoStepsAuthenticator.TimeAuthenticator();
 
-                var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
-                    return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                    if (string.IsNullOrEmpty(secretAuthToken.TwofaEnable))
+                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                var isok = authenticator.CheckCode(secretAuthToken.TwofaEnable, code, userModel);
+                    var isOk = authenticator.CheckCode(secretAuthToken.TwofaEnable, code, userModel);
 
-                if (!isok) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                    if (!isOk) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                }
+
 
                 var google = new GoogleAuthen.TwoFactorAuthenticator();
 
@@ -175,21 +190,22 @@ namespace Vakapay.ApiServer.Controllers
 
 
         // POST api/values
-        // verify code when disable twofa
+        // verify code when disable two Fa
         [HttpPost("disable/update")]
         public string VerifyCodeDisable([FromBody] JObject value)
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("code")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_DISABLE_CODE))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value["code"].ToString();
+                var code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_DISABLE_CODE].ToString();
                 if (!HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code))
                     return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                userModel.TwoFactor = false;
+                userModel.IsTwoFactor = 0;
                 userModel.SecretAuthToken = null;
 
                 _userBusiness.AddActionLog(userModel.Email, userModel.Id,
@@ -212,26 +228,34 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey("SMScode")) return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value["SMScode"].ToString();
+                var code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS].ToString();
 
-                bool isVerify;
+                bool isVerify = false;
 
-                if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
+                switch (userModel.IsTwoFactor)
                 {
-                    isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                }
-                else
-                {
-                    var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                    case 1:
+                        if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                        return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    isVerify = HelpersApi.CheckCodeSms(secretAuthToken.SendTransaction, code, userModel);
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
+                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.SendTransaction, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -252,44 +276,17 @@ namespace Vakapay.ApiServer.Controllers
         }
 
 
-        /**
-         *  send code when disable two
-         */
-        [HttpPost("disable/require-send-code-phone")]
-        public string SendCodeDisable()
-        {
-            try
-            {
-                var userModel = (User)RouteData.Values["UserModel"];
-
-                var google = new GoogleAuthen.TwoFactorAuthenticator();
-
-                var startSetup = google.GenerateSetupCode(userModel.Email, userModel.TwoFactorSecret, 300, 300);
-
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Data = startSetup.ManualEntryKey
-                }.ToJson();
-            }
-            catch (Exception e)
-            {
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
-
-
         [HttpPost("require-send-code-phone")]
         public string SendCode([FromBody] JObject value)
         {
             try
             {
-                if (!value.ContainsKey("action"))
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_SEND_CODE_ACTION))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var action = value["action"].ToString();
+                var action = value[ParseDataKeyApi.KEY_TWO_FA_SEND_CODE_ACTION].ToString();
                 string secret;
-                int time = 30;
+                var time = 30;
 
                 switch (action)
                 {
@@ -335,7 +332,7 @@ namespace Vakapay.ApiServer.Controllers
                         return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 }
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 var checkSecret = HelpersApi.CheckToken(userModel, secret);
 
@@ -351,10 +348,9 @@ namespace Vakapay.ApiServer.Controllers
                 userModel.SecretAuthToken = checkSecret.NewSecret;
                 var resultUpdate = _userBusiness.UpdateProfile(userModel);
 
-                if (resultUpdate.Status == Status.STATUS_ERROR)
-                    return resultUpdate.ToJson();
-
-                return _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(checkSecret.Secret, time)).ToJson();
+                return resultUpdate.Status == Status.STATUS_ERROR
+                    ? resultUpdate.ToJson()
+                    : _userBusiness.SendSms(userModel, HelpersApi.SendCodeSms(checkSecret.Secret, time)).ToJson();
             }
             catch (Exception e)
             {

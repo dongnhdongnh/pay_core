@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
+using UAParser;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -86,6 +87,25 @@ namespace Vakapay.ApiServer.Helpers
             Console.WriteLine(code);
             Console.WriteLine(secret);
             return code;
+        }
+
+        public static string GetBrowser(HttpRequest request)
+        {
+            var uaString = request.Headers["User-Agent"].FirstOrDefault();
+            var uaParser = Parser.GetDefault();
+
+            string browser = uaParser.ParseUserAgent(uaString).ToString();
+
+            if (browser.ToLower().Contains("chrome"))
+                return uaParser.ParseOS(uaString) + ", " + "Chrome";
+
+            if (browser.ToLower().Contains("chromium"))
+                return uaParser.ParseOS(uaString) + ", " + "Chromium";
+
+            if (browser.ToLower().Contains("firefox"))
+                return uaParser.ParseOS(uaString) + ", " + "Firefox";
+
+            return uaParser.Parse(uaString).ToString();
         }
 
         public static CheckTokenModel CheckToken(User userModel, string action)

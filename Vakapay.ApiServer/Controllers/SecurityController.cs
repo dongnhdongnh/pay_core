@@ -49,7 +49,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 return new ReturnObject
                 {
@@ -57,7 +57,7 @@ namespace Vakapay.ApiServer.Controllers
                     Data = JsonHelper.SerializeObject(new SecurityModel
                     {
                         TwofaOption = userModel.Verification,
-                        IsEnableTwofa = userModel.TwoFactor
+                        IsEnableTwofa = userModel.IsTwoFactor
                     })
                 }.ToJson();
             }
@@ -73,53 +73,60 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("code") && value.ContainsKey("status") && value.ContainsKey("password"))
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE) ||
+                    !value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_STATUS) ||
+                    !value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_PASSWORD))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                var code = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE].ToString();
+                var status = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_STATUS];
+
+                if (!int.TryParse((string) status, out var outStatus))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var password = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_PASSWORD].ToString();
+
+                if (!HelpersApi.ValidatePass(password))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                bool isVerify = false;
+
+                switch (userModel.IsTwoFactor)
                 {
-                    var code = value["code"].ToString();
-                    var status = value["status"];
+                    case 1:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (!int.TryParse((string)status, out int outStatus))
-                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-
-                    var password = value["password"].ToString();
-
-                    if (!HelpersApi.ValidatePass(password))
-                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-
-
-                    bool isVerify;
-
-                    if (userModel.TwoFactor && !string.IsNullOrEmpty(userModel.TwoFactorSecret))
-                    {
                         isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
-                    }
-                    else
-                    {
-                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
+                        break;
+                    case 2:
+                        if (!value.ContainsKey("code"))
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
                         if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
                             return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.LockScreen, code, userModel);
-                    }
-
-                    if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
-
-                    userModel.IsLockScreen = outStatus;
-                    userModel.SecondPassword = !string.IsNullOrEmpty(password)
-                        ? CommonHelper.Md5(password)
-                        : "";
-
-                    _userBusiness.UpdateProfile(userModel);
-
-                    return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                        ActionLog.LOCK_SCREEN,
-                        HelpersApi.GetIp(Request)).ToJson();
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.LockScreen, code, userModel, 120);
+                        break;
+                    case 0:
+                        isVerify = true;
+                        break;
                 }
 
-                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
+
+                userModel.IsLockScreen = outStatus;
+                userModel.SecondPassword = !string.IsNullOrEmpty(password)
+                    ? CommonHelper.Md5(password)
+                    : "";
+
+                _userBusiness.UpdateProfile(userModel);
+
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.LOCK_SCREEN,
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
@@ -132,7 +139,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (userModel.IsLockScreen == 0)
                     return new ReturnObject
@@ -141,19 +148,18 @@ namespace Vakapay.ApiServer.Controllers
                     }.ToJson();
 
 
-                if (value.ContainsKey("password"))
-                {
-                    var password = value["password"].ToString();
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_VERIFY_PASSWORD))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                var password = value[ParseDataKeyApi.KEY_SECURITY_VERIFY_PASSWORD].ToString();
 
-                    if (!HelpersApi.ValidatePass(password))
-                        return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!HelpersApi.ValidatePass(password))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                    if (CommonHelper.Md5(password).Equals(userModel.SecondPassword))
-                        return new ReturnObject
-                        {
-                            Status = Status.STATUS_SUCCESS,
-                        }.ToJson();
-                }
+                if (CommonHelper.Md5(password).Equals(userModel.SecondPassword))
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                    }.ToJson();
 
 
                 return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);

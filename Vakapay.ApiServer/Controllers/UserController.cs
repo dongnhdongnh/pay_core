@@ -1,8 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Cache;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
-using UAParser;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.Commons.Constants;
@@ -19,6 +24,7 @@ using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
+using Vakapay.Commons.Constants;
 
 namespace Vakapay.ApiServer.Controllers
 {
@@ -33,22 +39,21 @@ namespace Vakapay.ApiServer.Controllers
         private WalletBusiness.WalletBusiness _walletBusiness;
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
-        private IConfiguration Configuration { get; }
-
         public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
-            Configuration = configuration;
         }
 
         [HttpGet("getUserInfo")]
         public IActionResult GetUserInfo()
         {
-            return new JsonResult(from c in User.Claims where c.Type == "userInfo" select new {c.Value});
+            return new JsonResult(from c in User.Claims
+                where c.Type == ParseDataKeyApi.KEY_CLAIM_GET_DATA_USER_IDENTITY
+                select new {c.Value});
         }
 
-        [HttpPost("upload-avatar"), DisableRequestSizeLimit]
+        [HttpPost("upload-avatar-test"), DisableRequestSizeLimit]
         [BaseActionFilter]
-        public string UploadFile()
+        public string UploadFileTest()
         {
             try
             {
@@ -60,7 +65,7 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userCheck = (User)RouteData.Values["UserModel"];
+                var userCheck = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (file.Length > 2097152)
                     return CreateDataError("File max size 2Mb");
@@ -129,6 +134,84 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception ex)
             {
+                return HelpersApi.CreateDataError(ex.Message);
+            }
+        }
+
+        [HttpPost("upload-avatar"), DisableRequestSizeLimit]
+        [BaseActionFilter]
+        public async Task<string> UploadFile()
+        {
+            try
+            {
+                var file = Request.Form.Files[0];
+
+                if (_userBusiness == null)
+                {
+                    CreateUserBusiness();
+                }
+
+                var userCheck = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+
+                if (file.Length > 2097152)
+                    return CreateDataError("File max size 2Mb");
+
+                if (file.Length <= 0) return CreateDataError("Can't update image");
+
+
+                using (var w = new WebClient())
+                {
+                    w.CachePolicy = new RequestCachePolicy(RequestCacheLevel.NoCacheNoStore);
+                    try
+                    {
+                        using (var m = new MemoryStream())
+                        {
+                            file.CopyTo(m);
+                            m.Close();
+                            // Convert byte[] to Base64 String
+                            string base64String = Convert.ToBase64String(m.GetBuffer());
+
+                            var values = new NameValueCollection
+                            {
+                                {"image", base64String}
+                            };
+
+                            w.Headers.Add("Authorization", "Client-ID cfbceb1420c73c0");
+
+                            byte[] response = await w.UploadValuesTaskAsync("https://api.imgur.com/3/upload", values);
+
+                            var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(response));
+
+                            if (!(bool) result["success"])
+                                return CreateDataError("Save image fail");
+                            userCheck.Avatar = result["data"]["link"].ToString();
+                            var updateUser = _userBusiness.UpdateProfile(userCheck);
+
+                            if (updateUser.Status != Status.STATUS_SUCCESS)
+                                return CreateDataError("Can't update image");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        throw;
+                    }
+
+                    //save action log
+                    _userBusiness.AddActionLog(userCheck.Email, userCheck.Id,
+                        ActionLog.AVATAR,
+                        HelpersApi.GetIp(Request));
+
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Message = "Upload avatar success ",
+                        Data = userCheck.Avatar
+                    }.ToJson();
+                }
+            }
+            catch (Exception ex)
+            {
                 return CreateDataError(ex.Message);
             }
         }
@@ -138,16 +221,26 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
+                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value)
+                    .SingleOrDefault();
+
+                if (string.IsNullOrEmpty(email))
+                    return CreateDataError("Can't not email");
+
+                var query = new Dictionary<string, string> {{"Email", email}};
+
                 if (_userBusiness == null)
                 {
                     CreateUserBusiness();
                 }
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = _userBusiness.GetUserInfo(query);
+
 
                 if (userModel == null)
                 {
-                    var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value).SingleOrDefault();
+                    var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value)
+                        .SingleOrDefault();
 
                     var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
 
@@ -181,13 +274,11 @@ namespace Vakapay.ApiServer.Controllers
                 var location =
                     await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
 
-                var uaString = Request.Headers["User-Agent"].FirstOrDefault();
-                var uaParser = Parser.GetDefault();
-                var browser = uaParser.Parse(uaString);
+                var browser = HelpersApi.GetBrowser(Request);
 
                 var confirmedDevices = new ConfirmedDevices
                 {
-                    Browser = browser.ToString(),
+                    Browser = browser,
                     Ip = ip,
                     Location = !string.IsNullOrEmpty(location.CountryName)
                         ? location.City + "," + location.CountryName
@@ -195,7 +286,7 @@ namespace Vakapay.ApiServer.Controllers
                     UserId = userModel.Id
                 };
 
-                var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
+                var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser}};
 
 
                 //save devices
@@ -205,6 +296,10 @@ namespace Vakapay.ApiServer.Controllers
                     _userBusiness.SaveConfirmedDevices(confirmedDevices);
                 }
 
+
+                userModel.SecretAuthToken = null;
+                userModel.TwoFactorSecret = null;
+                userModel.SecondPassword = null;
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
@@ -218,7 +313,8 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         // POST api/values
-        [HttpPost("update-profile")]
+        [
+            HttpPost("update-profile")]
         [BaseActionFilter]
         public string UpdateUserProfile([FromBody] JObject value)
         {
@@ -229,26 +325,26 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("streetAddress1"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_1))
                 {
-                    userModel.StreetAddress1 = value["streetAddress1"].ToString();
+                    userModel.StreetAddress1 = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_1].ToString();
                 }
 
-                if (value.ContainsKey("streetAddress2"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_2))
                 {
-                    userModel.StreetAddress2 = value["streetAddress2"].ToString();
+                    userModel.StreetAddress2 = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_2].ToString();
                 }
 
-                if (value.ContainsKey("city"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_CITY))
                 {
-                    userModel.City = value["city"].ToString();
+                    userModel.City = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_CITY].ToString();
                 }
 
-                if (value.ContainsKey("postalCode"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_POSTAL_CODE))
                 {
-                    userModel.PostalCode = value["postalCode"].ToString();
+                    userModel.PostalCode = value[ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_POSTAL_CODE].ToString();
                 }
 
                 _userBusiness.UpdateProfile(userModel);
@@ -264,7 +360,8 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [HttpPost("update-preferences")]
+        [
+            HttpPost("update-preferences")]
         [BaseActionFilter]
         public string UpdatePreferences([FromBody] JObject value)
         {
@@ -275,12 +372,13 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("currencyKey"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_CURRENCY))
                 {
-                    var currencyKey = value["currencyKey"].ToString();
-                    if (!string.IsNullOrEmpty(currencyKey) && PaymentCurrency.LIST_CURRENCY.ContainsKey(currencyKey))
+                    var currencyKey = value[ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_CURRENCY].ToString();
+                    if (!string.IsNullOrEmpty(currencyKey) &&
+                        PaymentCurrency.LIST_CURRENCY.ContainsKey(currencyKey))
                     {
                         userModel.CurrencyKey = currencyKey;
                     }
@@ -290,9 +388,9 @@ namespace Vakapay.ApiServer.Controllers
                     }
                 }
 
-                if (value.ContainsKey("timezoneKey"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_TIMEZONE))
                 {
-                    var timezoneKey = value["timezoneKey"].ToString();
+                    var timezoneKey = value[ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_TIMEZONE].ToString();
                     if (!string.IsNullOrEmpty(timezoneKey) && Timezone.LIST_TIME_ZONE.ContainsKey(timezoneKey))
                     {
                         userModel.TimezoneKey = timezoneKey;
@@ -316,7 +414,8 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [HttpPost("update-notifications")]
+        [
+            HttpPost("update-notifications")]
         [BaseActionFilter]
         public string UpdateNotifications([FromBody] JObject value)
         {
@@ -327,11 +426,11 @@ namespace Vakapay.ApiServer.Controllers
                     CreateUserBusiness();
                 }
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (value.ContainsKey("notifications"))
+                if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION))
                 {
-                    userModel.CurrencyKey = value["notifications"].ToString();
+                    userModel.Notifications = value[ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION].ToString();
                 }
 
                 _userBusiness.UpdateProfile(userModel);
