@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 using UAParser;
 using Vakapay.ApiServer.ActionFilter;
@@ -59,10 +60,14 @@ namespace Vakapay.ApiServer.Controllers
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                StringValues sort;
+                StringValues filter;
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
-                queryStringValue.TryGetValue("filter", out var filter);
-                queryStringValue.TryGetValue("sort", out var sort);
+                if (queryStringValue.ContainsKey("offset"))
+                    queryStringValue.TryGetValue("filter", out filter);
+                if (queryStringValue.ContainsKey("sort"))
+                    queryStringValue.TryGetValue("sort", out sort);
                 sort = ConvertSortLog(sort);
 
                 if (userModel != null)
@@ -95,6 +100,8 @@ namespace Vakapay.ApiServer.Controllers
 
         private string ConvertSortLog(string sort)
         {
+            if (string.IsNullOrEmpty(sort))
+                return null;
             var key = sort;
             var desc = "";
             if (key[0].Equals('-'))
@@ -130,6 +137,9 @@ namespace Vakapay.ApiServer.Controllers
 
         private string ConvertSortDevice(string sort)
         {
+            if (string.IsNullOrEmpty(sort))
+                return null;
+
             var key = sort;
             var desc = "";
             if (key[0].Equals('-'))
@@ -169,10 +179,15 @@ namespace Vakapay.ApiServer.Controllers
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                StringValues sort;
+                StringValues filter;
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
-                queryStringValue.TryGetValue("filter", out var filter);
-                queryStringValue.TryGetValue("sort", out var sort);
+                if (queryStringValue.ContainsKey("offset"))
+                    queryStringValue.TryGetValue("filter", out filter);
+                if (queryStringValue.ContainsKey("sort"))
+                    queryStringValue.TryGetValue("sort", out sort);
+
                 sort = ConvertSortDevice(sort);
 
                 var ip = HelpersApi.GetIp(Request);
