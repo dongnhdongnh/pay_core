@@ -19,7 +19,9 @@ namespace Vakapay.SendEthereum
                 {
                     ConnectionString = AppSettingHelper.GetDbConnection()
                 };
-
+                string rootAddress = "0x12890d2cce102216644c59dae5baed380d84830c";
+                string rootPassword = "password";
+                EthereumRpc.SetAdminAddressPassword(rootAddress, rootPassword);
                 for (var i = 0; i < 10; i++)
                 {
                     var ts = new Thread(() => RunSend(repositoryConfig));
