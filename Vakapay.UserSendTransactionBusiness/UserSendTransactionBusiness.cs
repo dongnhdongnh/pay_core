@@ -50,13 +50,24 @@ namespace Vakapay.UserSendTransactionBusiness
                     }
                 }
 
-                if (CommonHelper.IsValidEmail(sendTransaction.To))
+                var walletBusiness = new WalletBusiness.WalletBusiness(_vakapayRepositoryFactory, false);
+
+                var valid = walletBusiness.ValidateWithdrawAmount(sendTransaction.UserId,
+                    sendTransaction.SendByBlockchainAddress, sendTransaction.Amount, sendTransaction.Fee,
+                    sendTransaction.Currency);
+
+                if (valid.Status == Status.STATUS_ERROR)
                 {
-                    return AddSendTransactionToEmailAddress(sendTransaction);
+                    return valid;
+                }
+
+                if (sendTransaction.SendByBlockchainAddress)
+                {
+                    return AddSendTransactionToBlockchainAddress(sendTransaction);
                 }
                 else
                 {
-                    return AddSendTransactionToBlockchainAddress(sendTransaction);
+                    return AddSendTransactionToEmailAddress(sendTransaction);
                 }
             }
             catch (Exception e)
@@ -98,8 +109,8 @@ namespace Vakapay.UserSendTransactionBusiness
             var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
 
             var userRepository = new UserRepository(_connectionDb);
-            var receiver = userRepository.FindByEmailAddress(sendTransaction.To);
             var sender = userRepository.FindById(sendTransaction.UserId);
+            var receiver = userRepository.FindByEmailAddress(sendTransaction.To);
 
             if (sender == null)
             {
@@ -308,13 +319,23 @@ namespace Vakapay.UserSendTransactionBusiness
                     };
                 }
 
-                if (senderWallet.Balance < transaction.Amount)
+                if (transaction.Amount > senderWallet.Balance)
                 {
                     transaction.Status = Status.STATUS_ERROR;
                     return new ReturnObject()
                     {
                         Status = Status.STATUS_ERROR,
-                        Message = "sender balance is smaller than transaction amount"
+                        Message = "Sender balance is smaller than transaction amount"
+                    };
+                }
+
+                if (transaction.Amount <= 0)
+                {
+                    transaction.Status = Status.STATUS_ERROR;
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Transaction amount must be positive"
                     };
                 }
 

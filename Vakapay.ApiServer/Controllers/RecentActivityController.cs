@@ -125,7 +125,7 @@ namespace Vakapay.ApiServer.Controllers
                     Amount = transaction.Amount,
                     IsSend = isSend,
                     NetworkName = networkName,
-                    BockNumber = transaction.BlockNumber,
+                    BlockNumber = transaction.BlockNumber,
                     FromAddress = transaction.FromAddress,
                     ToAddress = transaction.ToAddress,
                     Hash = transaction.Hash,

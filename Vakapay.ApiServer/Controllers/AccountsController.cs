@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -13,8 +16,11 @@ using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.ApiServer.Controllers
 {
+    [Produces("application/json")]
     [Route("v1/[controller]")]
+    [EnableCors]
     [ApiController]
+    [Authorize]
     public class AccountsController : Controller
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }
@@ -251,20 +257,29 @@ namespace Vakapay.ApiServer.Controllers
 
 
         [HttpPost("{userId}/transactions")]
-        public ActionResult<string> SendTransactions(string userId, [FromBody] JObject value)
+        public ActionResult<ReturnObject> SendTransactions(string userId, [FromBody] JObject value)
         {
             ReturnObject result = null;
             try
             {
                 var request = value.ToObject<SendTransaction>();
 
+                var userModel = RouteData.Values["userId"];
+
+                if ( userModel == null || userId != (string) userModel)
+                {
+                    return new ReturnObject()
+                        {Status = Status.STATUS_ERROR, Message = "UserId is not the same!"};
+                }
+
                 var userRequest = new UserSendTransaction()
                 {
                     UserId = userId,
                     Type = "send",
                     To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
+                    SendByBlockchainAddress = request.Detail.SendByAd,
                     Amount = request.Detail.VkcAmount,
-                    Currency = request.SortName,
+                    Currency = request.NetworkName,
                     Description = request.Detail.VkcNote,
                 };
 
@@ -277,7 +292,7 @@ namespace Vakapay.ApiServer.Controllers
                     {Status = Status.STATUS_ERROR, Message = e.Message};
             }
 
-            return result.ToJson();
+            return result;
         }
 
         [HttpGet]

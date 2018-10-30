@@ -23,6 +23,10 @@ namespace Vakapay.Models.Entities
 
         [JsonProperty("fee")] public string Fee { get; set; }
 
-        [JsonProperty("idem")] public string Idem { get; set; }
+        [JsonProperty("idem")]
+        public string Idem { get; set; }
+
+        [JsonProperty(PropertyName = "sendByAd")]
+        public bool SendByBlockchainAddress{ get; set; }
     }
 }

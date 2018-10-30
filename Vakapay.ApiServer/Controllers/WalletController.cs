@@ -10,6 +10,7 @@ using Vakapay.Commons.Constants;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Models;
+using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Entities;
 
 namespace Vakapay.ApiServer.Controllers
