@@ -16,8 +16,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
+using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -37,6 +39,7 @@ namespace Vakapay.ApiServer.Controllers
     {
         private UserBusiness.UserBusiness _userBusiness;
         private WalletBusiness.WalletBusiness _walletBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
         public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
@@ -124,9 +127,10 @@ namespace Vakapay.ApiServer.Controllers
                     }.ToJson();
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return CreateDataError(ex.Message);
+                _logger.Error(KeyLogger.USER_AVATAR + e);
+                return CreateDataError(e.Message);
             }
         }
 
@@ -270,6 +274,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.USER_UPDATE + e);
                 return CreateDataError(e.Message);
             }
         }
@@ -324,6 +329,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.USER_UPDATE_PREFERENCES + e);
                 return CreateDataError(e.Message);
             }
         }
@@ -355,6 +361,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.USER_UPDATE_NOTIFICATION + e);
                 return CreateDataError(e.Message);
             }
         }

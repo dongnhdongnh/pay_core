@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
@@ -26,6 +27,7 @@ namespace Vakapay.ApiServer.Controllers
     public class TwoFaController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
@@ -102,6 +104,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_OPTION_UPDATE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -130,6 +133,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_ENABLE_UPDATE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -184,6 +188,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_ENABLE_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -216,6 +221,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_DISABLE_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -271,6 +277,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_SEND_TRANSACTION_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -354,6 +361,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_REQUIRED_SEND_CODE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }

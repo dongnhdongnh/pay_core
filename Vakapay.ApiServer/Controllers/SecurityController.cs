@@ -65,6 +65,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.SECURITY_GET_INFO + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -132,6 +133,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.SECURITY_LOCK_SCREEN_UPDATE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -168,6 +170,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.SECURITY_LOCK_SCREEN_UNLOCK + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
