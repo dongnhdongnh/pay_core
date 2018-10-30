@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Vakapay.ApiServer.Models
+namespace Vakapay.Models.ClientRequest
 {
     public class TransactionDetail
     {
@@ -21,20 +20,9 @@ namespace Vakapay.ApiServer.Models
         public string VkcNote { get; set; }
 
         [JsonProperty(PropertyName = "sendByAd")]
+        [JsonRequired]
         public bool SendByAd { get; set; }
     }
-
-//    public class TransactionCheckObject
-//    {
-//        [JsonProperty(PropertyName = "vakapayFee")]
-//        public decimal VakapayFee;
-//
-//        [JsonProperty(PropertyName = "minerFee")]
-//        public decimal MinerFee;
-//
-//        [JsonProperty(PropertyName = "total")]
-//        public decimal Total;
-//    }
 
     public class SendTransaction
     {
@@ -45,13 +33,12 @@ namespace Vakapay.ApiServer.Models
         public string SortName { get; set; }
 
         [JsonProperty(PropertyName = "networkName")]
+        [JsonRequired]
         public string NetworkName { get; set; }
 
         [JsonProperty(PropertyName = "detail")]
+        [JsonRequired]
         public TransactionDetail Detail { get; set; }
-
-//        [JsonProperty(PropertyName = "checkObject")]
-//        public TransactionCheckObject CheckObject { get; set; }
 
         [JsonProperty(PropertyName = "SMSCode")]
         public string SmsCode { get; set; }

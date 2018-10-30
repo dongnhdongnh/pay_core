@@ -11,7 +11,7 @@
         public decimal Amount { get; set; }
         public decimal Value { get; set; }
         public decimal Price { get; set; }
-        public int BockNumber { get; set; }
+        public int BlockNumber { get; set; }
         public string Status { get; set; }
     }
 }

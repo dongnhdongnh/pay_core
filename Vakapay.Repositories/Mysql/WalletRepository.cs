@@ -317,15 +317,12 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public Wallet FindByUserAndNetwork(string userId, string networkName)
+        public Wallet FindByUserAndNetwork(string userId, string currency)
         {
             try
             {
-                string query = $"SELECT * FROM {TableName} WHERE UserId = '{userId}' AND Currency = '{networkName}'";
-                List<Wallet> wallets = FindBySql(query);
-                if (wallets == null || wallets.Count == 0)
-                    return null;
-                return wallets.SingleOrDefault();
+                var query = $"SELECT * FROM {TableName} WHERE UserId = @UserId AND Currency = @Currency";
+                return Connection.QuerySingleOrDefault<Wallet>(query, new {UserId = userId, Currency = currency});
             }
             catch (Exception e)
             {
@@ -395,11 +392,8 @@ namespace Vakapay.Repositories.Mysql
         {
             try
             {
-                string query = $"SELECT * FROM {TableName} WHERE UserId = '{user.Id}'";
-                List<Wallet> wallets = FindBySql(query);
-                if (wallets == null || wallets.Count <= 0)
-                    return null;
-                return wallets;
+                var query = $"SELECT * FROM {TableName} WHERE UserId = @UserId";
+                return Connection.Query<Wallet>(query, new {UserId = user.Id}).ToList();
             }
             catch (Exception e)
             {
@@ -412,8 +406,8 @@ namespace Vakapay.Repositories.Mysql
         {
             try
             {
-                var query = $"SELECT * FROM {TableName} WHERE UserId = '{id}'";
-                return FindBySql(query);
+                var query = $"SELECT * FROM {TableName} WHERE UserId = @UserId";
+                return Connection.Query<Wallet>(query, new {UserId = id}).ToList();
             }
             catch (Exception e)
             {

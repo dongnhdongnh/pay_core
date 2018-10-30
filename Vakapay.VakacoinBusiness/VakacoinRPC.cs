@@ -212,7 +212,7 @@ namespace Vakapay.VakacoinBusiness
 
                 return new ReturnObject
                 {
-                    Status = Status.STATUS_SUCCESS,
+                    Status = Status.STATUS_COMPLETED,
                     Data = result
                 };
             }

@@ -9,7 +9,7 @@ namespace Vakapay.Models.Repositories
     {
         ReturnObject UpdateBalanceWallet(decimal amount, string id, int version);
         List<Wallet> FindAllWalletByUser(User user);
-        Wallet FindByUserAndNetwork(string userId, string networkName);
+        Wallet FindByUserAndNetwork(string userId, string currency);
         List<Wallet> FindNullAddress();
         Wallet FindByAddressAndNetworkName(string address, string networkName);
         List<string> GetStringAddresses(string walletId, string networkName);
