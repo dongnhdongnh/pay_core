@@ -146,7 +146,7 @@ namespace Vakapay.EthereumBusiness
             }
         }
 
-        private static decimal EctherToWei(decimal amount)
+        private static decimal EtherToWei(decimal amount)
         {
             return amount * 1000000000000000000;
         }
