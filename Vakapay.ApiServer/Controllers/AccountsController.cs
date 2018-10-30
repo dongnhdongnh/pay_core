@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
@@ -21,6 +22,7 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
+    [BaseActionFilter]
     public class AccountsController : Controller
     {
         private VakapayRepositoryMysqlPersistenceFactory VakapayRepositoryFactory { get; }
@@ -198,148 +200,25 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [HttpPost("{userId}/coinbase_transactions")]
-        public ActionResult<string> SendTransactionsCoinbase(string userId, [FromBody] JObject value)
-        {
-            ReturnObject result = null;
-            try
-            {
-                var sendTransactionBusiness =
-                    new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
-
-                var request = value.ToObject<UserSendTransaction>();
-                request.UserId = userId;
-                result = AddSendTransaction(request);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                result = new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message};
-            }
-
-            return result.ToJson();
-        }
-
-        private ReturnObject AddSendTransaction(UserSendTransaction request)
-        {
-            var sendTransactionBusiness =
-                new UserSendTransactionBusiness.UserSendTransactionBusiness(VakapayRepositoryFactory);
-            ReturnObject result = null;
-            try
-            {
-                var res = sendTransactionBusiness.AddSendTransaction(request);
-
-                if (res.Status == Status.STATUS_ERROR)
-                {
-                    result = new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = res.Message};
-                }
-                else
-                {
-                    result = new ReturnDataObject()
-                        {Status = Status.STATUS_SUCCESS, Data = request};
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                result = new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message};
-            }
-            finally
-            {
-                sendTransactionBusiness.CloseDbConnection();
-            }
-
-            return result;
-        }
-
-
-        [HttpPost("{userId}/transactions")]
-        public ActionResult<ReturnObject> SendTransactions(string userId, [FromBody] JObject value)
-        {
-            ReturnObject result = null;
-            try
-            {
-                var request = value.ToObject<SendTransaction>();
-
-                var userModel = RouteData.Values["userId"];
-
-                if ( userModel == null || userId != (string) userModel)
-                {
-                    return new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = "UserId is not the same!"};
-                }
-
-                var userRequest = new UserSendTransaction()
-                {
-                    UserId = userId,
-                    Type = "send",
-                    To = request.Detail.SendByAd ? request.Detail.RecipientWalletAddress : request.Detail.RecipientEmailAddress,
-                    SendByBlockchainAddress = request.Detail.SendByAd,
-                    Amount = request.Detail.VkcAmount,
-                    Currency = request.NetworkName,
-                    Description = request.Detail.VkcNote,
-                };
-
-                result = AddSendTransaction(userRequest);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                result = new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message};
-            }
-
-            return result;
-        }
-
-        [HttpGet]
-        [Route("{userId}/transactions/{limit:int?}")]
-        public ActionResult<string> GetTransactions(string userId, int? limit = null)
-        {
-            try
-            {
-                var bitcoinDepositTrxRepo =
-                    new BitcoinDepositTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
-                var bitcoinWithdrawTrxRepo =
-                    new BitcoinWithdrawTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
-                var ethereumDepositTrxRepo =
-                    new EthereumDepositTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
-                var ethereumWithdrawTrxRepo =
-                    new EthereumWithdrawnTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
-                var vakacoinDepositTrxRepo =
-                    new VakacoinDepositTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
-                var vakacoinWithdrawTrxRepo =
-                    new VakacoinWithdrawTransactionRepository(VakapayRepositoryFactory.GetOldConnection());
-
-                var transactions = new List<BlockchainTransaction>();
-
-                transactions.AddRange(bitcoinDepositTrxRepo.FindTransactionsByUserId(userId));
-                transactions.AddRange(bitcoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
-                transactions.AddRange(ethereumDepositTrxRepo.FindTransactionsByUserId(userId));
-                transactions.AddRange(ethereumWithdrawTrxRepo.FindTransactionsByUserId(userId));
-                transactions.AddRange(vakacoinDepositTrxRepo.FindTransactionsByUserId(userId));
-                transactions.AddRange(vakacoinWithdrawTrxRepo.FindTransactionsByUserId(userId));
-
-                var sortedTransactions = transactions.OrderByDescending(o => o.UpdatedAt).ToList();
-
-                if (limit != null && limit > 0 && limit < sortedTransactions.Count)
-                {
-                    sortedTransactions = sortedTransactions.GetRange(0, (int)limit);
-                }
-
-                return new ReturnDataObject()
-                    {Status = Status.STATUS_SUCCESS, Data = sortedTransactions}.ToJson();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message}.ToJson();
-            }
-        }
+//        [HttpPost("{userId}/coinbase_transactions")]
+//        public ActionResult<string> SendTransactionsCoinbase(string userId, [FromBody] JObject value)
+//        {
+//            ReturnObject result = null;
+//            try
+//            {
+//                var request = value.ToObject<UserSendTransaction>();
+//                request.UserId = userId;
+//                result = AddSendTransaction(request);
+//            }
+//            catch (Exception e)
+//            {
+//                Console.WriteLine(e);
+//                result = new ReturnObject()
+//                    {Status = Status.STATUS_ERROR, Message = e.Message};
+//            }
+//
+//            return result.ToJson();
+//        }
 
         [HttpGet("Test/{pass}")]
         public ActionResult<string> Test(string pass)
