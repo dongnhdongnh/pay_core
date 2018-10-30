@@ -978,7 +978,7 @@ namespace Vakapay.WalletBusiness
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
+                return null;
             }
         }
         
