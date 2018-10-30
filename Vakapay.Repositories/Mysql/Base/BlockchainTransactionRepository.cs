@@ -419,11 +419,11 @@ namespace Vakapay.Repositories.Mysql.Base
                 tableInternalWithdraw = tableInternalWithdraw.Replace("`", string.Empty);
                 var selectInternal =
                     $"SELECT {tableInternalWithdraw}.Id,SenderUserId as UserId,SenderUserId as FromAddress,Email as ToAddress,{tableInternalWithdraw}.CreatedAt,{tableInternalWithdraw}.Status,-Amount as Amount " +
-                    $"FROM {tableInternalWithdraw} left join user on ReceiverUserId=User.Id" +
+                    $"FROM {tableInternalWithdraw} left join User on ReceiverUserId=User.Id" +
                     $" where SenderUserId = '{userId}'and Currency = '{currency}' " + searchString +
                     $"UNION ALL " +
                     $"SELECT {tableInternalWithdraw}.Id,ReceiverUserId as UserId,Email as FromAddress,ReceiverUserId as ToAddress,{tableInternalWithdraw}.CreatedAt,{tableInternalWithdraw}.Status,Amount as Amount " +
-                    $"FROM {tableInternalWithdraw} left join user on SenderUserId=User.Id" +
+                    $"FROM {tableInternalWithdraw} left join User on SenderUserId=User.Id" +
                     $" where ReceiverUserId = '{userId}'and Currency = '{currency}'" + searchString;
                 var selectThing = "Id,UserId,FromAddress,ToAddress,CreatedAt,Status";
                 var output =
