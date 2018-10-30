@@ -537,9 +537,10 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                wallet.Balance += addedBalance;
-                wallet.Version += 1;
-                var result = walletRepository.Update(wallet);
+//                wallet.Balance += addedBalance;
+//                wallet.Version += 1;
+//                var result = walletRepository.Update(wallet);
+                var result = UpdateBalance(addedBalance, wallet.Id, wallet.Version);
                 if (result.Status == Status.STATUS_ERROR)
                 {
                     return result;
