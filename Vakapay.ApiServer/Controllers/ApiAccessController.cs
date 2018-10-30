@@ -83,11 +83,15 @@ namespace Vakapay.ApiServer.Controllers
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
+                queryStringValue.TryGetValue("filter", out var filter);
+                queryStringValue.TryGetValue("sort", out var sort);
+
 
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
-
+                int numberData;
                 var dataApiKeys =
-                    _userBusiness.GetApiKeys(userModel.Id, Convert.ToInt32(offset), Convert.ToInt32(limit));
+                    _userBusiness.GetApiKeys(out numberData, userModel.Id, Convert.ToInt32(offset),
+                        Convert.ToInt32(limit), filter.ToString(), sort.ToString());
 
                 if (dataApiKeys.Status != Status.STATUS_SUCCESS)
                     return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
@@ -95,7 +99,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (listApiKeys.Count <= 0)
                     return new ReturnObject
                     {
-                        Status = Status.STATUS_SUCCESS,
+                        Status = Status.STATUS_ERROR,
                         Data = JsonHelper.SerializeObject(listApiKeys)
                     }.ToJson();
                 foreach (var listApiKey in listApiKeys)
@@ -106,7 +110,11 @@ namespace Vakapay.ApiServer.Controllers
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
-                    Data = JsonHelper.SerializeObject(listApiKeys)
+                    Data = new ResultList<ResultApiAccess>
+                    {
+                        List = listApiKeys,
+                        Total = numberData
+                    }.ToJson()
                 }.ToJson();
             }
             catch (Exception e)

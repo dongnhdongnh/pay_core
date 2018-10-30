@@ -50,16 +50,38 @@ namespace Vakapay.Repositories.Mysql
             }
         }
 
-        public List<ApiKey> GetListApiKey(string sql, int skip, int take)
+        public List<ApiKey> GetListApiKey(out int numberData, string sql, int skip, int take, string filter,
+            string sort)
         {
+            numberData = -1;
             try
             {
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 
-                var result = Connection.Query<ApiKey>(sql).Skip(skip).Take(take).ToList();
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    sql += " AND ( KeyApi LIKE '%" + filter + "%' OR Secret LIKE '%" + filter + "%' )";
+                }
 
-                return result;
+                numberData = Connection.Query(sql).Count();
+
+                if (!string.IsNullOrEmpty(sort))
+                {
+                    if (sort[0].Equals('-'))
+                    {
+                        sql += " ORDER BY " + sort.Remove(0, 1) + " DESC ";
+                    }
+                    else
+                    {
+                        sql += " ORDER BY " + sort;
+                    }
+                }
+
+                var result = Connection.Query<ApiKey>(sql).Skip(skip).Take(take);
+
+
+                return result.ToList();
             }
             catch (Exception e)
             {

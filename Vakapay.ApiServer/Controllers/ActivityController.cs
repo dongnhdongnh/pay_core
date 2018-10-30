@@ -11,7 +11,9 @@ using UAParser;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -52,19 +54,35 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var queryStringValue = Request.Query;
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
+                queryStringValue.TryGetValue("filter", out var filter);
+                queryStringValue.TryGetValue("sort", out var sort);
 
 
                 if (userModel != null)
                 {
-                    return _userBusiness.GetActionLog(userModel.Id, Convert.ToInt32(offset),
-                        Convert.ToInt32(limit)).ToJson();
+                    int numberData;
+                    var resultLogs = _userBusiness.GetActionLog(out numberData, userModel.Id, Convert.ToInt32(offset),
+                        Convert.ToInt32(limit), filter.ToString(), sort.ToString());
+                    if (resultLogs.Status != Status.STATUS_SUCCESS)
+                        return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+
+                    var listLogs = JsonHelper.DeserializeObject<List<UserActionLog>>(resultLogs.Data);
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = new ResultList<UserActionLog>
+                        {
+                            List = listLogs,
+                            Total = numberData
+                        }.ToJson()
+                    }.ToJson();
                 }
 
                 return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
@@ -88,6 +106,8 @@ namespace Vakapay.ApiServer.Controllers
 
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
+                queryStringValue.TryGetValue("filter", out var filter);
+                queryStringValue.TryGetValue("sort", out var sort);
 
                 var ip = HelpersApi.GetIp(Request);
 
@@ -107,11 +127,27 @@ namespace Vakapay.ApiServer.Controllers
                     checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
                 }
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values["UserModel"];
 
+                int numberData;
+                var resultDevice = _userBusiness.GetListConfirmedDevices(out numberData, userModel.Id,
+                    checkConfirmedDevices,
+                    Convert.ToInt32(offset),
+                    Convert.ToInt32(limit), sort: sort.ToString(), filter: filter.ToString());
 
-                return _userBusiness.GetListConfirmedDevices(userModel.Id, Convert.ToInt32(offset),
-                    Convert.ToInt32(limit), checkConfirmedDevices).ToJson();
+                if (resultDevice.Status != Status.STATUS_SUCCESS)
+                    return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+
+                var listDevice = JsonHelper.DeserializeObject<List<ConfirmedDevices>>(resultDevice.Data);
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = new ResultList<ConfirmedDevices>
+                    {
+                        List = listDevice,
+                        Total = numberData
+                    }.ToJson()
+                }.ToJson();
             }
             catch (Exception e)
             {
