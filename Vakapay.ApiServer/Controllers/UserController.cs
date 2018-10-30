@@ -218,6 +218,7 @@ namespace Vakapay.ApiServer.Controllers
                 userModel.SecretAuthToken = null;
                 userModel.TwoFactorSecret = null;
                 userModel.SecondPassword = null;
+                userModel.Id = null;
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
