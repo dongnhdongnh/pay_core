@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
+using NLog;
+using NLog.Fluent;
 using UAParser;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
@@ -30,7 +32,9 @@ namespace Vakapay.ApiServer.Controllers
     public class ActivityController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
+
 
         public ActivityController(
             IConfiguration configuration,
@@ -62,12 +66,12 @@ namespace Vakapay.ApiServer.Controllers
 
                 StringValues sort;
                 StringValues filter;
-                queryStringValue.TryGetValue("offset", out var offset);
-                queryStringValue.TryGetValue("limit", out var limit);
-                if (queryStringValue.ContainsKey("offset"))
-                    queryStringValue.TryGetValue("filter", out filter);
-                if (queryStringValue.ContainsKey("sort"))
-                    queryStringValue.TryGetValue("sort", out sort);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_OFFSET, out var offset);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_LIMIT, out var limit);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER, out filter);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT, out sort);
                 sort = ConvertSortLog(sort);
 
                 if (userModel != null)
@@ -94,6 +98,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.LOG_LIST + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -181,12 +186,12 @@ namespace Vakapay.ApiServer.Controllers
 
                 StringValues sort;
                 StringValues filter;
-                queryStringValue.TryGetValue("offset", out var offset);
-                queryStringValue.TryGetValue("limit", out var limit);
-                if (queryStringValue.ContainsKey("offset"))
-                    queryStringValue.TryGetValue("filter", out filter);
-                if (queryStringValue.ContainsKey("sort"))
-                    queryStringValue.TryGetValue("sort", out sort);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_OFFSET, out var offset);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_LIMIT, out var limit);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER, out filter);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT, out sort);
 
                 sort = ConvertSortDevice(sort);
 
@@ -228,6 +233,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.DEVICE_LIST + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -244,6 +250,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.DEVICE_DELETE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -260,6 +267,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.LOG_DELETE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }

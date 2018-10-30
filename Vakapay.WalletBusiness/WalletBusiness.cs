@@ -248,7 +248,7 @@ namespace Vakapay.WalletBusiness
                 }
 
                 var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
-                var userRepository   = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
+                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
 
                 // 1. Validate User status
                 var walletById = walletRepository.FindById(wallet.Id);
@@ -365,20 +365,20 @@ namespace Vakapay.WalletBusiness
                 case CryptoCurrency.BTC:
                     var btcWithdrawTransaction =
                         _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb);
-                    return btcWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<BitcoinWithdrawTransaction>());
-                    break;
+                    return btcWithdrawTransaction.Insert(
+                        blockchainTransaction.ToDelivered<BitcoinWithdrawTransaction>());
 
                 case CryptoCurrency.ETH:
                     var etherWithdrawTransaction =
                         _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb);
-                    return etherWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<EthereumWithdrawTransaction>());
-                    break;
+                    return etherWithdrawTransaction.Insert(blockchainTransaction
+                        .ToDelivered<EthereumWithdrawTransaction>());
 
                 case CryptoCurrency.VAKA:
                     var vakaWithdrawTransaction =
                         _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb);
-                    return vakaWithdrawTransaction.Insert(blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
-                    break;
+                    return vakaWithdrawTransaction.Insert(
+                        blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
 
                 default:
                     return new ReturnObject()
@@ -487,9 +487,9 @@ namespace Vakapay.WalletBusiness
             {
                 // TODO fake:
                 case CryptoCurrency.BTC:
-                    return (decimal)0.0005;
+                    return (decimal) 0.0005;
                 case CryptoCurrency.ETH:
-                    return (decimal)0.0005;
+                    return (decimal) 0.0005;
                 case CryptoCurrency.VAKA:
                     return 0;
                 default:
@@ -767,11 +767,7 @@ namespace Vakapay.WalletBusiness
             switch (networkName)
             {
                 case CryptoCurrency.BTC:
-                    var bitcoinRpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
-                        AppSettingHelper.GetBitcoinRpcAuthentication());
-                    var result = bitcoinRpc.ValidateAddress(address);
-                    var jsonResult = JObject.Parse(result.Data);
-                    return jsonResult["isvalid"].Value<bool>();
+                    return BlockchainHeper.IsBitcoinAddress(address);
 
                 case CryptoCurrency.ETH:
                     return BlockchainHeper.IsEthereumAddress(address);
@@ -916,7 +912,7 @@ namespace Vakapay.WalletBusiness
                 throw;
             }
         }
-        
+
         private async Task<ReturnObject> CreateAddressForWallet(Wallet pendingWallet)
         {
             try
@@ -981,7 +977,7 @@ namespace Vakapay.WalletBusiness
                 return null;
             }
         }
-        
+
         public List<string> DistinctUserId()
         {
             try

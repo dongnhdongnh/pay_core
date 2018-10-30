@@ -82,6 +82,15 @@ namespace Vakapay.Commons.Helpers
             return Get($"{Setting.SECTION_KEY_ELASTIC}:{Setting.SECTION_KEY_API_KEY}");
         }
 
+        public static string GetImgurApiKey()
+        {
+            return Get($"{Setting.SECTION_KEY_IMGUR}:{Setting.SECTION_KEY_IMG_API_KEY}");
+        }
+        public static string GetImgurUrl()
+        {
+            return Get($"{Setting.SECTION_KEY_IMGUR}:{Setting.SECTION_KEY_URL_IMG}");
+        }
+
         public static string GetElasticFromAddress()
         {
             return Get($"{Setting.SECTION_KEY_ELASTIC}:{Setting.SECTION_KEY_FROM_ADDRESS}");

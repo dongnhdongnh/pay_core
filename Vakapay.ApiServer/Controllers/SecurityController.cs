@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
@@ -26,6 +27,7 @@ namespace Vakapay.ApiServer.Controllers
     public class SecurityController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
@@ -63,6 +65,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.SECURITY_GET_INFO + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -75,11 +78,15 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE) ||
+                if (
                     !value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_STATUS) ||
                     !value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_PASSWORD))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-                var code = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE].ToString();
+                
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE))
+                    code = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE].ToString();
+
                 var status = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_STATUS];
 
                 if (!int.TryParse((string) status, out var outStatus))
@@ -130,6 +137,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.SECURITY_LOCK_SCREEN_UPDATE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -166,6 +174,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.SECURITY_LOCK_SCREEN_UNLOCK + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }

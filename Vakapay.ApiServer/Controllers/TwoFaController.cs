@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
@@ -26,6 +27,7 @@ namespace Vakapay.ApiServer.Controllers
     public class TwoFaController : ControllerBase
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
@@ -53,26 +55,26 @@ namespace Vakapay.ApiServer.Controllers
             {
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-                if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-
                 if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                var code = value[ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE].ToString();
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE))
+                    code = value[ParseDataKeyApi.KEY_TWO_FA_UPDATE_OPTION_CODE].ToString();
+
 
                 bool isVerify = false;
 
                 switch (userModel.IsTwoFactor)
                 {
                     case 1:
-                        if (!value.ContainsKey("code"))
+                        if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
                             return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                         isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
                         break;
                     case 2:
-                        if (!value.ContainsKey("code"))
+                        if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
                             return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
@@ -102,6 +104,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_OPTION_UPDATE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -130,6 +133,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_ENABLE_UPDATE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -184,6 +188,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_ENABLE_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -216,6 +221,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_DISABLE_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -231,7 +237,10 @@ namespace Vakapay.ApiServer.Controllers
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
 
-                var code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS].ToString();
+                var code = "";
+                if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
+                    code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS].ToString();
+
 
                 bool isVerify = false;
 
@@ -271,6 +280,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_SEND_TRANSACTION_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }
@@ -354,6 +364,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.TWOFA_REQUIRED_SEND_CODE + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }

@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Org.BouncyCastle.Crypto.Digests;
+using Vakapay.Commons.Helpers;
 
 namespace Vakapay.Cryptography
 {
@@ -34,7 +35,7 @@ namespace Vakapay.Cryptography
                 while (--j > 0)
                 {
                     p += 58 * output[j];
-                    output[j] = (byte)(p % 256);
+                    output[j] = (byte) (p % 256);
                     p /= 256;
                 }
 
@@ -70,6 +71,39 @@ namespace Vakapay.Cryptography
             }
         }
 
+        public static bool IsBitcoinAddress(string address)
+        {
+            byte[] hex = Base58CheckToByteArray(address);
+            if (hex == null || hex.Length != 21)
+                return false;
+            else
+                return true;
+        }
+
+        public static byte[] Base58CheckToByteArray(string base58)
+        {
+
+            byte[] bb = Base58.ToByteArray(base58);
+            if (bb == null || bb.Length < 4) return null;
+
+            Sha256Digest bcsha256a = new Sha256Digest();
+            bcsha256a.BlockUpdate(bb, 0, bb.Length - 4);
+
+            byte[] checksum = new byte[32];  
+            bcsha256a.DoFinal(checksum, 0);
+            bcsha256a.BlockUpdate(checksum, 0, 32);
+            bcsha256a.DoFinal(checksum, 0);
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (checksum[i] != bb[bb.Length - 4 + i]) return null;
+            }
+
+            byte[] rv = new byte[bb.Length - 4];
+            Array.Copy(bb, 0, rv, 0, bb.Length - 4);
+            return rv;
+        }
+        
         /// <summary>
         /// Validates if the hex string is 40 alphanumeric characters
         /// </summary>
@@ -184,7 +218,7 @@ namespace Vakapay.Cryptography
                     var upper = FromCharacterToByte(value[readIndex], readIndex, 4);
                     var lower = FromCharacterToByte(value[readIndex + 1], readIndex + 1);
 
-                    bytes[writeIndex++] = (byte)(upper | lower);
+                    bytes[writeIndex++] = (byte) (upper | lower);
                 }
             }
 
@@ -206,18 +240,18 @@ namespace Vakapay.Cryptography
 
         private static byte FromCharacterToByte(char character, int index, int shift = 0)
         {
-            var value = (byte)character;
+            var value = (byte) character;
             if (0x40 < value && 0x47 > value || 0x60 < value && 0x67 > value)
             {
                 if (0x40 == (0x40 & value))
                     if (0x20 == (0x20 & value))
-                        value = (byte)((value + 0xA - 0x61) << shift);
+                        value = (byte) ((value + 0xA - 0x61) << shift);
                     else
-                        value = (byte)((value + 0xA - 0x41) << shift);
+                        value = (byte) ((value + 0xA - 0x41) << shift);
             }
             else if (0x29 < value && 0x40 > value)
             {
-                value = (byte)((value - 0x30) << shift);
+                value = (byte) ((value - 0x30) << shift);
             }
             else
             {

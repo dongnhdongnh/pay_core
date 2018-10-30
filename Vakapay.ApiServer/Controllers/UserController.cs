@@ -16,8 +16,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
+using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -37,6 +39,7 @@ namespace Vakapay.ApiServer.Controllers
     {
         private UserBusiness.UserBusiness _userBusiness;
         private WalletBusiness.WalletBusiness _walletBusiness;
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
         public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
@@ -51,92 +54,6 @@ namespace Vakapay.ApiServer.Controllers
                 select new {c.Value});
         }
 
-        [HttpPost("upload-avatar-test"), DisableRequestSizeLimit]
-        [BaseActionFilter]
-        public string UploadFileTest()
-        {
-            try
-            {
-                var file = Request.Form.Files[0];
-
-
-                if (_userBusiness == null)
-                {
-                    CreateUserBusiness();
-                }
-
-                var userCheck = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
-
-                if (file.Length > 2097152)
-                    return CreateDataError("File max size 2Mb");
-
-
-                const string folderName = "wwwroot/upload/avatar";
-                var link = "/upload/avatar/";
-                var webRootPath = Directory.GetCurrentDirectory();
-                var newPath = Path.Combine(webRootPath, folderName);
-                if (!Directory.Exists(newPath))
-                {
-                    Directory.CreateDirectory(newPath);
-                }
-
-
-                if (file.Length <= 0) return CreateDataError("Can't update image");
-                char[] myChar = {'"'};
-                var fileName = CommonHelper.GetUnixTimestamp() + ContentDispositionHeaderValue
-                                   .Parse(file.ContentDisposition).FileName.ToString()
-                                   .Trim(myChar);
-
-                fileName = fileName.Replace(" ", "-");
-
-                var fullPath = Path.Combine(newPath, fileName);
-
-                using (var stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    file.CopyTo(stream);
-                }
-
-                var oldAvatar = userCheck.Avatar;
-
-                link = link + fileName;
-
-
-                //update avatar for user
-                userCheck.Avatar = link;
-                var updateUser = _userBusiness.UpdateProfile(userCheck);
-
-
-                //delete image old
-                if (!string.IsNullOrEmpty(oldAvatar))
-                {
-                    var oldName = oldAvatar.Split("/");
-
-                    var oldFullPath = Path.Combine(newPath, oldName[oldName.Length - 1]);
-
-                    if (System.IO.File.Exists(oldFullPath))
-                    {
-                        System.IO.File.Delete(oldFullPath);
-                    }
-                }
-
-                if (updateUser.Status != Status.STATUS_SUCCESS) return CreateDataError("Can't update image");
-                //save action log
-                _userBusiness.AddActionLog(userCheck.Email, userCheck.Id,
-                    ActionLog.AVATAR,
-                    HelpersApi.GetIp(Request));
-
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Message = "Upload avatar success ",
-                    Data = link
-                }.ToJson();
-            }
-            catch (Exception ex)
-            {
-                return HelpersApi.CreateDataError(ex.Message);
-            }
-        }
 
         [HttpPost("upload-avatar"), DisableRequestSizeLimit]
         [BaseActionFilter]
@@ -173,12 +90,12 @@ namespace Vakapay.ApiServer.Controllers
 
                             var values = new NameValueCollection
                             {
-                                {"image", base64String}
+                                {ParseDataKeyApi.KEY_USER_UPDATE_AVATAR, base64String}
                             };
 
-                            w.Headers.Add("Authorization", "Client-ID cfbceb1420c73c0");
+                            w.Headers.Add("Authorization", "Client-ID " + AppSettingHelper.GetImgurApiKey());
 
-                            byte[] response = await w.UploadValuesTaskAsync("https://api.imgur.com/3/upload", values);
+                            byte[] response = await w.UploadValuesTaskAsync(AppSettingHelper.GetImgurUrl(), values);
 
                             var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(response));
 
@@ -210,9 +127,10 @@ namespace Vakapay.ApiServer.Controllers
                     }.ToJson();
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                return CreateDataError(ex.Message);
+                _logger.Error(KeyLogger.USER_AVATAR + e);
+                return CreateDataError(e.Message);
             }
         }
 
@@ -300,6 +218,7 @@ namespace Vakapay.ApiServer.Controllers
                 userModel.SecretAuthToken = null;
                 userModel.TwoFactorSecret = null;
                 userModel.SecondPassword = null;
+                userModel.Id = null;
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
@@ -356,6 +275,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.USER_UPDATE + e);
                 return CreateDataError(e.Message);
             }
         }
@@ -410,6 +330,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.USER_UPDATE_PREFERENCES + e);
                 return CreateDataError(e.Message);
             }
         }
@@ -441,6 +362,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.USER_UPDATE_NOTIFICATION + e);
                 return CreateDataError(e.Message);
             }
         }
