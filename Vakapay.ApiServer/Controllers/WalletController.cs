@@ -228,6 +228,7 @@ namespace Vakapay.ApiServer.Controllers
                     To = request.Detail.SendByAd
                         ? request.Detail.RecipientWalletAddress
                         : request.Detail.RecipientEmailAddress,
+                    SendByBlockchainAddress = request.Detail.SendByAd,
                     Amount = request.Detail.VkcAmount,
                     Currency = request.NetworkName,
                     Description = request.Detail.VkcNote,
