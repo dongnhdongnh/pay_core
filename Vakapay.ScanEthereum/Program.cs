@@ -34,7 +34,7 @@ namespace Vakapay.ScanEthereum
                 {
                     Console.WriteLine("==========Start Scan Ethereum==========");
 
-                    var rpc = new EthereumRpc("http://localhost:9900");
+                    var rpc = new EthereumRpc(AppSettingHelper.GetEthereumNode());
 
                     var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
                     var ethereumDepoRepo = repoFactory.GetEthereumDepositeTransactionRepository(connection);

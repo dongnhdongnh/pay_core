@@ -6,12 +6,15 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 using UAParser;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
+using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
@@ -52,19 +55,39 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var queryStringValue = Request.Query;
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values["UserModel"];
 
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                StringValues sort;
+                StringValues filter;
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
-
+                if (queryStringValue.ContainsKey("offset"))
+                    queryStringValue.TryGetValue("filter", out filter);
+                if (queryStringValue.ContainsKey("sort"))
+                    queryStringValue.TryGetValue("sort", out sort);
+                sort = ConvertSortLog(sort);
 
                 if (userModel != null)
                 {
-                    return _userBusiness.GetActionLog(userModel.Id, Convert.ToInt32(offset),
-                        Convert.ToInt32(limit)).ToJson();
+                    int numberData;
+                    var resultLogs = _userBusiness.GetActionLog(out numberData, userModel.Id, Convert.ToInt32(offset),
+                        Convert.ToInt32(limit), filter.ToString(), sort);
+                    if (resultLogs.Status != Status.STATUS_SUCCESS)
+                        return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+
+                    var listLogs = JsonHelper.DeserializeObject<List<UserActionLog>>(resultLogs.Data);
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = new ResultList<UserActionLog>
+                        {
+                            List = listLogs,
+                            Total = numberData
+                        }.ToJson()
+                    }.ToJson();
                 }
 
                 return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
@@ -72,6 +95,76 @@ namespace Vakapay.ApiServer.Controllers
             catch (Exception e)
             {
                 return HelpersApi.CreateDataError(e.Message);
+            }
+        }
+
+        private string ConvertSortLog(string sort)
+        {
+            if (string.IsNullOrEmpty(sort))
+                return null;
+            var key = sort;
+            var desc = "";
+            if (key[0].Equals('-'))
+            {
+                desc = key[0].ToString();
+                key = sort.Remove(0, 1);
+            }
+
+            switch (key)
+            {
+                case "id":
+                    return desc + "Id";
+
+                case "actionname":
+                    return desc + "ActionName";
+
+                case "ip":
+                    return desc + "Ip";
+
+                case "userid":
+                    return desc + "UserId";
+
+                case "location":
+                    return desc + "Location";
+
+                case "createdAt":
+                    return desc + "CreatedAt";
+
+                default:
+                    return null;
+            }
+        }
+
+        private string ConvertSortDevice(string sort)
+        {
+            if (string.IsNullOrEmpty(sort))
+                return null;
+
+            var key = sort;
+            var desc = "";
+            if (key[0].Equals('-'))
+            {
+                desc = key[0].ToString();
+                key = sort.Remove(0, 1);
+            }
+
+            switch (key)
+            {
+                case "id":
+                    return desc + "Id";
+                case "userid":
+                    return desc + "UserId";
+                case "browser":
+                    return desc + "Browser";
+                case "ip":
+                    return desc + "Ip";
+                case "location":
+                    return desc + "Location";
+                case "signedin":
+                    return desc + "SignedIn";
+
+                default:
+                    return null;
             }
         }
 
@@ -86,8 +179,16 @@ namespace Vakapay.ApiServer.Controllers
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
+                StringValues sort;
+                StringValues filter;
                 queryStringValue.TryGetValue("offset", out var offset);
                 queryStringValue.TryGetValue("limit", out var limit);
+                if (queryStringValue.ContainsKey("offset"))
+                    queryStringValue.TryGetValue("filter", out filter);
+                if (queryStringValue.ContainsKey("sort"))
+                    queryStringValue.TryGetValue("sort", out sort);
+
+                sort = ConvertSortDevice(sort);
 
                 var ip = HelpersApi.GetIp(Request);
 
@@ -95,23 +196,35 @@ namespace Vakapay.ApiServer.Controllers
 
                 if (!string.IsNullOrEmpty(ip))
                 {
-                    //get location for ip
+                    var browser = HelpersApi.GetBrowser(Request);
 
-                    var uaString = Request.Headers["User-Agent"].FirstOrDefault();
-                    var uaParser = Parser.GetDefault();
-                    var browser = uaParser.Parse(uaString);
-
-                    var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser.ToString()}};
+                    var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser}};
 
                     //save web session
                     checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
                 }
 
-                var userModel = (User)RouteData.Values["UserModel"];
+                var userModel = (User) RouteData.Values["UserModel"];
 
+                int numberData;
+                var resultDevice = _userBusiness.GetListConfirmedDevices(out numberData, userModel.Id,
+                    checkConfirmedDevices,
+                    Convert.ToInt32(offset),
+                    Convert.ToInt32(limit), sort, filter);
 
-                return _userBusiness.GetListConfirmedDevices(userModel.Id, Convert.ToInt32(offset),
-                    Convert.ToInt32(limit), checkConfirmedDevices).ToJson();
+                if (resultDevice.Status != Status.STATUS_SUCCESS)
+                    return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+
+                var listDevice = JsonHelper.DeserializeObject<List<ConfirmedDevices>>(resultDevice.Data);
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_SUCCESS,
+                    Data = new ResultList<ConfirmedDevices>
+                    {
+                        List = listDevice,
+                        Total = numberData
+                    }.ToJson()
+                }.ToJson();
             }
             catch (Exception e)
             {

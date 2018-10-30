@@ -8,7 +8,7 @@ namespace Vakapay.Models.Repositories
     {
         string QuerySearch(Dictionary<string, string> models);
         ApiKey FindWhere(string sql);
-        List<ApiKey> GetListApiKey(string sql, int skip, int take);
+        List<ApiKey> GetListApiKey(out int numberData,string sql, int skip, int take, string filter, string sort);
         int GetCount();
     }
 }

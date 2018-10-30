@@ -77,19 +77,32 @@ namespace Vakapay.ApiServer.Controllers
         //}
         //  WalletBusiness.WalletBusiness walletBusiness = new WalletBusiness.WalletBusiness();
         [HttpGet("Infor")]
-        public ActionResult<string> GetWalletInfor([FromQuery] string walletID)
+        public ActionResult<string> GetWalletInfor([FromQuery] string networkName)
         {
-            var wallet = _walletBusiness.GetWalletById(walletID);
+            var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+            var wallet = _walletBusiness.FindByUserAndNetwork(userModel.Id, networkName);
             return JsonHelper.SerializeObject(wallet);
             //  return null;
         }
 
         [HttpGet("AddressInfor")]
-        public ActionResult<ReturnObject> GetAddresses([FromQuery] string walletId, [FromQuery] string networkName)
+        public ActionResult<ReturnObject> GetAddresses([FromQuery] string networkName)
         {
             try
             {
-                var addresses = _walletBusiness.GetAddresses(walletId, networkName);
+                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var wallet = _walletBusiness.FindByUserAndNetwork(userModel.Id, networkName);
+
+                if (wallet == null)
+                {
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = "Can't not wallet"
+                    };
+                }
+
+                var addresses = _walletBusiness.GetAddresses(wallet.Id, networkName);
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
