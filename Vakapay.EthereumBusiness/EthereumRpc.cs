@@ -113,11 +113,12 @@ namespace Vakapay.EthereumBusiness
         {
             try
             {
+                decimal weiAmount = EtherToWei(amount);
                 EthRpcJson.TransactionInfor sender = new EthRpcJson.TransactionInfor()
                 {
                     From = from,
                     To = toAddress,
-                    Value = ((int)amount).IntToHex()
+                    Value = ((int)weiAmount).IntToHex()
                 };
 
                 //var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
@@ -143,6 +144,11 @@ namespace Vakapay.EthereumBusiness
                     Message = e.Message
                 };
             }
+        }
+
+        private static decimal EtherToWei(decimal amount)
+        {
+            return amount * 1000000000000000000;
         }
 
         /// <summary>
