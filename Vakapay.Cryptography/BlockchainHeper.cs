@@ -80,9 +80,9 @@ namespace Vakapay.Cryptography
                 return true;
         }
 
-        public static byte[] Base58CheckToByteArray(string base58)
+        private static byte[] Base58CheckToByteArray(string base58)
         {
-
+            
             byte[] bb = Base58.ToByteArray(base58);
             if (bb == null || bb.Length < 4) return null;
 

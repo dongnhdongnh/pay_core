@@ -8,5 +8,7 @@ namespace Vakapay.ApiServer.Models
         public string Permissions { get; set; }
         public string Wallets { get; set; }
         public int Status { get; set; }
+        public int CreatedAt { get; set; }
+        public int UpdatedAt { get; set; }
     }
 }
