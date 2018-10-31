@@ -7,6 +7,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Vakapay.Commons\Vakapay.Commons.csproj" />
       <ProjectReference Include="..\Vakapay.Models\Vakapay.Models.csproj" />
+      <ProjectReference Include="..\Vakapay.PortfolioHistoryBusiness\Vakapay.PortfolioHistoryBusiness.csproj" />
       <ProjectReference Include="..\Vakapay.SendMailBusiness\Vakapay.SendMailBusiness.csproj" />
     </ItemGroup>
 
