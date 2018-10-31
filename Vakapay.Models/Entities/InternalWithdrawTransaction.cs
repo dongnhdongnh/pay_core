@@ -9,5 +9,7 @@ namespace Vakapay.Models.Entities
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public string Idem { get; set; }
+
+        public string Description { get; set; }
     }
 }

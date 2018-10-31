@@ -26,7 +26,8 @@ namespace Vakapay.BlockchainBusiness.Base
             DbConnection = isNewConnection
                 ? VakapayRepositoryFactory.GetDbConnection()
                 : VakapayRepositoryFactory.GetOldConnection();
-            portfolioHistoryBusiness =(PortfolioHistoryBusiness.PortfolioHistoryBusiness) VakapayRepositoryFactory.GetPortfolioHistoryRepository(DbConnection);
+            portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(VakapayRepositoryFactory,false);
+             //   (PortfolioHistoryBusiness.PortfolioHistoryBusiness) ;
             // portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness();
         }
 
