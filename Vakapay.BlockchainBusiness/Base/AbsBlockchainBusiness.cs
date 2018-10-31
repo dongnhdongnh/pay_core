@@ -10,7 +10,7 @@ using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Models.Repositories.Base;
-
+using Vakapay.PortfolioHistoryBusiness;
 
 namespace Vakapay.BlockchainBusiness.Base
 {
@@ -18,7 +18,7 @@ namespace Vakapay.BlockchainBusiness.Base
     {
         public IVakapayRepositoryFactory VakapayRepositoryFactory { get; }
         public IDbConnection DbConnection { get; }
-
+        PortfolioHistoryBusiness.PortfolioHistoryBusiness portfolioHistoryBusiness;
 
         public AbsBlockchainBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
         {
@@ -26,6 +26,9 @@ namespace Vakapay.BlockchainBusiness.Base
             DbConnection = isNewConnection
                 ? VakapayRepositoryFactory.GetDbConnection()
                 : VakapayRepositoryFactory.GetOldConnection();
+            portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(VakapayRepositoryFactory,false);
+             //   (PortfolioHistoryBusiness.PortfolioHistoryBusiness) ;
+            // portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness();
         }
 
         /// <summary>
@@ -49,7 +52,7 @@ namespace Vakapay.BlockchainBusiness.Base
              * 5. Update Transaction Status
              */
             // find transaction pending
-//            var pendingTransaction = repoQuery.FindTransactionPending();
+            //            var pendingTransaction = repoQuery.FindTransactionPending();
             var pendingTransaction = repoQuery.FindRowPending();
 
             if (pendingTransaction?.Id == null)
@@ -120,7 +123,7 @@ namespace Vakapay.BlockchainBusiness.Base
                 var sendTransaction = await rpcClass.SendTransactionAsync(pendingTransaction);
                 pendingTransaction.Status = sendTransaction.Status;
                 pendingTransaction.IsProcessing = 0;
-//                pendingTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp(); // set in SafeUpdate
+                //                pendingTransaction.UpdatedAt = (int) CommonHelper.GetUnixTimestamp(); // set in SafeUpdate
                 pendingTransaction.Hash = sendTransaction.Data;
 
                 //create database email when send success
@@ -333,7 +336,8 @@ namespace Vakapay.BlockchainBusiness.Base
                                 //	_currentPending.Status = Status.StatusCompleted;
                                 //	_currentPending.InProcess = 0;
                                 Console.WriteLine("CaLL UPDATE");
-
+                           
+                                portfolioHistoryBusiness.InsertWithPrice(_currentPending.UserId);
                                 withdrawRepoQuery.Update((TWithDraw)_currentPending);
                                 withdrawPendingTransactions.RemoveAt(i);
                             }
@@ -360,6 +364,7 @@ namespace Vakapay.BlockchainBusiness.Base
                             int _transaValue = 0;
                             if (_trans.Value.HexToInt(out _transaValue))
                             {
+                              //  portfolioHistoryBusiness.InsertWithPrice(_trans.i);
                                 wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
                             }
                         }

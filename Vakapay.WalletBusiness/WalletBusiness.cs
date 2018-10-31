@@ -30,6 +30,7 @@ namespace Vakapay.WalletBusiness
         VakacoinBusiness.VakacoinBusiness vakacoinBussiness;
         SendMailBusiness.SendMailBusiness sendMailBusiness;
         UserBusiness.UserBusiness userBusiness;
+        PortfolioHistoryBusiness.PortfolioHistoryBusiness portfolioHistoryBusiness;
         private readonly IVakapayRepositoryFactory _vakapayRepositoryFactory;
 
         private readonly IDbConnection _connectionDb;
@@ -48,6 +49,8 @@ namespace Vakapay.WalletBusiness
             vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
             sendMailBusiness = new SendMailBusiness.SendMailBusiness(_vakapayRepositoryFactory, false);
             userBusiness = new UserBusiness.UserBusiness(_vakapayRepositoryFactory, false);
+            portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(_vakapayRepositoryFactory,false);
+                //(PortfolioHistoryBusiness.PortfolioHistoryBusiness)_vakapayRepositoryFactory.GetPortfolioHistoryRepository(_connectionDb);
         }
 
         /// <summary>
@@ -204,7 +207,7 @@ namespace Vakapay.WalletBusiness
         /// <param name="toAddress"></param>
         /// <param name="amount"></param>
         /// <returns></returns>
-        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount)
+        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount,string description=null)
         {
             /*
              * 1. Validate User status
@@ -343,6 +346,7 @@ namespace Vakapay.WalletBusiness
                     ToAddress = toAddress,
                     Fee = free,
                     Amount = amount,
+                    Description= description
                 }, walletById.Currency);
 
                 return insertWithdraw;
@@ -537,9 +541,10 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                wallet.Balance += addedBalance;
-                wallet.Version += 1;
-                var result = walletRepository.Update(wallet);
+//                wallet.Balance += addedBalance;
+//                wallet.Version += 1;
+//                var result = walletRepository.Update(wallet);
+                var result = UpdateBalance(addedBalance, wallet.Id, wallet.Version);
                 if (result.Status == Status.STATUS_ERROR)
                 {
                     return result;
@@ -547,8 +552,10 @@ namespace Vakapay.WalletBusiness
                 else
                 {
                     User user = userBusiness.GetUserById(wallet.UserId);
+                   
                     if (user != null)
                     {
+                        portfolioHistoryBusiness.InsertWithPrice(user.Id);
                         //send mail:
                         EmailQueue email = new EmailQueue()
                         {

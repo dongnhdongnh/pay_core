@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Cache;
+using System.Numerics;
 using System.Threading.Tasks;
 using Vakapay.BlockchainBusiness;
 using Vakapay.Commons.Constants;
@@ -118,7 +119,7 @@ namespace Vakapay.EthereumBusiness
                 {
                     From = from,
                     To = toAddress,
-                    Value = ((int)weiAmount).IntToHex()
+                    Value = ((BigInteger)weiAmount).ToHex()
                 };
 
                 //var tx = { from: "0x391694e7e0b0cce554cb130d723a9d27458f9298", to: "0xafa3f8684e54059998bc3a7b0d2b0da075154d66", value: web3.toWei(1.23, "ether")};
@@ -149,6 +150,11 @@ namespace Vakapay.EthereumBusiness
         private static decimal EtherToWei(decimal amount)
         {
             return amount * 1000000000000000000;
+        }
+
+        public static decimal WeiToEther(BigInteger amount)
+        {
+            return ((decimal) amount) / 1000000000000000000;
         }
 
         /// <summary>

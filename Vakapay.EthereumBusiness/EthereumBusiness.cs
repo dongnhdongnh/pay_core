@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using Vakapay.BlockchainBusiness;
 using Vakapay.BlockchainBusiness.Base;
@@ -207,10 +208,10 @@ namespace Vakapay.EthereumBusiness
                         else
                         {
                             //Console.WriteLine("value" + _trans.value);
-                            int _transaValue = 0;
-                            if (trans.Value.HexToInt(out _transaValue))
+                            if (trans.Value.HexToBigInteger(out var transactionValue))
                             {
-                                wallet.UpdateBalanceDeposit(toAddress, (Decimal)_transaValue, networkName);
+                                wallet.UpdateBalanceDeposit(toAddress, EthereumRpc.WeiToEther(transactionValue),
+                                    networkName);
                             }
                         }
                     }
