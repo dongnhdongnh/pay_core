@@ -49,7 +49,8 @@ namespace Vakapay.WalletBusiness
             vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
             sendMailBusiness = new SendMailBusiness.SendMailBusiness(_vakapayRepositoryFactory, false);
             userBusiness = new UserBusiness.UserBusiness(_vakapayRepositoryFactory, false);
-            portfolioHistoryBusiness = (PortfolioHistoryBusiness.PortfolioHistoryBusiness)_vakapayRepositoryFactory.GetPortfolioHistoryRepository(_connectionDb);
+            portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(_vakapayRepositoryFactory,false);
+                //(PortfolioHistoryBusiness.PortfolioHistoryBusiness)_vakapayRepositoryFactory.GetPortfolioHistoryRepository(_connectionDb);
         }
 
         /// <summary>
@@ -206,7 +207,7 @@ namespace Vakapay.WalletBusiness
         /// <param name="toAddress"></param>
         /// <param name="amount"></param>
         /// <returns></returns>
-        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount)
+        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount,string description=null)
         {
             /*
              * 1. Validate User status
@@ -345,6 +346,7 @@ namespace Vakapay.WalletBusiness
                     ToAddress = toAddress,
                     Fee = free,
                     Amount = amount,
+                    Description= description
                 }, walletById.Currency);
 
                 return insertWithdraw;
