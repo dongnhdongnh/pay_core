@@ -97,7 +97,7 @@ namespace Vakapay.UserSendTransactionBusiness
                 };
             }
 
-            var res = walletBusiness.Withdraw(wallet, sendTransaction.To, sendTransaction.Amount);
+            var res = walletBusiness.Withdraw(wallet, sendTransaction.To, sendTransaction.Amount,sendTransaction.Description);
             return res;
         }
 
@@ -147,6 +147,7 @@ namespace Vakapay.UserSendTransactionBusiness
                 Amount = sendTransaction.Amount,
                 Currency = sendTransaction.Currency,
                 Idem = sendTransaction.Idem,
+                Description=sendTransaction.Description
             };
 
             insertRes = internalTransactionsRepository.Insert(internalTransactions);
