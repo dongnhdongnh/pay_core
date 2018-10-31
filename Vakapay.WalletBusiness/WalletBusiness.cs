@@ -30,6 +30,7 @@ namespace Vakapay.WalletBusiness
         VakacoinBusiness.VakacoinBusiness vakacoinBussiness;
         SendMailBusiness.SendMailBusiness sendMailBusiness;
         UserBusiness.UserBusiness userBusiness;
+        PortfolioHistoryBusiness.PortfolioHistoryBusiness portfolioHistoryBusiness;
         private readonly IVakapayRepositoryFactory _vakapayRepositoryFactory;
 
         private readonly IDbConnection _connectionDb;
@@ -48,6 +49,7 @@ namespace Vakapay.WalletBusiness
             vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
             sendMailBusiness = new SendMailBusiness.SendMailBusiness(_vakapayRepositoryFactory, false);
             userBusiness = new UserBusiness.UserBusiness(_vakapayRepositoryFactory, false);
+            portfolioHistoryBusiness = (PortfolioHistoryBusiness.PortfolioHistoryBusiness)_vakapayRepositoryFactory.GetPortfolioHistoryRepository(_connectionDb);
         }
 
         /// <summary>
@@ -548,8 +550,10 @@ namespace Vakapay.WalletBusiness
                 else
                 {
                     User user = userBusiness.GetUserById(wallet.UserId);
+                   
                     if (user != null)
                     {
+                        portfolioHistoryBusiness.InsertWithPrice(user.Id);
                         //send mail:
                         EmailQueue email = new EmailQueue()
                         {
