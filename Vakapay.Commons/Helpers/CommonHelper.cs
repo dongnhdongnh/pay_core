@@ -119,6 +119,13 @@ namespace Vakapay.Commons.Helpers
                 out result);
         }
 
+        public static bool HexToBigInteger(this string hex, out BigInteger result)
+        {
+            char[] trimHex = new char[] {'0', 'x'};
+            return BigInteger.TryParse(hex.TrimStart(trimHex), System.Globalization.NumberStyles.HexNumber, null,
+                out result);
+        }
+
         public static string GetPropertyName<T, P>(Expression<Func<T, P>> propertyDelegate)
         {
             var expression = (MemberExpression)propertyDelegate.Body;

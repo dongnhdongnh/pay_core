@@ -152,6 +152,11 @@ namespace Vakapay.EthereumBusiness
             return amount * 1000000000000000000;
         }
 
+        public static decimal WeiToEther(BigInteger amount)
+        {
+            return ((decimal) amount) / 1000000000000000000;
+        }
+
         /// <summary>
         /// This function send transaction
         /// </summary>
