@@ -169,8 +169,12 @@ namespace Vakapay.ApiServer.Controllers
                         Status = Status.STATUS_SUCCESS,
                     }.ToJson();
 
+                userModel.IsLockScreen = 1;
+                _userBusiness.UpdateProfile(userModel);
 
-                return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
+                    ActionLog.LOCK_SCREEN,
+                    HelpersApi.GetIp(Request)).ToJson();
             }
             catch (Exception e)
             {
