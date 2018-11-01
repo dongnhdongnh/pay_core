@@ -81,8 +81,8 @@ namespace Vakapay.ApiServer.Controllers
                 if (
                     !value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_STATUS) ||
                     !value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_PASSWORD))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-                
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 1);
+
                 var code = "";
                 if (value.ContainsKey(ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE))
                     code = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_CODE].ToString();
@@ -90,12 +90,12 @@ namespace Vakapay.ApiServer.Controllers
                 var status = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_STATUS];
 
                 if (!int.TryParse((string) status, out var outStatus))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 2);
 
                 var password = value[ParseDataKeyApi.KEY_SECURITY_UPDATE_CLOSE_ACCOUNT_PASSWORD].ToString();
 
-                if (!HelpersApi.ValidatePass(password))
-                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                if (!HelpersApi.ValidateSecondPass(password))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 3);
 
                 bool isVerify = false;
 
@@ -103,13 +103,13 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     case 1:
                         if (!value.ContainsKey("code"))
-                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 4);
 
                         isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
                         break;
                     case 2:
                         if (!value.ContainsKey("code"))
-                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 5);
 
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
                         if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
@@ -160,7 +160,7 @@ namespace Vakapay.ApiServer.Controllers
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                 var password = value[ParseDataKeyApi.KEY_SECURITY_VERIFY_PASSWORD].ToString();
 
-                if (!HelpersApi.ValidatePass(password))
+                if (!HelpersApi.ValidateSecondPass(password))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 if (CommonHelper.Md5(password).Equals(userModel.SecondPassword))

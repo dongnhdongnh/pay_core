@@ -43,6 +43,12 @@ namespace Vakapay.ApiServer.Helpers
             return Regex.IsMatch(pass, pattern);
         }
 
+        public static bool ValidateSecondPass(string pass)
+        {
+            const string pattern = @"^([^\s]*)$";
+            return Regex.IsMatch(pass, pattern);
+        }
+
         public static bool ValidatePermission(string permission)
         {
             var datas = permission.Split(",");
