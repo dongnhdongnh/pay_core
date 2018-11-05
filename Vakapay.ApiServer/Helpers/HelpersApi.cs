@@ -23,6 +23,10 @@ namespace Vakapay.ApiServer.Helpers
             return ip;
         }
 
+        public static bool ValidateCurrency(string currency)
+        {
+            return CryptoCurrency.ALL_NETWORK.Contains(currency);
+        }
 
         public static bool CheckCodeGoogle(string secret, string token)
         {

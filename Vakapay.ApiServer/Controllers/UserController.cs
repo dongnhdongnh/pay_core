@@ -165,7 +165,7 @@ namespace Vakapay.ApiServer.Controllers
                     var resultData = _userBusiness.Login(userClaims);
 
                     if (resultData.Status == Status.STATUS_ERROR)
-                        return CreateDataError("Can't not created User");
+                        return CreateDataError(resultData.Message);
 
 
                     userModel = Vakapay.Models.Entities.User.FromJson(resultData.Data);
@@ -219,10 +219,16 @@ namespace Vakapay.ApiServer.Controllers
                 userModel.TwoFactorSecret = null;
                 userModel.SecondPassword = null;
                 userModel.Id = null;
+                userModel.PhoneNumber = !string.IsNullOrEmpty(userModel.PhoneNumber)
+                    ? "*********" + userModel.PhoneNumber.Remove(0, 9)
+                    : null;
+                if (userModel.Birthday.Contains("1900-01-01"))
+                    userModel.Birthday = null;
+
                 return new ReturnObject
                 {
                     Status = Status.STATUS_SUCCESS,
-                    Data = Vakapay.Models.Entities.User.ToJson(userModel)
+                    Data = userModel.ToJson()
                 }.ToJson();
             }
             catch (Exception e)

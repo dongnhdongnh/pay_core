@@ -463,6 +463,7 @@ namespace Vakapay.UserBusiness
                         userModel.Id = CommonHelper.GenerateUuid();
                         userModel.Status = Status.STATUS_ACTIVE;
                         userModel.FullName = userModel.FirstName + " " + userModel.LastName;
+                        
                         //created new user
                         var resultCreatedUser = userRepository.Insert(userModel);
 
@@ -470,7 +471,7 @@ namespace Vakapay.UserBusiness
                             return new ReturnObject
                             {
                                 Status = Status.STATUS_ERROR,
-                                Message = "Fail insert to userRepository"
+                                Message = resultCreatedUser.Message
                             };
 
 
