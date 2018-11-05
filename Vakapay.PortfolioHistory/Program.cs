@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using NLog;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
@@ -10,6 +11,8 @@ namespace Vakapay.PortfolioHistory
 {
     class Program
     {
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
+        
         private static List<string> GetDistinctUserId(WalletBusiness.WalletBusiness walletBusiness)
         {
             return walletBusiness.DistinctUserId();
@@ -23,7 +26,7 @@ namespace Vakapay.PortfolioHistory
                 var lsUserId = GetDistinctUserId(walletBusiness);
                 foreach (var userId in lsUserId)
                 {
-                    Console.WriteLine("Scanned UserId = " + userId + " at " + CommonHelper.GetUnixTimestamp());
+                    _logger.Info("Scanned UserId = " + userId + " at " + CommonHelper.GetUnixTimestamp());
                     portfolioHistoryBusiness.InsertWithPrice(userId);
                 }
 

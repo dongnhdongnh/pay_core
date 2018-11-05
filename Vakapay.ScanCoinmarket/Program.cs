@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using NLog;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 
@@ -11,20 +12,28 @@ namespace Vakapay.ScanCoinmarket
     class Program
     {
         private static HttpClient client = new HttpClient();
+        private static Logger _logger = LogManager.GetCurrentClassLogger();
 
         static async Task<string> GetAsync(string path)
         {
-            Console.WriteLine("path = " + path);
+            _logger.Info("path = " + path);
             string result = null;
-            HttpResponseMessage response = await client.GetAsync(path);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                string resultTemp = await response.Content.ReadAsStringAsync();
-                var jsonObj = JToken.Parse(resultTemp);
-                result = JsonHelper.SerializeObject(jsonObj["price_usd"]);
+                HttpResponseMessage response = await client.GetAsync(path);
+                if (response.IsSuccessStatusCode)
+                {
+                    string resultTemp = await response.Content.ReadAsStringAsync();
+                    var jsonObj = JToken.Parse(resultTemp);
+                    result = JsonHelper.SerializeObject(jsonObj["price_usd"]);
+                }
+                return result;
             }
-
-            return result;
+            catch (Exception e)
+            {
+                _logger.Error(e);
+                return null;
+            }
         }
 
         static async Task<string> GetAsyncByTimeStamp(string networkName, long from, long to)
@@ -56,14 +65,17 @@ namespace Vakapay.ScanCoinmarket
                         {
                             var priceList = await GetAsyncByTimeStamp(networkName,
                                 currentTime - Time.SECOND_COUNT_IN_PERIOD[timeCondition], currentTime);
-                            CacheHelper.SetCacheString(
-                                String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, networkName, timeCondition),
-                                priceList);
+                            if (priceList != null)
+                            {
+                                CacheHelper.SetCacheString(
+                                    String.Format(RedisCacheKey.COINMARKET_PRICE_CACHEKEY, networkName, timeCondition),
+                                    priceList);
+                            }
                         }
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine("Error when scanCoinmarket save to redis " + e);
+                        _logger.Error("Error when scanCoinmarket save to redis " + e);
                         throw;
                     }
                 }
@@ -89,7 +101,7 @@ namespace Vakapay.ScanCoinmarket
             client.Timeout = TimeSpan.FromSeconds(30);
             while (true)
             {
-                Console.WriteLine("Get data from Coinmarket!!!");
+                _logger.Info("Get data from Coinmarket!!!");
                 RunAsync().GetAwaiter().GetResult();
                 Thread.Sleep(AppSettingHelper.GetCoinMarketInterval());
             }
