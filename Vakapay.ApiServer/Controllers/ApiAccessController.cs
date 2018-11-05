@@ -90,21 +90,18 @@ namespace Vakapay.ApiServer.Controllers
             {
                 case "id":
                     return desc + "Id";
-
                 case "userid":
                     return desc + "UserId";
-
                 case "keyapi":
                     return desc + "KeyApi";
-
                 case "permissions":
                     return desc + "Permissions";
-
                 case "wallets":
                     return desc + "Wallets";
-
                 case "status":
                     return desc + "Status";
+                case "updatedat":
+                    return desc + "UpdatedAt";
 
                 default:
                     return null;
@@ -122,7 +119,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("limit"))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                StringValues sort;
+                StringValues sort = "-updatedat";
                 StringValues filter;
                 queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_OFFSET, out var offset);
                 queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_LIMIT, out var limit);
@@ -174,7 +171,7 @@ namespace Vakapay.ApiServer.Controllers
 
         // POST api/values
         // verify code and update when update verify
-        [HttpPost("api-access/edit")]
+        [HttpPost("api-key/edit")]
         public string EditApiAccess([FromBody] JObject value)
         {
             try

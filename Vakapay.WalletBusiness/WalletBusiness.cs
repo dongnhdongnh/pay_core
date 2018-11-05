@@ -920,7 +920,7 @@ namespace Vakapay.WalletBusiness
             }
         }
 
-        private async Task<ReturnObject> CreateAddressForWallet(Wallet pendingWallet)
+        public async Task<ReturnObject> CreateAddressForWallet(Wallet pendingWallet)
         {
             try
             {
@@ -1053,6 +1053,22 @@ namespace Vakapay.WalletBusiness
                     Status = Status.STATUS_ERROR,
                     Message = "Validate amount throw exception."
                 };
+            }
+        }
+        
+        public List<BlockchainAddress> GetAddressesFull(string walletId, string networkName)
+        {
+            try
+            {
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
+                return walletRepository.GetAddresses(walletId, networkName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
             }
         }
     }
