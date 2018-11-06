@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
@@ -85,10 +86,15 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpPost("create-addresses")]
-        public ActionResult<ReturnObject> CreateAddresses([FromQuery] string networkName)
+        public ActionResult<ReturnObject> CreateAddresses([FromBody] JObject value)
         {
             try
             {
+                if (!value.ContainsKey(ParseDataKeyApi.KEY_TOOLS_NETWORK))
+                    return CreateDataErrorObject(MessageApiError.PARAM_INVALID);
+                
+                var networkName =  value[ParseDataKeyApi.KEY_TOOLS_NETWORK].ToString();
+                
                 if (!HelpersApi.ValidateCurrency(networkName))
                     return CreateDataErrorObject(MessageApiError.PARAM_INVALID);
 

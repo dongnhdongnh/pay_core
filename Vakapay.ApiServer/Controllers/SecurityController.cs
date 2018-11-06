@@ -97,6 +97,16 @@ namespace Vakapay.ApiServer.Controllers
                 if (!HelpersApi.ValidateSecondPass(password))
                     return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID + 3);
 
+                if (userModel.IsLockScreen != 0)
+                {
+                    if (!CommonHelper.Md5(password).Equals(userModel.SecondPassword))
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Pass is invalid"
+                        }.ToJson();
+                }
+
                 bool isVerify = false;
 
                 switch (userModel.IsTwoFactor)
@@ -115,7 +125,7 @@ namespace Vakapay.ApiServer.Controllers
                         if (string.IsNullOrEmpty(secretAuthToken.LockScreen))
                             return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.LockScreen, code, userModel, 120);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.LockScreen, code, userModel);
                         break;
                     case 0:
                         isVerify = true;

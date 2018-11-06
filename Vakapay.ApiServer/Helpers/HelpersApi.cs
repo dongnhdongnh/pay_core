@@ -140,6 +140,9 @@ namespace Vakapay.ApiServer.Helpers
                     case ActionLog.TWOFA_ENABLE:
                         newSecret.TwofaEnable = secret;
                         break;
+                    case ActionLog.CUSTOM_TWOFA:
+                        newSecret.CustomTwofa = secret;
+                        break;
                     case ActionLog.UPDATE_OPTION_VETIFY:
                         newSecret.UpdateOptionVerification = secret;
                         break;
@@ -149,8 +152,11 @@ namespace Vakapay.ApiServer.Helpers
                     case ActionLog.API_ACCESS_EDIT:
                         newSecret.ApiAccessEdit = secret;
                         break;
-                    case ActionLog.API_ACCESS:
-                        newSecret.ApiAccess = secret;
+                    case ActionLog.API_ACCESS_DELETE:
+                        newSecret.ApiAccessDelete = secret;
+                        break;
+                    case ActionLog.API_ACCESS_STATUS:
+                        newSecret.ApiAccessStatus = secret;
                         break;
                     case ActionLog.SEND_TRANSACTION:
                         newSecret.SendTransaction = secret;

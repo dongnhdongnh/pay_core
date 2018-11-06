@@ -386,7 +386,7 @@ namespace Vakapay.ApiServer.Controllers
                         if (string.IsNullOrEmpty(secretAuthToken.ApiAccessDelete))
                             return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessDelete, code, userModel, 120);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessDelete, code, userModel);
                         break;
                     case 0:
                         isVerify = true;
@@ -444,10 +444,10 @@ namespace Vakapay.ApiServer.Controllers
                         if (!value.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_CODE))
                             return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
-                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccessStatus))
                             return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel, 120);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessStatus, code, userModel);
                         break;
                     case 0:
                         isVerify = true;
@@ -505,10 +505,10 @@ namespace Vakapay.ApiServer.Controllers
                             return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
                         var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
 
-                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccess))
+                        if (string.IsNullOrEmpty(secretAuthToken.ApiAccessStatus))
                             return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
 
-                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccess, code, userModel, 120);
+                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.ApiAccessStatus, code, userModel);
                         break;
                     case 0:
                         isVerify = true;
