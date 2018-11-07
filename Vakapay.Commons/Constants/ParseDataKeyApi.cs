@@ -8,6 +8,7 @@ namespace Vakapay.Commons.Constants
         public const string KEY_PASS_DATA_GET_LIMIT = "limit";
         public const string KEY_PASS_DATA_GET_FILTER = "filter";
         public const string KEY_PASS_DATA_GET_SORT = "sort";
+        public const string KEY_PASS_DATA_GET_NETWORK = "networkName";
         public const string KEY_PASS_DATA_GET_CODE = "code";
 
 

@@ -49,8 +49,9 @@ namespace Vakapay.WalletBusiness
             vakacoinBussiness = new VakacoinBusiness.VakacoinBusiness(vakapayRepositoryFactory, false);
             sendMailBusiness = new SendMailBusiness.SendMailBusiness(_vakapayRepositoryFactory, false);
             userBusiness = new UserBusiness.UserBusiness(_vakapayRepositoryFactory, false);
-            portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(_vakapayRepositoryFactory,false);
-                //(PortfolioHistoryBusiness.PortfolioHistoryBusiness)_vakapayRepositoryFactory.GetPortfolioHistoryRepository(_connectionDb);
+            portfolioHistoryBusiness =
+                new PortfolioHistoryBusiness.PortfolioHistoryBusiness(_vakapayRepositoryFactory, false);
+            //(PortfolioHistoryBusiness.PortfolioHistoryBusiness)_vakapayRepositoryFactory.GetPortfolioHistoryRepository(_connectionDb);
         }
 
         /// <summary>
@@ -207,7 +208,7 @@ namespace Vakapay.WalletBusiness
         /// <param name="toAddress"></param>
         /// <param name="amount"></param>
         /// <returns></returns>
-        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount,string description=null)
+        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount, string description = null)
         {
             /*
              * 1. Validate User status
@@ -346,7 +347,7 @@ namespace Vakapay.WalletBusiness
                     ToAddress = toAddress,
                     Fee = free,
                     Amount = amount,
-                    Description= description
+                    Description = description
                 }, walletById.Currency);
 
                 return insertWithdraw;
@@ -552,7 +553,7 @@ namespace Vakapay.WalletBusiness
                 else
                 {
                     User user = userBusiness.GetUserById(wallet.UserId);
-                   
+
                     if (user != null)
                     {
                         portfolioHistoryBusiness.InsertWithPrice(user.Id);
@@ -1055,20 +1056,80 @@ namespace Vakapay.WalletBusiness
                 };
             }
         }
-        
-        public List<BlockchainAddress> GetAddressesFull(string walletId, string networkName)
+
+        public List<BlockchainAddress> GetAddressesFull(out int numberData, string walletId, string networkName,
+            int offset = 0, int limit = 8,
+            string filter = "", string sort = "")
+        {
+            numberData = -1;
+            try
+            {
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
+                return walletRepository.GetAddressesLimit(out numberData, walletId, networkName, offset, limit,
+                    filter);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        public BlockchainAddress GetAddressesInfo(string id, string networkName)
         {
             try
             {
                 if (_connectionDb.State != ConnectionState.Open)
                     _connectionDb.Open();
                 var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
-                return walletRepository.GetAddresses(walletId, networkName);
+                return walletRepository.GetAddressesInfo(id, networkName);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 return null;
+            }
+        }
+
+        public ReturnObject UpdateAddress(string id, string networkName, string label)
+        {
+            try
+            {
+                switch (networkName)
+                {
+                    case CryptoCurrency.BTC:
+                        var bitcoinAddressRepository = new BitcoinAddressRepository(_connectionDb);
+                        BitcoinAddress bitcoinAddress = bitcoinAddressRepository.FindById(id);
+                        bitcoinAddress.Label = label;
+                        return bitcoinAddressRepository.Update(bitcoinAddress);
+
+                    case CryptoCurrency.ETH:
+                        var ethereumAddressRepository = new EthereumAddressRepository(_connectionDb);
+                        EthereumAddress ethereumAddress = ethereumAddressRepository.FindById(id);
+                        ethereumAddress.Label = label;
+                        return ethereumAddressRepository.Update(ethereumAddress);
+
+                    case CryptoCurrency.VAKA:
+                        var vakacoinAddressRepository = new VakacoinAccountRepository(_connectionDb);
+                        VakacoinAccount vakacoinAccount = vakacoinAddressRepository.FindById(id);
+                        vakacoinAccount.Label = label;
+                        return vakacoinAddressRepository.Update(vakacoinAccount);
+                    default:
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR
+                        };
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR
+                };
             }
         }
     }

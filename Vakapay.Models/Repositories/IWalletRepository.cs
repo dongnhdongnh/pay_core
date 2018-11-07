@@ -12,7 +12,9 @@ namespace Vakapay.Models.Repositories
         Wallet FindByUserAndNetwork(string userId, string currency);
         List<Wallet> FindNullAddress();
         List<BlockchainAddress> GetAddresses(string walletId, string networkName);
+        List<BlockchainAddress> GetAddressesLimit(out int numberData,string walletId, string networkName,int skip, int take, string filter);
         Wallet FindByAddressAndNetworkName(string address, string networkName);
+        BlockchainAddress GetAddressesInfo(string id, string networkName);
         List<string> GetStringAddresses(string walletId, string networkName);
         List<string> DistinctUserId();
     }

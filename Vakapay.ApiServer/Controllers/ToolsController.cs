@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
 using Vakapay.ApiServer.ActionFilter;
 using Vakapay.ApiServer.Helpers;
@@ -54,24 +55,50 @@ namespace Vakapay.ApiServer.Controllers
 
 
         [HttpGet("get-addresses")]
-        public ActionResult<ReturnObject> GetAddresses([FromQuery] string networkName)
+        public string GetAddresses()
         {
             try
             {
+                var queryStringValue = Request.Query;
+
+
+                if (!queryStringValue.ContainsKey("offset") || !queryStringValue.ContainsKey("networkName") ||
+                    !queryStringValue.ContainsKey("limit"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                StringValues sort;
+                StringValues filter;
+                StringValues networkName;
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_OFFSET, out var offset);
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_LIMIT, out var limit);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_FILTER, out filter);
+                if (queryStringValue.ContainsKey(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT))
+                    queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_SORT, out sort);
+
+                queryStringValue.TryGetValue(ParseDataKeyApi.KEY_PASS_DATA_GET_NETWORK, out networkName);
+                //sort = ConvertSortLog(sort);
+
                 if (!HelpersApi.ValidateCurrency(networkName))
-                    return CreateDataErrorObject(MessageApiError.PARAM_INVALID);
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
                 var userModel = (User) RouteData.Values["UserModel"];
 
                 var wallet = _walletBusiness.FindByUserAndNetwork(userModel.Id, networkName);
-
-                var listAddresses = _walletBusiness.GetAddressesFull(wallet.Id, networkName);
+                int numberData;
+                var listAddresses = _walletBusiness.GetAddressesFull(out numberData, wallet.Id, networkName,
+                    Convert.ToInt32(offset),
+                    Convert.ToInt32(limit), filter.ToString(), sort);
 
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
-                    Data = JsonHelper.SerializeObject(listAddresses)
-                };
+                    Data = new ResultList<BlockchainAddress>
+                    {
+                        List = listAddresses,
+                        Total = numberData
+                    }.ToJson()
+                }.ToJson();
             }
             catch (Exception e)
             {
@@ -79,7 +106,91 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     Status = Status.STATUS_ERROR,
                     Message = e.Message
-                };
+                }.ToJson();
+            }
+
+        }
+
+        [HttpPost("update-addresses-info")]
+        public string UpdateLabel([FromBody] JObject value)
+        {
+            try
+            {
+                if (!value.ContainsKey("id") || !value.ContainsKey("networkName"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var id = value["id"].ToString();
+                var networkName = value["networkName"].ToString();
+
+                if (!HelpersApi.ValidateCurrency(networkName))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                if (!CommonHelper.ValidateId(id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                if (value.ContainsKey("label"))
+                {
+                    var label = value["label"].ToString();
+                    var result = _walletBusiness.UpdateAddress(id, networkName, label);
+
+                    if (result.Status == Status.STATUS_SUCCESS)
+
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_SUCCESS
+                        }.ToJson();
+                }
+
+
+                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                }.ToJson();
+            }
+        }
+
+        [HttpPost("get-addresses-info")]
+        public string GetAddressesInfo([FromBody] JObject value)
+        {
+            try
+            {
+                if (!value.ContainsKey("id") || !value.ContainsKey("networkName"))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var id = value["id"].ToString();
+                var networkName = value["networkName"].ToString();
+
+                if (!HelpersApi.ValidateCurrency(networkName))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                if (!CommonHelper.ValidateId(id))
+                    return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
+
+                var address = _walletBusiness.GetAddressesInfo(id, networkName);
+
+                if (address != null)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonHelper.SerializeObject(address)
+                    }.ToJson();
+                }
+
+                return HelpersApi.CreateDataError(MessageApiError.DATA_NOT_FOUND);
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                }.ToJson();
             }
 
             //  return null;
@@ -92,9 +203,9 @@ namespace Vakapay.ApiServer.Controllers
             {
                 if (!value.ContainsKey(ParseDataKeyApi.KEY_TOOLS_NETWORK))
                     return CreateDataErrorObject(MessageApiError.PARAM_INVALID);
-                
-                var networkName =  value[ParseDataKeyApi.KEY_TOOLS_NETWORK].ToString();
-                
+
+                var networkName = value[ParseDataKeyApi.KEY_TOOLS_NETWORK].ToString();
+
                 if (!HelpersApi.ValidateCurrency(networkName))
                     return CreateDataErrorObject(MessageApiError.PARAM_INVALID);
 

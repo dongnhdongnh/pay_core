@@ -116,7 +116,7 @@ namespace Vakapay.Repositories.Mysql
                 if (Connection.State != ConnectionState.Open)
                     Connection.Open();
 //                Int32 unixTimestamp = (Int32)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-                var unixTimestamp = (int)CommonHelper.GetUnixTimestamp();
+                var unixTimestamp = (int) CommonHelper.GetUnixTimestamp();
                 string sQuery =
                     $"UPDATE {TableName} SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID AND Version = @VERSION";
 
@@ -230,6 +230,82 @@ namespace Vakapay.Repositories.Mysql
                 }
 
                 return result;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+
+        public List<BlockchainAddress> GetAddressesLimit(out int numberData, string walletId, string networkName,
+            int offset = 0, int limit = 0, string filter = "")
+        {
+            numberData = -1;
+            try
+            {
+                List<BlockchainAddress> blockchainAddresses = null;
+                switch (networkName)
+                {
+                    case CryptoCurrency.BTC:
+                        blockchainAddresses = new BitcoinAddressRepository(Connection)
+                            .FindByWalletIdLimit(out numberData, walletId, offset, limit, filter)
+                            .ToList<BlockchainAddress>();
+                        break;
+
+                    case CryptoCurrency.ETH:
+                        blockchainAddresses = new EthereumAddressRepository(Connection)
+                            .FindByWalletIdLimit(out numberData, walletId, offset, limit, filter)
+                            .ToList<BlockchainAddress>();
+                        break;
+
+                    case CryptoCurrency.VAKA:
+                        blockchainAddresses = new VakacoinAccountRepository(Connection)
+                            .FindByWalletIdLimit(out numberData, walletId, offset, limit, filter)
+                            .ToList<BlockchainAddress>();
+                        break;
+
+                    default:
+                        throw new Exception("Network name is not defined!");
+                }
+
+                return blockchainAddresses;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        public BlockchainAddress GetAddressesInfo(string id, string networkName)
+        {
+            try
+            {
+                BlockchainAddress blockchainAddresses = null;
+                switch (networkName)
+                {
+                    case CryptoCurrency.BTC:
+                        blockchainAddresses = new BitcoinAddressRepository(Connection)
+                            .FindById(id);
+                        break;
+
+                    case CryptoCurrency.ETH:
+                        blockchainAddresses = new EthereumAddressRepository(Connection)
+                            .FindById(id);
+                        break;
+
+                    case CryptoCurrency.VAKA:
+                        blockchainAddresses = new VakacoinAccountRepository(Connection)
+                            .FindById(id);
+                        break;
+
+                    default:
+                        throw new Exception("Network name is not defined!");
+                }
+
+                return blockchainAddresses;
             }
             catch (Exception e)
             {

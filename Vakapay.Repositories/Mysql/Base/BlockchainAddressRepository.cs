@@ -57,6 +57,32 @@ namespace Vakapay.Repositories.Mysql.Base
             }
         }
 
+        public List<TAddress> FindByWalletIdLimit(out int numberData, string walletId, int skip, int take,
+            string filter)
+        {
+            numberData = -1;
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+                var sQuery = $"SELECT * FROM {TableName} WHERE WalletId = @WI";
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    sQuery += " AND Address LIKE '%" + filter + "%'";
+                }
+
+                numberData = Connection.Query(sQuery, new {WI = walletId}).Count();
+                var result = Connection.Query<TAddress>(sQuery, new {WI = walletId}).Skip(skip).Take(take).ToList();
+
+                return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"FindByWalletId walletID ({walletId}) Fail =>> fail: " + e.Message);
+                throw;
+            }
+        }
+
         public List<TAddress> FindByUserIdAndCurrency(string userId, string currency)
         {
             try

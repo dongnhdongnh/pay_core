@@ -10,6 +10,7 @@ namespace Vakapay.Models.Domains
     public abstract class BlockchainAddress : BaseModel
     {
         public string Address { get; set; }
+        public string Label { get; set; }
         public string WalletId { get; set; }
         public string Status { get; set; }
 
