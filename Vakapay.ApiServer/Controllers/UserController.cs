@@ -8,13 +8,11 @@ using System.Net.Cache;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using NLog;
 using Vakapay.ApiServer.ActionFilter;
@@ -26,7 +24,6 @@ using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-using Vakapay.Commons.Constants;
 
 namespace Vakapay.ApiServer.Controllers
 {
@@ -86,7 +83,7 @@ namespace Vakapay.ApiServer.Controllers
                             file.CopyTo(m);
                             m.Close();
                             // Convert byte[] to Base64 String
-                            string base64String = Convert.ToBase64String(m.GetBuffer());
+                            var base64String = Convert.ToBase64String(m.GetBuffer());
 
                             var values = new NameValueCollection
                             {
@@ -154,6 +151,13 @@ namespace Vakapay.ApiServer.Controllers
 
                 var userModel = _userBusiness.GetUserInfo(query);
 
+                var ip = HelpersApi.GetIp(Request);
+                IpGeographicalLocation location = null;
+                if (ip != null)
+                {
+                    //get location for ip
+                    location = await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
+                }
 
                 if (userModel == null)
                 {
@@ -161,6 +165,18 @@ namespace Vakapay.ApiServer.Controllers
                         .SingleOrDefault();
 
                     var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
+                    if (location != null)
+                    {
+                        if (location.Currency?.Code != null)
+                        {
+                            userClaims.CurrencyKey = location.Currency.Code;
+                        }
+
+                        if (location.TimeZone?.Id != null)
+                        {
+                            userClaims.TimezoneKey = location.TimeZone.Id;
+                        }
+                    }
 
                     var resultData = _userBusiness.Login(userClaims);
 
@@ -178,9 +194,6 @@ namespace Vakapay.ApiServer.Controllers
                     return _walletBusiness.MakeAllWalletForNewUser(userModel).ToJson();
                 }
 
-                var ip = HelpersApi.GetIp(Request);
-
-
                 if (string.IsNullOrEmpty(ip))
                     return new ReturnObject
                     {
@@ -188,9 +201,7 @@ namespace Vakapay.ApiServer.Controllers
                         Data = Vakapay.Models.Entities.User.ToJson(userModel)
                     }.ToJson();
 
-                //get location for ip
-                var location =
-                    await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
+                UpdateCurrencyAndTimeZone(userModel, location);
 
                 var browser = HelpersApi.GetBrowser(Request);
 
@@ -198,7 +209,7 @@ namespace Vakapay.ApiServer.Controllers
                 {
                     Browser = browser,
                     Ip = ip,
-                    Location = !string.IsNullOrEmpty(location.CountryName)
+                    Location = location != null && !string.IsNullOrEmpty(location.CountryName)
                         ? location.City + "," + location.CountryName
                         : "localhost",
                     UserId = userModel.Id
@@ -410,6 +421,27 @@ namespace Vakapay.ApiServer.Controllers
                 Status = Status.STATUS_ERROR,
                 Message = message
             }.ToJson();
+        }
+
+        private void UpdateCurrencyAndTimeZone(User userModel, IpGeographicalLocation location)
+        {
+            var isUpdate = false;
+            if (userModel.CurrencyKey == null && location?.Currency != null)
+            {
+                userModel.CurrencyKey = location.Currency.Code;
+                isUpdate = true;
+            }
+
+            if (userModel.TimezoneKey == null && location?.TimeZone != null)
+            {
+                userModel.TimezoneKey = location.TimeZone.Id;
+                isUpdate = true;
+            }
+
+            if (isUpdate)
+            {
+                _userBusiness.UpdateProfile(userModel);
+            }
         }
     }
 }

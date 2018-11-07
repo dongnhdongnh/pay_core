@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Vakapay.Commons.Helpers
 {
-    public class IpGeographicalLocation
+    public partial class IpGeographicalLocation
     {
         [JsonProperty("ip")] public string Ip { get; set; }
 
@@ -20,7 +20,9 @@ namespace Vakapay.Commons.Helpers
 
         [JsonProperty("zip_code")] public string ZipCode { get; set; }
 
-        [JsonProperty("time_zone")] public string TimeZone { get; set; }
+        [JsonProperty("time_zone")] public TimeZone TimeZone { get; set; }
+
+        [JsonProperty("currency")] public Currency Currency { get; set; }
 
         [JsonProperty("latitude")] public string Latitude { get; set; }
 
@@ -34,12 +36,39 @@ namespace Vakapay.Commons.Helpers
 
         public static async Task<IpGeographicalLocation> QueryGeographicalLocationAsync(string ipAddress)
         {
-            HttpClient client = new HttpClient();
-            string result =
-                await client.GetStringAsync("http://api.ipstack.com/" + ipAddress +
-                                            "?access_key=aa7359fbf9db81bc6e7c96078784cb0c");
+            var client = new HttpClient();
+            var result = await client.GetStringAsync("http://api.ipstack.com/" + ipAddress +
+                                                     "?access_key=aa7359fbf9db81bc6e7c96078784cb0c");
 
             return JsonConvert.DeserializeObject<IpGeographicalLocation>(result);
         }
+    }
+
+    public class Currency
+    {
+        [JsonProperty("code")] public string Code { get; set; }
+        [JsonProperty("name")] public string Name { get; set; }
+        [JsonProperty("plural")] public string Plural { get; set; }
+        [JsonProperty("symbol")] public string Symbol { get; set; }
+        [JsonProperty("symbol_native")] public string SymbolNative { get; set; }
+    }
+
+    public class TimeZone
+    {
+        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("code")] public string Code { get; set; }
+    }
+
+    public partial class IpGeographicalLocation
+    {
+        public static IpGeographicalLocation FromJson(string json) =>
+            JsonConvert.DeserializeObject<IpGeographicalLocation>(json
+                , JsonHelper.CONVERT_SETTINGS);
+    }
+
+    public static class Serialize
+    {
+        public static string ToJson(this IpGeographicalLocation self) =>
+            JsonConvert.SerializeObject(self, JsonHelper.CONVERT_SETTINGS);
     }
 }
