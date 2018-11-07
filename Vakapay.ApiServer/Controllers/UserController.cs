@@ -165,6 +165,7 @@ namespace Vakapay.ApiServer.Controllers
                         .SingleOrDefault();
 
                     var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
+                    userClaims.Notifications = "1,2,3";
                     if (location != null)
                     {
                         if (location.Currency?.Code != null)
