@@ -110,5 +110,15 @@ namespace Vakapay.Commons.Helpers
         {
             return Int32.Parse(Get($"{Setting.SECTION_KEY_COIN_MARKET}:{Setting.SECTION_KEY_GET_PRICE_INTERVAL}"));
         }
+
+        public static string GetCurrencyConverterUrl()
+        {
+            return Get($"{Setting.SECTION_KEY_CURRENCY_CONVERTER_API}:{Setting.SECTION_KEY_URL}");
+        }
+
+        public static int GetCurrencyConverterInterval()
+        {
+            return Int32.Parse(Get($"{Setting.SECTION_KEY_CURRENCY_CONVERTER_API}:{Setting.SECTION_KEY_GET_CURRENCY_CONVERTER_INTERVAL}"));
+        }
     }
 }
