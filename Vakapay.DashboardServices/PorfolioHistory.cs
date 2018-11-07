@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using NLog;
 using Vakapay.Commons.Constants;
@@ -7,9 +6,9 @@ using Vakapay.Commons.Helpers;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
 
-namespace Vakapay.PortfolioHistory
+namespace Vakapay.DashboardServices
 {
-    class Program
+    public class PorfolioHistory
     {
         private static Logger _logger = LogManager.GetCurrentClassLogger();
         
@@ -34,7 +33,7 @@ namespace Vakapay.PortfolioHistory
             }
         }
 
-        static void Main(string[] args)
+        public static void RunPortfolioHistory()
         {
             var repositoryConfig = new RepositoryConfiguration
             {

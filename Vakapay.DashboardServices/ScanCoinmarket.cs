@@ -7,9 +7,9 @@ using NLog;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 
-namespace Vakapay.ScanCoinmarket
+namespace Vakapay.DashboardServices
 {
-    class Program
+    public class ScanCoinmarket
     {
         private static HttpClient client = new HttpClient();
         private static Logger _logger = LogManager.GetCurrentClassLogger();
@@ -38,7 +38,7 @@ namespace Vakapay.ScanCoinmarket
 
         static async Task<string> GetAsyncByTimeStamp(string networkName, long from, long to)
         {
-            string path = networkName + "/" + from.ToString() + "000/" + to.ToString() +
+            string path = networkName + "/" + from + "000/" + to +
                           "000"; //from and to in second -> to miliseconds
             var result = await GetAsync(path);
             return result;
@@ -95,7 +95,7 @@ namespace Vakapay.ScanCoinmarket
             }
         }
 
-        public static void Main(string[] args)
+        public static void RunScanCoinmarket()
         {
             client.BaseAddress = new Uri(AppSettingHelper.GetCoinMarketUrl());
             client.Timeout = TimeSpan.FromSeconds(30);

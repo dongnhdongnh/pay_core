@@ -5,13 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vakapay.Commons\Vakapay.Commons.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NLog">
-      <Version>4.5.10</Version>
-    </PackageReference>
-    <PackageReference Include="NLog.Config">
-      <Version>4.5.10</Version>
-    </PackageReference>
+    <ProjectReference Include="..\Vakapay.PortfolioHistoryBusiness\Vakapay.PortfolioHistoryBusiness.csproj" />
+    <ProjectReference Include="..\Vakapay.WalletBusiness\Vakapay.WalletBusiness.csproj" />
   </ItemGroup>
 </Project>

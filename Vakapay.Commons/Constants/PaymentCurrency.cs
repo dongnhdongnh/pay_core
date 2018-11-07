@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Vakapay.Commons.Constants
 {
-    public class PaymentCurrency
+    public static class PaymentCurrency
     {
         public static readonly Dictionary<string, string> LIST_CURRENCY = new Dictionary<string, string>
         {

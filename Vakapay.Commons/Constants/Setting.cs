@@ -21,6 +21,9 @@ namespace Vakapay.Commons.Constants
 
         public const string SECTION_KEY_COIN_MARKET = "CoinMarket";
         public const string SECTION_KEY_GET_PRICE_INTERVAL = "Interval";
+
+        public const string SECTION_KEY_CURRENCY_CONVERTER_API = "CurrencyConverterApi";
+        public const string SECTION_KEY_GET_CURRENCY_CONVERTER_INTERVAL = "Interval";
         
         public const string SECTION_KEY_IMGUR = "Imgur";
         public const string SECTION_KEY_IMG_API_KEY = "ApiKey";

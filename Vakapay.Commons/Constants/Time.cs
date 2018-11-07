@@ -6,7 +6,7 @@ namespace Vakapay.Commons.Constants
     {
         public static readonly Dictionary<string, long> SECOND_COUNT_IN_PERIOD = new Dictionary<string, long>
         {
-            {DashboardConfig.CURRENT, 60*60},
+            {DashboardConfig.CURRENT, 24 * 60 * 60},
             {DashboardConfig.HOUR, 60 * 60},
             {DashboardConfig.DAY, 24 * 60 * 60},
             {DashboardConfig.WEEK, 7 * 24 * 60 * 60},
