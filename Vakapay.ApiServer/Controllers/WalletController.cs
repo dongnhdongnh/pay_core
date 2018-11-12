@@ -50,7 +50,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
                 var wallets = _walletBusiness.LoadAllWalletByUser(userModel);
                 return new ReturnObject()
                 {
@@ -79,7 +79,7 @@ namespace Vakapay.ApiServer.Controllers
         [HttpGet("Infor")]
         public ActionResult<string> GetWalletInfor([FromQuery] string networkName)
         {
-            var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+            var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
             var wallet = _walletBusiness.FindByUserAndNetwork(userModel.Id, networkName);
             return JsonHelper.SerializeObject(wallet);
             //  return null;
@@ -90,7 +90,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
                 var wallet = _walletBusiness.FindByUserAndNetwork(userModel.Id, networkName);
 
                 if (wallet == null)
@@ -161,7 +161,7 @@ namespace Vakapay.ApiServer.Controllers
                 float vakapayfee = 0.01f;
                 float minerfee = 0.01f;
                 float total = vakapayfee + minerfee + float.Parse(amount);
-                var feeObject = new {vakapayfee = vakapayfee, minerfee = minerfee, total = total};
+                var feeObject = new { vakapayfee = vakapayfee, minerfee = minerfee, total = total };
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
@@ -187,7 +187,7 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 //  var _history = _walletBusiness.GetHistory(walletSearch.wallet, 1, 3, new string[] { nameof(BlockchainTransaction.CreatedAt) });
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 int numberData;
                 var history = _walletBusiness.GetHistory(out numberData, userModel.Id, walletSearch.NetworkName,
@@ -215,12 +215,23 @@ namespace Vakapay.ApiServer.Controllers
         public ActionResult<string> SendTransactions([FromBody] JObject value)
         {
             ReturnObject result = null;
-            var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+            var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
             try
             {
                 var request = value.ToObject<SendTransaction>();
+                if (userModel.IsTwoFactor != 0)
+                {
+                    if (userModel.TwoFactorSecret == request.SmsCode)
+                    {
 
+                    }
+                    else
+                    {
+                        throw new Exception("Secret key not correct");
+                    }
+
+                }
                 var userRequest = new UserSendTransaction()
                 {
                     UserId = userModel.Id,
@@ -240,7 +251,7 @@ namespace Vakapay.ApiServer.Controllers
             {
                 Console.WriteLine(e);
                 result = new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message};
+                { Status = Status.STATUS_ERROR, Message = e.Message };
             }
 
             //  result = new ReturnObject() { Status = Status.STATUS_ERROR, Message = "test" };
@@ -260,19 +271,19 @@ namespace Vakapay.ApiServer.Controllers
                 if (res.Status == Status.STATUS_ERROR)
                 {
                     result = new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = res.Message};
+                    { Status = Status.STATUS_ERROR, Message = res.Message };
                 }
                 else
                 {
                     result = new ReturnDataObject()
-                        {Status = Status.STATUS_SUCCESS, Data = request};
+                    { Status = Status.STATUS_SUCCESS, Data = request };
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 result = new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message};
+                { Status = Status.STATUS_ERROR, Message = e.Message };
             }
             finally
             {
