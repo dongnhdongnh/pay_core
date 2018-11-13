@@ -37,7 +37,7 @@ namespace Vakapay.Commons.Constants
 
         //TwoFa controller VerifyCodeTransaction
         public const string KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS = "SMScode";
-
+        public const string KEY_TWO_FA_VERIFY_CODE_TRANSACTION_2FA = "TwoFAcode";
         //TwoFa controller SendCode
         public const string KEY_TWO_FA_SEND_CODE_ACTION = "action";
 

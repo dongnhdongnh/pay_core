@@ -152,7 +152,7 @@ namespace Vakapay.ApiServer.Controllers
         }
 
         [HttpGet("CheckSendCoin")]
-        public ActionResult<ReturnObject> CheckSendCoin([FromQuery] string fromAddress, [FromQuery] string toAddress,
+        public ActionResult<ReturnObject> CheckSendCoin([FromQuery] string toAddress,
             [FromQuery] string networkName, [FromQuery] string amount)
         {
             try
@@ -164,7 +164,7 @@ namespace Vakapay.ApiServer.Controllers
                 var feeObject = new { vakapayfee = vakapayfee, minerfee = minerfee, total = total };
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,
+                    Status = Status.STATUS_COMPLETED,  
                     // Data = numberData.ToString(),
                     Message = JsonHelper.SerializeObject(feeObject)
                 };
@@ -220,18 +220,18 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 var request = value.ToObject<SendTransaction>();
-                if (userModel.IsTwoFactor != 0)
-                {
-                    if (userModel.TwoFactorSecret == request.SmsCode)
-                    {
+                //if (userModel.IsTwoFactor != 0)
+                //{
+                //    if (userModel.TwoFactorSecret == request.SmsCode)
+                //    {
 
-                    }
-                    else
-                    {
-                        throw new Exception("Secret key not correct");
-                    }
+                //    }
+                //    else
+                //    {
+                //        throw new Exception("Secret key not correct");
+                //    }
 
-                }
+                //}
                 var userRequest = new UserSendTransaction()
                 {
                     UserId = userModel.Id,

@@ -29,7 +29,7 @@ namespace Vakapay.ApiServer.Controllers
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
-
+        WalletController _walletController;
 
         public TwoFaController(
             IConfiguration configuration,
@@ -42,7 +42,7 @@ namespace Vakapay.ApiServer.Controllers
             };
 
             PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-
+            _walletController = new WalletController();
             _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
         }
 
@@ -290,9 +290,11 @@ namespace Vakapay.ApiServer.Controllers
 
 
                 var code = "";
+                var codeGG = "";
                 if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
                     code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS].ToString();
-
+                if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_2FA))
+                    codeGG = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_2FA].ToString();
 
                 bool isVerify = false;
 
@@ -302,7 +304,7 @@ namespace Vakapay.ApiServer.Controllers
                         if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
                             return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
 
-                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, code);
+                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, codeGG);
                         break;
                     case 2:
                         if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
@@ -325,6 +327,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 // su ly data gui len
                 //to do
+                _walletController.SendTransactions(value);
 
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.SEND_TRANSACTION,
