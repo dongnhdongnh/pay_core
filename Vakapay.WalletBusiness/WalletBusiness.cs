@@ -208,7 +208,7 @@ namespace Vakapay.WalletBusiness
         /// <param name="toAddress"></param>
         /// <param name="amount"></param>
         /// <returns></returns>
-        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount, string description = null)
+        public ReturnObject Withdraw(Wallet wallet, string toAddress, decimal amount, decimal pricePerCoin, string description = null)
         {
             /*
              * 1. Validate User status
@@ -347,6 +347,7 @@ namespace Vakapay.WalletBusiness
                     ToAddress = toAddress,
                     Fee = free,
                     Amount = amount,
+                    PricePerCoin=pricePerCoin,
                     Description = description
                 }, walletById.Currency);
 

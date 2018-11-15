@@ -11,6 +11,7 @@ using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
+using Vakapay.Models.ClientRequest;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories;
@@ -29,7 +30,7 @@ namespace Vakapay.ApiServer.Controllers
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
-        WalletController _walletController;
+        WalletController _walletController=null;
 
         public TwoFaController(
             IConfiguration configuration,
@@ -327,7 +328,28 @@ namespace Vakapay.ApiServer.Controllers
 
                 // su ly data gui len
                 //to do
-                _walletController.SendTransactions(value);
+                if (_walletController == null)
+                    _walletController = new WalletController();
+                var request = value.ToObject<SendTransaction>();
+
+                var userRequest = new UserSendTransaction()
+                {
+                    UserId = userModel.Id,
+                    Type = "send",
+                    To = request.Detail.SendByAd
+                 ? request.Detail.RecipientWalletAddress
+                 : request.Detail.RecipientEmailAddress,
+                    SendByBlockchainAddress = request.Detail.SendByAd,
+                    Amount = request.Detail.VkcAmount,
+                    PricePerCoin = request.Detail.PricePerCoin,
+                    Currency = request.NetworkName,
+                    Description = request.Detail.VkcNote,
+                };
+                ReturnObject result = null;
+                result = _walletController.AddSendTransaction(userRequest);
+
+                return  JsonHelper.SerializeObject( result);
+                //  _walletController.SendTransactions(request,userModel);
 
                 return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
                     ActionLog.SEND_TRANSACTION,

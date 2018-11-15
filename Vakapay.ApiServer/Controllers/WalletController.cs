@@ -211,55 +211,56 @@ namespace Vakapay.ApiServer.Controllers
             //  return null;
         }
 
-        [HttpPost("sendTransactions")]
-        public ActionResult<string> SendTransactions([FromBody] JObject value)
-        {
-            ReturnObject result = null;
-            var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+      //  [HttpPost("sendTransactions")]
+        //public ActionResult<string> SendTransactions(SendTransaction value,User userModel)
+        //{
+        //    ReturnObject result = null;
+        //  //  var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
-            try
-            {
-                var request = value.ToObject<SendTransaction>();
-                //if (userModel.IsTwoFactor != 0)
-                //{
-                //    if (userModel.TwoFactorSecret == request.SmsCode)
-                //    {
+        //    try
+        //    {
+        //        var request = value;
+        //        //if (userModel.IsTwoFactor != 0)
+        //        //{
+        //        //    if (userModel.TwoFactorSecret == request.SmsCode)
+        //        //    {
 
-                //    }
-                //    else
-                //    {
-                //        throw new Exception("Secret key not correct");
-                //    }
+        //        //    }
+        //        //    else
+        //        //    {
+        //        //        throw new Exception("Secret key not correct");
+        //        //    }
 
-                //}
-                var userRequest = new UserSendTransaction()
-                {
-                    UserId = userModel.Id,
-                    Type = "send",
-                    To = request.Detail.SendByAd
-                        ? request.Detail.RecipientWalletAddress
-                        : request.Detail.RecipientEmailAddress,
-                    SendByBlockchainAddress = request.Detail.SendByAd,
-                    Amount = request.Detail.VkcAmount,
-                    Currency = request.NetworkName,
-                    Description = request.Detail.VkcNote,
-                };
+        //        //}
+        //        var userRequest = new UserSendTransaction()
+        //        {
+        //            UserId = userModel.Id,
+        //            Type = "send",
+        //            To = request.Detail.SendByAd
+        //                ? request.Detail.RecipientWalletAddress
+        //                : request.Detail.RecipientEmailAddress,
+        //            SendByBlockchainAddress = request.Detail.SendByAd,
+        //            Amount = request.Detail.VkcAmount,
+        //            PricePerCoin=request.Detail.PricePerCoin,
+        //            Currency = request.NetworkName,
+        //            Description = request.Detail.VkcNote,
+        //        };
 
-                result = AddSendTransaction(userRequest);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                result = new ReturnObject()
-                { Status = Status.STATUS_ERROR, Message = e.Message };
-            }
+        //        result = AddSendTransaction(userRequest);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //        result = new ReturnObject()
+        //        { Status = Status.STATUS_ERROR, Message = e.Message };
+        //    }
 
-            //  result = new ReturnObject() { Status = Status.STATUS_ERROR, Message = "test" };
-            return result.ToJson();
-        }
+        //    //  result = new ReturnObject() { Status = Status.STATUS_ERROR, Message = "test" };
+        //    return result.ToJson();
+        //}
 
 
-        private ReturnObject AddSendTransaction(UserSendTransaction request)
+        public ReturnObject AddSendTransaction(UserSendTransaction request)
         {
             var sendTransactionBusiness =
                 new UserSendTransactionBusiness.UserSendTransactionBusiness(PersistenceFactory);

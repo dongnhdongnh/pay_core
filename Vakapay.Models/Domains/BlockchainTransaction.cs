@@ -13,6 +13,8 @@ namespace Vakapay.Models.Domains
         public string Hash { get; set; }
         public int BlockNumber { get; set; }
         public decimal Amount { get; set; }
+        public decimal PricePerCoin { get; set; }
+
         public string FromAddress { get; set; }
         public string ToAddress { get; set; }
         public decimal Fee { get; set; }

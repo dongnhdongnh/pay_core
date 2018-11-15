@@ -10,6 +10,9 @@ namespace Vakapay.Models.ClientRequest
         [JsonProperty(PropertyName = "recipientEmailAddress")]
         public string RecipientEmailAddress { get; set; }
 
+        [JsonProperty(PropertyName = "PricePerCoin")]
+        public decimal PricePerCoin { get; set; }
+
         [JsonProperty(PropertyName = "VNDAmount")]
         public decimal VndAmount { get; set; }
 
@@ -42,5 +45,6 @@ namespace Vakapay.Models.ClientRequest
 
         [JsonProperty(PropertyName = "SMSCode")]
         public string SmsCode { get; set; }
+
     }
 }

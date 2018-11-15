@@ -7,6 +7,7 @@ namespace Vakapay.Models.Entities
         public string SenderUserId { get; set; }
         public string ReceiverUserId { get; set; }
         public decimal Amount { get; set; }
+        public decimal PricePerCoin { get; set; }
         public string Currency { get; set; }
         public string Idem { get; set; }
 

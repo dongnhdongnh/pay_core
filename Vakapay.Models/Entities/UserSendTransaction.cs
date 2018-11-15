@@ -15,6 +15,9 @@ namespace Vakapay.Models.Entities
         [JsonRequired]
         public decimal Amount { get; set; }
 
+        [JsonProperty("PricePerCoin")]
+        [JsonRequired]
+        public decimal PricePerCoin { get; set; }
         [JsonProperty("currency")]
         [JsonRequired]
         public string Currency { get; set; }
