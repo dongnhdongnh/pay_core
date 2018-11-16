@@ -26,8 +26,8 @@ namespace Vakapay.BlockchainBusiness.Base
             DbConnection = isNewConnection
                 ? VakapayRepositoryFactory.GetDbConnection()
                 : VakapayRepositoryFactory.GetOldConnection();
-            portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(VakapayRepositoryFactory,false);
-             //   (PortfolioHistoryBusiness.PortfolioHistoryBusiness) ;
+            portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(VakapayRepositoryFactory, false);
+            //   (PortfolioHistoryBusiness.PortfolioHistoryBusiness) ;
             // portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness();
         }
 
@@ -336,7 +336,7 @@ namespace Vakapay.BlockchainBusiness.Base
                                 //	_currentPending.Status = Status.StatusCompleted;
                                 //	_currentPending.InProcess = 0;
                                 Console.WriteLine("CaLL UPDATE");
-                           
+
                                 portfolioHistoryBusiness.InsertWithPrice(_currentPending.UserId);
                                 withdrawRepoQuery.Update((TWithDraw)_currentPending);
                                 withdrawPendingTransactions.RemoveAt(i);
@@ -364,8 +364,9 @@ namespace Vakapay.BlockchainBusiness.Base
                             int _transaValue = 0;
                             if (_trans.Value.HexToInt(out _transaValue))
                             {
-                              //  portfolioHistoryBusiness.InsertWithPrice(_trans.i);
-                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
+                                var userID = "";
+                                //  portfolioHistoryBusiness.InsertWithPrice(_trans.i);
+                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName, out userID);
                             }
                         }
                     }
