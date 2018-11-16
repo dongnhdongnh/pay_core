@@ -200,8 +200,8 @@ namespace Vakapay.EthereumBusiness
                     foreach (EthereumTransactionResponse trans in block.TransactionsResponse)
                     {
                         string toAddress = trans.To;
-                    //    if (!wallet.CheckExistedAddress(toAddress, networkName))
-if(false)
+                        if (!wallet.CheckExistedAddress(toAddress, networkName))
+                        //if(false)
                         {
                             //logger.Info(to + " is not exist in Wallet!!!");
                             continue;
@@ -213,7 +213,7 @@ if(false)
                             {
                                 var userID = "";
                                 wallet.UpdateBalanceDeposit(toAddress, EthereumRpc.WeiToEther(transactionValue),
-                                  networkName,out userID);
+                                  networkName, out userID);
                                 var _deposite = new EthereumDepositTransaction();
                                 _deposite.Id = CommonHelper.GenerateUuid();
                                 _deposite.FromAddress = trans.From;
@@ -223,12 +223,12 @@ if(false)
                                 _deposite.BlockNumber = 0;
                                 int bNum = 0;
                                 if (trans.BlockNumber.HexToInt(out bNum))
-                                    _deposite.BlockNumber = bNum;        
+                                    _deposite.BlockNumber = bNum;
                                 _deposite.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
                                 _deposite.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
-                                
+
                                 depositRepoQuery.Insert(_deposite as TDeposit);
-                              
+
                             }
                         }
                     }
