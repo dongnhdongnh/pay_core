@@ -245,6 +245,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                _logger.Error(KeyLogger.USER_UPDATE + e);
                 return CreateDataError(e.Message);
             }
         }
