@@ -12,5 +12,7 @@ namespace Vakapay.Models.Repositories
         User FindWhere(string sql);
         string FindEmailBySendTransaction(BlockchainTransaction transaction);
         User FindByEmailAddress(string emailAddress);
+
+        List<User> FindAllUser();
     }
 }
