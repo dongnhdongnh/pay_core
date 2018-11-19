@@ -517,16 +517,25 @@ namespace Vakapay.WalletBusiness
             return GetAddresses(wallet.Id, wallet.Currency)[0];
         }
 
-        public ReturnObject UpdateBalanceDeposit(string toAddress, decimal addedBalance, string networkName,out string userID)
+        public Wallet FindWalletByAddressAndNetworkName(string Address, string networkName)
+        {
+            if (_connectionDb.State != ConnectionState.Open)
+                _connectionDb.Open();
+            var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
+            var wallet = walletRepository.FindByAddressAndNetworkName(Address, networkName);
+            return wallet;
+        }
+
+        public ReturnObject UpdateBalanceDeposit(string toAddress, decimal addedBalance, string networkName)
         {
             try
             {
-                userID = "";
+                //  userID = "";
                 if (_connectionDb.State != ConnectionState.Open)
                     _connectionDb.Open();
-                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
-                var wallet = walletRepository.FindByAddressAndNetworkName(toAddress, networkName);
-              
+               
+                var wallet = FindByAddressAndNetworkName(toAddress, networkName);
+
                 if (wallet == null)
                 {
                     return new ReturnObject
@@ -556,7 +565,7 @@ namespace Vakapay.WalletBusiness
                 else
                 {
                     User user = userBusiness.GetUserById(wallet.UserId);
-                    userID = user.Id;
+                    //  userID = user.Id;
                     if (user != null)
                     {
                         portfolioHistoryBusiness.InsertWithPrice(user.Id);
@@ -578,7 +587,7 @@ namespace Vakapay.WalletBusiness
             }
             catch (Exception e)
             {
-                userID = "";
+                //     userID = "";
                 return new ReturnObject
                 {
                     Status = Status.STATUS_ERROR,
@@ -942,7 +951,7 @@ namespace Vakapay.WalletBusiness
                 {
                     case CryptoCurrency.ETH:
                         Console.WriteLine("make eth");
-                      //  var ethereumBusiness = new EthereumBusiness.EthereumBusiness(_vakapayRepositoryFactory, false);
+                        //  var ethereumBusiness = new EthereumBusiness.EthereumBusiness(_vakapayRepositoryFactory, false);
                         res = ethereumBussiness.CreateAddressAsync(
                             new EthereumAddressRepository(_connectionDb),
                             new EthereumRpc(AppSettingHelper.GetEthereumNode()),
@@ -951,7 +960,7 @@ namespace Vakapay.WalletBusiness
 
                     case CryptoCurrency.BTC:
                         Console.WriteLine("make btc");
-                     //   var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory, false);
+                        //   var bitcoinBusiness = new BitcoinBusiness.BitcoinBusiness(_vakapayRepositoryFactory, false);
                         res = bitcoinBussiness.CreateAddressAsync(
                             new BitcoinAddressRepository(_connectionDb),
                             new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
@@ -961,7 +970,7 @@ namespace Vakapay.WalletBusiness
 
                     case CryptoCurrency.VAKA:
                         Console.WriteLine("make vaka");
-                    //    var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory, false);
+                        //    var vakaBusiness = new VakacoinBusiness.VakacoinBusiness(_vakapayRepositoryFactory, false);
                         res = vakacoinBussiness.CreateAddressAsync(
                             new VakacoinAccountRepository(_connectionDb),
                             new VakacoinRpc(AppSettingHelper.GetVakacoinNode()),
@@ -1143,5 +1152,7 @@ namespace Vakapay.WalletBusiness
                 };
             }
         }
+
+
     }
 }
