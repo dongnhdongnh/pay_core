@@ -366,7 +366,7 @@ namespace Vakapay.BlockchainBusiness.Base
                             {
                                 var userID = "";
                                 //  portfolioHistoryBusiness.InsertWithPrice(_trans.i);
-                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName, out userID);
+                                wallet.UpdateBalanceDeposit(_toAddress, (Decimal)_transaValue, networkName);
                             }
                         }
                     }
