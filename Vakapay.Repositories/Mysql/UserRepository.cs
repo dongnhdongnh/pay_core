@@ -63,34 +63,34 @@ namespace Vakapay.Repositories.Mysql
         {
             try
             {
-//                var blockchainAddressTableName = "";
-//                if (transaction.GetType() == typeof(BitcoinWithdrawTransaction))
-//                {
-//                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
-//                }
-//                else if (transaction.GetType() == typeof(EthereumWithdrawTransaction))
-//                {
-//                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(EthereumAddress));
-//                }
-//                else if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
-//                {
-//                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(VakacoinAccount));
-//                }
-//                else
-//                {
-//                    blockchainAddressTableName = "";
-//                }
-//
-//                if (Connection.State != ConnectionState.Open)
-//                    Connection.Open();
-//
-//                var sQuery = $"SELECT Email FROM {TableName} t1 INNER JOIN {WalletTableName} t2 ON t1.Id = t2.UserId "
-//                             + $"INNER JOIN {blockchainAddressTableName} t3 ON t2.Id = t3.WalletId "
-//                             + $"WHERE t3.{nameof(BlockchainAddress.Address)} = @Address;";
-//
-//                var result = Connection.QueryFirstOrDefault<string>(sQuery, new {Address = transaction.FromAddress});
-//                Logger.Debug("UserRepository =>> FindEmailByAddressOfWallet result: " + result);
-//                return result;
+                //                var blockchainAddressTableName = "";
+                //                if (transaction.GetType() == typeof(BitcoinWithdrawTransaction))
+                //                {
+                //                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(BitcoinAddress));
+                //                }
+                //                else if (transaction.GetType() == typeof(EthereumWithdrawTransaction))
+                //                {
+                //                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(EthereumAddress));
+                //                }
+                //                else if (transaction.GetType() == typeof(VakacoinWithdrawTransaction))
+                //                {
+                //                    blockchainAddressTableName = SimpleCRUD.GetTableName(typeof(VakacoinAccount));
+                //                }
+                //                else
+                //                {
+                //                    blockchainAddressTableName = "";
+                //                }
+                //
+                //                if (Connection.State != ConnectionState.Open)
+                //                    Connection.Open();
+                //
+                //                var sQuery = $"SELECT Email FROM {TableName} t1 INNER JOIN {WalletTableName} t2 ON t1.Id = t2.UserId "
+                //                             + $"INNER JOIN {blockchainAddressTableName} t3 ON t2.Id = t3.WalletId "
+                //                             + $"WHERE t3.{nameof(BlockchainAddress.Address)} = @Address;";
+                //
+                //                var result = Connection.QueryFirstOrDefault<string>(sQuery, new {Address = transaction.FromAddress});
+                //                Logger.Debug("UserRepository =>> FindEmailByAddressOfWallet result: " + result);
+                //                return result;
 
                 var user = FindById(transaction.UserId);
 
@@ -116,7 +116,7 @@ namespace Vakapay.Repositories.Mysql
                              "WHERE t3.Address = @BitcoinAddress;";
 
 
-                var result = Connection.QueryFirstOrDefault<string>(sQuery, new {BitcoinAddress = bitcoinAddress});
+                var result = Connection.QueryFirstOrDefault<string>(sQuery, new { BitcoinAddress = bitcoinAddress });
                 Logger.Error("UserRepository =>> FindEmailByAddressOfWallet result: " + result);
                 return result;
             }
@@ -136,9 +136,29 @@ namespace Vakapay.Repositories.Mysql
 
                 var sQuery = $"SELECT * FROM {TableName} WHERE {nameof(User.Email)} = @Email";
 
-                var result = Connection.QuerySingleOrDefault<User>(sQuery, new {Email = emailAddress});
+                var result = Connection.QuerySingleOrDefault<User>(sQuery, new { Email = emailAddress });
 
                 return result;
+            }
+            catch (Exception e)
+            {
+                Logger.Error("UserRepository =>> FindByEmailAddress fail: " + e.Message);
+                throw;
+            }
+        }
+
+        public List<User> FindAllUser()
+        {
+            try
+            {
+                if (Connection.State != ConnectionState.Open)
+                    Connection.Open();
+
+                var sQuery = $"SELECT * FROM {TableName} ";
+
+                var result = Connection.Query<User>(sQuery);
+
+                return (List<User>)result;
             }
             catch (Exception e)
             {

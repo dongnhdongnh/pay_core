@@ -120,7 +120,7 @@ namespace Vakapay.Repositories.Mysql
                 string sQuery =
                     $"UPDATE {TableName} SET Balance = Balance + @AMOUNT, Version = @VERSION + 1, UpdatedAt = @TIMESTAMP WHERE Id = @ID AND Version = @VERSION";
 
-                var result = Connection.Query(sQuery,
+                var result = Connection.Execute(sQuery,
                     new
                     {
                         ID = id,
@@ -128,8 +128,8 @@ namespace Vakapay.Repositories.Mysql
                         AMOUNT = amount,
                         TIMESTAMP = unixTimestamp
                     });
-
-                var status = !String.IsNullOrEmpty(result.ToString()) ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                Console.WriteLine("UPDATE RESULT "+result);
+                var status =( !String.IsNullOrEmpty(result.ToString()) && result>0 )? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
                 return new ReturnObject
                 {
                     Status = status,

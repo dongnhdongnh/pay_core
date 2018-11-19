@@ -17,7 +17,7 @@ namespace Vakapay.ApiServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+     [Authorize]
     [BaseActionFilter]
     public class WalletController : Controller
     {
@@ -122,6 +122,32 @@ namespace Vakapay.ApiServer.Controllers
             //  return null;
         }
 
+        [HttpGet("CheckUserMail")]
+        public ActionResult<ReturnObject> CheckUserMail([FromQuery] string userMail)
+        {
+            try
+            {
+                var _userData = _userBusiness.GetUserByEmail(userMail);
+                if (_userData == null)
+                    throw new Exception("Not found user data"+userMail);
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_SUCCESS,
+
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+
+            //  return null;
+        }
+
         [HttpGet("GetExchangeRate")]
         public ActionResult<ReturnObject> GetExchangeRate([FromQuery] string networkName)
         {
@@ -164,7 +190,7 @@ namespace Vakapay.ApiServer.Controllers
                 var feeObject = new { vakapayfee = vakapayfee, minerfee = minerfee, total = total };
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,  
+                    Status = Status.STATUS_COMPLETED,
                     // Data = numberData.ToString(),
                     Message = JsonHelper.SerializeObject(feeObject)
                 };
@@ -211,7 +237,7 @@ namespace Vakapay.ApiServer.Controllers
             //  return null;
         }
 
-      //  [HttpPost("sendTransactions")]
+        //  [HttpPost("sendTransactions")]
         //public ActionResult<string> SendTransactions(SendTransaction value,User userModel)
         //{
         //    ReturnObject result = null;

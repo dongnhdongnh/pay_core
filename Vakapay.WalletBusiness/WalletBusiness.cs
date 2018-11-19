@@ -67,9 +67,12 @@ namespace Vakapay.WalletBusiness
                 foreach (string blockchainName in CryptoCurrency.ALL_NETWORK)
                 {
                     ReturnObject result = CreateNewWallet(user, blockchainName);
+                    Console.WriteLine("Call "+user.Id+"_" + blockchainName);
                     if (result.Status == Status.STATUS_ERROR)
                     {
-                        return result;
+                      //  Console.WriteLine("ERROR" + JsonHelper.SerializeObject(result));
+                       // return result;
+                        continue;
                     }
                 }
 
@@ -128,6 +131,7 @@ namespace Vakapay.WalletBusiness
                         blockchainNetwork);
                 if (existUserNetwork != null)
                 {
+                    Console.WriteLine("existed "+user.Id +"_ "+blockchainNetwork);
                     return new ReturnObject
                     {
                         Status = Status.STATUS_ERROR,
@@ -150,6 +154,7 @@ namespace Vakapay.WalletBusiness
                     Currency = blockchainNetwork,
                     UserId = user.Id
                 };
+                Console.WriteLine("create wallet "+user.Id+"_"+ blockchainNetwork);
                 var resultMakeWallet = walletRepo.Insert(wallet);
                 return resultMakeWallet;
             }

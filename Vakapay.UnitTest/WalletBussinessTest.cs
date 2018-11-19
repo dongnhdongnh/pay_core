@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.EthereumBusiness;
@@ -8,14 +9,14 @@ using Vakapay.Models.Entities;
 using Vakapay.Models.Entities.ETH;
 using Vakapay.Models.Repositories;
 using Vakapay.Repositories.Mysql;
-
+using Vakapay.UserBusiness;
 namespace Vakapay.UnitTest
 {
     [TestFixture]
     class WalletBussinessTest
     {
         Vakapay.WalletBusiness.WalletBusiness _walletBusiness;
-
+        Vakapay.UserBusiness.UserBusiness _userBusiness;
         Vakapay.WalletBusiness.WalletBusiness WalletBusiness
         {
             get
@@ -30,6 +31,8 @@ namespace Vakapay.UnitTest
                     var persistence = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
                     _walletBusiness =
                         new Vakapay.WalletBusiness.WalletBusiness(persistence);
+                    _userBusiness =
+                      new Vakapay.UserBusiness.UserBusiness(persistence);
                 }
 
                 return _walletBusiness;
@@ -61,7 +64,21 @@ namespace Vakapay.UnitTest
             _vakapayRepositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
 
             _walletBusiness = new WalletBusiness.WalletBusiness(_vakapayRepositoryFactory);
+            _userBusiness =
+                      new Vakapay.UserBusiness.UserBusiness(_vakapayRepositoryFactory);
         }
+
+        [Test]
+        public void CheckUserAndMakeWallet()
+        {
+            List<User> users = _userBusiness.FindAllUser();
+            foreach(User user in users)
+            {
+                Console.WriteLine(user.Id);
+                _walletBusiness.MakeAllWalletForNewUser(user);
+            }
+        }
+
 
         [TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c306")]
         [TestCase("8377a95b-79b4-4dfb-8e1e-b4833443c307")]
@@ -162,7 +179,7 @@ namespace Vakapay.UnitTest
             {
                 var prepareWallet = walletRepo.FindByUserAndNetwork(i.ToString(), CryptoCurrency.ETH);
                 //Todo update prepareWallet.Address
-//				InsertPendingTxsToWithdraw("46b4594c-a45a-400d-86ce-9a7869d61180", prepareWallet.Address);
+                //				InsertPendingTxsToWithdraw("46b4594c-a45a-400d-86ce-9a7869d61180", prepareWallet.Address);
             }
         }
 
@@ -176,7 +193,7 @@ namespace Vakapay.UnitTest
                 userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.VAKA);
 
-            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal)0.0001);
+            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal)0.0001, 0);
             Assert.AreEqual(res.Status, Status.STATUS_SUCCESS);
         }
 
@@ -190,7 +207,7 @@ namespace Vakapay.UnitTest
                 userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.BTC);
 
-            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal)0.0001);
+            var res = _walletBusiness.Withdraw(wallet, "useraaaaaaab", (decimal)0.0001, 0);
             Assert.AreEqual(res.Status, Status.STATUS_SUCCESS);
         }
 
@@ -204,7 +221,7 @@ namespace Vakapay.UnitTest
                 userRepo.FindByEmailAddress("tieuthanhliem@gmail.com").Id,
                 CryptoCurrency.ETH);
 
-            var res = _walletBusiness.Withdraw(wallet, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", (decimal)0.0001);
+            var res = _walletBusiness.Withdraw(wallet, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", (decimal)0.0001, 0);
             Assert.AreEqual(res.Status, Status.STATUS_SUCCESS);
         }
 
@@ -238,7 +255,7 @@ namespace Vakapay.UnitTest
 
                 var toWalletAddr = walletRepo.FindByUserAndNetwork(rndTo.ToString(), CryptoCurrency.ETH);
                 // TODO
-//				resultTest = _walletBusiness.Withdraw(fromWallet, toWalletAddr.Address, 1);
+                //				resultTest = _walletBusiness.Withdraw(fromWallet, toWalletAddr.Address, 1);
             }
 
             Console.WriteLine(JsonHelper.SerializeObject(resultTest));
@@ -264,7 +281,7 @@ namespace Vakapay.UnitTest
 
             ReturnObject resultTest = null;
 
-            resultTest = _walletBusiness.Withdraw(wallet, toAddr, 1000000000000000000000m);
+            resultTest = _walletBusiness.Withdraw(wallet, toAddr, 1000000000000000000000m, 0);
 
 
             Console.WriteLine(JsonHelper.SerializeObject(resultTest));

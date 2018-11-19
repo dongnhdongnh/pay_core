@@ -355,7 +355,7 @@ namespace Vakapay.UserSendTransactionBusiness
                 }
 
                 updateBalanceRes =
-                    walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, senderWallet.Version);
+                    walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, receiverWallet.Version);
 
                 if (updateBalanceRes.Status == Status.STATUS_ERROR)
                 {
