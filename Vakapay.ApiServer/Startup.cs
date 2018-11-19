@@ -54,7 +54,7 @@ namespace Vakapay.ApiServer
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseStaticFiles();
             app.UseCors(builder =>
