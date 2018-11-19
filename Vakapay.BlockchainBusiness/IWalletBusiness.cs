@@ -5,6 +5,7 @@ namespace Vakapay.BlockchainBusiness
 {
     public interface IWalletBusiness
     {
+        Wallet FindWalletByAddressAndNetworkName(string Address,string networkName);
         ReturnObject CreateNewWallet(User user, string blockchainNetwork);
         bool CheckExistedAddress(string toAddress, string networkName);
         ReturnObject UpdateBalanceDeposit(string toAddress, decimal addedBalance, string networkName);
