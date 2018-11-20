@@ -136,7 +136,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (listApiKeys.Count <= 0)
                     return new ReturnObject
                     {
-                        Status = Status.STATUS_ERROR,
+                        Status = Status.STATUS_SUCCESS,
                         Data = JsonHelper.SerializeObject(listApiKeys)
                     }.ToJson();
                 foreach (var listApiKey in listApiKeys)
