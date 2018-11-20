@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IApiKeyRepository : IRepositoryBase<ApiKey>
+    public interface IApiKeyRepository : IRepositoryBase<ApiKey>, IDisposable
     {
         string QuerySearch(Dictionary<string, string> models);
         ApiKey FindWhere(string sql);
