@@ -32,16 +32,20 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    public class UserController : ControllerBase
+    public class UserController : CustomController
     {
         private UserBusiness.UserBusiness _userBusiness;
-        private WalletBusiness.WalletBusiness _walletBusiness;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private VakapayRepositoryMysqlPersistenceFactory _persistenceFactory;
 
-        public UserController(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        public UserController(
+            IVakapayRepositoryFactory persistenceFactory,
+            IConfiguration configuration,
+            IHostingEnvironment hostingEnvironment
+        ) : base(persistenceFactory, configuration, hostingEnvironment)
         {
+            _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
         }
+
 
         [HttpGet("getUserInfo")]
         public IActionResult GetUserInfo()
@@ -53,17 +57,12 @@ namespace Vakapay.ApiServer.Controllers
 
 
         [HttpPost("upload-avatar"), DisableRequestSizeLimit]
-        [BaseActionFilter]
         public async Task<string> UploadFile()
         {
             try
             {
                 var file = Request.Form.Files[0];
 
-                if (_userBusiness == null)
-                {
-                    CreateUserBusiness();
-                }
 
                 var userCheck = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
@@ -131,138 +130,13 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [HttpGet("get-info")]
-        public async Task<string> GetCurrentUser()
-        {
-            try
-            {
-                var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value)
-                    .SingleOrDefault();
-
-                if (string.IsNullOrEmpty(email))
-                    return CreateDataError("Can't not email");
-
-                var query = new Dictionary<string, string> {{"Email", email}};
-
-                if (_userBusiness == null)
-                {
-                    CreateUserBusiness();
-                }
-
-                var userModel = _userBusiness.GetUserInfo(query);
-
-                var ip = HelpersApi.GetIp(Request);
-                IpGeographicalLocation location = null;
-                if (ip != null)
-                {
-                    //get location for ip
-                    location = await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
-                }
-
-                if (userModel == null)
-                {
-                    var jsonUser = User.Claims.Where(c => c.Type == "userInfo").Select(c => c.Value)
-                        .SingleOrDefault();
-
-                    var userClaims = Vakapay.Models.Entities.User.FromJson(jsonUser);
-                    userClaims.Notifications = "1,2,3";
-                    if (location != null)
-                    {
-                        if (location.Currency?.Code != null)
-                        {
-                            userClaims.CurrencyKey = location.Currency.Code;
-                        }
-
-                        if (location.TimeZone?.Id != null)
-                        {
-                            userClaims.TimezoneKey = location.TimeZone.Id;
-                        }
-                    }
-
-                    var resultData = _userBusiness.Login(userClaims);
-
-                    if (resultData.Status == Status.STATUS_ERROR)
-                        return CreateDataError(resultData.Message);
-
-
-                    userModel = Vakapay.Models.Entities.User.FromJson(resultData.Data);
-
-                    if (_walletBusiness == null)
-                    {
-                        CreateWalletBusiness();
-                    }
-
-                    return _walletBusiness.MakeAllWalletForNewUser(userModel).ToJson();
-                }
-
-                if (string.IsNullOrEmpty(ip))
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_SUCCESS,
-                        Data = Vakapay.Models.Entities.User.ToJson(userModel)
-                    }.ToJson();
-
-                UpdateCurrencyAndTimeZone(userModel, location);
-
-                var browser = HelpersApi.GetBrowser(Request);
-
-                var confirmedDevices = new ConfirmedDevices
-                {
-                    Browser = browser,
-                    Ip = ip,
-                    Location = location != null && !string.IsNullOrEmpty(location.CountryName)
-                        ? location.City + "," + location.CountryName
-                        : "localhost",
-                    UserId = userModel.Id
-                };
-
-                var search = new Dictionary<string, string> {{"Ip", ip}, {"Browser", browser}};
-
-
-                //save devices
-                var checkConfirmedDevices = _userBusiness.GetConfirmedDevices(search);
-                if (checkConfirmedDevices == null)
-                {
-                    _userBusiness.SaveConfirmedDevices(confirmedDevices);
-                }
-
-
-                userModel.SecretAuthToken = null;
-                userModel.TwoFactorSecret = null;
-                userModel.SecondPassword = null;
-                userModel.Id = null;
-                userModel.PhoneNumber = !string.IsNullOrEmpty(userModel.PhoneNumber)
-                    ? "*********" + userModel.PhoneNumber.Remove(0, 9)
-                    : null;
-                if (userModel.Birthday.Contains("1900-01-01"))
-                    userModel.Birthday = null;
-
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Data = userModel.ToJson()
-                }.ToJson();
-            }
-            catch (Exception e)
-            {
-                _logger.Error(KeyLogger.USER_UPDATE + e);
-                return CreateDataError(e.Message);
-            }
-        }
 
         // POST api/values
-        [
-            HttpPost("update-profile")]
-        [BaseActionFilter]
+        [HttpPost("update-profile")]
         public string UpdateUserProfile([FromBody] JObject value)
         {
             try
             {
-                if (_userBusiness == null)
-                {
-                    CreateUserBusiness();
-                }
-
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PROFILE_ADDRESS_1))
@@ -299,18 +173,11 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [
-            HttpPost("update-preferences")]
-        [BaseActionFilter]
+        [HttpPost("update-preferences")]
         public string UpdatePreferences([FromBody] JObject value)
         {
             try
             {
-                if (_userBusiness == null)
-                {
-                    CreateUserBusiness();
-                }
-
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_PREFERENCES_CURRENCY))
@@ -354,18 +221,11 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        [
-            HttpPost("update-notifications")]
-        [BaseActionFilter]
+        [HttpPost("update-notifications")]
         public string UpdateNotifications([FromBody] JObject value)
         {
             try
             {
-                if (_userBusiness == null)
-                {
-                    CreateUserBusiness();
-                }
-
                 var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 if (value.ContainsKey(ParseDataKeyApi.KEY_USER_UPDATE_NOTIFICATION))
@@ -386,36 +246,6 @@ namespace Vakapay.ApiServer.Controllers
             }
         }
 
-        private void CreateUserBusiness()
-        {
-            if (_persistenceFactory == null)
-            {
-                CreateVakapayRepositoryMysqlPersistenceFactory();
-            }
-
-            _userBusiness = new UserBusiness.UserBusiness(_persistenceFactory);
-        }
-
-        private void CreateWalletBusiness()
-        {
-            if (_persistenceFactory == null)
-            {
-                CreateVakapayRepositoryMysqlPersistenceFactory();
-            }
-
-            _walletBusiness = new WalletBusiness.WalletBusiness(_persistenceFactory);
-        }
-
-        private void CreateVakapayRepositoryMysqlPersistenceFactory()
-        {
-            var repositoryConfig = new RepositoryConfiguration
-            {
-                ConnectionString = AppSettingHelper.GetDbConnection()
-            };
-
-            _persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-        }
-
         public string CreateDataError(string message)
         {
             return new ReturnObject
@@ -423,27 +253,6 @@ namespace Vakapay.ApiServer.Controllers
                 Status = Status.STATUS_ERROR,
                 Message = message
             }.ToJson();
-        }
-
-        private void UpdateCurrencyAndTimeZone(User userModel, IpGeographicalLocation location)
-        {
-            var isUpdate = false;
-            if (userModel.CurrencyKey == null && location?.Currency != null)
-            {
-                userModel.CurrencyKey = location.Currency.Code;
-                isUpdate = true;
-            }
-
-            if (userModel.TimezoneKey == null && location?.TimeZone != null)
-            {
-                userModel.TimezoneKey = location.TimeZone.Id;
-                isUpdate = true;
-            }
-
-            if (isUpdate)
-            {
-                _userBusiness.UpdateProfile(userModel);
-            }
         }
     }
 }
