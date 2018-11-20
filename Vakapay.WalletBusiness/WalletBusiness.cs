@@ -280,7 +280,7 @@ namespace Vakapay.WalletBusiness
                     var userCheck = userRepository.FindById(walletById.UserId);
                     if (userCheck == null ||
                         userCheck.Status != Status.STATUS_ACTIVE // ||
-                        // !walletById.Currency.Equals(walletByAddress.Currency))
+                                                                 // !walletById.Currency.Equals(walletByAddress.Currency))
                     )
                     {
                         return new ReturnObject
@@ -396,10 +396,11 @@ namespace Vakapay.WalletBusiness
                     }
 
                 case CryptoCurrency.VAKA:
-                    var vakaWithdrawTransaction =
-                        _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb);
-                    return vakaWithdrawTransaction.Insert(
-                        blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
+                    using (var vakaWithdrawTransaction =_vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
+                    {
+                        return vakaWithdrawTransaction.Insert(
+                            blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
+                    }
 
                 default:
                     return new ReturnObject()
@@ -508,9 +509,9 @@ namespace Vakapay.WalletBusiness
             {
                 // TODO fake:
                 case CryptoCurrency.BTC:
-                    return (decimal) 0.0005;
+                    return (decimal)0.0005;
                 case CryptoCurrency.ETH:
-                    return (decimal) 0.0005;
+                    return (decimal)0.0005;
                 case CryptoCurrency.VAKA:
                     return 0;
                 default:
@@ -891,7 +892,7 @@ namespace Vakapay.WalletBusiness
                     //    throw new Exception(sendResult.Message);
                     //}
                     pendingWallet.Status = sendResult.Status;
-                    pendingWallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    pendingWallet.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                     pendingWallet.IsProcessing = 0;
                     pendingWallet.AddressCount += 1;
 
@@ -937,7 +938,7 @@ namespace Vakapay.WalletBusiness
                     }
 
                     wallet.Status = sendResult.Status;
-                    wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    wallet.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                     wallet.IsProcessing = 0;
                     wallet.AddressCount += 1;
 

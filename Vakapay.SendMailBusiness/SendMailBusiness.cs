@@ -36,12 +36,14 @@ namespace Vakapay.SendMailBusiness
         {
             try
             {
-                var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb);
+                using (var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb))
+                {
 
-                // save to DB
-                var result = sendEmailRepository.Insert(emailQueue);
+                    // save to DB
+                    var result = sendEmailRepository.Insert(emailQueue);
 
-                return result;
+                    return result;
+                }
             }
             catch (Exception e)
             {
@@ -57,86 +59,89 @@ namespace Vakapay.SendMailBusiness
         public async Task<ReturnObject> SendEmailAsync(string apiUrl, string apiKey, string from,
             string fromName)
         {
-            var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb);
-            var pendingEmail = sendEmailRepository.FindRowPending();
-
-            if (pendingEmail?.Id == null)
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Message = "Pending email not found"
-                };
-
-            if (_connectionDb.State != ConnectionState.Open)
-                _connectionDb.Open();
-
-            //begin first email
-            var transctionScope = _connectionDb.BeginTransaction();
-            try
+            using (var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb))
             {
-                var lockResult = await sendEmailRepository.LockForProcess(pendingEmail);
-                if (lockResult.Status == Status.STATUS_ERROR)
+                var pendingEmail = sendEmailRepository.FindRowPending();
+
+                if (pendingEmail?.Id == null)
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Message = "Pending email not found"
+                    };
+
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+
+                //begin first email
+                var transctionScope = _connectionDb.BeginTransaction();
+                try
+                {
+                    var lockResult = await sendEmailRepository.LockForProcess(pendingEmail);
+                    if (lockResult.Status == Status.STATUS_ERROR)
+                    {
+                        transctionScope.Rollback();
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_SUCCESS,
+                            Message = "Cannot Lock For Process"
+                        };
+                    }
+
+                    transctionScope.Commit();
+
+                }
+                catch (Exception e)
                 {
                     transctionScope.Rollback();
                     return new ReturnObject
                     {
-                        Status = Status.STATUS_SUCCESS,
-                        Message = "Cannot Lock For Process"
-                    };
-                }
-
-                transctionScope.Commit();
-            }
-            catch (Exception e)
-            {
-                transctionScope.Rollback();
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_ERROR,
-                    Message = e.ToString()
-                };
-            }
-
-            //update Version to Model
-            pendingEmail.Version += 1;
-
-            var transactionSend = _connectionDb.BeginTransaction();
-            try
-            {
-                var sendResult = await SendEmail(pendingEmail, apiUrl, apiKey, from, fromName);
-                //                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
-                //                {
-                //                    return new ReturnObject
-                //                    {
-                //                        Status = Status.STATUS_ERROR,
-                //                        Message = "Cannot Send email"
-                //                    };
-                //                }
-
-                pendingEmail.Status = sendResult.Status;
-                pendingEmail.IsProcessing = 0;
-
-                var updateResult = await sendEmailRepository.SafeUpdate(pendingEmail);
-                if (updateResult.Status == Status.STATUS_ERROR)
-                {
-                    transactionSend.Rollback();
-                    return new ReturnObject
-                    {
                         Status = Status.STATUS_ERROR,
-                        Message = "Cannot update email status"
+                        Message = e.ToString()
                     };
                 }
 
-                transactionSend.Commit();
-                return updateResult;
-            }
-            catch (Exception e)
-            {
-                // release lock
-                transactionSend.Rollback();
-                var releaseResult = sendEmailRepository.ReleaseLock(pendingEmail);
-                Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
-                throw;
+                //update Version to Model
+                pendingEmail.Version += 1;
+
+                var transactionSend = _connectionDb.BeginTransaction();
+                try
+                {
+                    var sendResult = await SendEmail(pendingEmail, apiUrl, apiKey, from, fromName);
+                    //                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
+                    //                {
+                    //                    return new ReturnObject
+                    //                    {
+                    //                        Status = Status.STATUS_ERROR,
+                    //                        Message = "Cannot Send email"
+                    //                    };
+                    //                }
+
+                    pendingEmail.Status = sendResult.Status;
+                    pendingEmail.IsProcessing = 0;
+
+                    var updateResult = await sendEmailRepository.SafeUpdate(pendingEmail);
+                    if (updateResult.Status == Status.STATUS_ERROR)
+                    {
+                        transactionSend.Rollback();
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Cannot update email status"
+                        };
+                    }
+
+                    transactionSend.Commit();
+                    return updateResult;
+                }
+                catch (Exception e)
+                {
+                    // release lock
+                    transactionSend.Rollback();
+                    var releaseResult = sendEmailRepository.ReleaseLock(pendingEmail);
+                    Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+                    throw;
+                }
             }
         }
 
@@ -169,7 +174,7 @@ namespace Vakapay.SendMailBusiness
 
                     var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
@@ -246,11 +251,17 @@ namespace Vakapay.SendMailBusiness
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:
-                            return _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb)
-                                .FindById(emailQueue.TransactionId);
+                            using (var rep = _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
+                            {
+                               return  rep.FindById(emailQueue.TransactionId);
+                            }
+                    
                         case EmailTemplate.Received:
-                            return _vakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(_connectionDb)
-                                .FindById(emailQueue.TransactionId);
+                            using (var rep = _vakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(_connectionDb))
+                            {
+                                return rep.FindById(emailQueue.TransactionId);
+                            }
+
                         case EmailTemplate.NewDevice:
                             break;
                         case EmailTemplate.Verify:

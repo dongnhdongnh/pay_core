@@ -297,9 +297,10 @@ namespace Vakapay.UserBusiness
 
                         break;
                     case CryptoCurrency.VAKA:
-                        var vakaRepo =
-                            _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb);
-                        output = vakaRepo.FindById(id);
+                        using (var vakaRepo = _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
+                        {
+                            output = vakaRepo.FindById(id);
+                        }
                         break;
                     case CryptoCurrency.BTC:
                         using (var bitcoinRepo =

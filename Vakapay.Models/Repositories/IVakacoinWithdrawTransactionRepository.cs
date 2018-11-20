@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using Vakapay.Models.Entities.VAKA;
 using Vakapay.Models.Repositories.Base;
-
+using System;
 namespace Vakapay.Models.Repositories
 {
     public interface
-        IVakacoinWithdrawTransactionRepository : IRepositoryBlockchainTransaction<VakacoinWithdrawTransaction>
+        IVakacoinWithdrawTransactionRepository : IRepositoryBlockchainTransaction<VakacoinWithdrawTransaction>,IDisposable
     {
         string Query_Search(Dictionary<string, string> whereValue);
 

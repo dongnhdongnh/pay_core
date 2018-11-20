@@ -56,12 +56,14 @@ namespace Vakapay.SendVakacoin
                         business.SetAccountRepositoryForRpc(rpc);
 
                         Console.WriteLine("Start Send Vakacoin...");
-                        var repo = repoFactory.GetVakacoinWithdrawTransactionRepository(connection);
-                        var resultSend = business.SendTransactionAsync(repo, rpc);
-                        Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
+                        using (var repo = repoFactory.GetVakacoinWithdrawTransactionRepository(connection))
+                        {
+                            var resultSend = business.SendTransactionAsync(repo, rpc);
+                            Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
-                        Console.WriteLine("Send Vakacoin End...");
-                        Thread.Sleep(100);
+                            Console.WriteLine("Send Vakacoin End...");
+                            Thread.Sleep(100);
+                        }
                     }
                     catch (Exception e)
                     {

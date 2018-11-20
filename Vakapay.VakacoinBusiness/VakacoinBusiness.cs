@@ -19,19 +19,22 @@ namespace Vakapay.VakacoinBusiness
 
     public class VakacoinBusiness : AbsBlockchainBusiness, IBlockchainBusiness
     {
-        private IVakacoinDepositTransactionRepository VakacoinDepositRepo { get; set; }
+       // private IVakacoinDepositTransactionRepository VakacoinDepositRepo { get; set; }
         private VakacoinRpc VakacoinRpcObj { get; set; }
 
         public VakacoinBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
             : base(vakapayRepositoryFactory, isNewConnection)
         {
-            VakacoinDepositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
+          //  VakacoinDepositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
         }
 
         public void SetAccountRepositoryForRpc(VakacoinRpc rpc)
         {
-            rpc.AccountRepository =
-                (VakacoinAccountRepository)VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
+            using (var rep = (VakacoinAccountRepository)VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection))
+            {
+                rpc.AccountRepository = rep;
+            }
+
         }
 
         /// <summary>
@@ -50,21 +53,24 @@ namespace Vakapay.VakacoinBusiness
                 if (resultRpc.Status == Status.STATUS_ERROR)
                     return resultRpc;
 
-                var repo = VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
-
-                //TODO Encrypt Password Before save
-                var returnDb = repo.Insert(new VakacoinAccount
+                using (var repo = VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection))
                 {
-                    Status = Status.STATUS_ACTIVE,
-                    Address = resultRpc.Data,
-                    OwnerPrivateKey = keyPair.PrivateKey,
-                    OwnerPublicKey = keyPair.PublicKey,
-                    ActivePrivateKey = keyPair.PrivateKey,
-                    ActivePublicKey = keyPair.PublicKey,
-                    WalletId = walletId,
-                });
 
-                return returnDb.Status == Status.STATUS_SUCCESS ? resultRpc : returnDb;
+                    //TODO Encrypt Password Before save
+                    var returnDb = repo.Insert(new VakacoinAccount
+                    {
+                        Status = Status.STATUS_ACTIVE,
+                        Address = resultRpc.Data,
+                        OwnerPrivateKey = keyPair.PrivateKey,
+                        OwnerPublicKey = keyPair.PublicKey,
+                        ActivePrivateKey = keyPair.PrivateKey,
+                        ActivePublicKey = keyPair.PublicKey,
+                        WalletId = walletId,
+                    });
+
+
+                    return returnDb.Status == Status.STATUS_SUCCESS ? resultRpc : returnDb;
+                }
             }
             catch (Exception e)
             {
@@ -86,27 +92,29 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-                var repo = VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection);
-
-                if (string.IsNullOrEmpty(activePrivateKey))
+                using (var repo = VakapayRepositoryFactory.GetVakacoinAccountRepository(DbConnection))
                 {
-                    activePrivateKey = ownerPrivateKey;
-                    activePublicKey = ownerPublicKey;
+
+                    if (string.IsNullOrEmpty(activePrivateKey))
+                    {
+                        activePrivateKey = ownerPrivateKey;
+                        activePublicKey = ownerPublicKey;
+                    }
+
+                    //TODO Encrypt Password Before save
+                    var returnObject = repo.Insert(new VakacoinAccount
+                    {
+                        Status = Status.STATUS_ACTIVE,
+                        Address = accountName,
+                        OwnerPrivateKey = ownerPrivateKey,
+                        OwnerPublicKey = ownerPublicKey,
+                        ActivePrivateKey = activePrivateKey,
+                        ActivePublicKey = activePublicKey,
+                        WalletId = walletId
+                    });
+
+                    return returnObject;
                 }
-
-                //TODO Encrypt Password Before save
-                var returnObject = repo.Insert(new VakacoinAccount
-                {
-                    Status = Status.STATUS_ACTIVE,
-                    Address = accountName,
-                    OwnerPrivateKey = ownerPrivateKey,
-                    OwnerPublicKey = ownerPublicKey,
-                    ActivePrivateKey = activePrivateKey,
-                    ActivePublicKey = activePublicKey,
-                    WalletId = walletId
-                });
-
-                return returnObject;
             }
             catch (Exception e)
             {
@@ -123,22 +131,25 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-                if (DbConnection.State != ConnectionState.Open)
-                    DbConnection.Open();
-                var transaction = new VakacoinDepositTransaction
+                using (var _rep = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection))
                 {
-                    TrxId = trxId,
-                    BlockNumber = blockNumber,
-                    Amount = amount,
-                    FromAddress = fromAddress,
-                    ToAddress = toAddress,
-                    Fee = fee,
-                    Status = status,
-                    IsProcessing = 0,
-                    Version = 0
-                };
-                var result = VakacoinDepositRepo.Insert(transaction);
-                return result;
+                    if (DbConnection.State != ConnectionState.Open)
+                        DbConnection.Open();
+                    var transaction = new VakacoinDepositTransaction
+                    {
+                        TrxId = trxId,
+                        BlockNumber = blockNumber,
+                        Amount = amount,
+                        FromAddress = fromAddress,
+                        ToAddress = toAddress,
+                        Fee = fee,
+                        Status = status,
+                        IsProcessing = 0,
+                        Version = 0
+                    };
+                    var result = _rep.Insert(transaction);
+                    return result;
+                }
             }
             catch (Exception e)
             {
@@ -154,10 +165,11 @@ namespace Vakapay.VakacoinBusiness
         {
             try
             {
-                var vakacoinwithdrawRepo =
-                    VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
-                blockchainTransaction.Status = Status.STATUS_PENDING;
-                return vakacoinwithdrawRepo.Insert(blockchainTransaction);
+                using (var vakacoinwithdrawRepo =VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection))
+                {
+                    blockchainTransaction.Status = Status.STATUS_PENDING;
+                    return vakacoinwithdrawRepo.Insert(blockchainTransaction);
+                }
             }
             catch (Exception e)
             {
@@ -256,26 +268,34 @@ namespace Vakapay.VakacoinBusiness
         public override List<BlockchainTransaction> GetWithdrawHistory(int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
-            var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
-            return GetHistory<VakacoinWithdrawTransaction>(withdrawRepo, offset, limit, orderBy);
+            using (var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection))
+            {
+                return GetHistory<VakacoinWithdrawTransaction>(withdrawRepo, offset, limit, orderBy);
+            }
         }
 
         public override List<BlockchainTransaction> GetDepositHistory(int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
-            var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
-            return GetHistory<VakacoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+            using (var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection))
+            {
+                return GetHistory<VakacoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+            }
         }
 
         public override List<BlockchainTransaction> GetAllHistory(out int numberData, string userId, string currency,
             int offset = -1, int limit = -1, string[] orderBy = null, string search = null)
         {
-            var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
-            var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
-            using (var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection))
+            using (var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection))
             {
-                return GetAllHistory<VakacoinWithdrawTransaction, VakacoinDepositTransaction>(out numberData, userId,
-                    currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+                using (var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection))
+                {
+                    using (var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection))
+                    {
+                        return GetAllHistory<VakacoinWithdrawTransaction, VakacoinDepositTransaction>(out numberData, userId,
+                            currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+                    }
+                }
             }
         }
     }
