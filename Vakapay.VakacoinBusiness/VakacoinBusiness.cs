@@ -272,9 +272,11 @@ namespace Vakapay.VakacoinBusiness
         {
             var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection);
             var withdrawRepo = VakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(DbConnection);
-            var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection);
-            return GetAllHistory<VakacoinWithdrawTransaction, VakacoinDepositTransaction>(out numberData, userId,
-                currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+            using (var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection))
+            {
+                return GetAllHistory<VakacoinWithdrawTransaction, VakacoinDepositTransaction>(out numberData, userId,
+                    currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+            }
         }
     }
 }

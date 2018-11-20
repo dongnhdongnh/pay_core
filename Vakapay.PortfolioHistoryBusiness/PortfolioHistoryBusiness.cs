@@ -13,13 +13,13 @@ namespace Vakapay.PortfolioHistoryBusiness
     {
         private IPortfolioHistoryRepository Repository { get; set; }
         public IDbConnection DbConnection { get; }
-
+        IVakapayRepositoryFactory vakapayRepositoryFactory;
         public PortfolioHistoryBusiness(IVakapayRepositoryFactory vakapayRepositoryFactory, bool isNewConnection = true)
         {
             DbConnection = isNewConnection
                 ? vakapayRepositoryFactory.GetOldConnection()
                 : vakapayRepositoryFactory.GetDbConnection();
-            Repository = vakapayRepositoryFactory.GetPortfolioHistoryRepository(DbConnection);
+            this.vakapayRepositoryFactory = vakapayRepositoryFactory;
         }
 
         public ReturnObject InsertWithPrice(string userId)
@@ -33,13 +33,18 @@ namespace Vakapay.PortfolioHistoryBusiness
             string ethPrice = CacheHelper.GetCacheString(String.Format(
                 RedisCacheKey.COINMARKET_PRICE_CACHEKEY, DashboardConfig.ETHEREUM,
                 DashboardConfig.CURRENT));
-
-            return Repository.InsertWithPrice(userId, vkcPrice, btcPrice, ethPrice);
+            using (Repository = vakapayRepositoryFactory.GetPortfolioHistoryRepository(DbConnection))
+            {
+                return Repository.InsertWithPrice(userId, vkcPrice, btcPrice, ethPrice);
+            }
         }
 
         public List<PortfolioHistory> FindByUserId(string userId, long from, long to)
         {
-            return Repository.FindByUserId(userId, from, to);
+            using (Repository = vakapayRepositoryFactory.GetPortfolioHistoryRepository(DbConnection))
+            {
+                return Repository.FindByUserId(userId, from, to);
+            }
         }
     }
 }

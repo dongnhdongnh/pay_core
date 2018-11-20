@@ -91,9 +91,12 @@ namespace Vakapay.EthereumBusiness
             {
                 using (var withdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection))
                 {
-                    var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection);
-                    return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData, userID,
-                        currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+                    using (var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection))
+                    {
+                        return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData, userID,
+                            currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+
+                    }
                 }
             }
         }

@@ -72,7 +72,7 @@ namespace Vakapay.UnitTest
         public void CheckUserAndMakeWallet()
         {
             List<User> users = _userBusiness.FindAllUser();
-            foreach(User user in users)
+            foreach (User user in users)
             {
                 Console.WriteLine(user.Id);
                 _walletBusiness.MakeAllWalletForNewUser(user);
@@ -121,15 +121,17 @@ namespace Vakapay.UnitTest
             var persistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
             _ethBus = new Vakapay.EthereumBusiness.EthereumBusiness(persistenceFactory);
             var connection = persistenceFactory.GetDbConnection();
-            var ethAddressRepos = persistenceFactory.GetEthereumAddressRepository(connection);
-            _walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
+            using (var ethAddressRepos = persistenceFactory.GetEthereumAddressRepository(connection))
+            {
+                _walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
 
-            string pass = "password";
-            //	var resultTest = _ethBus.CreateNewAddAddress(wallet);
-            var outPut =
-                await _ethBus.CreateAddressAsync<EthereumAddress>(ethAddressRepos, RpcClass, walletId,
-                    pass);
-            Assert.IsNotNull(outPut);
+                string pass = "password";
+                //	var resultTest = _ethBus.CreateNewAddAddress(wallet);
+                var outPut =
+                    await _ethBus.CreateAddressAsync<EthereumAddress>(ethAddressRepos, RpcClass, walletId,
+                        pass);
+                Assert.IsNotNull(outPut);
+            }
         }
 
         [Test]
