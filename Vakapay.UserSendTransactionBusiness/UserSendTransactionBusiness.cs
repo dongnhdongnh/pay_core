@@ -294,81 +294,83 @@ namespace Vakapay.UserSendTransactionBusiness
         {
             try
             {
-                var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb);
-
-                var senderWallet =
-                    walletRepository.FindByUserAndNetwork(transaction.SenderUserId, transaction.Currency);
-                var receiverWallet =
-                    walletRepository.FindByUserAndNetwork(transaction.ReceiverUserId, transaction.Currency);
-
-                if (senderWallet == null)
+                using (var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb))
                 {
-                    transaction.Status = Status.STATUS_ERROR;
+
+                    var senderWallet =
+                        walletRepository.FindByUserAndNetwork(transaction.SenderUserId, transaction.Currency);
+                    var receiverWallet =
+                        walletRepository.FindByUserAndNetwork(transaction.ReceiverUserId, transaction.Currency);
+
+                    if (senderWallet == null)
+                    {
+                        transaction.Status = Status.STATUS_ERROR;
+                        return new ReturnObject()
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Cannot find sender wallet"
+                        };
+                    }
+
+                    if (receiverWallet == null)
+                    {
+                        transaction.Status = Status.STATUS_ERROR;
+                        return new ReturnObject()
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Cannot find receiver wallet"
+                        };
+                    }
+
+                    if (transaction.Amount > senderWallet.Balance)
+                    {
+                        transaction.Status = Status.STATUS_ERROR;
+                        return new ReturnObject()
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Sender balance is smaller than transaction amount"
+                        };
+                    }
+
+                    if (transaction.Amount <= 0)
+                    {
+                        transaction.Status = Status.STATUS_ERROR;
+                        return new ReturnObject()
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Transaction amount must be positive"
+                        };
+                    }
+
+                    //                senderWallet.Balance -= transaction.Amount;
+                    //                receiverWallet.Balance += transaction.Amount;
+
+                    var updateBalanceRes =
+                        walletRepository.UpdateBalanceWallet(-transaction.Amount, senderWallet.Id,
+                            senderWallet.Version); //TODO dangerous code
+
+                    if (updateBalanceRes.Status == Status.STATUS_ERROR)
+                    {
+                        transaction.Status = Status.STATUS_ERROR;
+                        return updateBalanceRes;
+                    }
+
+                    updateBalanceRes =
+                        walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, receiverWallet.Version);
+
+                    if (updateBalanceRes.Status == Status.STATUS_ERROR)
+                    {
+                        transaction.Status = Status.STATUS_ERROR;
+                        return updateBalanceRes;
+                    }
+
+                    transaction.Status = Status.STATUS_COMPLETED;
+
                     return new ReturnObject()
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Cannot find sender wallet"
+                        Status = Status.STATUS_SUCCESS
                     };
                 }
-
-                if (receiverWallet == null)
-                {
-                    transaction.Status = Status.STATUS_ERROR;
-                    return new ReturnObject()
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Cannot find receiver wallet"
-                    };
-                }
-
-                if (transaction.Amount > senderWallet.Balance)
-                {
-                    transaction.Status = Status.STATUS_ERROR;
-                    return new ReturnObject()
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Sender balance is smaller than transaction amount"
-                    };
-                }
-
-                if (transaction.Amount <= 0)
-                {
-                    transaction.Status = Status.STATUS_ERROR;
-                    return new ReturnObject()
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Transaction amount must be positive"
-                    };
-                }
-
-//                senderWallet.Balance -= transaction.Amount;
-//                receiverWallet.Balance += transaction.Amount;
-
-                var updateBalanceRes =
-                    walletRepository.UpdateBalanceWallet(-transaction.Amount, senderWallet.Id,
-                        senderWallet.Version); //TODO dangerous code
-
-                if (updateBalanceRes.Status == Status.STATUS_ERROR)
-                {
-                    transaction.Status = Status.STATUS_ERROR;
-                    return updateBalanceRes;
-                }
-
-                updateBalanceRes =
-                    walletRepository.UpdateBalanceWallet(transaction.Amount, receiverWallet.Id, receiverWallet.Version);
-
-                if (updateBalanceRes.Status == Status.STATUS_ERROR)
-                {
-                    transaction.Status = Status.STATUS_ERROR;
-                    return updateBalanceRes;
-                }
-
-                transaction.Status = Status.STATUS_COMPLETED;
-
-                return new ReturnObject()
-                {
-                    Status = Status.STATUS_SUCCESS
-                };
             }
             catch (Exception e)
             {

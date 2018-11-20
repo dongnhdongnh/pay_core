@@ -216,30 +216,32 @@ namespace Vakapay.VakacoinBusiness
 
             try
             {
-                var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection);
+                using (var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection))
+                {
 
-                var walletCheck = walletRepository.FindById(walletId);
+                    var walletCheck = walletRepository.FindById(walletId);
 
-                if (walletCheck == null)
+                    if (walletCheck == null)
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Wallet Not Found"
+                        };
+
+                    VakacoinRpcObj = rpcClass as VakacoinRpc;
+
+                    var results =
+                        CreateNewAccount(walletId); // Create account and add account name to VakacoinAccount table
+
+                    if (results.Status == Status.STATUS_ERROR)
+                        return results;
+
                     return new ReturnObject
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Wallet Not Found"
+                        Status = Status.STATUS_SUCCESS,
+                        Message = "Create vakacoin account success!"
                     };
-
-                VakacoinRpcObj = rpcClass as VakacoinRpc;
-
-                var results =
-                    CreateNewAccount(walletId); // Create account and add account name to VakacoinAccount table
-
-                if (results.Status == Status.STATUS_ERROR)
-                    return results;
-
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Message = "Create vakacoin account success!"
-                };
+                }
             }
             catch (Exception e)
             {

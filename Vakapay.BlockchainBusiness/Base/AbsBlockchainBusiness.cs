@@ -186,17 +186,18 @@ namespace Vakapay.BlockchainBusiness.Base
         {
             try
             {
-                var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection);
+                using (var walletRepository = VakapayRepositoryFactory.GetWalletRepository(DbConnection))
+                {
 
-                var walletCheck = walletRepository.FindById(walletId);
+                    var walletCheck = walletRepository.FindById(walletId);
 
-                if (walletCheck == null)
-                    return new ReturnObject
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Wallet Not Found"
-                    };
-
+                    if (walletCheck == null)
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Wallet Not Found"
+                        };
+                }
                 var resultsRPC = rpcClass.CreateNewAddress(other);
                 if (resultsRPC.Status == Status.STATUS_ERROR)
                     return resultsRPC;
