@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities;
@@ -5,7 +6,7 @@ using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface IWalletRepository : IRepositoryBase<Wallet>, IMultiThreadUpdateEntityRepository<Wallet>
+    public interface IWalletRepository : IRepositoryBase<Wallet>, IMultiThreadUpdateEntityRepository<Wallet>, IDisposable
     {
         ReturnObject UpdateBalanceWallet(decimal amount, string id, int version);
         List<Wallet> FindAllWalletByUser(User user);
