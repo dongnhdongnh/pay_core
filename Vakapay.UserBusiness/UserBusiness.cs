@@ -275,9 +275,11 @@ namespace Vakapay.UserBusiness
                 switch (currency)
                 {
                     case CryptoCurrency.ETH:
-                        var ethereumRepo =
-                            _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb);
-                        output = ethereumRepo.FindById(id);
+                        using (var ethereumRepo =
+                               _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb))
+                        {
+                            output = ethereumRepo.FindById(id);
+                        }
 
                         break;
                     case CryptoCurrency.VAKA:

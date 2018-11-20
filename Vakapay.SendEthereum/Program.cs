@@ -48,13 +48,15 @@ namespace Vakapay.SendEthereum
 
                     var rpc = new EthereumRpc(AppSettingHelper.GetEthereumNode());
 
-                    var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
-                    var resultSend = ethereumBusiness.SendTransactionAsync(ethereumRepo, rpc);
-                    Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
+                    using (var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection))
+                    {
+                        var resultSend = ethereumBusiness.SendTransactionAsync(ethereumRepo, rpc);
+                        Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
 
-                    Console.WriteLine("Send Ethereum End...");
-                    Thread.Sleep(1000);
+                        Console.WriteLine("Send Ethereum End...");
+                        Thread.Sleep(1000);
+                    }
                 }
             }
             catch (Exception e)

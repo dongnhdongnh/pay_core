@@ -25,10 +25,13 @@ namespace Vakapay.EthereumBusiness
         {
             try
             {
-                var ethereumwithdrawRepo =
-                    VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-                blockchainTransaction.Status = Status.STATUS_PENDING;
-                return ethereumwithdrawRepo.Insert(blockchainTransaction);
+                using (var ethereumwithdrawRepo =
+                        VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection))
+                {
+                    blockchainTransaction.Status = Status.STATUS_PENDING;
+                    return ethereumwithdrawRepo.Insert(blockchainTransaction);
+                }
+
             }
             catch (Exception e)
             {
@@ -44,9 +47,11 @@ namespace Vakapay.EthereumBusiness
         {
             try
             {
-                var repo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
-                blockchainTransaction.Status = Status.STATUS_COMPLETED;
-                return repo.Insert(blockchainTransaction);
+                using (var repo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection))
+                {
+                    blockchainTransaction.Status = Status.STATUS_COMPLETED;
+                    return repo.Insert(blockchainTransaction);
+                }
             }
             catch (Exception e)
             {
@@ -61,16 +66,20 @@ namespace Vakapay.EthereumBusiness
         public override List<BlockchainTransaction> GetWithdrawHistory(int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
-            var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-            Console.WriteLine("Get ETH HISTORY");
-            return GetHistory<EthereumWithdrawTransaction>(ethereumwithdrawRepo, offset, limit, orderBy);
+            using (var ethereumwithdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection))
+            {
+                Console.WriteLine("Get ETH HISTORY");
+                return GetHistory<EthereumWithdrawTransaction>(ethereumwithdrawRepo, offset, limit, orderBy);
+            }
         }
 
         public override List<BlockchainTransaction> GetDepositHistory(int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
-            var ethereumDepositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
-            return GetHistory<EthereumDepositTransaction>(ethereumDepositRepo, offset, limit, orderBy);
+            using (var ethereumDepositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection))
+            {
+                return GetHistory<EthereumDepositTransaction>(ethereumDepositRepo, offset, limit, orderBy);
+            }
         }
 
 
@@ -78,11 +87,15 @@ namespace Vakapay.EthereumBusiness
             int offset = -1,
             int limit = -1, string[] orderBy = null, string search = null)
         {
-            var depositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection);
-            var withdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection);
-            var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection);
-            return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData, userID,
-                currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+            using (var depositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection))
+            {
+                using (var withdrawRepo = VakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(DbConnection))
+                {
+                    var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection);
+                    return GetAllHistory<EthereumWithdrawTransaction, EthereumDepositTransaction>(out numberData, userID,
+                        currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+                }
+            }
         }
 
         public virtual async Task<ReturnObject> ScanBlockAsync<TWithDraw, TDeposit, TBlockResponse, TTransaction>(

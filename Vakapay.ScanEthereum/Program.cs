@@ -36,19 +36,23 @@ namespace Vakapay.ScanEthereum
 
                     var rpc = new EthereumRpc(AppSettingHelper.GetEthereumNode());
 
-                    var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection);
-                    var ethereumDepoRepo = repoFactory.GetEthereumDepositeTransactionRepository(connection);
-                    var resultSend =
-                        ethereumBusiness
-                            .ScanBlockAsync<EthereumWithdrawTransaction, EthereumDepositTransaction,
-                                EthereumBlockResponse, EthereumTransactionResponse>(CryptoCurrency.ETH, walletBusiness,
-                                ethereumRepo, ethereumDepoRepo, rpc);
-                    Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
+                    using (var ethereumRepo = repoFactory.GetEthereumWithdrawTransactionRepository(connection))
+                    {
+                        using (var ethereumDepoRepo = repoFactory.GetEthereumDepositeTransactionRepository(connection))
+                        {
+                            var resultSend =
+                                ethereumBusiness
+                                    .ScanBlockAsync<EthereumWithdrawTransaction, EthereumDepositTransaction,
+                                        EthereumBlockResponse, EthereumTransactionResponse>(CryptoCurrency.ETH, walletBusiness,
+                                        ethereumRepo, ethereumDepoRepo, rpc);
+                            Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
 
-                    Console.WriteLine("==========Scan Ethereum End==========");
-                    Console.WriteLine("==========Wait for next scan==========");
-                    Thread.Sleep(5000);
+                            Console.WriteLine("==========Scan Ethereum End==========");
+                            Console.WriteLine("==========Wait for next scan==========");
+                            Thread.Sleep(5000);
+                        }
+                    }
                 }
             }
             catch (Exception e)

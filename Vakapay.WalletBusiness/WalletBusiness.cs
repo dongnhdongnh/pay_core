@@ -388,10 +388,12 @@ namespace Vakapay.WalletBusiness
                         blockchainTransaction.ToDelivered<BitcoinWithdrawTransaction>());
 
                 case CryptoCurrency.ETH:
-                    var etherWithdrawTransaction =
-                        _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb);
-                    return etherWithdrawTransaction.Insert(blockchainTransaction
-                        .ToDelivered<EthereumWithdrawTransaction>());
+                    using (var etherWithdrawTransaction =
+                            _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb))
+                    {
+                        return etherWithdrawTransaction.Insert(blockchainTransaction
+                            .ToDelivered<EthereumWithdrawTransaction>());
+                    }
 
                 case CryptoCurrency.VAKA:
                     var vakaWithdrawTransaction =

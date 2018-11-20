@@ -104,14 +104,14 @@ namespace Vakapay.SendMailBusiness
             try
             {
                 var sendResult = await SendEmail(pendingEmail, apiUrl, apiKey, from, fromName);
-//                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
-//                {
-//                    return new ReturnObject
-//                    {
-//                        Status = Status.STATUS_ERROR,
-//                        Message = "Cannot Send email"
-//                    };
-//                }
+                //                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
+                //                {
+                //                    return new ReturnObject
+                //                    {
+                //                        Status = Status.STATUS_ERROR,
+                //                        Message = "Cannot Send email"
+                //                    };
+                //                }
 
                 pendingEmail.Status = sendResult.Status;
                 pendingEmail.IsProcessing = 0;
@@ -214,11 +214,17 @@ namespace Vakapay.SendMailBusiness
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:
-                            return _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb)
-                                .FindById(emailQueue.TransactionId);
+                            //return
+                            using (var _rep = _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb))
+                            {
+                                return _rep.FindById(emailQueue.TransactionId);
+                            }
                         case EmailTemplate.Received:
-                            return _vakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(_connectionDb)
-                                .FindById(emailQueue.TransactionId);
+                            using (var _rep = _vakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(_connectionDb))
+                            {
+                                return _rep.FindById(emailQueue.TransactionId);
+                            }
+
                         case EmailTemplate.NewDevice:
                             break;
                         case EmailTemplate.Verify:
