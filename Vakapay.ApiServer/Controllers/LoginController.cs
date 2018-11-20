@@ -26,7 +26,7 @@ namespace Vakapay.ApiServer.Controllers
     public class LoginController : Controller
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
-    //    private readonly WalletBusiness.WalletBusiness _walletBusiness;
+        private readonly WalletBusiness.WalletBusiness _walletBusiness;
         private IConfiguration Configuration { get; }
         private IVakapayRepositoryFactory _repositoryFactory;
         private IHostingEnvironment _env;
@@ -42,14 +42,14 @@ namespace Vakapay.ApiServer.Controllers
             Configuration = configuration;
 
             _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
-          //  _walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
+            _walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
         }
 
 
         [HttpGet("get-info")]
         public async Task<string> GetCurrentUser()
         {
-            /*try
+            try
             {
                 var email = User.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value)
                     .SingleOrDefault();
@@ -153,42 +153,37 @@ namespace Vakapay.ApiServer.Controllers
             catch (Exception e)
             {
                 return CreateDataError(e.Message);
-            }*/
-            return new ReturnObject
-            {
-                Status = Status.STATUS_SUCCESS,
-                Data = ""
-            }.ToJson();
+            }
         }
 
-//        private void UpdateCurrencyAndTimeZone(User userModel, IpGeographicalLocation location)
-//        {
-//            var isUpdate = false;
-//            if (userModel.CurrencyKey == null && location?.Currency != null)
-//            {
-//                userModel.CurrencyKey = location.Currency.Code;
-//                isUpdate = true;
-//            }
-//
-//            if (userModel.TimezoneKey == null && location?.TimeZone != null)
-//            {
-//                userModel.TimezoneKey = location.TimeZone.Id;
-//                isUpdate = true;
-//            }
-//
-//            if (isUpdate)
-//            {
-//                _userBusiness.UpdateProfile(userModel);
-//            }
-//        }
-//
-//        public string CreateDataError(string message)
-//        {
-//            return new ReturnObject
-//            {
-//                Status = Status.STATUS_ERROR,
-//                Message = message
-//            }.ToJson();
-//        }
+        private void UpdateCurrencyAndTimeZone(User userModel, IpGeographicalLocation location)
+        {
+            var isUpdate = false;
+            if (userModel.CurrencyKey == null && location?.Currency != null)
+            {
+                userModel.CurrencyKey = location.Currency.Code;
+                isUpdate = true;
+            }
+
+            if (userModel.TimezoneKey == null && location?.TimeZone != null)
+            {
+                userModel.TimezoneKey = location.TimeZone.Id;
+                isUpdate = true;
+            }
+
+            if (isUpdate)
+            {
+                _userBusiness.UpdateProfile(userModel);
+            }
+        }
+
+        public string CreateDataError(string message)
+        {
+            return new ReturnObject
+            {
+                Status = Status.STATUS_ERROR,
+                Message = message
+            }.ToJson();
+        }
     }
 }

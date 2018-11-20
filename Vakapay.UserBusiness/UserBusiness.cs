@@ -95,10 +95,8 @@ namespace Vakapay.UserBusiness
             }
             catch (Exception e)
             {
-
                 throw e;
             }
-           
         }
 
         /// <summary>
@@ -184,7 +182,7 @@ namespace Vakapay.UserBusiness
                         : "localhost",
                     Id = CommonHelper.GenerateUuid(),
                     Source = source,
-                    CreatedAt = (int)CommonHelper.GetUnixTimestamp()
+                    CreatedAt = (int) CommonHelper.GetUnixTimestamp()
                 };
 
                 var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
@@ -351,8 +349,8 @@ namespace Vakapay.UserBusiness
                     model.Status = 1;
                     model.KeyApi = CommonHelper.RandomString(16);
                     model.Secret = CommonHelper.RandomString(32);
-                    model.CreatedAt = (int)CommonHelper.GetUnixTimestamp();
-                    model.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                    model.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                     var resultAdd = apirRepository.Insert(model);
 
                     return new ReturnObject
@@ -364,7 +362,7 @@ namespace Vakapay.UserBusiness
                 }
                 else
                 {
-                    model.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                     var resultEdit = apirRepository.Update(model);
 
                     return new ReturnObject
@@ -404,7 +402,7 @@ namespace Vakapay.UserBusiness
                 var logRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
 
                 confirmedDevices.Id = CommonHelper.GenerateUuid();
-                confirmedDevices.SignedIn = (int)CommonHelper.GetUnixTimestamp();
+                confirmedDevices.SignedIn = (int) CommonHelper.GetUnixTimestamp();
                 return logRepository.Insert(confirmedDevices);
             }
             catch (Exception e)
@@ -468,7 +466,7 @@ namespace Vakapay.UserBusiness
                     };
 
                 var userCheck = userRepository.FindWhere(userRepository.QuerySearch(search));
-                var time = (int)CommonHelper.GetUnixTimestamp();
+                var time = (int) CommonHelper.GetUnixTimestamp();
 
                 if (userCheck == null)
                 {
@@ -580,6 +578,7 @@ namespace Vakapay.UserBusiness
                 };
             }
         }
+
         public User GetUserByEmail(string email)
         {
             try
@@ -594,6 +593,7 @@ namespace Vakapay.UserBusiness
                 return null;
             }
         }
+
         // find UserInfo by id
         public User GetUserById(string id)
         {
@@ -619,10 +619,11 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                var user = userRepository.FindWhere(userRepository.QuerySearch(search));
-
-                return user;
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
+                {
+                    var user = userRepository.FindWhere(userRepository.QuerySearch(search));
+                    return user;
+                }
             }
             catch (Exception e)
             {
