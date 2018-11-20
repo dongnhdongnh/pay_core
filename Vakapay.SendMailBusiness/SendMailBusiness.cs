@@ -207,8 +207,7 @@ namespace Vakapay.SendMailBusiness
                                 return bitcoinWithdraw.FindById(emailQueue.TransactionId);
                             }
                         case EmailTemplate.Received:
-                            using (var bitcoinDeposit =
-                                _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb))
+                            using (var bitcoinDeposit =_vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb))
                             {
                                 return bitcoinDeposit.FindById(emailQueue.TransactionId);
                             }

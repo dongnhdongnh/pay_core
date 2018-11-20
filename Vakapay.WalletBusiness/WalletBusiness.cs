@@ -267,102 +267,104 @@ namespace Vakapay.WalletBusiness
                     // 1. Validate User status
                     var walletById = walletRepository.FindById(wallet.Id);
 
-                    var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                    if (walletById == null)
+                    using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                     {
-                        return new ReturnObject()
+                        if (walletById == null)
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = "User wallet found in data base"
-                        };
-                    }
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "User wallet found in data base"
+                            };
+                        }
 
-                    var userCheck = userRepository.FindById(walletById.UserId);
-                    if (userCheck == null ||
-                        userCheck.Status != Status.STATUS_ACTIVE // ||
-                                                                 // !walletById.Currency.Equals(walletByAddress.Currency))
-                    )
-                    {
-                        return new ReturnObject
+                        var userCheck = userRepository.FindById(walletById.UserId);
+                        if (userCheck == null ||
+                            userCheck.Status != Status.STATUS_ACTIVE // ||
+                                                                     // !walletById.Currency.Equals(walletByAddress.Currency))
+                        )
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = "User Not Found || Not Active" // || Not same Network"
-                        };
-                    }
+                            return new ReturnObject
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "User Not Found || Not Active" // || Not same Network"
+                            };
+                        }
 
-                    //                // 2. validate Network status ==> not validate Network status as check if node is running,
-                    //                var validateNetworks = ValidateNetworkStatus(wallet.Currency);
-                    //                if (validateNetworks.Status == Status.STATUS_ERROR)
-                    //                {
-                    //                    return validateNetworks;
-                    //                }
+                        //                // 2. validate Network status ==> not validate Network status as check if node is running,
+                        //                var validateNetworks = ValidateNetworkStatus(wallet.Currency);
+                        //                if (validateNetworks.Status == Status.STATUS_ERROR)
+                        //                {
+                        //                    return validateNetworks;
+                        //                }
 
-                    // 3. Validate toAddress
-                    if (ValidateAddress(toAddress, wallet.Currency) == false)
-                    {
-                        return new ReturnObject
+                        // 3. Validate toAddress
+                        if (ValidateAddress(toAddress, wallet.Currency) == false)
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = wallet.Currency + ": To Address is not valid!"
-                        };
-                    }
+                            return new ReturnObject
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = wallet.Currency + ": To Address is not valid!"
+                            };
+                        }
 
-                    // 4. Validate amount
-                    var free = GetFee(wallet.Currency);
+                        // 4. Validate amount
+                        var free = GetFee(wallet.Currency);
 
-                    if (walletById.Balance < amount + free)
-                    {
-                        return new ReturnObject()
+                        if (walletById.Balance < amount + free)
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = "Can't transfer bigger than wallet balance"
-                        };
-                    }
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Can't transfer bigger than wallet balance"
+                            };
+                        }
 
-                    //                var withdrawTrx = ConnectionDb.BeginTransaction();
-                    /*
-                     * Should we BeginTransaction a transaction here and rollback if error happens?
-                     * But it is dangerous because if insert task is slow and user can double send their balance before
-                     * transaction being committed.
-                     */
+                        //                var withdrawTrx = ConnectionDb.BeginTransaction();
+                        /*
+                         * Should we BeginTransaction a transaction here and rollback if error happens?
+                         * But it is dangerous because if insert task is slow and user can double send their balance before
+                         * transaction being committed.
+                         */
 
-                    // 5. Update Wallet Balance
-                    var updateWallet = UpdateBalance(-(amount + free), wallet.Id, wallet.Version);
-                    if (updateWallet == null || updateWallet.Status == Status.STATUS_ERROR)
-                    {
-                        //                    withdrawTrx.Rollback();
-                        return new ReturnObject()
+                        // 5. Update Wallet Balance
+                        var updateWallet = UpdateBalance(-(amount + free), wallet.Id, wallet.Version);
+                        if (updateWallet == null || updateWallet.Status == Status.STATUS_ERROR)
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = "Fail update balance in walletDB"
-                        };
-                    }
+                            //                    withdrawTrx.Rollback();
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Fail update balance in walletDB"
+                            };
+                        }
 
-                    // double check balance of wallet is valid: check after update balance
-                    walletById = walletRepository.FindById(wallet.Id);
-                    if (walletById.Balance < 0)
-                    {
-                        return new ReturnObject()
+                        // double check balance of wallet is valid: check after update balance
+                        walletById = walletRepository.FindById(wallet.Id);
+                        if (walletById.Balance < 0)
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = $"Balance in {walletById.Currency} wallet after UpdateBalance is smaller than 0!!"
-                        };
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = $"Balance in {walletById.Currency} wallet after UpdateBalance is smaller than 0!!"
+                            };
+                        }
+
+
+                        //Make new transaction withdraw pending by
+                        var insertWithdraw = InsertToWithdrawTable(new BlockchainTransaction
+                        {
+                            UserId = walletById.UserId,
+                            FromAddress = fromAddress,
+                            ToAddress = toAddress,
+                            Fee = free,
+                            Amount = amount,
+                            PricePerCoin = pricePerCoin,
+                            Description = description
+                        }, walletById.Currency);
+
+                        return insertWithdraw;
                     }
-
-
-                    //Make new transaction withdraw pending by
-                    var insertWithdraw = InsertToWithdrawTable(new BlockchainTransaction
-                    {
-                        UserId = walletById.UserId,
-                        FromAddress = fromAddress,
-                        ToAddress = toAddress,
-                        Fee = free,
-                        Amount = amount,
-                        PricePerCoin = pricePerCoin,
-                        Description = description
-                    }, walletById.Currency);
-
-                    return insertWithdraw;
                 }
             }
             catch (Exception e)
@@ -396,7 +398,7 @@ namespace Vakapay.WalletBusiness
                     }
 
                 case CryptoCurrency.VAKA:
-                    using (var vakaWithdrawTransaction =_vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
+                    using (var vakaWithdrawTransaction = _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
                     {
                         return vakaWithdrawTransaction.Insert(
                             blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
@@ -801,15 +803,17 @@ namespace Vakapay.WalletBusiness
 
         public string FindEmailByAddressAndNetworkName(string addr, string networkName)
         {
-            var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-            var wallet = FindByAddressAndNetworkName(addr, networkName);
+            using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
+            {
+                var wallet = FindByAddressAndNetworkName(addr, networkName);
 
-            var user = userRepository.FindById(wallet.UserId);
+                var user = userRepository.FindById(wallet.UserId);
 
-            if (user?.Id == null)
-                return null;
+                if (user?.Id == null)
+                    return null;
 
-            return user.Email;
+                return user.Email;
+            }
         }
 
         public static bool ValidateAddress(string address, string networkName)

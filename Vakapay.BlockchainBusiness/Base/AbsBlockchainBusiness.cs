@@ -482,9 +482,11 @@ namespace Vakapay.BlockchainBusiness.Base
         {
             try
             {
-                var userRepository = VakapayRepositoryFactory.GetUserRepository(DbConnection);
-                var email = userRepository.FindEmailBySendTransaction(transaction);
-                return email;
+                using (var userRepository = VakapayRepositoryFactory.GetUserRepository(DbConnection))
+                {
+                    var email = userRepository.FindEmailBySendTransaction(transaction);
+                    return email;
+                }
             }
             catch (Exception e)
             {

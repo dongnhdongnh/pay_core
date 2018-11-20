@@ -108,54 +108,55 @@ namespace Vakapay.BitcoinNotifi
             {
                 Logger.Debug("HandleNotifiDataReceiver start");
 
-                var btcDepositTransactionRepository = btcBusiness
-                    .VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(btcBusiness.DbConnection);
-
-                Logger.Debug("HandleNotifiDataReceiver start1");
-                var currentBtcDepositTransaction = GetDepositTransaction(btcDepositTransactionRepository,
-                    transactionModelDetail.Address, transactionModel.Txid);
-                Logger.Debug("HandleNotifiDataReceiver =>> currentBtcDepositTransaction: " +
-                             currentBtcDepositTransaction);
-                var currentTime = CommonHelper.GetUnixTimestamp();
-                if (transactionModel.Confirmations == 0)
+                using (var btcDepositTransactionRepository = btcBusiness.VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(btcBusiness.DbConnection))
                 {
-                    Logger.Debug("HandleNotifiDataReceiver with confirm = 0");
-                    if (currentBtcDepositTransaction == null)
+
+                    Logger.Debug("HandleNotifiDataReceiver start1");
+                    var currentBtcDepositTransaction = GetDepositTransaction(btcDepositTransactionRepository,
+                        transactionModelDetail.Address, transactionModel.Txid);
+                    Logger.Debug("HandleNotifiDataReceiver =>> currentBtcDepositTransaction: " +
+                                 currentBtcDepositTransaction);
+                    var currentTime = CommonHelper.GetUnixTimestamp();
+                    if (transactionModel.Confirmations == 0)
                     {
-                        CreateNewBtcDepositTransaction(transactionModel, transactionModelDetail,
-                            btcDepositTransactionRepository, currentTime);
+                        Logger.Debug("HandleNotifiDataReceiver with confirm = 0");
+                        if (currentBtcDepositTransaction == null)
+                        {
+                            CreateNewBtcDepositTransaction(transactionModel, transactionModelDetail,
+                                btcDepositTransactionRepository, currentTime);
+                        }
+                        else
+                        {
+                            // transaction is exist
+                            Logger.Debug(
+                                "HandleNotifiDataReceiver =>> BitcoinDepositTransaction is exist, don't create new data");
+                        }
                     }
                     else
                     {
-                        // transaction is exist
-                        Logger.Debug(
-                            "HandleNotifiDataReceiver =>> BitcoinDepositTransaction is exist, don't create new data");
-                    }
-                }
-                else
-                {
-                    Logger.Debug("HandleNotifiDataReceiver with confirm > 0");
-                    if (currentBtcDepositTransaction != null)
-                    {
-                        currentBtcDepositTransaction.BlockHash = transactionModel.BlockHash;
-                        currentBtcDepositTransaction.Amount = transactionModel.Amount;
-                        currentBtcDepositTransaction.Status = Status.STATUS_COMPLETED;
-                        currentBtcDepositTransaction.UpdatedAt = currentTime;
-                        btcDepositTransactionRepository.Update(currentBtcDepositTransaction);
-                    }
-                    else
-                    {
-                        CreateNewBtcDepositTransaction(transactionModel, transactionModelDetail,
-                            btcDepositTransactionRepository, currentTime);
-                    }
+                        Logger.Debug("HandleNotifiDataReceiver with confirm > 0");
+                        if (currentBtcDepositTransaction != null)
+                        {
+                            currentBtcDepositTransaction.BlockHash = transactionModel.BlockHash;
+                            currentBtcDepositTransaction.Amount = transactionModel.Amount;
+                            currentBtcDepositTransaction.Status = Status.STATUS_COMPLETED;
+                            currentBtcDepositTransaction.UpdatedAt = currentTime;
+                            btcDepositTransactionRepository.Update(currentBtcDepositTransaction);
+                        }
+                        else
+                        {
+                            CreateNewBtcDepositTransaction(transactionModel, transactionModelDetail,
+                                btcDepositTransactionRepository, currentTime);
+                        }
 
-                    // update balance 
-                    _walletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address,
-                        transactionModelDetail.Amount,
-                        CryptoCurrency.BTC);
+                        // update balance 
+                        _walletBusiness?.UpdateBalanceDeposit(transactionModelDetail.Address,
+                            transactionModelDetail.Amount,
+                            CryptoCurrency.BTC);
 
-                    //insert new email data
-                    CreateDataEmail(btcBusiness, transactionModelDetail);
+                        //insert new email data
+                        CreateDataEmail(btcBusiness, transactionModelDetail);
+                    }
                 }
             }
             catch (Exception e)
@@ -174,21 +175,23 @@ namespace Vakapay.BitcoinNotifi
         {
             try
             {
-                var userRepository = btcBusiness.VakapayRepositoryFactory.GetUserRepository(btcBusiness.DbConnection);
-                var email = userRepository.FindEmailByBitcoinAddress(transactionModelDetail.Address);
+                using (var userRepository = btcBusiness.VakapayRepositoryFactory.GetUserRepository(btcBusiness.DbConnection))
+                {
+                    var email = userRepository.FindEmailByBitcoinAddress(transactionModelDetail.Address);
 
-                if (email != null)
-                {
-                    const string title = "Notify receiver BitCoin";
-//                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
-//                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
-                    var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(title, email,
-                        transactionModelDetail.Amount, "", //TODO add transaction Id
-                        EmailTemplate.Received, CryptoCurrency.BTC, btcBusiness.VakapayRepositoryFactory, false);
-                }
-                else
-                {
-                    Logger.Debug("CreateDataEmail =>> error because email fail");
+                    if (email != null)
+                    {
+                        const string title = "Notify receiver BitCoin";
+                        //                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
+                        //                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
+                        var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(title, email,
+                            transactionModelDetail.Amount, "", //TODO add transaction Id
+                            EmailTemplate.Received, CryptoCurrency.BTC, btcBusiness.VakapayRepositoryFactory, false);
+                    }
+                    else
+                    {
+                        Logger.Debug("CreateDataEmail =>> error because email fail");
+                    }
                 }
             }
             catch (Exception e)
