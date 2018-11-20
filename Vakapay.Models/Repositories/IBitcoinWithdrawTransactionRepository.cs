@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Entities.BTC;
 using Vakapay.Models.Repositories.Base;
@@ -6,7 +7,7 @@ using Vakapay.Models.Repositories.Base;
 namespace Vakapay.Models.Repositories
 {
     public interface
-        IBitcoinWithdrawTransactionRepository : IRepositoryBlockchainTransaction<BitcoinWithdrawTransaction>
+        IBitcoinWithdrawTransactionRepository : IRepositoryBlockchainTransaction<BitcoinWithdrawTransaction>, IDisposable
     {
         List<BitcoinWithdrawTransaction> FindWhere(BitcoinWithdrawTransaction objectTransaction);
         string QuerySearch(Dictionary<string, string> models);
