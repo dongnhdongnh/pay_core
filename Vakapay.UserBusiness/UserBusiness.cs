@@ -46,35 +46,37 @@ namespace Vakapay.UserBusiness
             numberData = -1;
             try
             {
-                var confirmedDevicesRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
-
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"UserId", idUser}
-                    };
-
-                var resultGetLog =
-                    confirmedDevicesRepository.GetListConfirmedDevices(out numberData,
-                        confirmedDevicesRepository.QuerySearch(search),
-                        offset, limit, filter, sort);
-
-
-                if (!string.IsNullOrEmpty(checkConfirmedDevices.Id))
+                using (var confirmedDevicesRepository =
+                    _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb))
                 {
-                    foreach (var log in resultGetLog)
+                    var search =
+                        new Dictionary<string, string>
+                        {
+                            {"UserId", idUser}
+                        };
+
+                    var resultGetLog =
+                        confirmedDevicesRepository.GetListConfirmedDevices(out numberData,
+                            confirmedDevicesRepository.QuerySearch(search),
+                            offset, limit, filter, sort);
+
+
+                    if (!string.IsNullOrEmpty(checkConfirmedDevices.Id))
                     {
-                        log.Current = 0;
-                        if (log.Id.Equals(checkConfirmedDevices.Id))
-                            log.Current = 1;
+                        foreach (var log in resultGetLog)
+                        {
+                            log.Current = 0;
+                            if (log.Id.Equals(checkConfirmedDevices.Id))
+                                log.Current = 1;
+                        }
                     }
-                }
 
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Data = JsonConvert.SerializeObject(resultGetLog)
-                };
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonConvert.SerializeObject(resultGetLog)
+                    };
+                }
             }
             catch (Exception e)
             {
@@ -90,8 +92,10 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                return userRepository.FindAllUser();
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
+                {
+                    return userRepository.FindAllUser();
+                }
             }
             catch (Exception e)
             {
@@ -114,34 +118,39 @@ namespace Vakapay.UserBusiness
             numberData = -1;
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                var userCheck = userRepository.FindById(idUser);
-
-                if (userCheck == null)
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                 {
-                    return new ReturnObject
+                    var userCheck = userRepository.FindById(idUser);
+
+                    if (userCheck == null)
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't User"
-                    };
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Can't User"
+                        };
+                    }
                 }
 
-                var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb);
 
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"UserId", idUser}
-                    };
-
-                var resultGetLog = logRepository.GetListLog(out numberData, logRepository.QuerySearch(search), offset,
-                    limit, filter, sort);
-
-                return new ReturnObject
+                using (var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb))
                 {
-                    Status = Status.STATUS_SUCCESS,
-                    Data = JsonHelper.SerializeObject(resultGetLog)
-                };
+                    var search =
+                        new Dictionary<string, string>
+                        {
+                            {"UserId", idUser}
+                        };
+
+                    var resultGetLog = logRepository.GetListLog(out numberData, logRepository.QuerySearch(search),
+                        offset,
+                        limit, filter, sort);
+
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonHelper.SerializeObject(resultGetLog)
+                    };
+                }
             }
             catch (Exception e)
             {
@@ -185,20 +194,22 @@ namespace Vakapay.UserBusiness
                     CreatedAt = (int) CommonHelper.GetUnixTimestamp()
                 };
 
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                var userCheck = userRepository.FindById(log.UserId);
-                if (userCheck == null)
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                 {
-                    return new ReturnObject
+                    var userCheck = userRepository.FindById(log.UserId);
+                    if (userCheck == null)
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't User"
-                    };
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Can't User"
+                        };
+                    }
+
+                    var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb);
+
+                    return logRepository.Insert(log);
                 }
-
-                var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb);
-
-                return logRepository.Insert(log);
             }
             catch (Exception e)
             {
@@ -225,33 +236,36 @@ namespace Vakapay.UserBusiness
             numberData = -1;
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                var userCheck = userRepository.FindById(idUser);
-                if (userCheck == null)
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                 {
-                    return new ReturnObject
+                    var userCheck = userRepository.FindById(idUser);
+                    if (userCheck == null)
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't User"
-                    };
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Can't User"
+                        };
+                    }
                 }
 
-                var apiRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
-
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"UserId", idUser}
-                    };
-
-                var resultGetLog = apiRepository.GetListApiKey(out numberData, apiRepository.QuerySearch(search),
-                    offset, limit, filter, sort);
-
-                return new ReturnObject
+                using (var apiRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb))
                 {
-                    Status = Status.STATUS_SUCCESS,
-                    Data = JsonHelper.SerializeObject(resultGetLog)
-                };
+                    var search =
+                        new Dictionary<string, string>
+                        {
+                            {"UserId", idUser}
+                        };
+
+                    var resultGetLog = apiRepository.GetListApiKey(out numberData, apiRepository.QuerySearch(search),
+                        offset, limit, filter, sort);
+
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonHelper.SerializeObject(resultGetLog)
+                    };
+                }
             }
             catch (Exception e)
             {
@@ -311,15 +325,16 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var apiRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
+                using (var apiRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb))
+                {
+                    var search =
+                        new Dictionary<string, string>
+                        {
+                            {"KeyApi", apiKey}
+                        };
 
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"KeyApi", apiKey}
-                    };
-
-                return apiRepository.FindWhere(apiRepository.QuerySearch(search));
+                    return apiRepository.FindWhere(apiRepository.QuerySearch(search));
+                }
             }
             catch (Exception e)
             {
@@ -333,46 +348,50 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                var userCheck = userRepository.FindById(model.UserId);
-                var apirRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
-                if (userCheck == null)
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                 {
-                    return new ReturnObject
+                    var userCheck = userRepository.FindById(model.UserId);
+                    if (userCheck == null)
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't User"
-                    };
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Can't User"
+                        };
+                    }
                 }
 
-                if (string.IsNullOrEmpty(model.Id))
+                using (var apirRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb))
                 {
-                    model.Id = CommonHelper.GenerateUuid();
-                    model.Status = 1;
-                    model.KeyApi = CommonHelper.RandomString(16);
-                    model.Secret = CommonHelper.RandomString(32);
-                    model.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
-                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
-                    var resultAdd = apirRepository.Insert(model);
-
-                    return new ReturnObject
+                    if (string.IsNullOrEmpty(model.Id))
                     {
-                        Status = resultAdd.Status,
-                        Data = JsonHelper.SerializeObject(model),
-                        Message = resultAdd.Message
-                    };
-                }
-                else
-                {
-                    model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
-                    var resultEdit = apirRepository.Update(model);
+                        model.Id = CommonHelper.GenerateUuid();
+                        model.Status = 1;
+                        model.KeyApi = CommonHelper.RandomString(16);
+                        model.Secret = CommonHelper.RandomString(32);
+                        model.CreatedAt = (int) CommonHelper.GetUnixTimestamp();
+                        model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                        var resultAdd = apirRepository.Insert(model);
 
-                    return new ReturnObject
+                        return new ReturnObject
+                        {
+                            Status = resultAdd.Status,
+                            Data = JsonHelper.SerializeObject(model),
+                            Message = resultAdd.Message
+                        };
+                    }
+                    else
                     {
-                        Status = resultEdit.Status,
-                        Data = JsonHelper.SerializeObject(model),
-                        Message = resultEdit.Message
-                    };
+                        model.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                        var resultEdit = apirRepository.Update(model);
+
+                        return new ReturnObject
+                        {
+                            Status = resultEdit.Status,
+                            Data = JsonHelper.SerializeObject(model),
+                            Message = resultEdit.Message
+                        };
+                    }
                 }
             }
             catch (Exception e)
@@ -390,22 +409,24 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-                var userCheck = userRepository.FindById(confirmedDevices.UserId);
-                if (userCheck == null)
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                 {
-                    return new ReturnObject
+                    var userCheck = userRepository.FindById(confirmedDevices.UserId);
+                    if (userCheck == null)
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't User"
-                    };
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Can't User"
+                        };
+                    }
+
+                    var logRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
+
+                    confirmedDevices.Id = CommonHelper.GenerateUuid();
+                    confirmedDevices.SignedIn = (int) CommonHelper.GetUnixTimestamp();
+                    return logRepository.Insert(confirmedDevices);
                 }
-
-                var logRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
-
-                confirmedDevices.Id = CommonHelper.GenerateUuid();
-                confirmedDevices.SignedIn = (int) CommonHelper.GetUnixTimestamp();
-                return logRepository.Insert(confirmedDevices);
             }
             catch (Exception e)
             {
@@ -426,19 +447,20 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-
-                var userCheck = userRepository.FindById(user.Id);
-                if (userCheck == null)
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                 {
-                    return new ReturnObject
+                    var userCheck = userRepository.FindById(user.Id);
+                    if (userCheck == null)
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can't User"
-                    };
-                }
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Can't User"
+                        };
+                    }
 
-                return userRepository.Update(user);
+                    return userRepository.Update(user);
+                }
             }
             catch (Exception e)
             {
@@ -459,74 +481,75 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
-
-                var search =
-                    new Dictionary<string, string>
-                    {
-                        {"Email", userModel.Email}
-                    };
-
-                var userCheck = userRepository.FindWhere(userRepository.QuerySearch(search));
-                var time = (int) CommonHelper.GetUnixTimestamp();
-
-                if (userCheck == null)
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
                 {
-                    //login first
-                    try
+                    var search =
+                        new Dictionary<string, string>
+                        {
+                            {"Email", userModel.Email}
+                        };
+
+                    var userCheck = userRepository.FindWhere(userRepository.QuerySearch(search));
+                    var time = (int) CommonHelper.GetUnixTimestamp();
+
+                    if (userCheck == null)
                     {
-                        userModel.Id = CommonHelper.GenerateUuid();
-                        userModel.Status = Status.STATUS_ACTIVE;
-                        userModel.FullName = userModel.FirstName + " " + userModel.LastName;
+                        //login first
+                        try
+                        {
+                            userModel.Id = CommonHelper.GenerateUuid();
+                            userModel.Status = Status.STATUS_ACTIVE;
+                            userModel.FullName = userModel.FirstName + " " + userModel.LastName;
 
-                        //created new user
-                        var resultCreatedUser = userRepository.Insert(userModel);
+                            //created new user
+                            var resultCreatedUser = userRepository.Insert(userModel);
 
-                        if (resultCreatedUser.Status == Status.STATUS_ERROR)
+                            if (resultCreatedUser.Status == Status.STATUS_ERROR)
+                                return new ReturnObject
+                                {
+                                    Status = Status.STATUS_ERROR,
+                                    Message = resultCreatedUser.Message
+                                };
+
+
+                            return new ReturnObject
+                            {
+                                Status = Status.STATUS_SUCCESS,
+                                Data = JsonHelper.SerializeObject(userModel),
+                            };
+                        }
+                        catch (Exception e)
+                        {
                             return new ReturnObject
                             {
                                 Status = Status.STATUS_ERROR,
-                                Message = resultCreatedUser.Message
                             };
-
-
-                        return new ReturnObject
-                        {
-                            Status = Status.STATUS_SUCCESS,
-                            Data = JsonHelper.SerializeObject(userModel),
-                        };
+                        }
                     }
-                    catch (Exception e)
+                    else
                     {
-                        return new ReturnObject
-                        {
-                            Status = Status.STATUS_ERROR,
-                        };
+                        //Update data user
+                        userCheck.FullName = userModel.FullName;
+                        userCheck.PhoneNumber = userModel.PhoneNumber;
+                        userCheck.Birthday = userModel.Birthday;
+                        userCheck.UpdatedAt = time;
+                        //updated user
+                        var resultUpdatedUser = userRepository.Update(userCheck);
+
+                        if (resultUpdatedUser.Status == Status.STATUS_ERROR)
+                            return new ReturnObject
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Fail update to userRepository"
+                            };
                     }
-                }
-                else
-                {
-                    //Update data user
-                    userCheck.FullName = userModel.FullName;
-                    userCheck.PhoneNumber = userModel.PhoneNumber;
-                    userCheck.Birthday = userModel.Birthday;
-                    userCheck.UpdatedAt = time;
-                    //updated user
-                    var resultUpdatedUser = userRepository.Update(userCheck);
 
-                    if (resultUpdatedUser.Status == Status.STATUS_ERROR)
-                        return new ReturnObject
-                        {
-                            Status = Status.STATUS_ERROR,
-                            Message = "Fail update to userRepository"
-                        };
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Data = JsonHelper.SerializeObject(userCheck)
+                    };
                 }
-
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Data = JsonHelper.SerializeObject(userCheck)
-                };
             }
             catch (Exception e)
             {
@@ -601,10 +624,12 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb);
+                using (var userRepository = _vakapayRepositoryFactory.GetUserRepository(_connectionDb))
+                {
+                    return userRepository.FindById(id);
+                }
 
-                var user = userRepository.FindById(id);
-                return user;
+                ;
             }
             catch (Exception e)
             {
@@ -643,10 +668,11 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var confirmedDevicesRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
-                var confirmedDevices =
-                    confirmedDevicesRepository.FindWhere(confirmedDevicesRepository.QuerySearch(search));
-                return confirmedDevices;
+                using (var confirmedDevicesRepository =
+                    _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb))
+                {
+                    return confirmedDevicesRepository.FindWhere(confirmedDevicesRepository.QuerySearch(search));
+                }
             }
             catch (Exception e)
             {
@@ -665,9 +691,11 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var confirmedDevicesRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
-                var resultObject = confirmedDevicesRepository.Delete(id);
-                return resultObject;
+                using (var confirmedDevicesRepository =
+                    _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb))
+                {
+                    return confirmedDevicesRepository.Delete(id);
+                }
             }
             catch (Exception e)
             {
@@ -688,9 +716,10 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb);
-                var resultObject = logRepository.Delete(id);
-                return resultObject;
+                using (var logRepository = _vakapayRepositoryFactory.GetUserActionLogRepository(_connectionDb))
+                {
+                    return logRepository.Delete(id);
+                }
             }
             catch (Exception e)
             {
@@ -711,9 +740,10 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var apiKeyRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
-                var resultObject = apiKeyRepository.Delete(id);
-                return resultObject;
+                using (var apiKeyRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb))
+                {
+                    return apiKeyRepository.Delete(id);
+                }
             }
             catch (Exception e)
             {
@@ -730,10 +760,10 @@ namespace Vakapay.UserBusiness
         {
             try
             {
-                var apiKeyRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb);
-
-                var apiKey = apiKeyRepository.FindById(id);
-                return apiKey;
+                using (var apiKeyRepository = _vakapayRepositoryFactory.GetApiKeyRepository(_connectionDb))
+                {
+                    return apiKeyRepository.FindById(id);
+                }
             }
             catch (Exception e)
             {
