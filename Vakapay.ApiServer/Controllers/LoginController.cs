@@ -23,13 +23,13 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    public class LoginController : ControllerBase
+    public class LoginController : Controller
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly WalletBusiness.WalletBusiness _walletBusiness;
-        protected IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
         private IVakapayRepositoryFactory _repositoryFactory;
-        protected IHostingEnvironment _env;
+        private IHostingEnvironment _env;
 
 
         public LoginController(
