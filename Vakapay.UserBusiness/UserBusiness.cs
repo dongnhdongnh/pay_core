@@ -290,7 +290,7 @@ namespace Vakapay.UserBusiness
                 {
                     case CryptoCurrency.ETH:
                         using (var ethereumRepo =
-                               _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb))
+                            _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb))
                         {
                             output = ethereumRepo.FindById(id);
                         }
@@ -302,10 +302,12 @@ namespace Vakapay.UserBusiness
                         output = vakaRepo.FindById(id);
                         break;
                     case CryptoCurrency.BTC:
-                        var bitcoinRepo =
-                            _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb);
-                        output = bitcoinRepo.FindById(id);
-                        break;
+                        using (var bitcoinRepo =
+                            _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb))
+                        {
+                            output = bitcoinRepo.FindById(id);
+                            break;
+                        }
                 }
 
                 return output;

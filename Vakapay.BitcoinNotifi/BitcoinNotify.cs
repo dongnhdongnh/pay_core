@@ -182,7 +182,8 @@ namespace Vakapay.BitcoinNotifi
                     const string title = "Notify receiver BitCoin";
 //                    btcBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount,
 //                        Constants.TEMPLATE_EMAIL_SENT, Constants.NETWORK_NAME_BITCOIN, Constants.TYPE_RECEIVER);
-                    var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(title, email, transactionModelDetail.Amount, "", //TODO add transaction Id
+                    var res = SendMailBusiness.SendMailBusiness.CreateDataEmail(title, email,
+                        transactionModelDetail.Amount, "", //TODO add transaction Id
                         EmailTemplate.Received, CryptoCurrency.BTC, btcBusiness.VakapayRepositoryFactory, false);
                 }
                 else
@@ -226,8 +227,8 @@ namespace Vakapay.BitcoinNotifi
                 };
                 var userId = GetUserIdByAddress(transactionModelDetail.Address);
                 if (userId == null) return;
-                var portfolioHistoryBusiness = 
-                    new PortfolioHistoryBusiness.PortfolioHistoryBusiness(_persistenceFactory,false);
+                var portfolioHistoryBusiness =
+                    new PortfolioHistoryBusiness.PortfolioHistoryBusiness(_persistenceFactory, false);
                 portfolioHistoryBusiness.InsertWithPrice(userId);
                 btcDepositTransaction.UserId = userId;
                 Logger.Debug("cretateNewBtcDepositTransaction =>> btcDepositTransaction: " +
@@ -282,24 +283,27 @@ namespace Vakapay.BitcoinNotifi
                 Logger.Debug("HandleNotifyDataSend start");
                 if (transactionModel.Confirmations > 0)
                 {
-                    var bitCoinRawTransactionRepository = btcBusiness
-                        .VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(btcBusiness.DbConnection);
-
-                    var currentBtcWithdrawTransaction =
-                        GetBtcWithdrawTransaction(bitCoinRawTransactionRepository, transactionModelDetail.Address,
-                            transactionModel.Txid);
-
-                    Logger.Debug("HandleNotifyDataSend =>> btcWithdrawTransaction: " + currentBtcWithdrawTransaction);
-                    if (currentBtcWithdrawTransaction == null) return;
-                    Logger.Debug("HandleNotifyDataSend ==>> Update hash and time update ");
-                    var currentTime = CommonHelper.GetUnixTimestamp();
-                    if (currentBtcWithdrawTransaction.UserId == null)
+                    using (var bitCoinRawTransactionRepository = btcBusiness
+                        .VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(btcBusiness.DbConnection))
                     {
-                        currentBtcWithdrawTransaction.UserId = GetUserIdByAddress(transactionModelDetail.Address);
+                        var currentBtcWithdrawTransaction =
+                            GetBtcWithdrawTransaction(bitCoinRawTransactionRepository, transactionModelDetail.Address,
+                                transactionModel.Txid);
+
+                        Logger.Debug(
+                            "HandleNotifyDataSend =>> btcWithdrawTransaction: " + currentBtcWithdrawTransaction);
+                        if (currentBtcWithdrawTransaction == null) return;
+                        Logger.Debug("HandleNotifyDataSend ==>> Update hash and time update ");
+                        var currentTime = CommonHelper.GetUnixTimestamp();
+                        if (currentBtcWithdrawTransaction.UserId == null)
+                        {
+                            currentBtcWithdrawTransaction.UserId = GetUserIdByAddress(transactionModelDetail.Address);
+                        }
+
+                        currentBtcWithdrawTransaction.BlockHash = transactionModel.BlockHash;
+                        currentBtcWithdrawTransaction.UpdatedAt = currentTime;
+                        bitCoinRawTransactionRepository.Update(currentBtcWithdrawTransaction);
                     }
-                    currentBtcWithdrawTransaction.BlockHash = transactionModel.BlockHash;
-                    currentBtcWithdrawTransaction.UpdatedAt = currentTime;
-                    bitCoinRawTransactionRepository.Update(currentBtcWithdrawTransaction);
                 }
                 else
                 {
