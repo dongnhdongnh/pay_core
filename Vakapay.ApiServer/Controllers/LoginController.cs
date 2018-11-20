@@ -32,7 +32,7 @@ namespace Vakapay.ApiServer.Controllers
         protected IHostingEnvironment _env;
 
 
-        protected LoginController(
+        public LoginController(
             IVakapayRepositoryFactory persistenceFactory,
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment)
