@@ -64,7 +64,7 @@ namespace Vakapay.ApiServer.Controllers
 
                 var ip = HelpersApi.GetIp(Request);
                 IpGeographicalLocation location = null;
-                if (ip != null)
+                if (!string.IsNullOrEmpty(ip))
                 {
                     //get location for ip
                     location = await IpGeographicalLocation.QueryGeographicalLocationAsync(ip);
