@@ -25,7 +25,7 @@ namespace Vakapay.ApiServer.Controllers
     [Authorize]
     public class LoginController : Controller
     {
-     //   private readonly UserBusiness.UserBusiness _userBusiness;
+        private readonly UserBusiness.UserBusiness _userBusiness;
     //    private readonly WalletBusiness.WalletBusiness _walletBusiness;
         private IConfiguration Configuration { get; }
         private IVakapayRepositoryFactory _repositoryFactory;
@@ -41,7 +41,7 @@ namespace Vakapay.ApiServer.Controllers
             _env = hostingEnvironment;
             Configuration = configuration;
 
-          //  _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
           //  _walletBusiness = new WalletBusiness.WalletBusiness(persistenceFactory);
         }
 
