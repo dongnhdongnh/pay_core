@@ -24,28 +24,21 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    [BaseActionFilter]
-    public class TwoFaController : ControllerBase
+    public class TwoFaController : CustomController
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
-        WalletController _walletController=null;
+
 
         public TwoFaController(
+            IVakapayRepositoryFactory persistenceFactory,
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
-        )
+        ) : base(persistenceFactory, configuration, hostingEnvironment)
         {
-            var repositoryConfig = new RepositoryConfiguration
-            {
-                ConnectionString = AppSettingHelper.GetDbConnection()
-            };
-
-            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            _walletController = new WalletController();
-            _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
         }
+
 
         // POST api/values
         // verify code and update when update verify
@@ -198,6 +191,7 @@ namespace Vakapay.ApiServer.Controllers
 
                         break;
                 }
+
                 Console.WriteLine(isVerify);
 
                 if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
@@ -275,89 +269,6 @@ namespace Vakapay.ApiServer.Controllers
             catch (Exception e)
             {
                 _logger.Error(KeyLogger.TWOFA_ENABLE_VERIFY + e);
-                return HelpersApi.CreateDataError(e.Message);
-            }
-        }
-
-
-        // POST api/values
-        // verify code and update when update verify
-        [HttpPost("transaction/verify-code")]
-        public string VerifyCodeTransaction([FromBody] JObject value)
-        {
-            try
-            {
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
-
-
-                var code = "";
-                var codeGG = "";
-                if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
-                    code = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS].ToString();
-                if (value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_2FA))
-                    codeGG = value[ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_2FA].ToString();
-
-                bool isVerify = false;
-
-                switch (userModel.IsTwoFactor)
-                {
-                    case 1:
-                        if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
-                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-
-                        isVerify = HelpersApi.CheckCodeGoogle(userModel.TwoFactorSecret, codeGG);
-                        break;
-                    case 2:
-                        if (!value.ContainsKey(ParseDataKeyApi.KEY_TWO_FA_VERIFY_CODE_TRANSACTION_SMS))
-                            return HelpersApi.CreateDataError(MessageApiError.PARAM_INVALID);
-
-                        var secretAuthToken = ActionCode.FromJson(userModel.SecretAuthToken);
-                        if (string.IsNullOrEmpty(secretAuthToken.SendTransaction))
-                            return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
-
-                        isVerify = HelpersApi.CheckCodeSms(secretAuthToken.SendTransaction, code, userModel);
-                        break;
-                    case 0:
-                        isVerify = true;
-                        break;
-                }
-
-                if (!isVerify) return HelpersApi.CreateDataError(MessageApiError.SMS_VERIFY_ERROR);
-
-                // userModel.Verification = (int) option;
-
-                // su ly data gui len
-                //to do
-                if (_walletController == null)
-                    _walletController = new WalletController();
-                var request = value.ToObject<SendTransaction>();
-
-                var userRequest = new UserSendTransaction()
-                {
-                    UserId = userModel.Id,
-                    Type = "send",
-                    To = request.Detail.SendByAd
-                 ? request.Detail.RecipientWalletAddress
-                 : request.Detail.RecipientEmailAddress,
-                    SendByBlockchainAddress = request.Detail.SendByAd,
-                    Amount = request.Detail.VkcAmount,
-                    PricePerCoin = request.Detail.PricePerCoin,
-                    Currency = request.NetworkName,
-                    Description = request.Detail.VkcNote,
-                };
-                ReturnObject result = null;
-                result = _walletController.AddSendTransaction(userRequest);
-
-                return  JsonHelper.SerializeObject( result);
-                //  _walletController.SendTransactions(request,userModel);
-
-                return _userBusiness.AddActionLog(userModel.Email, userModel.Id,
-                    ActionLog.SEND_TRANSACTION,
-                    HelpersApi.GetIp(Request)).ToJson();
-            }
-            catch (Exception e)
-            {
-                _logger.Error(KeyLogger.TWOFA_SEND_TRANSACTION_VERIFY + e);
                 return HelpersApi.CreateDataError(e.Message);
             }
         }

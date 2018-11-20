@@ -23,34 +23,21 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    [BaseActionFilter]
-    public class ToolsController : ControllerBase
+    public class ToolsController : CustomController
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly WalletBusiness.WalletBusiness _walletBusiness;
-        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
-
-        private IConfiguration Configuration { get; }
 
         public ToolsController(
+            IVakapayRepositoryFactory persistenceFactory,
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
-        )
+        ) : base(persistenceFactory, configuration, hostingEnvironment)
         {
-            Configuration = configuration;
-
-            var repositoryConfig = new RepositoryConfiguration
-            {
-                ConnectionString = AppSettingHelper.GetDbConnection()
-            };
-
-            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-
-            _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
-
+            _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
             _walletBusiness =
-                new WalletBusiness.WalletBusiness(PersistenceFactory);
+                new WalletBusiness.WalletBusiness(persistenceFactory);
         }
 
 
@@ -108,7 +95,6 @@ namespace Vakapay.ApiServer.Controllers
                     Message = e.Message
                 }.ToJson();
             }
-
         }
 
         [HttpPost("update-addresses-info")]

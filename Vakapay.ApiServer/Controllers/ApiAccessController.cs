@@ -26,28 +26,21 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    [BaseActionFilter]
-    public class ApiAccessController : ControllerBase
+    public class ApiAccessController : CustomController
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private VakapayRepositoryMysqlPersistenceFactory PersistenceFactory { get; }
 
 
         public ApiAccessController(
+            IVakapayRepositoryFactory persistenceFactory,
             IConfiguration configuration,
             IHostingEnvironment hostingEnvironment
-        )
+        ) : base(persistenceFactory, configuration, hostingEnvironment)
         {
-            var repositoryConfig = new RepositoryConfiguration
-            {
-                ConnectionString = AppSettingHelper.GetDbConnection()
-            };
-
-            PersistenceFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-
-            _userBusiness = new UserBusiness.UserBusiness(PersistenceFactory);
+            _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
         }
+
 
         [HttpGet("api-access/get-info")]
         public string GetInfo()

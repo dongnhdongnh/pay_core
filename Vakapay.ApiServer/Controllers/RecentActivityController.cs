@@ -4,7 +4,9 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -19,21 +21,20 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    public class RecentActivityController : Controller
+    public class RecentActivityController : CustomController
     {
-        private VakapayRepositoryMysqlPersistenceFactory _vakapayRepository { get; }
         private readonly UserBusiness.UserBusiness _userBusiness;
-        public RecentActivityController()
-        {
-            var repositoryConfig = new RepositoryConfiguration
-            {
-                ConnectionString = AppSettingHelper.GetDbConnection()
-            };
 
-            _vakapayRepository = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            _userBusiness = new UserBusiness.UserBusiness(_vakapayRepository);
+        public RecentActivityController(
+            IVakapayRepositoryFactory persistenceFactory,
+            IConfiguration configuration,
+            IHostingEnvironment hostingEnvironment
+        ) : base(persistenceFactory, configuration, hostingEnvironment)
+        {
+            _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
         }
-        
+
+
         [HttpGet("transactions/{limit:int?}")]
         public ReturnObject GetTransactions(int? limit = null)
         {
@@ -48,26 +49,27 @@ namespace Vakapay.ApiServer.Controllers
                 if (userModel == null)
                 {
                     //return error
-                    return new ReturnObject{
+                    return new ReturnObject
+                    {
                         Status = Status.STATUS_ERROR,
                         Message = "User not exist in DB"
                     };
                 }
 
                 var userId = userModel.Id;
-                
+
                 var bitcoinDepositTrxRepo =
-                    new BitcoinDepositTransactionRepository(_vakapayRepository.GetOldConnection());
+                    new BitcoinDepositTransactionRepository(_repositoryFactory.GetOldConnection());
                 var bitcoinWithdrawTrxRepo =
-                    new BitcoinWithdrawTransactionRepository(_vakapayRepository.GetOldConnection());
+                    new BitcoinWithdrawTransactionRepository(_repositoryFactory.GetOldConnection());
                 var ethereumDepositTrxRepo =
-                    new EthereumDepositTransactionRepository(_vakapayRepository.GetOldConnection());
+                    new EthereumDepositTransactionRepository(_repositoryFactory.GetOldConnection());
                 var ethereumWithdrawTrxRepo =
-                    new EthereumWithdrawnTransactionRepository(_vakapayRepository.GetOldConnection());
+                    new EthereumWithdrawnTransactionRepository(_repositoryFactory.GetOldConnection());
                 var vakacoinDepositTrxRepo =
-                    new VakacoinDepositTransactionRepository(_vakapayRepository.GetOldConnection());
+                    new VakacoinDepositTransactionRepository(_repositoryFactory.GetOldConnection());
                 var vakacoinWithdrawTrxRepo =
-                    new VakacoinWithdrawTransactionRepository(_vakapayRepository.GetOldConnection());
+                    new VakacoinWithdrawTransactionRepository(_repositoryFactory.GetOldConnection());
 
                 var activities = new List<RecentActivity>();
 
@@ -75,27 +77,27 @@ namespace Vakapay.ApiServer.Controllers
                     DashboardConfig.BITCOIN, false));
                 activities.AddRange(ProcessTransactions(bitcoinWithdrawTrxRepo.FindTransactionsByUserId(userId),
                     DashboardConfig.BITCOIN, true));
-                
+
                 activities.AddRange(ProcessTransactions(ethereumDepositTrxRepo.FindTransactionsByUserId(userId),
                     DashboardConfig.ETHEREUM, false));
                 activities.AddRange(ProcessTransactions(ethereumWithdrawTrxRepo.FindTransactionsByUserId(userId),
                     DashboardConfig.ETHEREUM, true));
-                
+
                 activities.AddRange(ProcessTransactions(vakacoinDepositTrxRepo.FindTransactionsByUserId(userId),
                     DashboardConfig.VAKACOIN, false));
                 activities.AddRange(ProcessTransactions(vakacoinWithdrawTrxRepo.FindTransactionsByUserId(userId),
                     DashboardConfig.VAKACOIN, true));
-                
-                var sortedActivities = activities.OrderByDescending(o=>o.TimeStamp).ToList();
 
-                if ( limit != null && limit > 0 && limit < sortedActivities.Count )
+                var sortedActivities = activities.OrderByDescending(o => o.TimeStamp).ToList();
+
+                if (limit != null && limit > 0 && limit < sortedActivities.Count)
                 {
                     sortedActivities = sortedActivities.GetRange(0, (int) limit);
                 }
 
                 return new ReturnObject
                 {
-                    Status = Status.STATUS_SUCCESS, 
+                    Status = Status.STATUS_SUCCESS,
                     Data = JsonHelper.SerializeObject(sortedActivities)
                 };
             }
@@ -103,7 +105,7 @@ namespace Vakapay.ApiServer.Controllers
             {
                 return new ReturnObject
                 {
-                    Status = Status.STATUS_ERROR, 
+                    Status = Status.STATUS_ERROR,
                     Message = e.Message
                 };
             }
@@ -116,7 +118,7 @@ namespace Vakapay.ApiServer.Controllers
             var price = Decimal.Parse(CacheHelper.GetCacheString(String.Format(
                 RedisCacheKey.COINMARKET_PRICE_CACHEKEY, networkName,
                 DashboardConfig.CURRENT)));
-            
+
             foreach (var transaction in transactions)
             {
                 var activity = new RecentActivity
@@ -135,6 +137,7 @@ namespace Vakapay.ApiServer.Controllers
                 };
                 activities.Add(activity);
             }
+
             return activities;
         }
     }

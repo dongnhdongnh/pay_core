@@ -1,35 +1,35 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Server.Kestrel.Transport.Libuv.Internal.Networking;
+using Microsoft.Extensions.Configuration;
 using Vakapay.ApiServer.Models;
 using Vakapay.Commons.Constants;
-using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
 using Vakapay.Models.Repositories;
-using Vakapay.Repositories.Mysql;
 
-namespace Vakapay.ApiServer.ActionFilter
+namespace Vakapay.ApiServer.Controllers
 {
-    public class BaseActionFilter : ActionFilterAttribute
+    public abstract class CustomController : Controller
     {
-        private readonly VakapayRepositoryMysqlPersistenceFactory _repositoryFactory;
-        public IDbConnection connection { get; }
+        protected IConfiguration Configuration { get; }
+        public IVakapayRepositoryFactory _repositoryFactory;
+        protected IHostingEnvironment _env;
 
-        public BaseActionFilter()
+
+        protected CustomController(
+            IVakapayRepositoryFactory persistenceFactory,
+            IConfiguration configuration,
+            IHostingEnvironment hostingEnvironment)
         {
-            var repositoryConfig = new RepositoryConfiguration
-            {
-                ConnectionString = AppSettingHelper.GetDbConnection()
-            };
-
-            _repositoryFactory = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            connection = _repositoryFactory.GetDbConnection();
+            _repositoryFactory = persistenceFactory;
+            _env = hostingEnvironment;
+            Configuration = configuration;
         }
+
 
         public override void OnActionExecuting(ActionExecutingContext actionExecutedContext)
         {
@@ -44,7 +44,7 @@ namespace Vakapay.ApiServer.ActionFilter
                     var userBusiness = new UserBusiness.UserBusiness(_repositoryFactory);
 
                     var userModel = userBusiness.GetUserInfo(query);
-                    connection.Close();
+
                     if (userModel != null)
                     {
                         actionExecutedContext.RouteData.Values.Add("UserModel", userModel);
@@ -60,7 +60,6 @@ namespace Vakapay.ApiServer.ActionFilter
                 actionExecutedContext.Result = new JsonResult(CreateDataError(MessageApiError.USER_NOT_EXIT));
             }
         }
-
 
         /// <summary>
         /// CreateDataError

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Vakapay.Commons.Helpers;
+using Vakapay.Models.Repositories;
+using Vakapay.Repositories.Mysql;
 
 namespace Vakapay.ApiServer
 {
@@ -22,7 +25,15 @@ namespace Vakapay.ApiServer
             services.AddMvcCore().AddRazorViewEngine()
                 .AddAuthorization()
                 .AddJsonFormatters();
-
+            
+            var repositoryConfig = new RepositoryConfiguration
+            {
+                ConnectionString = AppSettingHelper.GetDbConnection()
+            };
+            
+            services.AddScoped<IVakapayRepositoryFactory, VakapayRepositoryMysqlPersistenceFactory>(
+                serviceProvider => new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig)
+            );
             services.AddCors();
 
             services.AddAuthentication("Bearer")

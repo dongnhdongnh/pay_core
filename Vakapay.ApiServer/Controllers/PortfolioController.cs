@@ -4,7 +4,9 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Vakapay.Commons.Constants;
 using Vakapay.Commons.Helpers;
 using Vakapay.Models.Domains;
@@ -19,22 +21,21 @@ namespace Vakapay.ApiServer.Controllers
     [EnableCors]
     [ApiController]
     [Authorize]
-    public class PortfolioController : ControllerBase
+    public class PortfolioController : CustomController
     {
         private readonly UserBusiness.UserBusiness _userBusiness;
         private readonly PortfolioHistoryBusiness.PortfolioHistoryBusiness _portfolioHistoryBusiness;
 
-        public PortfolioController()
+        public PortfolioController(
+            IVakapayRepositoryFactory persistenceFactory,
+            IConfiguration configuration,
+            IHostingEnvironment hostingEnvironment
+        ) : base(persistenceFactory, configuration, hostingEnvironment)
         {
-            var repositoryConfig = new RepositoryConfiguration
-            {
-                ConnectionString = AppSettingHelper.GetDbConnection()
-            };
-
-            var vakapayRepository = new VakapayRepositoryMysqlPersistenceFactory(repositoryConfig);
-            _userBusiness = new UserBusiness.UserBusiness(vakapayRepository);
-            _portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(vakapayRepository);
+            _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
+            _portfolioHistoryBusiness = new PortfolioHistoryBusiness.PortfolioHistoryBusiness(persistenceFactory);
         }
+
 
         [HttpGet("value/{condition}")]
         public ReturnObject PortfolioValueHistory(string condition)
@@ -57,7 +58,7 @@ namespace Vakapay.ApiServer.Controllers
 
             var userid = userModel.Id;
             var currentTime = CommonHelper.GetUnixTimestamp();
-           
+
             if (!Time.SECOND_COUNT_IN_PERIOD.ContainsKey(condition))
             {
                 return new ReturnObject
@@ -86,7 +87,7 @@ namespace Vakapay.ApiServer.Controllers
                 if (time != null && time.Equals(DashboardConfig.CURRENT))
                 {
                     var returnData = JsonHelper.SerializeObject(data[data.Count - 1]);
-                    
+
                     return new ReturnObject
                     {
                         Status = Status.STATUS_SUCCESS,
