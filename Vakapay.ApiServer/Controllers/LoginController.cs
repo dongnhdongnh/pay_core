@@ -19,7 +19,7 @@ using Vakapay.Models.Repositories;
 namespace Vakapay.ApiServer.Controllers
 {
     [Produces("application/json")]
-    [Route("api/user")]
+    [Route("api/[controller]")]
     [EnableCors]
     [ApiController]
     [Authorize]
