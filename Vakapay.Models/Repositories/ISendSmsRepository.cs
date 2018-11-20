@@ -1,9 +1,10 @@
-﻿using Vakapay.Models.Entities;
+﻿using System;
+using Vakapay.Models.Entities;
 using Vakapay.Models.Repositories.Base;
 
 namespace Vakapay.Models.Repositories
 {
-    public interface ISendSmsRepository : IRepositoryBase<SmsQueue>, IMultiThreadUpdateEntityRepository<SmsQueue>
+    public interface ISendSmsRepository : IRepositoryBase<SmsQueue>, IMultiThreadUpdateEntityRepository<SmsQueue>, IDisposable
     {
 //        SmsQueue FindPendingSms();
 //        Task<ReturnObject> LockForProcess(SmsQueue sms);

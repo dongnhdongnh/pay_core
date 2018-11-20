@@ -55,53 +55,54 @@ namespace Vakapay.SendSmsBusiness
 
         public virtual async Task<ReturnObject> SendSmsAsync(string apiUrl, string apiKey)
         {
-            var sendSmsRepository = _vakapayRepositoryFactory.GetSendSmsRepository(_connectionDb);
-            var pendingSms = sendSmsRepository.FindRowPending();
-
-            if (pendingSms?.Id == null)
-                return new ReturnObject
-                {
-                    Status = Status.STATUS_SUCCESS,
-                    Message = "Pending sms not found"
-                };
-
-            if (_connectionDb.State != ConnectionState.Open)
-                _connectionDb.Open();
-
-            //begin first sms
-            var transactionScope = _connectionDb.BeginTransaction();
-            try
+            using (var sendSmsRepository = _vakapayRepositoryFactory.GetSendSmsRepository(_connectionDb))
             {
-                var lockResult = await sendSmsRepository.LockForProcess(pendingSms);
-                if (lockResult.Status == Status.STATUS_ERROR)
+                var pendingSms = sendSmsRepository.FindRowPending();
+
+                if (pendingSms?.Id == null)
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_SUCCESS,
+                        Message = "Pending sms not found"
+                    };
+
+                if (_connectionDb.State != ConnectionState.Open)
+                    _connectionDb.Open();
+
+                //begin first sms
+                var transactionScope = _connectionDb.BeginTransaction();
+                try
+                {
+                    var lockResult = await sendSmsRepository.LockForProcess(pendingSms);
+                    if (lockResult.Status == Status.STATUS_ERROR)
+                    {
+                        transactionScope.Rollback();
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_SUCCESS,
+                            Message = "Cannot Lock For Process"
+                        };
+                    }
+
+                    transactionScope.Commit();
+                }
+                catch (Exception e)
                 {
                     transactionScope.Rollback();
                     return new ReturnObject
                     {
-                        Status = Status.STATUS_SUCCESS,
-                        Message = "Cannot Lock For Process"
+                        Status = Status.STATUS_ERROR,
+                        Message = e.ToString()
                     };
                 }
 
-                transactionScope.Commit();
-            }
-            catch (Exception e)
-            {
-                transactionScope.Rollback();
-                return new ReturnObject
+                //update Version to Model
+                pendingSms.Version += 1;
+
+                var transactionSend = _connectionDb.BeginTransaction();
+                try
                 {
-                    Status = Status.STATUS_ERROR,
-                    Message = e.ToString()
-                };
-            }
-
-            //update Version to Model
-            pendingSms.Version += 1;
-
-            var transactionSend = _connectionDb.BeginTransaction();
-            try
-            {
-                var sendResult = await SendSms(pendingSms, apiUrl, apiKey);
+                    var sendResult = await SendSms(pendingSms, apiUrl, apiKey);
 //                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
 //                {
 //                    return new ReturnObject
@@ -111,32 +112,33 @@ namespace Vakapay.SendSmsBusiness
 //                    };
 //                }
 
-                pendingSms.Status = sendResult.Status;
-                pendingSms.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
-                pendingSms.IsProcessing = 0;
+                    pendingSms.Status = sendResult.Status;
+                    pendingSms.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    pendingSms.IsProcessing = 0;
 
-                var updateResult = await sendSmsRepository.SafeUpdate(pendingSms);
-                if (updateResult.Status == Status.STATUS_ERROR)
-                {
-                    transactionSend.Rollback();
-                    return new ReturnObject
+                    var updateResult = await sendSmsRepository.SafeUpdate(pendingSms);
+                    if (updateResult.Status == Status.STATUS_ERROR)
                     {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Cannot update sms status"
-                    };
-                }
+                        transactionSend.Rollback();
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_ERROR,
+                            Message = "Cannot update sms status"
+                        };
+                    }
 
-                transactionSend.Commit();
-                return updateResult;
-            }
-            catch (Exception e)
-            {
-                // release lock
-                transactionSend.Rollback();
-                var releaseResult = sendSmsRepository.ReleaseLock(pendingSms);
-                Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
-                _logger.Error(e);
-                throw;
+                    transactionSend.Commit();
+                    return updateResult;
+                }
+                catch (Exception e)
+                {
+                    // release lock
+                    transactionSend.Rollback();
+                    var releaseResult = sendSmsRepository.ReleaseLock(pendingSms);
+                    Console.WriteLine(JsonHelper.SerializeObject(releaseResult));
+                    _logger.Error(e);
+                    throw;
+                }
             }
         }
 
@@ -159,7 +161,7 @@ namespace Vakapay.SendSmsBusiness
 
                     var result = JsonConvert.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
