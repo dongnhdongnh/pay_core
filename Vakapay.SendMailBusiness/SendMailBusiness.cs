@@ -169,7 +169,7 @@ namespace Vakapay.SendMailBusiness
 
                     var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
@@ -196,11 +196,17 @@ namespace Vakapay.SendMailBusiness
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:
-                            return _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb)
-                                .FindById(emailQueue.TransactionId);
+                            using (var bitcoinWithdraw =
+                                _vakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(_connectionDb))
+                            {
+                                return bitcoinWithdraw.FindById(emailQueue.TransactionId);
+                            }
                         case EmailTemplate.Received:
-                            return _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb)
-                                .FindById(emailQueue.TransactionId);
+                            using (var bitcoinDeposit =
+                                _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb))
+                            {
+                                return bitcoinDeposit.FindById(emailQueue.TransactionId);
+                            }
                         case EmailTemplate.NewDevice:
                             break;
                         case EmailTemplate.Verify:
@@ -215,12 +221,14 @@ namespace Vakapay.SendMailBusiness
                     {
                         case EmailTemplate.Sent:
                             //return
-                            using (var _rep = _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb))
+                            using (var _rep =
+                                _vakapayRepositoryFactory.GetEthereumWithdrawTransactionRepository(_connectionDb))
                             {
                                 return _rep.FindById(emailQueue.TransactionId);
                             }
                         case EmailTemplate.Received:
-                            using (var _rep = _vakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(_connectionDb))
+                            using (var _rep =
+                                _vakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(_connectionDb))
                             {
                                 return _rep.FindById(emailQueue.TransactionId);
                             }
@@ -374,7 +382,8 @@ namespace Vakapay.SendMailBusiness
         //        public async Task CreateDataEmail(string subject, string email, decimal amount, string template,
         //            string networkName, string sendOrReceiver)
         public static async Task CreateDataEmail(string subject, string email, decimal amount, string transactionId,
-            EmailTemplate template, string networkName, IVakapayRepositoryFactory vakapayRepositoryFactory, bool isInnerTransaction)
+            EmailTemplate template, string networkName, IVakapayRepositoryFactory vakapayRepositoryFactory,
+            bool isInnerTransaction)
         {
             try
             {

@@ -47,12 +47,14 @@ namespace Vakapay.SendBitcoin
                     var rpc = new BitcoinRpc(AppSettingHelper.GetBitcoinNode(),
                         AppSettingHelper.GetBitcoinRpcAuthentication());
 
-                    var bitcoinRepo = repoFactory.GetBitcoinWithdrawTransactionRepository(connection);
-                    var resultSend = bitcoinBusiness.SendTransactionAsync(bitcoinRepo, rpc);
-                    Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
+                    using (var bitcoinRepo = repoFactory.GetBitcoinWithdrawTransactionRepository(connection))
+                    {
+                        var resultSend = bitcoinBusiness.SendTransactionAsync(bitcoinRepo, rpc);
+                        Console.WriteLine(JsonHelper.SerializeObject(resultSend.Result));
 
-                    Console.WriteLine("Send Bitcoin End...");
-                    Thread.Sleep(1000);
+                        Console.WriteLine("Send Bitcoin End...");
+                        Thread.Sleep(1000);
+                    }
                 }
             }
             catch (Exception e)
