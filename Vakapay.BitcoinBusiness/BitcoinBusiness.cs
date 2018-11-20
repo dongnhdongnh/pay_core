@@ -39,26 +39,36 @@ namespace Vakapay.BitcoinBusiness
         public override List<BlockchainTransaction> GetWithdrawHistory(int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
-            var withdrawRepo = VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection);
-            return GetHistory<BitcoinWithdrawTransaction>(withdrawRepo, offset, limit, orderBy);
+            using (var withdrawRepo = VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection))
+            {
+                return GetHistory<BitcoinWithdrawTransaction>(withdrawRepo, offset, limit, orderBy);
+            }
         }
 
         public override List<BlockchainTransaction> GetDepositHistory(int offset = -1, int limit = -1,
             string[] orderBy = null)
         {
-            var depositRepo = VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(DbConnection);
-            return GetHistory<BitcoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+            using (var depositRepo = VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(DbConnection))
+            {
+                return GetHistory<BitcoinDepositTransaction>(depositRepo, offset, limit, orderBy);
+            }
         }
 
         public override List<BlockchainTransaction> GetAllHistory(out int numberData, string userId, string currency,
             int offset = -1, int limit = -1, string[] orderBy = null, string search = null)
         {
-            var depositRepo = VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(DbConnection);
-            var withdrawRepo = VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection);
-            using (var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection))
+            using (var depositRepo = VakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(DbConnection))
             {
-                return GetAllHistory<BitcoinWithdrawTransaction, BitcoinDepositTransaction>(out numberData, userId,
-                    currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+                using (var withdrawRepo =
+                    VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection))
+                {
+                    using (var inter = VakapayRepositoryFactory.GetInternalTransactionRepository(DbConnection))
+                    {
+                        return GetAllHistory<BitcoinWithdrawTransaction, BitcoinDepositTransaction>(out numberData,
+                            userId,
+                            currency, withdrawRepo, depositRepo, inter.GetTableName(), offset, limit, orderBy, search);
+                    }
+                }
             }
         }
     }
