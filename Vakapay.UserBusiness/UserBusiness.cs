@@ -424,11 +424,13 @@ namespace Vakapay.UserBusiness
                         };
                     }
 
-                    var logRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb);
+                    using (var logRepository = _vakapayRepositoryFactory.GetConfirmedDevicesRepository(_connectionDb))
+                    {
 
-                    confirmedDevices.Id = CommonHelper.GenerateUuid();
-                    confirmedDevices.SignedIn = (int) CommonHelper.GetUnixTimestamp();
-                    return logRepository.Insert(confirmedDevices);
+                        confirmedDevices.Id = CommonHelper.GenerateUuid();
+                        confirmedDevices.SignedIn = (int)CommonHelper.GetUnixTimestamp();
+                        return logRepository.Insert(confirmedDevices);
+                    }
                 }
             }
             catch (Exception e)
