@@ -9,8 +9,10 @@ namespace Vakapay.Commons.Helpers
         {
             lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
             {
+                Console.WriteLine("GET REDIS FROM "+ AppSettingHelper.GetRedisConfig());
                 return ConnectionMultiplexer.Connect($"{AppSettingHelper.GetRedisConfig()}");
             });
+            
         }
 
         private static Lazy<ConnectionMultiplexer> lazyConnection;
