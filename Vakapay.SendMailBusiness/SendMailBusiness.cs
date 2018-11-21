@@ -38,7 +38,6 @@ namespace Vakapay.SendMailBusiness
             {
                 using (var sendEmailRepository = _vakapayRepositoryFactory.GetSendEmailRepository(_connectionDb))
                 {
-
                     // save to DB
                     var result = sendEmailRepository.Insert(emailQueue);
 
@@ -89,7 +88,6 @@ namespace Vakapay.SendMailBusiness
                     }
 
                     transctionScope.Commit();
-
                 }
                 catch (Exception e)
                 {
@@ -174,7 +172,7 @@ namespace Vakapay.SendMailBusiness
 
                     var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
@@ -207,7 +205,8 @@ namespace Vakapay.SendMailBusiness
                                 return bitcoinWithdraw.FindById(emailQueue.TransactionId);
                             }
                         case EmailTemplate.Received:
-                            using (var bitcoinDeposit =_vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb))
+                            using (var bitcoinDeposit =
+                                _vakapayRepositoryFactory.GetBitcoinDepositTransactionRepository(_connectionDb))
                             {
                                 return bitcoinDeposit.FindById(emailQueue.TransactionId);
                             }
@@ -250,13 +249,15 @@ namespace Vakapay.SendMailBusiness
                     switch (emailQueue.Template)
                     {
                         case EmailTemplate.Sent:
-                            using (var rep = _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
+                            using (var rep =
+                                _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
                             {
-                               return  rep.FindById(emailQueue.TransactionId);
+                                return rep.FindById(emailQueue.TransactionId);
                             }
-                    
+
                         case EmailTemplate.Received:
-                            using (var rep = _vakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(_connectionDb))
+                            using (var rep =
+                                _vakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(_connectionDb))
                             {
                                 return rep.FindById(emailQueue.TransactionId);
                             }
@@ -280,12 +281,16 @@ namespace Vakapay.SendMailBusiness
             try
             {
                 if (emailQueue.IsInnerTransaction == false) return GetTransaction(emailQueue).ToAddress;
+                using (var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb))
+                {
+                    var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
 
-                var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
-                var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
-                var userRepository = new UserRepository(_connectionDb);
-                var user = userRepository.FindById(transaction.ReceiverUserId);
-                return user.Email;
+                    using (var userRepository = new UserRepository(_connectionDb))
+                    {
+                        var user = userRepository.FindById(transaction.ReceiverUserId);
+                        return user.Email;
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -363,11 +368,16 @@ namespace Vakapay.SendMailBusiness
         {
             try
             {
-                var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb);
-                var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
-                var userRepository = new UserRepository(_connectionDb);
-                var user = userRepository.FindById(transaction.SenderUserId);
-                return user.Email;
+                using (var internalTransactionsRepository = new InternalTransactionsRepository(_connectionDb))
+                {
+                    using (var userRepository = new UserRepository(_connectionDb))
+                    {
+                        var transaction = internalTransactionsRepository.FindById(emailQueue.TransactionId);
+
+                        var user = userRepository.FindById(transaction.SenderUserId);
+                        return user.Email;
+                    }
+                }
             }
             catch (Exception e)
             {

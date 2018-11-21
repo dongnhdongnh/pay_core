@@ -281,7 +281,7 @@ namespace Vakapay.WalletBusiness
                         var userCheck = userRepository.FindById(walletById.UserId);
                         if (userCheck == null ||
                             userCheck.Status != Status.STATUS_ACTIVE // ||
-                                                                     // !walletById.Currency.Equals(walletByAddress.Currency))
+                            // !walletById.Currency.Equals(walletByAddress.Currency))
                         )
                         {
                             return new ReturnObject
@@ -346,7 +346,8 @@ namespace Vakapay.WalletBusiness
                             return new ReturnObject()
                             {
                                 Status = Status.STATUS_ERROR,
-                                Message = $"Balance in {walletById.Currency} wallet after UpdateBalance is smaller than 0!!"
+                                Message =
+                                    $"Balance in {walletById.Currency} wallet after UpdateBalance is smaller than 0!!"
                             };
                         }
 
@@ -398,7 +399,8 @@ namespace Vakapay.WalletBusiness
                     }
 
                 case CryptoCurrency.VAKA:
-                    using (var vakaWithdrawTransaction = _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
+                    using (var vakaWithdrawTransaction =
+                        _vakapayRepositoryFactory.GetVakacoinWithdrawTransactionRepository(_connectionDb))
                     {
                         return vakaWithdrawTransaction.Insert(
                             blockchainTransaction.ToDelivered<VakacoinWithdrawTransaction>());
@@ -511,9 +513,9 @@ namespace Vakapay.WalletBusiness
             {
                 // TODO fake:
                 case CryptoCurrency.BTC:
-                    return (decimal)0.0005;
+                    return (decimal) 0.0005;
                 case CryptoCurrency.ETH:
-                    return (decimal)0.0005;
+                    return (decimal) 0.0005;
                 case CryptoCurrency.VAKA:
                     return 0;
                 default:
@@ -896,7 +898,7 @@ namespace Vakapay.WalletBusiness
                     //    throw new Exception(sendResult.Message);
                     //}
                     pendingWallet.Status = sendResult.Status;
-                    pendingWallet.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                    pendingWallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                     pendingWallet.IsProcessing = 0;
                     pendingWallet.AddressCount += 1;
 
@@ -942,7 +944,7 @@ namespace Vakapay.WalletBusiness
                     }
 
                     wallet.Status = sendResult.Status;
-                    wallet.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
+                    wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
                     wallet.IsProcessing = 0;
                     wallet.AddressCount += 1;
 
@@ -1076,37 +1078,38 @@ namespace Vakapay.WalletBusiness
                     };
                 }
 
-                var walletRepository = new WalletRepository(_connectionDb);
-
-                var wallet = walletRepository.FindByUserAndNetwork(userId, currency);
-
-                if (sendByBlockchainAddress == true)
+                using (var walletRepository = new WalletRepository(_connectionDb))
                 {
-                    if (amount + GetFee(currency) > wallet.Balance)
+                    var wallet = walletRepository.FindByUserAndNetwork(userId, currency);
+
+                    if (sendByBlockchainAddress == true)
                     {
-                        return new ReturnObject()
+                        if (amount + GetFee(currency) > wallet.Balance)
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = "Withdraw balance + fee is larger than wallet balance."
-                        };
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Withdraw balance + fee is larger than wallet balance."
+                            };
+                        }
                     }
-                }
-                else
-                {
-                    if (amount > wallet.Balance)
+                    else
                     {
-                        return new ReturnObject()
+                        if (amount > wallet.Balance)
                         {
-                            Status = Status.STATUS_ERROR,
-                            Message = "Withdraw balance larger than wallet balance."
-                        };
+                            return new ReturnObject()
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = "Withdraw balance larger than wallet balance."
+                            };
+                        }
                     }
-                }
 
-                return new ReturnObject()
-                {
-                    Status = Status.STATUS_SUCCESS
-                };
+                    return new ReturnObject()
+                    {
+                        Status = Status.STATUS_SUCCESS
+                    };
+                }
             }
             catch (Exception e)
             {
@@ -1165,22 +1168,29 @@ namespace Vakapay.WalletBusiness
                 switch (networkName)
                 {
                     case CryptoCurrency.BTC:
-                        var bitcoinAddressRepository = new BitcoinAddressRepository(_connectionDb);
-                        BitcoinAddress bitcoinAddress = bitcoinAddressRepository.FindById(id);
-                        bitcoinAddress.Label = label;
-                        return bitcoinAddressRepository.Update(bitcoinAddress);
+                        using (var bitcoinAddressRepository = new BitcoinAddressRepository(_connectionDb))
+                        {
+                            BitcoinAddress bitcoinAddress = bitcoinAddressRepository.FindById(id);
+                            bitcoinAddress.Label = label;
+                            return bitcoinAddressRepository.Update(bitcoinAddress);
+                        }
+
 
                     case CryptoCurrency.ETH:
-                        var ethereumAddressRepository = new EthereumAddressRepository(_connectionDb);
-                        EthereumAddress ethereumAddress = ethereumAddressRepository.FindById(id);
-                        ethereumAddress.Label = label;
-                        return ethereumAddressRepository.Update(ethereumAddress);
-
+                        using (var ethereumAddressRepository = new EthereumAddressRepository(_connectionDb))
+                        {
+                            EthereumAddress ethereumAddress = ethereumAddressRepository.FindById(id);
+                            ethereumAddress.Label = label;
+                            return ethereumAddressRepository.Update(ethereumAddress);
+                        }
                     case CryptoCurrency.VAKA:
-                        var vakacoinAddressRepository = new VakacoinAccountRepository(_connectionDb);
-                        VakacoinAccount vakacoinAccount = vakacoinAddressRepository.FindById(id);
-                        vakacoinAccount.Label = label;
-                        return vakacoinAddressRepository.Update(vakacoinAccount);
+                        using (var vakacoinAddressRepository = new VakacoinAccountRepository(_connectionDb))
+                        {
+                            VakacoinAccount vakacoinAccount = vakacoinAddressRepository.FindById(id);
+                            vakacoinAccount.Label = label;
+                            return vakacoinAddressRepository.Update(vakacoinAccount);
+                        }
+
                     default:
                         return new ReturnObject
                         {

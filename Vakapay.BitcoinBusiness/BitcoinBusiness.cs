@@ -20,10 +20,12 @@ namespace Vakapay.BitcoinBusiness
         {
             try
             {
-                var bitcoinWithDrawRepo =
-                    VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection);
-                blockchainTransaction.Status = Status.STATUS_PENDING;
-                return bitcoinWithDrawRepo.Insert(blockchainTransaction);
+                using (var bitcoinWithDrawRepo =
+                    VakapayRepositoryFactory.GetBitcoinWithdrawTransactionRepository(DbConnection))
+                {
+                    blockchainTransaction.Status = Status.STATUS_PENDING;
+                    return bitcoinWithDrawRepo.Insert(blockchainTransaction);
+                }
             }
             catch (Exception e)
             {

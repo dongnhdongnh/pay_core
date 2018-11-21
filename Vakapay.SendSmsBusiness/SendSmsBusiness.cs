@@ -35,12 +35,12 @@ namespace Vakapay.SendSmsBusiness
         {
             try
             {
-                var sendSmslRepository = _vakapayRepositoryFactory.GetSendSmsRepository(_connectionDb);
+                using (var sendSmslRepository = _vakapayRepositoryFactory.GetSendSmsRepository(_connectionDb))
+                {
+                    return sendSmslRepository.Insert(model);
+                }
 
                 // save to DB
-                var result = sendSmslRepository.Insert(model);
-
-                return result;
             }
             catch (Exception e)
             {
