@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-
+using System;
 namespace Vakapay.DashboardServices
 {
     class Program
@@ -11,6 +11,7 @@ namespace Vakapay.DashboardServices
             Task coinmarketTask = Task.Factory.StartNew(() => ScanCoinmarket.RunScanCoinmarket());
 
             Task.WaitAll(currencyTask, portfolioTask, coinmarketTask);
+            Console.WriteLine("Start App");
         }
     }
 }
