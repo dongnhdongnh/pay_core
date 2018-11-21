@@ -27,6 +27,7 @@ namespace Vakapay.ApiServer.Controllers
                 var cacheKey = "USD_" + symbol;
                 if (CacheHelper.HaveKey(cacheKey))
                 {
+                    Console.WriteLine("get cu "+cacheKey);
                     var result = CacheHelper.GetCacheString(cacheKey);
                     return new ReturnObject
                     {
@@ -42,6 +43,7 @@ namespace Vakapay.ApiServer.Controllers
             }
             catch (Exception e)
             {
+                Console.WriteLine("ERROR"+e.ToString());
                 _logger.Error(e);
                 return new ReturnObject
                 {
