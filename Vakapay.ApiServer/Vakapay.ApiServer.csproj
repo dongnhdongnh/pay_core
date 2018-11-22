@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="9.2.3" />
     <PackageReference Include="Dapper" Version="1.50.5" />
     <PackageReference Include="Dapper.Extension" Version="1.0.0.1" />
     <PackageReference Include="DapperExtensions" Version="1.6.3" />

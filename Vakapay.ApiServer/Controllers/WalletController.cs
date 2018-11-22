@@ -15,6 +15,8 @@ using Vakapay.ApiServer.Helpers;
 using Vakapay.ApiServer.Models;
 using Vakapay.Models.Entities;
 using Vakapay.Models.ClientRequest;
+using System.IO;
+using CsvHelper;
 
 namespace Vakapay.ApiServer.Controllers
 {
@@ -52,7 +54,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
 
                 var code = "";
@@ -125,7 +127,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
                 var wallets = _walletBusiness.LoadAllWalletByUser(userModel);
                 return new ReturnObject()
                 {
@@ -154,7 +156,7 @@ namespace Vakapay.ApiServer.Controllers
         [HttpGet("Infor")]
         public ActionResult<string> GetWalletInfor([FromQuery] string networkName)
         {
-            var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+            var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
             var wallet = _walletBusiness.FindByUserAndNetwork(userModel.Id, networkName);
             return JsonHelper.SerializeObject(wallet);
             //  return null;
@@ -165,7 +167,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             try
             {
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
                 var wallet = _walletBusiness.FindByUserAndNetwork(userModel.Id, networkName);
 
                 if (wallet == null)
@@ -261,7 +263,7 @@ namespace Vakapay.ApiServer.Controllers
                 float vakapayfee = 0.01f;
                 float minerfee = 0.01f;
                 float total = vakapayfee + minerfee + float.Parse(amount);
-                var feeObject = new {vakapayfee = vakapayfee, minerfee = minerfee, total = total};
+                var feeObject = new { vakapayfee = vakapayfee, minerfee = minerfee, total = total };
                 return new ReturnObject()
                 {
                     Status = Status.STATUS_COMPLETED,
@@ -287,7 +289,7 @@ namespace Vakapay.ApiServer.Controllers
             try
             {
                 //  var _history = _walletBusiness.GetHistory(walletSearch.wallet, 1, 3, new string[] { nameof(BlockchainTransaction.CreatedAt) });
-                var userModel = (User) RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
 
                 int numberData;
                 var history = _walletBusiness.GetHistory(out numberData, userModel.Id, walletSearch.NetworkName,
@@ -297,6 +299,45 @@ namespace Vakapay.ApiServer.Controllers
                     Status = Status.STATUS_COMPLETED,
                     Data = numberData.ToString(),
                     Message = JsonHelper.SerializeObject(history)
+                };
+            }
+            catch (Exception e)
+            {
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = e.Message
+                };
+            }
+
+            //  return null;
+        }
+
+        [HttpPost("Report")]
+        public ActionResult<ReturnObject> GetWalletReport([FromBody] HistoryReport walletReport)
+        {
+            try
+            {
+                //  var _history = _walletBusiness.GetHistory(walletSearch.wallet, 1, 3, new string[] { nameof(BlockchainTransaction.CreatedAt) });
+                var userModel = (User)RouteData.Values[ParseDataKeyApi.KEY_PASS_DATA_USER_MODEL];
+                // CommonHelper.GetUnixTimestamp
+                DateTime dateForButton = DateTime.Now.AddDays(-1 * walletReport.DayTime);
+                var _searchTime = UnixTimestamp.ToUnixTimestamp(dateForButton);
+                int numberData;
+                var history = _walletBusiness.GetHistory(out numberData, userModel.Id, walletReport.NetworkName, -1, -1, null, null, _searchTime);
+
+
+                using (StreamWriter sw = new StreamWriter(System.IO.File.Open("D:\\ReportData\\"+ userModel.Id + UnixTimestamp.ToUnixTimestamp(DateTime.Now)+".csv", FileMode.OpenOrCreate, FileAccess.ReadWrite)))
+                {
+                    var csv = new CsvWriter(sw);
+                    csv.WriteRecords(history);
+                }
+                //  Console.WriteLine("csv " + csv);
+                return new ReturnObject()
+                {
+                    Status = Status.STATUS_COMPLETED,
+                    Data = JsonHelper.SerializeObject(history),
+                    Message = numberData.ToString()
                 };
             }
             catch (Exception e)
@@ -324,19 +365,19 @@ namespace Vakapay.ApiServer.Controllers
                 if (res.Status == Status.STATUS_ERROR)
                 {
                     result = new ReturnObject()
-                        {Status = Status.STATUS_ERROR, Message = res.Message};
+                    { Status = Status.STATUS_ERROR, Message = res.Message };
                 }
                 else
                 {
                     result = new ReturnDataObject()
-                        {Status = Status.STATUS_SUCCESS, Data = request};
+                    { Status = Status.STATUS_SUCCESS, Data = request };
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 result = new ReturnObject()
-                    {Status = Status.STATUS_ERROR, Message = e.Message};
+                { Status = Status.STATUS_ERROR, Message = e.Message };
             }
             finally
             {
@@ -351,6 +392,15 @@ namespace Vakapay.ApiServer.Controllers
         {
             [DataMember(Name = "userID")] public string UserId;
             [DataMember(Name = "networkName")] public string NetworkName;
+            [DataMember(Name = "offset")] public int Offset = -1;
+            [DataMember(Name = "limit")] public int Limit = -1;
+            [DataMember(Name = "orderBy")] public string[] OrderBy;
+            [DataMember(Name = "search")] public string Search;
+        }
+        public class HistoryReport
+        {
+            [DataMember(Name = "networkName")] public string NetworkName;
+            [DataMember(Name = "dayTime")] public int DayTime = 1;
             [DataMember(Name = "offset")] public int Offset = -1;
             [DataMember(Name = "limit")] public int Limit = -1;
             [DataMember(Name = "orderBy")] public string[] OrderBy;

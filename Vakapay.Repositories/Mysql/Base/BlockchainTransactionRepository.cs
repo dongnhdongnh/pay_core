@@ -280,7 +280,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 var sqlString =
                     $"Select * from {TableName} where BlockNumber = @BlockNumber and IsProcessing = 0 and Status=@Status";
                 var result = Connection
-                    .Query<TTransaction>(sqlString, new {BlockNumber = 0, Status = Status.STATUS_COMPLETED})
+                    .Query<TTransaction>(sqlString, new { BlockNumber = 0, Status = Status.STATUS_COMPLETED })
                     .ToList();
                 return result;
             }
@@ -323,7 +323,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 }
 
                 var sqlString = $"Select * from {TableName} where UserId = @UserId";
-                var result = Connection.Query<TTransaction>(sqlString, new {UserId = userId})
+                var result = Connection.Query<TTransaction>(sqlString, new { UserId = userId })
                     .ToList<BlockchainTransaction>();
                 return result;
             }
@@ -347,7 +347,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 }
 
                 var sqlString = $"Select * from {TableName} where FromAddress = @Address";
-                var result = Connection.Query<TTransaction>(sqlString, new {Address = fromAddress})
+                var result = Connection.Query<TTransaction>(sqlString, new { Address = fromAddress })
                     .ToList<BlockchainTransaction>();
                 return result;
             }
@@ -371,7 +371,7 @@ namespace Vakapay.Repositories.Mysql.Base
                 }
 
                 var sqlString = $"Select * from {TableName} where ToAddress = @Address";
-                var result = Connection.Query<TTransaction>(sqlString, new {Address = toAddress})
+                var result = Connection.Query<TTransaction>(sqlString, new { Address = toAddress })
                     .ToList<BlockchainTransaction>();
                 return result;
             }
@@ -404,7 +404,7 @@ namespace Vakapay.Repositories.Mysql.Base
 
         public List<BlockchainTransaction> FindTransactionHistoryAll(out int numberData, string userId, string currency,
             string tableNameWithdraw, string tableNameDeposit, string tableInternalWithdraw, int offset, int limit,
-            string[] orderByValue, string whereValue)
+            string[] orderByValue, string whereValue, long dayValue)
 
         {
             numberData = -1;
@@ -413,7 +413,11 @@ namespace Vakapay.Repositories.Mysql.Base
                 string searchString = "";
                 if (whereValue != null && whereValue != String.Empty && whereValue != "")
                 {
-                    searchString = " and ABS(Amount)= "+ whereValue+" ";
+                    searchString += " and ABS(Amount)= " + whereValue + " ";
+                }
+                if (dayValue >= 0)
+                {
+                    searchString += " and CreatedAt>= " + dayValue + " ";
                 }
 
                 tableInternalWithdraw = tableInternalWithdraw.Replace("`", string.Empty);
@@ -446,12 +450,12 @@ namespace Vakapay.Repositories.Mysql.Base
                     {
                         //if (prop.Value != null)
                         {
-                            
+
                             if (count > 0)
                                 orderStr.Append(",");
                             if (prop[0].Equals('-'))
                             {
-                                orderStr.AppendFormat(" {0} DESC ", prop.Remove(0,1));
+                                orderStr.AppendFormat(" {0} DESC ", prop.Remove(0, 1));
                             }
                             else
                             {
@@ -492,7 +496,7 @@ namespace Vakapay.Repositories.Mysql.Base
 
         public override Task<ReturnObject> SafeUpdate(TTransaction row)
         {
-            return base.SafeUpdate(row, new[] {nameof(row.Hash)});
+            return base.SafeUpdate(row, new[] { nameof(row.Hash) });
         }
     }
 }

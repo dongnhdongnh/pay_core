@@ -85,7 +85,7 @@ namespace Vakapay.EthereumBusiness
 
         public override List<BlockchainTransaction> GetAllHistory(out int numberData, string userID, string currency,
             int offset = -1,
-            int limit = -1, string[] orderBy = null, string search = null)
+            int limit = -1, string[] orderBy = null, string search = null,long day=-1)
         {
             using (var depositRepo = VakapayRepositoryFactory.GetEthereumDepositeTransactionRepository(DbConnection))
             {

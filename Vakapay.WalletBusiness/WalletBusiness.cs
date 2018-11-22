@@ -766,7 +766,7 @@ namespace Vakapay.WalletBusiness
         /// <param name="search"></param>
         /// <returns></returns>
         public List<BlockchainTransaction> GetHistory(out int numberData, string userId, string currencyName,
-            int offset = -1, int limit = -1, string[] orderBy = null, string search = null)
+            int offset = -1, int limit = -1, string[] orderBy = null, string search = null,long day=-1)
         {
             numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
@@ -777,15 +777,15 @@ namespace Vakapay.WalletBusiness
                 case CryptoCurrency.ETH:
 
                     output = ethereumBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
-                        orderBy, search);
+                        orderBy, search,day);
                     break;
                 case CryptoCurrency.VAKA:
                     output = vakacoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
-                        orderBy, search);
+                        orderBy, search,day);
                     break;
                 case CryptoCurrency.BTC:
                     output = bitcoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
-                        orderBy, search);
+                        orderBy, search,day);
                     break;
             }
 

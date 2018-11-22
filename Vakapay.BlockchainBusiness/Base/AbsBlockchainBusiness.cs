@@ -409,14 +409,14 @@ namespace Vakapay.BlockchainBusiness.Base
             IRepositoryBlockchainTransaction<T1> withdrawRepository,
             IRepositoryBlockchainTransaction<T2> depositRepository, string tableInternalWithdrawName, int offset = -1,
             int limit = -1,
-            string[] orderBy = null, string search = null)
+            string[] orderBy = null, string search = null,long day=-1)
         {
             try
             {
                 Console.WriteLine("FIND HISTORY FROM ABS");
                 return withdrawRepository.FindTransactionHistoryAll(out numberData, userID, currency,
                     withdrawRepository.GetTableName(), depositRepository.GetTableName(), tableInternalWithdrawName,
-                    offset, limit, orderBy, search);
+                    offset, limit, orderBy, search,day);
             }
             catch (Exception e)
             {
@@ -466,7 +466,7 @@ namespace Vakapay.BlockchainBusiness.Base
 
         public virtual List<BlockchainTransaction> GetAllHistory(out int numberData, string userID, string currency,
             int offset = -1, int limit = -1,
-            string[] orderBy = null, string search = null)
+            string[] orderBy = null, string search = null,long daySearch=-1)
         {
             numberData = -1;
             Console.WriteLine("Not override");

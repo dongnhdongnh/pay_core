@@ -284,7 +284,7 @@ namespace Vakapay.VakacoinBusiness
         }
 
         public override List<BlockchainTransaction> GetAllHistory(out int numberData, string userId, string currency,
-            int offset = -1, int limit = -1, string[] orderBy = null, string search = null)
+            int offset = -1, int limit = -1, string[] orderBy = null, string search = null,long day=-1)
         {
             using (var depositRepo = VakapayRepositoryFactory.GetVakacoinDepositTransactionRepository(DbConnection))
             {

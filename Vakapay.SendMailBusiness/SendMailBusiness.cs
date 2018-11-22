@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Data;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -172,7 +173,7 @@ namespace Vakapay.SendMailBusiness
 
                     var result = JsonHelper.DeserializeObject<JObject>(Encoding.UTF8.GetString(apiResponse));
 
-                    var status = (bool) result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
+                    var status = (bool)result["success"] ? Status.STATUS_SUCCESS : Status.STATUS_ERROR;
 
                     return new ReturnObject
                     {
@@ -190,6 +191,94 @@ namespace Vakapay.SendMailBusiness
                 }
             }
         }
+
+        public async Task<ReturnObject> SendEmailSendFile(EmailQueue emailQueue, string apiUrl, string apiKey, string from,
+          string fromName)
+        {
+            string emailBody = CreateEmailBody(emailQueue);
+            if (emailBody == null)
+                return new ReturnObject
+                {
+                    Status = Status.STATUS_ERROR,
+                    Message = "Cannot find template"
+                };
+            var values = new NameValueCollection
+            {
+                {"apikey", apiKey},
+                {"from", from},
+                {"fromName", fromName},
+                {"to", emailQueue.ToEmail},
+                {"subject", emailQueue.Subject},
+                {"bodyHtml", emailBody},
+                {"isTransactional", "true"}
+            };
+
+            var filepath = "C:\\example\\helloWorld.txt";
+            var file = File.OpenRead(filepath);
+
+            var paramFileStream = new Stream[] { file };
+            var filenames = new string[] { "report.csv" };
+            //   string result = Upload(apiUrl, values, filesStream, filenames);
+
+            //     Console.WriteLine(result);
+
+            //  using (var client = new WebClient())
+            {
+                try
+                {
+
+                    using (var client = new HttpClient())
+                    using (var formData = new MultipartFormDataContent())
+                    {
+                        foreach (string key in values)
+                        {
+                            HttpContent stringContent = new StringContent(values[key]);
+                            formData.Add(stringContent, key);
+                        }
+
+                        for (int i = 0; i < paramFileStream.Length; i++)
+                        {
+                            HttpContent fileStreamContent = new StreamContent(paramFileStream[i]);
+                            formData.Add(fileStreamContent, "file" + i, filenames[i]);
+                        }
+
+                        var response = client.PostAsync(apiUrl, formData).Result;
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            //   throw new Exception(response.Content.ReadAsStringAsync().Result);
+                            return new ReturnObject
+                            {
+                                Status = Status.STATUS_ERROR,
+                                Message = response.Content.ReadAsStringAsync().Result
+                            };
+                        }
+
+
+
+                        return new ReturnObject
+                        {
+                            Status = Status.STATUS_SUCCESS,
+                            Message = response.Content.ReadAsStringAsync().Result
+                        };
+                    }
+
+
+
+
+                }
+                catch (Exception ex)
+                {
+                    return new ReturnObject
+                    {
+                        Status = Status.STATUS_ERROR,
+                        Message = ex.Message
+                    };
+                }
+            }
+        }
+
+
+
 
         private BlockchainTransaction GetTransaction(EmailQueue emailQueue)
         {
