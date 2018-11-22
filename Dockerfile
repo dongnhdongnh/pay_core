@@ -1,11 +1,9 @@
  FROM microsoft/aspnetcore-build:2.0 AS build-env
  WORKDIR /source
 
- COPY ./Vakapay.ApiServer/*.csproj ./
+ COPY . ./
  
  RUN dotnet restore
- 
- COPY ./Vakapay.ApiServer ./
  
  RUN dotnet publish -c Release -o out
 
