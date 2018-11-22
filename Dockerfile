@@ -1,10 +1,8 @@
 FROM microsoft/dotnet:2.1-sdk AS build-env
 WORKDIR /source
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
+RUN curl -sL https://deb.nodesource.com/setup_8.x | -E bash -
 RUN apt-get install -y nodejs
-
-ECHO nodejs -v
  
 COPY . ./
  
