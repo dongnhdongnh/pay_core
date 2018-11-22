@@ -7,11 +7,20 @@ namespace Vakapay.Commons.Helpers
     {
         static CacheHelper()
         {
-            lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+            try
             {
-                Console.WriteLine("GET REDIS FROM " + AppSettingHelper.GetRedisConfig());
-                return ConnectionMultiplexer.Connect($"{AppSettingHelper.GetRedisConfig()}");
-            });
+                lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+                {
+                    Console.WriteLine("GET REDIS FROM " + AppSettingHelper.GetRedisConfig());
+                    return ConnectionMultiplexer.Connect($"{AppSettingHelper.GetRedisConfig()}");
+                });
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.ToString());
+            }
+           
 
         }
 
