@@ -1,4 +1,4 @@
- FROM aspnetcore-build:2.0.5-2.1.500 AS build-env
+ FROM microsoft/aspnetcore-build:2.0.5-2.1.500 AS build-env
  WORKDIR /source
 
  COPY . ./
