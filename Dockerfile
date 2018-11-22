@@ -1,16 +1,19 @@
- FROM microsoft/dotnet:2.1-sdk AS build-env
- WORKDIR /source
+FROM microsoft/dotnet:2.1-sdk AS build-env
+WORKDIR /source
 
- COPY . ./
+RUN curl -sL https://deb.nodesource.com/setup_10.x |  bash -
+RUN apt-get install -y nodejs
  
- RUN dotnet restore
+COPY . ./
  
- RUN npm install
+RUN dotnet restore
  
- RUN dotnet publish -c Release -o out
+RUN npm install
+ 
+RUN dotnet publish "./Vakapay.ApiServer/Vakapay.ApiServer.csproj" -c Release --output "./dist"
 
- # Stage 2
- FROM microsoft/dotnet:2.1-aspnetcore-runtime
- WORKDIR /app
- COPY --from=build-env /app/out .
- ENTRYPOINT ["dotnet", "Vakapay.ApiServer.dll"]
+# Stage 2
+FROM microsoft/dotnet:2.1-aspnetcore-runtime
+WORKDIR /app
+COPY --from=build-env /app/dist .
+ENTRYPOINT ["dotnet", "Vakapay.ApiServer.dll"]
