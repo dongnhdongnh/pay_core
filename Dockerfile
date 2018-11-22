@@ -5,6 +5,8 @@
  
  RUN dotnet restore
  
+ RUN npm install
+ 
  RUN dotnet publish -c Release -o out
 
  # Stage 2
