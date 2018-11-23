@@ -132,7 +132,7 @@ namespace Vakapay.ApiServer.Controllers
                 var wallets = _walletBusiness.LoadAllWalletByUser(userModel);
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,
+                    Status = Status.STATUS_SUCCESS,
                     Message = JsonHelper.SerializeObject(wallets)
                 };
             }
@@ -183,7 +183,7 @@ namespace Vakapay.ApiServer.Controllers
                 var addresses = _walletBusiness.GetAddresses(wallet.Id, networkName);
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,
+                    Status = Status.STATUS_SUCCESS,
                     // Data = numberData.ToString(),
                     Message = JsonHelper.SerializeObject(addresses)
                 };
@@ -237,7 +237,7 @@ namespace Vakapay.ApiServer.Controllers
                 float rate = 1.0f / 7000000.0f;
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,
+                    Status = Status.STATUS_SUCCESS,
                     // Data = numberData.ToString(),
                     Message = rate.ToString()
                 };
@@ -267,7 +267,7 @@ namespace Vakapay.ApiServer.Controllers
                 var feeObject = new { vakapayfee = vakapayfee, minerfee = minerfee, total = total };
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,
+                    Status = Status.STATUS_SUCCESS,
                     // Data = numberData.ToString(),
                     Message = JsonHelper.SerializeObject(feeObject)
                 };
@@ -297,7 +297,7 @@ namespace Vakapay.ApiServer.Controllers
                     walletSearch.Offset, walletSearch.Limit, walletSearch.OrderBy, walletSearch.Search);
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,
+                    Status = Status.STATUS_SUCCESS,
                     Data = numberData.ToString(),
                     Message = JsonHelper.SerializeObject(history)
                 };
@@ -350,7 +350,7 @@ namespace Vakapay.ApiServer.Controllers
                 //  Console.WriteLine("csv " + csv);
                 return new ReturnObject()
                 {
-                    Status = Status.STATUS_COMPLETED,
+                    Status = Status.STATUS_SUCCESS,
                     Data = JsonHelper.SerializeObject(history),
                     Message = numberData.ToString()
                 };
