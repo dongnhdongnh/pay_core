@@ -252,15 +252,15 @@ namespace Vakapay.WalletBusiness
 
                 var fromAddress = GetSenderAddress(wallet, toAddress, amount);
 
-                if (string.IsNullOrEmpty(fromAddress))
-                {
-                    logger.Error("Can not get sender address!");
-                    return new ReturnObject()
-                    {
-                        Status = Status.STATUS_ERROR,
-                        Message = "Can not get sender address!"
-                    };
-                }
+                //if (string.IsNullOrEmpty(fromAddress))
+                //{
+                //    logger.Error("Can not get sender address!");
+                //    return new ReturnObject()
+                //    {
+                //        Status = Status.STATUS_ERROR,
+                //        Message = "Can not get sender address!"
+                //    };
+                //}
 
                 using (var walletRepository = _vakapayRepositoryFactory.GetWalletRepository(_connectionDb))
                 {
@@ -281,7 +281,7 @@ namespace Vakapay.WalletBusiness
                         var userCheck = userRepository.FindById(walletById.UserId);
                         if (userCheck == null ||
                             userCheck.Status != Status.STATUS_ACTIVE // ||
-                            // !walletById.Currency.Equals(walletByAddress.Currency))
+                                                                     // !walletById.Currency.Equals(walletByAddress.Currency))
                         )
                         {
                             return new ReturnObject
@@ -370,6 +370,7 @@ namespace Vakapay.WalletBusiness
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.ToString());
                 logger.Error(e.Message);
                 return new ReturnObject
                 {
@@ -513,9 +514,9 @@ namespace Vakapay.WalletBusiness
             {
                 // TODO fake:
                 case CryptoCurrency.BTC:
-                    return (decimal) 0.0005;
+                    return (decimal)0.0005;
                 case CryptoCurrency.ETH:
-                    return (decimal) 0.0005;
+                    return (decimal)0.0005;
                 case CryptoCurrency.VAKA:
                     return 0;
                 default:
@@ -534,7 +535,10 @@ namespace Vakapay.WalletBusiness
         {
             //            throw new NotImplementedException(); //TODO  must implement
             //TODO fake
-            return GetAddresses(wallet.Id, wallet.Currency)[0];
+            var address = GetAddresses(wallet.Id, wallet.Currency);
+            if (address != null && address.Count > 1)
+                return address[0];
+            return "";
         }
 
         public Wallet FindWalletByAddressAndNetworkName(string Address, string networkName)
@@ -766,7 +770,7 @@ namespace Vakapay.WalletBusiness
         /// <param name="search"></param>
         /// <returns></returns>
         public List<BlockchainTransaction> GetHistory(out int numberData, string userId, string currencyName,
-            int offset = -1, int limit = -1, string[] orderBy = null, string search = null,long day=-1)
+            int offset = -1, int limit = -1, string[] orderBy = null, string search = null, long day = -1)
         {
             numberData = -1;
             List<BlockchainTransaction> output = new List<BlockchainTransaction>();
@@ -777,15 +781,15 @@ namespace Vakapay.WalletBusiness
                 case CryptoCurrency.ETH:
 
                     output = ethereumBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
-                        orderBy, search,day);
+                        orderBy, search, day);
                     break;
                 case CryptoCurrency.VAKA:
                     output = vakacoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
-                        orderBy, search,day);
+                        orderBy, search, day);
                     break;
                 case CryptoCurrency.BTC:
                     output = bitcoinBussiness.GetAllHistory(out numberData, userId, currencyName, offset, limit,
-                        orderBy, search,day);
+                        orderBy, search, day);
                     break;
             }
 
@@ -898,7 +902,7 @@ namespace Vakapay.WalletBusiness
                     //    throw new Exception(sendResult.Message);
                     //}
                     pendingWallet.Status = sendResult.Status;
-                    pendingWallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    pendingWallet.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                     pendingWallet.IsProcessing = 0;
                     pendingWallet.AddressCount += 1;
 
@@ -944,7 +948,7 @@ namespace Vakapay.WalletBusiness
                     }
 
                     wallet.Status = sendResult.Status;
-                    wallet.UpdatedAt = (int) CommonHelper.GetUnixTimestamp();
+                    wallet.UpdatedAt = (int)CommonHelper.GetUnixTimestamp();
                     wallet.IsProcessing = 0;
                     wallet.AddressCount += 1;
 
