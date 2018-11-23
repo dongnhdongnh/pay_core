@@ -29,5 +29,7 @@ namespace Vakapay.Commons.Constants
         public const string SECTION_KEY_IMG_API_KEY = "ApiKey";
         public const string SECTION_KEY_SECRET = "Secret";
         public const string SECTION_KEY_URL_IMG = "Url";
+
+        public const string SECTION_KEY_REPORT_STORE = "Report";
     }
 }

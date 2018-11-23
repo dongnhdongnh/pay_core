@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Vakapay.Commons.Constants
@@ -8,7 +9,7 @@ namespace Vakapay.Commons.Constants
         public const string VAKA = "Vakacoin";
         public const string BTC = "Bitcoin";
 
-        public static readonly IEnumerable<string> ALL_NETWORK = new string[] {ETH, VAKA, BTC};
+        public static readonly IEnumerable<string> ALL_NETWORK = new string[] { ETH, VAKA, BTC };
 
         private static readonly Dictionary<string, string> SYMBOLS = new Dictionary<string, string>
         {
@@ -19,12 +20,21 @@ namespace Vakapay.Commons.Constants
 
         public static string GetAmount(string currency, decimal amount)
         {
-            if (currency == VAKA)
+            try
             {
-                return amount.ToString("N4") + " " + SYMBOLS[currency];
+                if (currency == VAKA)
+                {
+                    return amount.ToString("N4") + " " + SYMBOLS[currency];
+                }
+
+                return amount + " " + SYMBOLS[currency];
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return amount + " " + currency;
             }
 
-            return amount + " " + SYMBOLS[currency];
         }
     }
 }

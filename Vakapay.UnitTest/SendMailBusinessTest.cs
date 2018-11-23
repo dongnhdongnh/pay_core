@@ -30,7 +30,7 @@ namespace Vakapay.UnitTest
         {
             Assert.AreEqual(Status.STATUS_SUCCESS, _mailBusiness.CreateEmailQueueAsync(new EmailQueue
             {
-                ToEmail = "doantoansai1992@gmail.com",
+                ToEmail = "dongnhdongnh@gmail.com",
                 Subject = "Unit test subject",
                 Status = Status.STATUS_PENDING,
                 Template = EmailTemplate.Received,

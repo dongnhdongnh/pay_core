@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.IO;
@@ -106,7 +107,12 @@ namespace Vakapay.SendMailBusiness
                 var transactionSend = _connectionDb.BeginTransaction();
                 try
                 {
-                    var sendResult = await SendEmail(pendingEmail, apiUrl, apiKey, from, fromName);
+                    ReturnObject sendResult;
+                    if (pendingEmail.SendFileList == null)
+                        sendResult = await SendEmail(pendingEmail, apiUrl, apiKey, from, fromName);
+                    else
+                        sendResult = await SendEmailSendFile(pendingEmail, apiUrl, apiKey, from, fromName);
+
                     //                if (sendResult.Status == Status.STATUS_ERROR) // Not return error, update row.status = ERROR
                     //                {
                     //                    return new ReturnObject
@@ -213,11 +219,25 @@ namespace Vakapay.SendMailBusiness
                 {"isTransactional", "true"}
             };
 
-            var filepath = "C:\\example\\helloWorld.txt";
-            var file = File.OpenRead(filepath);
+            string _filesToSend = emailQueue.SendFileList;
+            string[] filesToSend = _filesToSend.Split(",");
+            List<Stream> paramFileStream = new List<Stream>();
+            List<string> filenames = new List<string>();
+            foreach (var fileToSend in filesToSend)
+            {
+                // AppSettingHelper.GetBitcoinNode
+                var filepath = AppSettingHelper.GetReportStoreUrl() + fileToSend;
+                if (!System.IO.File.Exists(filepath))
+                    continue;
+                var file = File.OpenRead(filepath);
+                filenames.Add(fileToSend);
+                paramFileStream.Add(file);
+            }
 
-            var paramFileStream = new Stream[] { file };
-            var filenames = new string[] { "report.csv" };
+
+
+            //var paramFileStream = new Stream[] { file };
+            // var filenames = new string[] { "report.csv" };
             //   string result = Upload(apiUrl, values, filesStream, filenames);
 
             //     Console.WriteLine(result);
@@ -236,13 +256,29 @@ namespace Vakapay.SendMailBusiness
                             formData.Add(stringContent, key);
                         }
 
-                        for (int i = 0; i < paramFileStream.Length; i++)
+                        for (int i = 0; i < paramFileStream.Count; i++)
                         {
                             HttpContent fileStreamContent = new StreamContent(paramFileStream[i]);
                             formData.Add(fileStreamContent, "file" + i, filenames[i]);
+                     
                         }
 
-                        var response = client.PostAsync(apiUrl, formData).Result;
+                        var response = await client.PostAsync(apiUrl, formData);
+                        //   var response = postData.Result;
+                        for (int i = 0; i < paramFileStream.Count; i++)
+                        {
+                            paramFileStream[i].Close();
+                        }
+                        foreach (var fileToSend in filesToSend)
+                        {
+                            var filepath = AppSettingHelper.GetReportStoreUrl() + fileToSend;
+                            if (!System.IO.File.Exists(filepath))
+                            {
+                                Console.WriteLine(filepath + " not exist");
+                                continue;
+                            }
+                            System.IO.File.Delete(filepath);
+                        }
                         if (!response.IsSuccessStatusCode)
                         {
                             //   throw new Exception(response.Content.ReadAsStringAsync().Result);
@@ -268,6 +304,7 @@ namespace Vakapay.SendMailBusiness
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     return new ReturnObject
                     {
                         Status = Status.STATUS_ERROR,
@@ -438,6 +475,9 @@ namespace Vakapay.SendMailBusiness
                         body = body.Replace("{signInUrl}", emailQueue.SignInUrl);
                         body = body.Replace("{amount}", emailQueue.GetAmount());
                         body = body.Replace("{sender}", GetSender(emailQueue));
+                        break;
+                    case EmailTemplate.Report:
+                        //  body = body.Replace("{verifyEmailUrl}", emailQueue.VerifyUrl);
                         break;
 
                     default:

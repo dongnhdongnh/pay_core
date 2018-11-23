@@ -33,7 +33,7 @@ namespace Vakapay.Models.Domains
 
         //sent subject
         public const string SUBJECT_SENT_OR_RECEIVED = "Balance notification!";
-
+        public const string SUBJECT_REPORT = "Your Report";
         //verify subject
         public const string SUBJECT_VERIFY = "Verify account";
 
@@ -45,6 +45,7 @@ namespace Vakapay.Models.Domains
                 {EmailTemplate.Received, "received.htm"},
                 {EmailTemplate.ReceivedInternal, "receivedInternal.htm"},
                 {EmailTemplate.Verify, "verify.htm"},
+                 {EmailTemplate.Report, "report.htm"}
             };
 
         public static string GetNumberOfNeededConfirmation(string networkName)

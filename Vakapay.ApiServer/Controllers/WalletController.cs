@@ -27,7 +27,7 @@ namespace Vakapay.ApiServer.Controllers
     {
         readonly WalletBusiness.WalletBusiness _walletBusiness;
         readonly UserBusiness.UserBusiness _userBusiness;
-
+        readonly SendMailBusiness.SendMailBusiness _sendMailBusiness;
         public WalletController(
             IVakapayRepositoryFactory persistenceFactory,
             IConfiguration configuration,
@@ -36,6 +36,7 @@ namespace Vakapay.ApiServer.Controllers
         {
             _userBusiness = new UserBusiness.UserBusiness(persistenceFactory);
             _walletBusiness = new Vakapay.WalletBusiness.WalletBusiness(persistenceFactory);
+            _sendMailBusiness = new Vakapay.SendMailBusiness.SendMailBusiness(persistenceFactory);
         }
 
 
@@ -325,12 +326,26 @@ namespace Vakapay.ApiServer.Controllers
                 var _searchTime = UnixTimestamp.ToUnixTimestamp(dateForButton);
                 int numberData;
                 var history = _walletBusiness.GetHistory(out numberData, userModel.Id, walletReport.NetworkName, -1, -1, null, null, _searchTime);
-
-
-                using (StreamWriter sw = new StreamWriter(System.IO.File.Open("D:\\ReportData\\"+ userModel.Id + UnixTimestamp.ToUnixTimestamp(DateTime.Now)+".csv", FileMode.OpenOrCreate, FileAccess.ReadWrite)))
+                if (walletReport.Email != null)
                 {
-                    var csv = new CsvWriter(sw);
-                    csv.WriteRecords(history);
+                    string fileName = userModel.Id + UnixTimestamp.ToUnixTimestamp(DateTime.Now) + ".csv";
+                    using (StreamWriter sw = new StreamWriter(System.IO.File.Open(AppSettingHelper.GetReportStoreUrl() + fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite)))
+                    {
+                        var csv = new CsvWriter(sw);
+                        csv.WriteRecords(history);
+                    }
+
+                    EmailQueue email = new EmailQueue()
+                    {
+                        ToEmail = walletReport.Email,
+                        NetworkName = walletReport.NetworkName,
+                        // Amount = addedBalance,
+                        Template = EmailTemplate.Report,
+                        Subject = EmailConfig.SUBJECT_REPORT,
+                        SendFileList = fileName
+                        //							Content = networkName + "+" + addedBlance
+                    };
+                    _sendMailBusiness.CreateEmailQueueAsync(email);
                 }
                 //  Console.WriteLine("csv " + csv);
                 return new ReturnObject()
@@ -401,10 +416,8 @@ namespace Vakapay.ApiServer.Controllers
         {
             [DataMember(Name = "networkName")] public string NetworkName;
             [DataMember(Name = "dayTime")] public int DayTime = 1;
-            [DataMember(Name = "offset")] public int Offset = -1;
-            [DataMember(Name = "limit")] public int Limit = -1;
-            [DataMember(Name = "orderBy")] public string[] OrderBy;
-            [DataMember(Name = "search")] public string Search;
+            [DataMember(Name = "email")] public string Email;
+
         }
     }
 }

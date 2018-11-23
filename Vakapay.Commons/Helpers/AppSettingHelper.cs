@@ -106,6 +106,11 @@ namespace Vakapay.Commons.Helpers
             return Get($"{Setting.SECTION_KEY_COIN_MARKET}:{Setting.SECTION_KEY_URL}");
         }
 
+        public static string GetReportStoreUrl()
+        {
+            return Get($"{Setting.SECTION_KEY_REPORT_STORE}:{Setting.SECTION_KEY_URL}");
+        }
+
         public static int GetCoinMarketInterval()
         {
             return Int32.Parse(Get($"{Setting.SECTION_KEY_COIN_MARKET}:{Setting.SECTION_KEY_GET_PRICE_INTERVAL}"));

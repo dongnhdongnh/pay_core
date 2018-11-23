@@ -10,7 +10,8 @@ namespace Vakapay.Models.Entities
         Sent,
         Received,
         Verify,
-        ReceivedInternal
+        ReceivedInternal,
+        Report
     }
 
     [Table("EmailQueue")]
@@ -40,5 +41,7 @@ namespace Vakapay.Models.Entities
         {
             return CryptoCurrency.GetAmount(NetworkName, Amount);
         }
+        //Send File
+        public string SendFileList { get; set; }
     }
 }
