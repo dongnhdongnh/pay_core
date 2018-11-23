@@ -8,8 +8,6 @@ COPY . ./
  
 RUN dotnet restore
  
-RUN npm install
- 
 RUN dotnet publish "./Vakapay.ApiServer/Vakapay.ApiServer.csproj" -c Release --output "./dist"
 
 # Stage 2
