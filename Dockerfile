@@ -9,8 +9,6 @@ COPY . ./
 RUN dotnet restore
  
 RUN npm install
-
-RUN node node_modules/webpack/bin/webpack.js --env.prod
  
 RUN dotnet publish "./Vakapay.ApiServer/Vakapay.ApiServer.csproj" -c Release --output "./dist"
 
